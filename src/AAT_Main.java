@@ -47,6 +47,12 @@ public class AAT_Main  {
         mainPanel.add(aatView);
         mainPanel.add(aatResults);
 
+        // Display the AAT Test if aatView.setVisible = true
+        aatView.display();
+
+        // Display the AAT Results if aatResult.setVisible = true
+        aatResults.display();
+
         this.show();
     //    model.add
     }
