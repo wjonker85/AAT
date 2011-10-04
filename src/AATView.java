@@ -1,6 +1,7 @@
 import processing.core.PApplet;
 import processing.core.PImage;
 
+
 import java.util.Observable;
 import java.util.Observer;
 
@@ -45,13 +46,16 @@ public class AATView extends PApplet implements Observer {
 
         if (keyPressed == true) {
             if (keyCode == 38) {
-                i += 30;
+                i += 50;
             } else if (keyCode == 40) {
-                i -= 30;
+                if (i < 0) {
+                    i = 0;
+                } else
+                    i -= 50;
             }
         }
-
     }
+
 
     public void display() {
     }
