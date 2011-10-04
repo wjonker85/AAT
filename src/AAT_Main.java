@@ -30,7 +30,7 @@ public class AAT_Main  {
 
         frame.setContentPane(mainPanel);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(800,600);
+        frame.setSize(1280,800);
         frame.pack();
         frame.setVisible(true);
     }
@@ -38,7 +38,7 @@ public class AAT_Main  {
     public AAT_Main() {
        frame = new JFrame("Approach Avoidance Task");
         model = new AATModel();
-        aatView = new AATView();
+        aatView = new AATView(800, 600);
         aatResults = new AATResults();
 
         aatView.init();
@@ -46,12 +46,6 @@ public class AAT_Main  {
         mainPanel = new JPanel();
         mainPanel.add(aatView);
         mainPanel.add(aatResults);
-
-        // Display the AAT Test if aatView.setVisible = true
-        aatView.display();
-
-        // Display the AAT Results if aatResult.setVisible = true
-        aatResults.display();
 
         this.show();
     //    model.add
