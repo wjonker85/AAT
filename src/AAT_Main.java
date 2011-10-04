@@ -38,7 +38,7 @@ public class AAT_Main  {
     public AAT_Main() {
        frame = new JFrame("Approach Avoidance Task");
         model = new AATModel();
-        aatView = new AATView(800, 600);
+        aatView = new AATView(600, 600); //TODO size() in processing is statisch, voordat AAT geladen wordt scherm groote initialiseren
         aatResults = new AATResults();
 
         aatView.init();
