@@ -13,7 +13,7 @@ import java.util.Observer;
  */
 public class AATView extends PApplet implements Observer {
     int viewWidth, viewHeight;
-    int i = 0;
+    int i;
     PImage img;
 
     private AATModel model;
@@ -29,26 +29,32 @@ public class AATView extends PApplet implements Observer {
 
     public void setup() {
         size(viewWidth, viewHeight);
-        img = loadImage("C:\\Users\\Public\\Pictures\\Sample Pictures\\Chrysanthemum.jpg");
+        img = loadImage("C:\\Users\\Public\\Pictures\\Sample Pictures\\Penguins800_800.jpg");
         smooth();
     }
 
     public void draw() {
-        image(img, 0,0);
-        img.resize(i, i);
-        image(img, 0, 0);
-        i++;
+        background(0);
+        imageMode(CENTER);
+        rectMode(CENTER);
+        translate(width / 2, height / 2);
+        stroke(0, 255, 0);
+        strokeWeight(20);
+        rect(0, 0, i, i);
+        image(img, 0, 0, i, i);
+
+        if (keyPressed == true) {
+            if (keyCode == 38) {
+                i += 30;
+            } else if (keyCode == 40) {
+                i -= 30;
+            }
+        }
+
     }
 
     public void display() {
-
-
     }
-
-
-
-
-
 
     //Wanneer TEST_VIEW true is word setvisible op true zodat AATView view getoond word op scherm
     public void update(Observable observable, Object o) {
@@ -62,6 +68,4 @@ public class AATView extends PApplet implements Observer {
         }
 
     }
-
-
 }
