@@ -1,7 +1,6 @@
 import processing.core.PApplet;
 import processing.core.PImage;
 
-
 import java.util.Observable;
 import java.util.Observer;
 
@@ -13,10 +12,8 @@ import java.util.Observer;
  * To change this template use File | Settings | File Templates.
  */
 public class AATView extends PApplet implements Observer {
-    int viewWidth, viewHeight;
-    int i;
-    PImage img;
-
+    public int viewWidth, viewHeight, imgSize, maxSize, borderWidth;
+    public PImage img;
     private AATModel model;
 
     public AATView(int viewWidth, int viewHeight) {
@@ -31,7 +28,10 @@ public class AATView extends PApplet implements Observer {
     public void setup() {
         size(viewWidth, viewHeight);
         img = loadImage("C:\\Users\\Public\\Pictures\\Sample Pictures\\Penguins800_800.jpg");
-        smooth();
+        imgSize = resizeStep() * 3; // set initial size for image;
+        //smooth(); // no smooth, makes it to slow, processing opengl lib gives problems
+        maxSize = resizeStep() * 7;
+        borderWidth = 20;
     }
 
     public void draw() {
@@ -40,24 +40,53 @@ public class AATView extends PApplet implements Observer {
         rectMode(CENTER);
         translate(width / 2, height / 2);
         stroke(0, 255, 0);
-        strokeWeight(20);
-        rect(0, 0, i, i);
-        image(img, 0, 0, i, i);
+        strokeWeight(borderWidth);
+        rect(0, 0, imgSize, imgSize);
+        image(img, 0, 0, imgSize, imgSize);
 
-        if (keyPressed == true) {
-            if (keyCode == 38) {
-                i += 50;
-            } else if (keyCode == 40) {
-                if (i < 0) {
-                    i = 0;
-                } else
-                    i -= 50;
-            }
-        }
     }
 
+    //Grote van resize factor is gebonden aan scherm groote, zodat er max 7 stappen zijn.
+    public int resizeStep() {
+        int i;
+        if (viewHeight > viewWidth) {
+            i = (int) viewWidth / 7;
+        } else {
+            i = (int) viewHeight / 7;
+        }
+        return i;
+    }
 
-    public void display() {
+    public void keyPressed() {
+        if (keyCode == 38) {
+            if (imgSize < maxSize) {
+                imgSize += resizeStep();
+            }
+        } else if (keyCode == 40) {
+            if (imgSize < resizeStep()) {
+                imgSize = 0;
+            } else
+                imgSize -= resizeStep();
+        }
+
+        //Some debug code
+        println("resizeStep: " + resizeStep());
+        println("Size: " + imgSize);
+        println("maxSize: " + maxSize);
+    }
+
+    public void mouseMoved() {
+        if (mouseY > pmouseY) {
+            if (imgSize < maxSize) {
+                imgSize += resizeStep();
+            }
+        } else if (mouseY < pmouseY) {
+            if (imgSize < resizeStep()) {
+                imgSize = 0;
+            } else
+                imgSize -= resizeStep();
+        }
+        println(mouseY);
     }
 
     //Wanneer TEST_VIEW true is word setvisible op true zodat AATView view getoond word op scherm
