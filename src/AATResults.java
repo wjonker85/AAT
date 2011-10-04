@@ -18,6 +18,12 @@ public class AATResults extends PApplet implements Observer {
         setVisible(false);
     }
 
+    public void display(){
+        background(255);
+        fill(255,0,0);
+        rect(10,10,10,10);
+    }
+
     public void update(Observable observable, Object o) {
         model = (AATModel) observable;
                 if(o.equals("View changed")) {
