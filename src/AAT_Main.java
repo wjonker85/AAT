@@ -14,6 +14,7 @@ public class AAT_Main  {
     private AATModel model;
     private JFrame frame;
     private JPanel mainPanel;
+    private JoystickController joystick;
 
    /*
    Definieer view classes, deze classes worden door Wilfried in Processing geschreven.
@@ -40,14 +41,13 @@ public class AAT_Main  {
         model = new AATModel();
         aatView = new AATView(600, 600); //TODO size() in processing is statisch, voordat AAT geladen wordt scherm groote initialiseren
         aatResults = new AATResults();
-
+        model.addObserver(aatView);    //AAT als observer view toevoegen aan het model
+        joystick = new JoystickController(model);
         aatView.init();
         aatResults.init();
         mainPanel = new JPanel();
         mainPanel.add(aatView);
         mainPanel.add(aatResults);
-
         this.show();
-    //    model.add
     }
 }
