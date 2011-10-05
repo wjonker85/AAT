@@ -1,3 +1,4 @@
+import java.awt.*;
 import java.util.Observable;
 
 /**
@@ -5,20 +6,27 @@ import java.util.Observable;
  * User: marcel
  * Date: 10/4/11
  * Time: 3:12 PM
- * To change this template use File | Settings | File Templates.
+ * Model voor de AAT. Dit model houdt alle data bij, bepaalt welke view actief dient te zijn. Geeft ook de plaatje door.
  */
 public class AATModel extends Observable {
 
+    //Verschillende berichten die naar de views gestuurd kunnen worden.
+
+    //Welke views dienen actief te worden
     public static int TEST_VIEW = 0;
     public static int SINGLE_RESULTS = 1;
     public static int OVERALL_RESULTS = 3;
 
+    //Berichten voor tijdens de test.
     public static int Y_AXIS_CHANGED = 4;
+    public static int JOYSTICK_BUTTON_PRESSED = 5;
+    public static int NEXT_PICTURE = 6;
 
     private int resize = 0;
     private long timeFirst = 0;
 
     private int currentView = 0;
+    private long startMeasure;
 
     public AATModel() {
 
@@ -30,9 +38,11 @@ public class AATModel extends Observable {
 
     }
 
-    public int currentView() {
+    public int getCurrentView() {
         return currentView;
     }
+
+
 
 
     //Methode die doorgeeft dat er een verandering van de Y-as is geweest
@@ -58,4 +68,13 @@ public class AATModel extends Observable {
         return resize;
     }
 
+    //Start de meting zodra de view het plaatje geladen heeft.
+    public void startMeasure() {
+         startMeasure = System.currentTimeMillis();
+    }
+
+    //Returns the next Image
+    public Image getNextImage() {
+        return null;
+    }
 }
