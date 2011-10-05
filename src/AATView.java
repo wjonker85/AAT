@@ -12,7 +12,7 @@ import java.util.Observer;
  * To change this template use File | Settings | File Templates.
  */
 public class AATView extends PApplet implements Observer {
-    public int viewWidth, viewHeight, borderWidth, stepSize, imgBorderWidth;
+    public int viewWidth, viewHeight, borderWidth, stepSize, imgBorderWidth, rA, gA, bA, rB, gB, bB, stepStart;
     public float stepX, stepY, imgSizeX, imgSizeY, stepCount, imgRefactor, viewRatio, imgRatio, xPos, yPos;
     public PImage img;
     private AATModel model;
@@ -30,14 +30,19 @@ public class AATView extends PApplet implements Observer {
         //Set size of window
         size(viewWidth, viewHeight);
 
+        //plaatje laden voor trail
+        loadImage(random(0, 1));
         //Some var initialising
-        img = loadImage("D:\\Documenten\\Prive\\Familie\\Foto's\\Barcalona\\IMG_3505.JPG");
         stepSize = 7;
-        stepCount = 4;
+        stepStart = 4;
+        stepCount = stepStart;
         borderWidth = 8;
         imgBorderWidth = borderWidth;
         xPos = width / 2;
         yPos = height / 2;
+
+        //RGB color values for Yellow & Blue
+
 
         //Ratio scherm en plaatje, nodig bij bepalen vergroot /verklein factor
         viewRatio = (float) viewHeight / (float) viewWidth;
@@ -65,12 +70,37 @@ public class AATView extends PApplet implements Observer {
         imageMode(CENTER);
         rectMode(CENTER);
         image(img, xPos, yPos, imgSizeX, imgSizeY);
-        stroke(75, 100, 255);
+        stroke(rB, gB, bB);
         strokeWeight(imgBorderWidth);
         fill(0, 0, 0, 0);
         rect(xPos, yPos, imgSizeX, imgSizeY);
         fill(255);
+        text("Beter voorlopig nog ff toetsenbord gebruiken tot je stick werkt :)", 5, 15);
         text(time, width - 70, height - 10);
+    }
+
+    public void loadImage(float imgT) {
+        int i;
+        char ab;
+        i = (int) random(1, 6);
+
+        if ((int) imgT == 0) {
+            ab = 'a';
+            rB = 245;
+            gB = 254;
+            bB = 2;
+        } else {
+            ab = 'b';
+            rB = 0;
+            gB = 164;
+            bB = 231;
+        }
+
+        img = loadImage("images\\" + ab + i + ".png");
+        imgSizeX = (float) (imgRefactor * (stepCount * stepX));
+        imgSizeY = (float) (imgRefactor * (stepCount * stepY));
+        imgBorderWidth = (int) (borderWidth * stepCount);
+
     }
 
     public void keyPressed() {
@@ -80,23 +110,21 @@ public class AATView extends PApplet implements Observer {
             imgSizeX = (float) (imgRefactor * (stepCount * stepX));
             imgSizeY = (float) (imgRefactor * (stepCount * stepY));
         } else if (keyCode == 38 && stepCount >= stepSize) {
-            stepCount = stepSize;
-            imgBorderWidth = (int) (borderWidth * stepCount);
-            imgSizeX = (float) (imgRefactor * (stepCount * stepX));
-            imgSizeY = (float) (imgRefactor * (stepCount * stepY));
+            stepCount = stepStart;
+            loadImage(random(0, 2));
         } else if (keyCode == 40 && stepCount > 0) {
             stepCount--;
             imgBorderWidth = (int) (borderWidth * stepCount);
             imgSizeX = (float) (imgRefactor * (stepCount * stepX));
             imgSizeY = (float) (imgRefactor * (stepCount * stepY));
         } else if (keyCode == 40 && stepCount <= 0) {
-            stepCount = 0;
-            imgBorderWidth = 0;
-            imgSizeX = (float) (imgRefactor * (stepCount * stepX));
-            imgSizeY = (float) (imgRefactor * (stepCount * stepY));
+            stepCount = stepStart;
+            loadImage(random(0, 2));
         }
-        println("x: " + imgSizeX);
-        println("y: " + imgSizeY);
+        if (key == 'n') {
+            loadImage(random(0, 2));
+        }
+        println(stepCount);
     }
 
 
@@ -107,20 +135,16 @@ public class AATView extends PApplet implements Observer {
             imgSizeX = (float) (imgRefactor * (stepCount * stepX));
             imgSizeY = (float) (imgRefactor * (stepCount * stepY));
         } else if (pmouseY == mouseY && stepCount >= stepSize) {
-            stepCount = stepSize;
-            imgBorderWidth = (int) (borderWidth * stepCount);
-            imgSizeX = (float) (imgRefactor * (stepCount * stepX));
-            imgSizeY = (float) (imgRefactor * (stepCount * stepY));
+            stepCount = stepStart;
+            loadImage(random(0, 2));
         } else if (pmouseY > mouseY && stepCount > 0) {
             stepCount--;
             imgBorderWidth = (int) (borderWidth * stepCount);
             imgSizeX = (float) (imgRefactor * (stepCount * stepX));
             imgSizeY = (float) (imgRefactor * (stepCount * stepY));
         } else if (pmouseY > mouseY && stepCount <= 0) {
-            stepCount = 0;
-            imgBorderWidth = 0;
-            imgSizeX = (float) (imgRefactor * (stepCount * stepX));
-            imgSizeY = (float) (imgRefactor * (stepCount * stepY));
+            stepCount = stepStart;
+            loadImage(random(0, 2));
         }
         println("x: " + imgSizeX);
         println("y: " + imgSizeY);
@@ -141,4 +165,6 @@ public class AATView extends PApplet implements Observer {
         }
 
     }
+
 }
+
