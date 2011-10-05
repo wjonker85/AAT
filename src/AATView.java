@@ -156,8 +156,12 @@ public class AATView extends PApplet implements Observer {
     //Wanneer TEST_VIEW true is word setvisible op true zodat AATView view getoond word op scherm
     public void update(Observable observable, Object o) {
         model = (AATModel) observable;
+
+        if (o.toString().equals("Y-as")) {
+            System.out.println("Resize "+model.getPictureSize());
+        }
         if (o.equals("View changed")) {
-            if (model.currentView() == AATModel.TEST_VIEW) {
+            if (model.getCurrentView() == AATModel.TEST_VIEW) {
                 this.setVisible(true);
             } else {
                 this.setVisible(false);
