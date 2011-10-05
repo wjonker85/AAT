@@ -6,13 +6,14 @@ import java.util.Observer;
 
 /**
  * Created by IntelliJ IDEA.
- * User: marcel
+ * User: wjonker85
  * Date: 10/4/11
  * Time: 3:25 PM
  * To change this template use File | Settings | File Templates.
  */
 public class AATView extends PApplet implements Observer {
-    public int viewWidth, viewHeight, imgSize, maxSize, borderWidth;
+    public int viewWidth, viewHeight, borderWidth, stepSize, imgBorderWidth;
+    public float stepX, stepY, imgSizeX, imgSizeY, stepCount, imgRefactor, viewRatio, imgRatio, xPos, yPos;
     public PImage img;
     private AATModel model;
 
@@ -26,80 +27,113 @@ public class AATView extends PApplet implements Observer {
     }
 
     public void setup() {
+        //Set size of window
         size(viewWidth, viewHeight);
-        img = loadImage("C:\\Users\\Public\\Pictures\\Sample Pictures\\Penguins800_800.jpg");
-        imgSize = resizeStep() * 3; // set initial size for image;
-        //smooth(); // no smooth, makes it to slow, processing opengl lib gives problems
-        maxSize = resizeStep() * 7;
-        borderWidth = 20;
+
+        //Some var initialising
+        img = loadImage("D:\\Documenten\\Prive\\Familie\\Foto's\\Barcalona\\IMG_3505.JPG");
+        stepSize = 7;
+        stepCount = 4;
+        borderWidth = 8;
+        imgBorderWidth = borderWidth;
+        xPos = width / 2;
+        yPos = height / 2;
+
+        //Ratio scherm en plaatje, nodig bij bepalen vergroot /verklein factor
+        viewRatio = (float) viewHeight / (float) viewWidth;
+        imgRatio = (float) img.height / (float) img.width;
+
+        //Stapgroote bepale waarmee plaatjes verklijnt of vergoor moeten worden.
+        stepX = (float) img.width / (float) stepSize;
+        stepY = (float) img.height / (float) stepSize;
+
+        //image size initialiseren wanneer deze voor het eerst op het scherm verschijnt
+        imgSizeX = stepCount * stepX;
+        imgSizeY = stepCount * stepY;
+
+        //Vergroot / verklein factor van plaatje bepalen, zodat plaatje nooit groter kan worden dan het max hoogte of breedte van scherm
+        if (viewRatio > imgRatio) {
+            imgRefactor = (float) viewWidth / (float) img.width;
+        } else {
+            imgRefactor = (float) viewHeight / (float) img.height;
+        }
     }
 
     public void draw() {
+        int time = millis();
         background(0);
         imageMode(CENTER);
         rectMode(CENTER);
-        translate(width / 2, height / 2);
-        stroke(0, 255, 0);
-        strokeWeight(borderWidth);
-        rect(0, 0, imgSize, imgSize);
-        image(img, 0, 0, imgSize, imgSize);
-
-    }
-
-    //Grote van resize factor is gebonden aan scherm groote, zodat er max 7 stappen zijn.
-    public int resizeStep() {
-        int i;
-        if (viewHeight > viewWidth) {
-            i = (int) viewWidth / 7;
-        } else {
-            i = (int) viewHeight / 7;
-        }
-        return i;
+        image(img, xPos, yPos, imgSizeX, imgSizeY);
+        stroke(75, 100, 255);
+        strokeWeight(imgBorderWidth);
+        fill(0, 0, 0, 0);
+        rect(xPos, yPos, imgSizeX, imgSizeY);
+        fill(255);
+        text(time, width - 70, height - 10);
     }
 
     public void keyPressed() {
-        if (keyCode == 38) {
-            if (imgSize < maxSize) {
-                imgSize += resizeStep();
-            }
-        } else if (keyCode == 40) {
-            if (imgSize < resizeStep()) {
-                imgSize = 0;
-            } else
-                imgSize -= resizeStep();
+        if (keyCode == 38 && stepCount < stepSize) {
+            stepCount++;
+            imgBorderWidth = (int) (borderWidth * stepCount);
+            imgSizeX = (float) (imgRefactor * (stepCount * stepX));
+            imgSizeY = (float) (imgRefactor * (stepCount * stepY));
+        } else if (keyCode == 38 && stepCount >= stepSize) {
+            stepCount = stepSize;
+            imgBorderWidth = (int) (borderWidth * stepCount);
+            imgSizeX = (float) (imgRefactor * (stepCount * stepX));
+            imgSizeY = (float) (imgRefactor * (stepCount * stepY));
+        } else if (keyCode == 40 && stepCount > 0) {
+            stepCount--;
+            imgBorderWidth = (int) (borderWidth * stepCount);
+            imgSizeX = (float) (imgRefactor * (stepCount * stepX));
+            imgSizeY = (float) (imgRefactor * (stepCount * stepY));
+        } else if (keyCode == 40 && stepCount <= 0) {
+            stepCount = 0;
+            imgBorderWidth = 0;
+            imgSizeX = (float) (imgRefactor * (stepCount * stepX));
+            imgSizeY = (float) (imgRefactor * (stepCount * stepY));
         }
-
-        //Some debug code
-        println("resizeStep: " + resizeStep());
-        println("Size: " + imgSize);
-        println("maxSize: " + maxSize);
+        println("x: " + imgSizeX);
+        println("y: " + imgSizeY);
     }
+
 
     public void mouseMoved() {
-        if (mouseY > pmouseY) {
-            if (imgSize < maxSize) {
-                imgSize += resizeStep();
-            }
-        } else if (mouseY < pmouseY) {
-            if (imgSize < resizeStep()) {
-                imgSize = 0;
-            } else
-                imgSize -= resizeStep();
+        if (pmouseY < mouseY && stepCount < stepSize) {
+            stepCount++;
+            imgBorderWidth = (int) (borderWidth * stepCount);
+            imgSizeX = (float) (imgRefactor * (stepCount * stepX));
+            imgSizeY = (float) (imgRefactor * (stepCount * stepY));
+        } else if (pmouseY == mouseY && stepCount >= stepSize) {
+            stepCount = stepSize;
+            imgBorderWidth = (int) (borderWidth * stepCount);
+            imgSizeX = (float) (imgRefactor * (stepCount * stepX));
+            imgSizeY = (float) (imgRefactor * (stepCount * stepY));
+        } else if (pmouseY > mouseY && stepCount > 0) {
+            stepCount--;
+            imgBorderWidth = (int) (borderWidth * stepCount);
+            imgSizeX = (float) (imgRefactor * (stepCount * stepX));
+            imgSizeY = (float) (imgRefactor * (stepCount * stepY));
+        } else if (pmouseY > mouseY && stepCount <= 0) {
+            stepCount = 0;
+            imgBorderWidth = 0;
+            imgSizeX = (float) (imgRefactor * (stepCount * stepX));
+            imgSizeY = (float) (imgRefactor * (stepCount * stepY));
         }
-        println(mouseY);
+        println("x: " + imgSizeX);
+        println("y: " + imgSizeY);
+        println("r: " + imgRefactor);
+
     }
 
+
     //Wanneer TEST_VIEW true is word setvisible op true zodat AATView view getoond word op scherm
-    //Ook een update gemaakt voor als de y-as van de joystick verandert. Doet nu alleen een println met de int waardes tussen -3 en 3
-    //Methode nog veranderen zodat Object o altijd een integer waarde wordt.
     public void update(Observable observable, Object o) {
         model = (AATModel) observable;
-
-        if (o.toString().equals("Y-as")) {
-            System.out.println("Resize "+model.getPictureSize());
-        }
         if (o.equals("View changed")) {
-            if (model.getCurrentView() == AATModel.TEST_VIEW) {
+            if (model.currentView() == AATModel.TEST_VIEW) {
                 this.setVisible(true);
             } else {
                 this.setVisible(false);
