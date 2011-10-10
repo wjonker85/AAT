@@ -1,6 +1,7 @@
 import processing.core.PApplet;
 import processing.core.PImage;
 
+import java.io.File;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -17,6 +18,7 @@ public class AATView extends PApplet implements Observer {
     public float stepX, stepY, imgSizeX, imgSizeY, stepCount, imgRefactor, viewRatio, imgRatio, xPos, yPos;
     public PImage img;
     private AATModel model;
+
 
     public AATView(int viewWidth, int viewHeight) {
         // Tijdelijk, moet uit model komen.
@@ -96,7 +98,7 @@ public class AATView extends PApplet implements Observer {
             bB = 231;
         }
 
-        img = loadImage("images/" + ab + i + ".png");
+        img = loadImage("images"+ File.separator + ab + i + ".png");  //Zo zou het in Windows en Linux moeten werken
         System.out.println(img.toString());
         imgSizeX = (float) (imgRefactor * (stepCount * stepX));
         imgSizeY = (float) (imgRefactor * (stepCount * stepY));
