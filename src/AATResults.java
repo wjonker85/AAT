@@ -31,7 +31,7 @@ public class AATResults extends PApplet implements Observer {
     public void update(Observable observable, Object o) {
         model = (AATModel) observable;
         if (o.equals("View changed")) {
-            if (model.currentView() == AATModel.SINGLE_RESULTS) {
+            if (model.getCurrentView() == AATModel.SINGLE_RESULTS) {
                 this.setVisible(true);
             } else {
                 this.setVisible(false);

@@ -43,6 +43,7 @@ public class AAT_Main  {
         aatResults = new AATResults();
         model.addObserver(aatView);    //AAT als observer view toevoegen aan het model
         joystick = new JoystickController(model);
+        joystick.start(); //Start joystick Thread
         aatView.init();
         aatResults.init();
         mainPanel = new JPanel();

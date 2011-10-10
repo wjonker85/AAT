@@ -73,6 +73,12 @@ public class AATModel extends Observable {
          startMeasure = System.currentTimeMillis();
     }
 
+    public void triggerPressed() {
+    //    System.out.println("Trigger pressed");
+       this.setChanged();
+        notifyObservers("Trigger");
+    }
+
     //Returns the next Image
     public Image getNextImage() {
         return null;
