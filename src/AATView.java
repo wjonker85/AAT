@@ -14,7 +14,7 @@ import java.util.Observer;
  * TODO: Betere methode van plaatjes laden.
  */
 public class AATView extends PApplet implements Observer {
-    public int viewWidth, viewHeight, borderWidth, stepSize, imgBorderWidth, rA, gA, bA, rB, gB, bB, stepStart, inputY, inputT;
+    public int viewWidth, viewHeight, borderWidth, stepSize, imgBorderWidth, rB, gB, bB, stepStart, inputY, inputT;
     public float stepX, stepY, imgSizeX, imgSizeY, stepCount, imgRefactor, viewRatio, imgRatio, xPos, yPos;
     public PImage img;
     private AATModel model;
@@ -37,7 +37,7 @@ public class AATView extends PApplet implements Observer {
         stepSize = 7;
         stepStart = 4; //Verandert van 4 naar 7
         stepCount = stepStart;
-        borderWidth = 8;
+        borderWidth = 10;
         imgBorderWidth = borderWidth;
         xPos = width / 2;
         yPos = height / 2;
@@ -61,10 +61,7 @@ public class AATView extends PApplet implements Observer {
             imgRefactor = (float) viewHeight / (float) img.height;
         }
 
-        //Temp
-        imgSizeX = (float) (imgRefactor * (stepCount * stepX));
-        imgSizeY = (float) (imgRefactor * (stepCount * stepY));
-        imgBorderWidth = (int) (borderWidth * stepCount);
+        imageRefactor();
     }
 
     public void draw() {
@@ -73,9 +70,9 @@ public class AATView extends PApplet implements Observer {
     }
 
     public void imageRefactor() {
-        imgBorderWidth = borderWidth * inputY;
-        imgSizeX = imgRefactor * (inputY * stepX);
-        imgSizeY = imgRefactor * (inputY * stepY);
+        imgBorderWidth = (int) (imgRefactor * borderWidth * inputY);
+        imgSizeX = imgRefactor * inputY * stepX;
+        imgSizeY = imgRefactor * inputY * stepY;
     }
 
     public void imageShow() {
@@ -87,8 +84,9 @@ public class AATView extends PApplet implements Observer {
         strokeWeight(imgBorderWidth);
         fill(0, 0, 0, 0);
         rect(xPos, yPos, imgSizeX, imgSizeY);
-        fill(255);
+        fill(255, 0, 0);
         text("n = imageLoad()", 5, 15);
+        text("X: "+ (int)imgSizeX + " Y: "+ (int)imgSizeY, 5, 30);
     }
 
     //Waarde Y uit model overzetten naar inputY
@@ -126,9 +124,8 @@ public class AATView extends PApplet implements Observer {
         }
 
         img = loadImage("images" + File.separator + ab + i + ".png");  //Zo zou het in Windows en Linux moeten werken
-        System.out.println(img.toString());
-        imgSizeX = (float) (imgRefactor * (stepCount * stepX));
-        imgSizeY = (float) (imgRefactor * (stepCount * stepY));
+        imgSizeX = imgRefactor * stepCount * stepX;
+        imgSizeY = imgRefactor * stepCount * stepY;
         imgBorderWidth = (int) (borderWidth * stepCount);
     }
 
