@@ -14,7 +14,7 @@ import java.util.Observer;
  * TODO: Betere methode van plaatjes laden.
  */
 public class AATView extends PApplet implements Observer {
-    public int viewWidth, viewHeight, borderWidth, stepSize, imgBorderWidth, rA, gA, bA, rB, gB, bB, stepStart;
+    public int viewWidth, viewHeight, borderWidth, stepSize, imgBorderWidth, rA, gA, bA, rB, gB, bB, stepStart, inputY, inputT;
     public float stepX, stepY, imgSizeX, imgSizeY, stepCount, imgRefactor, viewRatio, imgRatio, xPos, yPos;
     public PImage img;
     private AATModel model;
@@ -31,20 +31,16 @@ public class AATView extends PApplet implements Observer {
     public void setup() {
         //Set size of window
         size(viewWidth, viewHeight);
+        imageLoad();
 
-        //plaatje laden voor trail
-        loadImage(random(0, 1));
         //Some var initialising
         stepSize = 7;
-        stepStart = 7; //Verandert van 4 naar 7
+        stepStart = 4; //Verandert van 4 naar 7
         stepCount = stepStart;
         borderWidth = 8;
         imgBorderWidth = borderWidth;
         xPos = width / 2;
         yPos = height / 2;
-
-        //RGB color values for Yellow & Blue
-
 
         //Ratio scherm en plaatje, nodig bij bepalen vergroot /verklein factor
         viewRatio = (float) viewHeight / (float) viewWidth;
@@ -64,10 +60,25 @@ public class AATView extends PApplet implements Observer {
         } else {
             imgRefactor = (float) viewHeight / (float) img.height;
         }
+
+        //Temp
+        imgSizeX = (float) (imgRefactor * (stepCount * stepX));
+        imgSizeY = (float) (imgRefactor * (stepCount * stepY));
+        imgBorderWidth = (int) (borderWidth * stepCount);
     }
 
     public void draw() {
-        int time = millis();
+        imageRefactor();
+        imageShow();
+    }
+
+    public void imageRefactor() {
+        imgBorderWidth = borderWidth * inputY;
+        imgSizeX = imgRefactor * (inputY * stepX);
+        imgSizeY = imgRefactor * (inputY * stepY);
+    }
+
+    public void imageShow() {
         background(0);
         imageMode(CENTER);
         rectMode(CENTER);
@@ -77,11 +88,27 @@ public class AATView extends PApplet implements Observer {
         fill(0, 0, 0, 0);
         rect(xPos, yPos, imgSizeX, imgSizeY);
         fill(255);
-        text("Beter voorlopig nog ff toetsenbord gebruiken tot je stick werkt :)", 5, 15);
-        text(time, width - 70, height - 10);
+        text("n = imageLoad()", 5, 15);
     }
 
-    public void loadImage(float imgT) {
+    //Waarde Y uit model overzetten naar inputY
+    public void deviceUpdateY(int inputY) {
+        this.inputY = inputY;
+    }
+
+    //Waarde tricker uit model overzetten naar inputT
+    public void deviceUpdateT(int inputT) {
+        this.inputT = inputT;
+    }
+
+    public void keyPressed(){
+        if(key == 'n'){
+            imageLoad();
+        }
+    }
+
+    public void imageLoad() {
+        float imgT = random(0,2);
         int i;
         char ab;
         i = (int) random(1, 6);
@@ -98,77 +125,25 @@ public class AATView extends PApplet implements Observer {
             bB = 231;
         }
 
-        img = loadImage("images"+ File.separator + ab + i + ".png");  //Zo zou het in Windows en Linux moeten werken
+        img = loadImage("images" + File.separator + ab + i + ".png");  //Zo zou het in Windows en Linux moeten werken
         System.out.println(img.toString());
         imgSizeX = (float) (imgRefactor * (stepCount * stepX));
         imgSizeY = (float) (imgRefactor * (stepCount * stepY));
         imgBorderWidth = (int) (borderWidth * stepCount);
-
     }
 
-    public void keyPressed() {
-        if (keyCode == 38 && stepCount < stepSize) {
-            stepCount++;
-            imgBorderWidth = (int) (borderWidth * stepCount);
-            imgSizeX = (float) (imgRefactor * (stepCount * stepX));
-            imgSizeY = (float) (imgRefactor * (stepCount * stepY));
-        } else if (keyCode == 38 && stepCount >= stepSize) {
-            stepCount = stepStart;
-            loadImage(random(0, 2));
-        } else if (keyCode == 40 && stepCount > 0) {
-            stepCount--;
-            imgBorderWidth = (int) (borderWidth * stepCount);
-            imgSizeX = (float) (imgRefactor * (stepCount * stepX));
-            imgSizeY = (float) (imgRefactor * (stepCount * stepY));
-        } else if (keyCode == 40 && stepCount <= 0) {
-            stepCount = stepStart;
-            loadImage(random(0, 2));
-        }
-        if (key == 'n') {
-            loadImage(random(0, 2));
-        }
-        println(stepCount);
-    }
 
-    /*
-     public void mouseMoved() {
-         if (pmouseY < mouseY && stepCount < stepSize) {
-             stepCount++;
-             imgBorderWidth = (int) (borderWidth * stepCount);
-             imgSizeX = (float) (imgRefactor * (stepCount * stepX));
-             imgSizeY = (float) (imgRefactor * (stepCount * stepY));
-         } else if (pmouseY == mouseY && stepCount >= stepSize) {
-             stepCount = stepStart;
-             loadImage(random(0, 2));
-         } else if (pmouseY > mouseY && stepCount > 0) {
-             stepCount--;
-             imgBorderWidth = (int) (borderWidth * stepCount);
-             imgSizeX = (float) (imgRefactor * (stepCount * stepX));
-             imgSizeY = (float) (imgRefactor * (stepCount * stepY));
-         } else if (pmouseY > mouseY && stepCount <= 0) {
-             stepCount = stepStart;
-             loadImage(random(0, 2));
-         }
-         println("x: " + imgSizeX);
-         println("y: " + imgSizeY);
-         println("r: " + imgRefactor);
 
-     }
-
-    */
     //Wanneer TEST_VIEW true is word setvisible op true zodat AATView view getoond word op scherm
     public void update(Observable observable, Object o) {
         model = (AATModel) observable;
 
         if (o.toString().equals("Y-as")) {
-            System.out.println("Resize " + model.getPictureSize());
-            imgSizeX = model.getPictureSize() * 100;           //Simpel resizen als proof of concept
-            imgSizeY = model.getPictureSize() * 100;
+            deviceUpdateY(model.getPictureSize());
         }
 
         if (o.toString().equals("Trigger")) {
-            System.out.println("Trigger pressed");
-            loadImage(random(0, 1));            //Random nieuw plaatje
+            //deviceUpdateT(model.getTrigger); TODO: in AATView trigger initialiseren
         }
 
 
@@ -179,7 +154,7 @@ public class AATView extends PApplet implements Observer {
                 this.setVisible(false);
             }
         }
-
     }
+
 }
 
