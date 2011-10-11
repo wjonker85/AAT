@@ -39,7 +39,7 @@ public class AAT_Main  {
     public AAT_Main() {
        frame = new JFrame("Approach Avoidance Task");
         model = new AATModel();
-        aatView = new AATView(600, 600); //TODO size() in processing is statisch, voordat AAT geladen wordt scherm groote initialiseren
+        aatView = new AATView(700, 700); //TODO size() in processing is statisch, voordat AAT geladen wordt scherm groote initialiseren
         aatResults = new AATResults();
         model.addObserver(aatView);    //AAT als observer view toevoegen aan het model
         joystick = new JoystickController(model);
@@ -49,6 +49,7 @@ public class AAT_Main  {
         mainPanel = new JPanel();
         mainPanel.add(aatView);
         mainPanel.add(aatResults);
+        aatView.setSize(1400,1400);
         this.show();
     }
 }

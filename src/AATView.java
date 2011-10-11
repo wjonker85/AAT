@@ -17,7 +17,9 @@ public class AATView extends PApplet implements Observer {
     public int viewWidth, viewHeight, borderWidth, stepSize, imgBorderWidth, rB, gB, bB, stepStart, inputY, inputT;
     public float stepX, stepY, imgSizeX, imgSizeY, stepCount, imgRefactor, viewRatio, imgRatio, xPos, yPos;
     public PImage img;
+    private boolean showImage = false;
     private AATModel model;
+
 
 
     public AATView(int viewWidth, int viewHeight) {
@@ -77,6 +79,7 @@ public class AATView extends PApplet implements Observer {
 
     public void imageShow() {
         background(0);
+        if(showImage) {
         imageMode(CENTER);
         rectMode(CENTER);
         image(img, xPos, yPos, imgSizeX, imgSizeY);
@@ -86,27 +89,28 @@ public class AATView extends PApplet implements Observer {
         rect(xPos, yPos, imgSizeX, imgSizeY);
         fill(255, 0, 0);
         text("n = imageLoad()", 5, 15);
-        text("X: "+ (int)imgSizeX + " Y: "+ (int)imgSizeY, 5, 30);
+        text("X: " + (int) imgSizeX + " Y: " + (int) imgSizeY, 5, 30);
     }
-
+    }
     //Waarde Y uit model overzetten naar inputY
     public void deviceUpdateY(int inputY) {
         this.inputY = inputY;
     }
 
     //Waarde tricker uit model overzetten naar inputT
-    public void deviceUpdateT(int inputT) {
-        this.inputT = inputT;
+    public void deviceUpdateT() {
+        imageLoad();
     }
 
-    public void keyPressed(){
-        if(key == 'n'){
+
+    public void keyPressed() {
+        if (key == 'n') {
             imageLoad();
         }
     }
 
     public void imageLoad() {
-        float imgT = random(0,2);
+        float imgT = random(0, 2);
         int i;
         char ab;
         i = (int) random(1, 6);
@@ -124,11 +128,11 @@ public class AATView extends PApplet implements Observer {
         }
 
         img = loadImage("images" + File.separator + ab + i + ".png");  //Zo zou het in Windows en Linux moeten werken
+
         imgSizeX = imgRefactor * stepCount * stepX;
         imgSizeY = imgRefactor * stepCount * stepY;
         imgBorderWidth = (int) (borderWidth * stepCount);
     }
-
 
 
     //Wanneer TEST_VIEW true is word setvisible op true zodat AATView view getoond word op scherm
@@ -139,8 +143,14 @@ public class AATView extends PApplet implements Observer {
             deviceUpdateY(model.getPictureSize());
         }
 
+        if (o.toString().equals("Black Screen")) {
+                  showImage = false;
+        }
+
         if (o.toString().equals("Trigger")) {
-            //deviceUpdateT(model.getTrigger); TODO: in AATView trigger initialiseren
+            showImage = true;
+            deviceUpdateT(); //TODO: in AATView trigger initialiseren
+
         }
 
 
