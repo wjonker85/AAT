@@ -8,8 +8,8 @@ import java.util.Observable;
  * Date: 10/4/11
  * Time: 3:12 PM
  * Model voor de AAT. Dit model houdt alle data bij, bepaalt welke view actief dient te zijn. Geeft ook de plaatje door.
-    TODO Alleen next image als de juiste beweging wordt gemaakt.
- TODO; Map met alle plaatjes laden. Daarna random verdelen.
+ * TODO Alleen next image als de juiste beweging wordt gemaakt.
+ * TODO; Map met alle plaatjes laden. Daarna random verdelen.
  */
 public class AATModel extends Observable {
 
@@ -36,7 +36,7 @@ public class AATModel extends Observable {
     private ArrayList<Image> Images;
 
     public AATModel() {
-       Images = new ArrayList<Image>();
+        Images = new ArrayList<Image>();
     }
 
     public void setCurrentView(int newView) {
@@ -57,18 +57,17 @@ public class AATModel extends Observable {
             this.setChanged();
             notifyObservers("Black Screen");
         }
-        else {
         resize = value;
         this.setChanged();
 
         notifyObservers("Y-as");
-        }
+
+        System.out.println("public void changeYaxis(int value): " + value);
     }
 
     public int getPictureSize() {
         return resize;
     }
-
 
 
     //Start de meting zodra de view het plaatje geladen heeft.
