@@ -21,7 +21,6 @@ public class AATView extends PApplet implements Observer {
     private AATModel model;
 
 
-
     public AATView(int viewWidth, int viewHeight) {
         // Tijdelijk, moet uit model komen.
         setVisible(true);
@@ -62,7 +61,6 @@ public class AATView extends PApplet implements Observer {
         } else {
             imgRefactor = (float) viewHeight / (float) img.height;
         }
-
         imageRefactor();
     }
 
@@ -73,35 +71,24 @@ public class AATView extends PApplet implements Observer {
 
     public void imageRefactor() {
         imgBorderWidth = (int) (imgRefactor * borderWidth * inputY);
-        imgSizeX = imgRefactor * inputY * stepX;
-        imgSizeY = imgRefactor * inputY * stepY;
+        imgSizeX = (float) (imgRefactor * inputY * stepX);
+        imgSizeY = (float) (imgRefactor * inputY * stepY);
     }
 
     public void imageShow() {
         background(0);
-        if(showImage) {
-        imageMode(CENTER);
-        rectMode(CENTER);
-        image(img, xPos, yPos, imgSizeX, imgSizeY);
-        stroke(rB, gB, bB);
-        strokeWeight(imgBorderWidth);
-        fill(0, 0, 0, 0);
-        rect(xPos, yPos, imgSizeX, imgSizeY);
+        if (showImage) {
+            imageMode(CENTER);
+            rectMode(CENTER);
+            image(img, xPos, yPos, imgSizeX, imgSizeY);
+            stroke(rB, gB, bB);
+            strokeWeight(imgBorderWidth);
+            fill(0, 0, 0, 0);
+            rect(xPos, yPos, imgSizeX, imgSizeY);
+        }
         fill(255, 0, 0);
-        text("n = imageLoad()", 5, 15);
-        text("X: " + (int) imgSizeX + " Y: " + (int) imgSizeY, 5, 30);
+        text("X: " + (int) imgSizeX + "px; Y: " + (int) imgSizeY + "px;"+ " inputY: "+ inputY, 5, 15);
     }
-    }
-    //Waarde Y uit model overzetten naar inputY
-    public void deviceUpdateY(int inputY) {
-        this.inputY = inputY;
-    }
-
-    //Waarde tricker uit model overzetten naar inputT
-    public void deviceUpdateT() {
-        imageLoad();
-    }
-
 
     public void keyPressed() {
         if (key == 'n') {
@@ -140,17 +127,17 @@ public class AATView extends PApplet implements Observer {
         model = (AATModel) observable;
 
         if (o.toString().equals("Y-as")) {
-            deviceUpdateY(model.getPictureSize());
+            inputY = model.getPictureSize();
+            println("AATView model.getPictureSize(): "+ model.getPictureSize());
         }
 
         if (o.toString().equals("Black Screen")) {
-                  showImage = false;
+            showImage = false;
         }
 
         if (o.toString().equals("Trigger")) {
+            imageLoad();
             showImage = true;
-            deviceUpdateT(); //TODO: in AATView trigger initialiseren
-
         }
 
 
