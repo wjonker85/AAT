@@ -2,6 +2,8 @@ import net.java.games.input.Component;
 import net.java.games.input.Controller;
 import net.java.games.input.ControllerEnvironment;
 
+import javax.swing.plaf.basic.BasicInternalFrameTitlePane;
+
 /**
  * Created by IntelliJ IDEA.
  * User: marcel
@@ -39,14 +41,9 @@ public class JoystickController extends Thread {
             System.exit(0);
         }
 
-        joyStick = findJoystick(cs);
+        joyStick = findJoystick(cs);   //Search for an attached joystick
         yAxis = joyStick.getComponent(Component.Identifier.Axis.Y);   //Y-as
-
-       for(int x =0;x<joyStick.getComponents().length;x++) {
-           System.out.println(joyStick.getComponents()[x].getIdentifier().getName());
-           System.out.println(Component.Identifier.Button.TRIGGER.toString());
-       }
-        trigger = joyStick.getComponent(Component.Identifier.Button._0); //Trigger-button
+        trigger = getTrigger(joyStick);  //Search for trigger button
 
         //  pollComponent(cs[0], trigger);
 
@@ -55,9 +52,29 @@ public class JoystickController extends Thread {
 
     //Start the thread
     public void run() {
-        pollComponent(joyStick, yAxis);
+        pollController(joyStick);
     }
 
+
+    //Find the trigger button. Button may be called Trigger or Button 0, maybe even different with other joysticks.
+    //TODO: Check different systems/joysticks
+
+    private Component getTrigger(Controller con) {
+        Component trigger = con.getComponent(Component.Identifier.Button.TRIGGER);
+        if(trigger !=null) {
+            return trigger;
+        }
+        else {
+            trigger = con.getComponent(Component.Identifier.Button._0);
+        }
+        if(trigger !=null) {
+            return trigger;
+        }
+        else {
+            System.out.println("No trigger button found");
+            return null;
+        }
+    }
 
     //Search all attached controllers and returns the first joystick found
     private Controller findJoystick(Controller[] controllers) {
@@ -70,7 +87,10 @@ public class JoystickController extends Thread {
         return null;
     }
 
-    private void pollComponent(Controller c, Component component) {
+
+    //Will be run in a seperate Thread. Will poll the joystick with a given delay. Will poll the y-axis and the trigger button
+    //Will call methods in the model when there is a change.
+    private void pollController(Controller c) {
         float prevYValue = 0.0f;
         float yAxisValue;
         float prevTrigger = 0.0f;
@@ -104,9 +124,9 @@ public class JoystickController extends Thread {
     }
 
 
-    //Zet de float waarde van de joystick om in Integer tussen -3 en 3
+    //Changes float value to an Integer from 1 to 7.
     private int convertValue(float value) {
-        if (value > 0.25 && value < 0.5) {
+        if (value > 0 && value < 0.5) {
             return 5;
         }
         if (value > 0.5 && value < 1) {
@@ -115,7 +135,7 @@ public class JoystickController extends Thread {
         if (value == 1) {
             return 7;
         }
-        if (value < -0.25 && value > -0.5) {
+        if (value < 0 && value > -0.5) {
             return 3;
         }
         if (value < -0.5 && value > -1) {

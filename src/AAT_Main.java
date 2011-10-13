@@ -51,5 +51,6 @@ public class AAT_Main  {
         mainPanel.add(aatResults);
         aatView.setSize(1400,1400);
         this.show();
+        model.startTest(3,1);
     }
 }
