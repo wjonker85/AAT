@@ -126,25 +126,30 @@ public class JoystickController extends Thread {
 
     //Changes float value to an Integer from 1 to 7.
     private int convertValue(float value) {
-        if (value > 0 && value < 0.5) {
-            return 5;
-        }
-        if (value > 0.5 && value < 1) {
+        if (value > 0 && value <= 0.33) {
             return 6;
         }
-        if (value == 1) {
+        if (value > 0.33 && value <= 0.66) {
             return 7;
         }
-        if (value < 0 && value > -0.5) {
+        if(value >0.66 && value < 1)  {
+            return 8;
+        }
+        if (value == 1) {
+            return 9;
+        }
+        if (value < 0 && value > -0.33) {
+            return 4;
+        }
+        if (value <= -0.33 && value > -0.66) {
             return 3;
         }
-        if (value < -0.5 && value > -1) {
+        if(value<=-0.66 && value > -1)
             return 2;
-        }
         if (value == -1) {
             return 1;
         } else {
-            return 4;
+            return 5;      //Stick in the middle
         }
     }
 

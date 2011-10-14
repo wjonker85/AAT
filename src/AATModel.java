@@ -1,9 +1,6 @@
-import javax.imageio.ImageIO;
-import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileFilter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -34,9 +31,11 @@ public class AATModel extends Observable {
     public static int JOYSTICK_BUTTON_PRESSED = 5;
     public static int NEXT_PICTURE = 6;
 
-    private static int TEST_RUNNING = 0;
+    private static int IMAGE_LOADED = 0;
     private static int TEST_ON_BREAK = 1;
     private static int TEST_ENDED = 2;
+    private static int TEST_WAIT_FOR_TRIGGER = 3;
+    private static int TEST_START_INFO;
 
     public static int PUSH = 0;
     public static int PULL = 1;
@@ -55,31 +54,31 @@ public class AATModel extends Observable {
     private int testStatus;
 
 
+    private ArrayList<Double> results;
+    private boolean imageLoaded = false;
     private ArrayList<File> imageFiles;
     private ArrayList<AATImage> testList; //Random list that contains the push or pull images.
-    private File imageDir;
-    private Matcher matcher;
     private Pattern pattern;
     private static final String IMAGE_PATTERN =
             "([^\\s]+(\\.(?i)(jpg|png|gif|bmp))$)";        //regex for extension filtering
 
-    private int nextImageType = 0;
-
     public AATModel() {
-        imageDir = new File("images");
+        File imageDir = new File("images");
         pattern = Pattern.compile(IMAGE_PATTERN);
         imageFiles = getImages(imageDir); //create ArrayList with all image files;
+        results = new ArrayList<Double>();
     }
 
 
-    //Returns arrayList with all imageFiles
+    //Geeft een arrayList gevuld met alle grafische bestanden in een directory
     private ArrayList<File> getImages(File dir) {
         File[] files = dir.listFiles(extensionFilter);
         return new ArrayList<File>(Arrays.asList(files));
     }
 
 
-    //Creates a random list based on the imageFiles.
+    //Maakt een lijst met AATImage objecten. Maakt van elk plaatje een push en pull versie en maakt er vervolgens een random lijst
+    //van.
     private ArrayList<AATImage> createRandomList(ArrayList<File> imageFiles) {
         ArrayList<AATImage> randomList = new ArrayList<AATImage>();
         for (File image : imageFiles) {
@@ -92,27 +91,22 @@ public class AATModel extends Observable {
         return randomList;
     }
 
+    //Start een nieuwe AAT. Met het aantal keer herhalingen en wanneer er een pauze moet volgen.
     public void startTest(int repeat, int breakAfter) {
         this.repeat = repeat;
         this.breakAfter = breakAfter;
         testList = createRandomList(imageFiles);
         count = 0;
-        run = 1;
-        setCurrentImage(count); //Gets the first image
-        count++;
-        testStatus = AATModel.TEST_RUNNING;
+        run = 0;
         this.setChanged();
         notifyObservers("Start");
-    }
-
-    private void setCurrentImage(int pos) {
-        current = testList.get(pos);
+        testStatus = AATModel.TEST_WAIT_FOR_TRIGGER;
     }
 
     //Use regular expression for the filtering of extensions
     FileFilter extensionFilter = new FileFilter() {
         public boolean accept(File file) {
-            matcher = pattern.matcher(file.getName());
+            Matcher matcher = pattern.matcher(file.getName());
             return matcher.matches();
         }
     };
@@ -132,50 +126,63 @@ public class AATModel extends Observable {
     //Methode die doorgeeft dat er een verandering van de Y-as is geweest
     //TODO nog wat netter/verbeteren.
     public void changeYaxis(int value) {
-      //  System.out.println("Resize " + value);
+        //  System.out.println("Resize " + value);
         resize = value;
-
-        if (current.getType() == AATImage.PULL && value == 7) {
-           nextImage();
-
-        } else if (current.getType() == AATImage.PUSH && value == 1) {
-            nextImage();
+        if (testStatus == AATModel.IMAGE_LOADED) { //alleen uitvoeren als de view een image geladen heeft.
+            if (current.getType() == AATImage.PULL && value == 9) {
+                this.setChanged();
+                endMeasure();
+                notifyObservers("Wait screen");  //Doorgeven dat het plaatje weg is.
+            } else if (current.getType() == AATImage.PUSH && value == 1) {
+                this.setChanged();
+                endMeasure();
+                notifyObservers("Wait screen");
+            }
         }
-
         this.setChanged();
         notifyObservers("Y-as");
+
     }
 
-    //Loads the next image if there are any left. Else the run has ended.
-    //Load new run if there is no break or the test has ended.
-    private void nextImage() {
-        count++;
-        if(count%(run*testList.size()) < testList.size()) {     //There are more images in the list
-            current = testList.get(count);
-                    this.setChanged();
-            notifyObservers("Next Image");
-        }
-       else {
-          if(count/(run*testList.size()) == breakAfter) {
-              testList = createRandomList(imageFiles); //create a new Random list
-              run++;
-              current = testList.get(count%repeat);
-              testStatus = AATModel.TEST_ON_BREAK;
-             this.setChanged();
-              notifyObservers("Break");
-          }
-          else if(count/(run*testList.size()) == repeat) {
-              testStatus = AATModel.TEST_ENDED;
-              this.setChanged();
-              notifyObservers("Test ended");
-          }
-          else {
-              testList = createRandomList(imageFiles); //create a new Random list
-              current = testList.get(count%repeat);
-              run++;
-              this.setChanged();
-              notifyObservers("Next Image");
-          }
+  //  public void imageLoaded() {
+  //      System.out.println("Plaatje geladen");
+   //     imageLoaded = true;
+   //     startMeasure();
+  //  }
+
+    private void loadNextImage() {
+        if (count < testList.size()) {     //De run is nog niet afgelopen, lijst bevat nog plaatjes.
+            current = testList.get(count);    //Volgend plaatje laden.
+            System.out.println("Loaded "+current.toString());
+            count++;
+            this.setChanged();
+            notifyObservers("Show Image");
+        } else {      //Geen plaatjes meer om te laten zien, nu kijken of er een break is, of er direct nieuwe plaatjes getoond kunnen
+             run++;     //of dat de test afgelopen is.
+            if (run == breakAfter) {    //Test is bij de break aangekomen.
+                testList = createRandomList(imageFiles); //Nieuwe random lijst maken.
+                current = testList.get(count % repeat);
+                testStatus = AATModel.TEST_ON_BREAK;
+                count = 0;
+                this.setChanged();
+                notifyObservers("Break");
+
+            } else if (run == repeat) {   //Laatste run is geweest
+                testStatus = AATModel.TEST_ENDED;
+                count = 0;
+                System.out.println("No results " + results.size());
+                for (Double d : results) {
+                    System.out.println(d);
+                }
+                this.setChanged();
+                notifyObservers("Test ended");
+            } else {           //Gewoon doorgaan met een volgende run
+                testList = createRandomList(imageFiles); //create a new Random list
+                current = testList.get(count % repeat); //TODO: nog even naar kijken of dit wel klopt.
+                count = 0;
+                this.setChanged();
+                notifyObservers("Next Image");
+            }
         }
     }
 
@@ -190,34 +197,35 @@ public class AATModel extends Observable {
         startMeasure = System.currentTimeMillis();
     }
 
-    public BufferedImage getImage() {
-        return null;
+    public void endMeasure() {
+        double reactionTime = System.currentTimeMillis() - startMeasure;
+        System.out.println(System.currentTimeMillis() - startMeasure);
+        //   System.out.println("result added");
+        results.add(reactionTime);
     }
 
-    public int getDirection() {
-        return 0;
-    }
-
-    //Trigger pressed
+    //Als de trigger ingedruk wordt, gaat de status naar IMAGE_LOADED
     public void triggerPressed() {
         //    System.out.println("Trigger pressed");
-        if(testStatus == AATModel.TEST_ON_BREAK) {         //end the break
-            testStatus = AATModel.TEST_RUNNING;
-            this.setChanged();
-            notifyObservers("Resumed");
+        if (testStatus == AATModel.TEST_ON_BREAK) {         //end the break
+            testStatus = AATModel.IMAGE_LOADED;
+            loadNextImage();
+        //    this.setChanged();
+        //    notifyObservers("Show Image");
         }
-        this.setChanged();
-        notifyObservers("Trigger");
-    }
+        if (testStatus == AATModel.TEST_WAIT_FOR_TRIGGER) {
+            this.setChanged();
+            testStatus = AATModel.IMAGE_LOADED;
+        //    loadNextImage();
+       //     notifyObservers("Show Image");
+        }
+        if (testStatus == AATModel.TEST_START_INFO) {
+            this.setChanged();
+            testStatus = IMAGE_LOADED;
+            loadNextImage();
+            notifyObservers("Show Image");
+        }
 
-
-    //Getter/Setter for nextImage type (push or pull)
-    private void setNextImageType(int type) {
-        nextImageType = type;
-    }
-
-    public int getNextImageType() {
-        return current.getType();
     }
 
     //Returns the next Image
@@ -226,5 +234,15 @@ public class AATModel extends Observable {
     }
 }
 
+//class resultData {
 
-//Class that contains the image that has to be displayed. It also contain whether it's a pull or push image
+//  private ArrayList runs;
+
+//   public resultData() {
+
+//   }
+
+//  public void add
+
+//}
+
