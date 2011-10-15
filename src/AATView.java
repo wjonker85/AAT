@@ -34,6 +34,7 @@ public class AATView extends PApplet implements Observer {
     public AATView(int viewWidth, int viewHeight, int imgWidth, int imgHeight) {
         // Tijdelijk, moet uit model komen.
         setVisible(true);
+        System.out.println(viewWidth);
         //Grote van de AATView scherm.
 
         this.viewHeight = viewHeight;
@@ -195,13 +196,7 @@ public class AATView extends PApplet implements Observer {
 
 
         //Informatie of deze view wel of niet zichtbaar hoort te zijn.
-        if (o.equals("View changed")) {
-            if (model.getCurrentView() == AATModel.TEST_VIEW) {
-                this.setVisible(true);
-            } else {
-                this.setVisible(false);
-            }
-        }
+
     }
 
 

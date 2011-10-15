@@ -1,3 +1,4 @@
+import javax.swing.table.TableModel;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileFilter;
@@ -14,8 +15,8 @@ import java.util.regex.Pattern;
  * Date: 10/4/11
  * Time: 3:12 PM
  * Model voor de AAT. Dit model houdt alle data bij, bepaalt welke view actief dient te zijn. Geeft ook de plaatje door.
- * TODO Alleen next image als de juiste beweging wordt gemaakt.
- * TODO; Map met alle plaatjes laden. Daarna random verdelen.
+ * TODO: Test werkt, nu nog op een juiste manier een meting uitvoeren. Zodat ook alle bewegingen geregistreerd worden, niet alleen
+ * TODO: de totale reactietijd.
  */
 public class AATModel extends Observable {
 
@@ -26,36 +27,29 @@ public class AATModel extends Observable {
     public static int SINGLE_RESULTS = 1;
     public static int OVERALL_RESULTS = 3;
 
-    //Berichten voor tijdens de test.
-    public static int Y_AXIS_CHANGED = 4;
-    public static int JOYSTICK_BUTTON_PRESSED = 5;
-    public static int NEXT_PICTURE = 6;
 
-    private static int IMAGE_LOADED = 0;
-    private static int TEST_ON_BREAK = 1;
-    private static int TEST_ENDED = 2;
-    private static int TEST_WAIT_FOR_TRIGGER = 3;
-    private static int TEST_START_INFO;
+    //Status van de test.
+    private static int TEST_STOPPED = 0;
+    private static int IMAGE_LOADED = 1;
+    private static int TEST_WAIT_FOR_TRIGGER = 2;
 
-    public static int PUSH = 0;
-    public static int PULL = 1;
-    private int resize = 0;
-    private long timeFirst = 0;
 
+    private int resize = 5;
     private int currentView = 0;
     private long startMeasure;
 
     private int repeat;
     private int breakAfter;
-
     private int count; //Counts the number of images shown.   4
     private int run;
+    private int id = 0;
+    private MeasureData newMeasure;
+
     private AATImage current;
     private int testStatus;
 
-
     private ArrayList<Double> results;
-    private boolean imageLoaded = false;
+    private ResultsTableModel resultsTable;
     private ArrayList<File> imageFiles;
     private ArrayList<AATImage> testList; //Random list that contains the push or pull images.
     private Pattern pattern;
@@ -67,6 +61,7 @@ public class AATModel extends Observable {
         pattern = Pattern.compile(IMAGE_PATTERN);
         imageFiles = getImages(imageDir); //create ArrayList with all image files;
         results = new ArrayList<Double>();
+        testStatus = AATModel.TEST_STOPPED;
     }
 
 
@@ -76,6 +71,14 @@ public class AATModel extends Observable {
         return new ArrayList<File>(Arrays.asList(files));
     }
 
+
+    //Use regular expression for the filtering of extensions
+    FileFilter extensionFilter = new FileFilter() {
+        public boolean accept(File file) {
+            Matcher matcher = pattern.matcher(file.getName());
+            return matcher.matches();
+        }
+    };
 
     //Maakt een lijst met AATImage objecten. Maakt van elk plaatje een push en pull versie en maakt er vervolgens een random lijst
     //van.
@@ -96,20 +99,15 @@ public class AATModel extends Observable {
         this.repeat = repeat;
         this.breakAfter = breakAfter;
         testList = createRandomList(imageFiles);
+        resultsTable = new ResultsTableModel();
         count = 0;
         run = 0;
+        newMeasure = new MeasureData(id);
+        id++;
         this.setChanged();
         notifyObservers("Start");
         testStatus = AATModel.TEST_WAIT_FOR_TRIGGER;
     }
-
-    //Use regular expression for the filtering of extensions
-    FileFilter extensionFilter = new FileFilter() {
-        public boolean accept(File file) {
-            Matcher matcher = pattern.matcher(file.getName());
-            return matcher.matches();
-        }
-    };
 
 
     public void setCurrentView(int newView) {
@@ -122,115 +120,110 @@ public class AATModel extends Observable {
         return currentView;
     }
 
+    /*
+        Deze methode bepaalt wat de volgende stap in de test is. Deze methode wordt telkens aangeroepen nadat op de
+        trigger knop gedrukt is. Als nog niet alle plaatjes in de lijst getoond worden, moet de test doorgaan met de volgende.
+        Is het einde van de lijst bereikt, dan moet er gekeken worden of er gewoon verder gegaan moet worden met een nieuwe lijst,
+        of er een pauze gehouden moet worden, of dat de test afgelopen is.
 
-    //Methode die doorgeeft dat er een verandering van de Y-as is geweest
-    //TODO nog wat netter/verbeteren.
-    public void changeYaxis(int value) {
-        //  System.out.println("Resize " + value);
-        resize = value;
-        if (testStatus == AATModel.IMAGE_LOADED) { //alleen uitvoeren als de view een image geladen heeft.
-            if (current.getType() == AATImage.PULL && value == 9) {
-                this.setChanged();
-                endMeasure();
-                notifyObservers("Wait screen");  //Doorgeven dat het plaatje weg is.
-            } else if (current.getType() == AATImage.PUSH && value == 1) {
-                this.setChanged();
-                endMeasure();
-                notifyObservers("Wait screen");
-            }
-        }
-        this.setChanged();
-        notifyObservers("Y-as");
-
-    }
-
-  //  public void imageLoaded() {
-  //      System.out.println("Plaatje geladen");
-   //     imageLoaded = true;
-   //     startMeasure();
-  //  }
-
-    private void loadNextImage() {
+    */
+    private void NextStep() {
         if (count < testList.size()) {     //De run is nog niet afgelopen, lijst bevat nog plaatjes.
-            current = testList.get(count);    //Volgend plaatje laden.
-            System.out.println("Loaded "+current.toString());
-            count++;
-            this.setChanged();
-            notifyObservers("Show Image");
-        } else {      //Geen plaatjes meer om te laten zien, nu kijken of er een break is, of er direct nieuwe plaatjes getoond kunnen
-             run++;     //of dat de test afgelopen is.
+            showNextImage();
+        } else {
+            run++;
+            count = 0;
             if (run == breakAfter) {    //Test is bij de break aangekomen.
                 testList = createRandomList(imageFiles); //Nieuwe random lijst maken.
-                current = testList.get(count % repeat);
-                testStatus = AATModel.TEST_ON_BREAK;
-                count = 0;
+                current = testList.get(0);
+                testStatus = AATModel.TEST_WAIT_FOR_TRIGGER;
                 this.setChanged();
                 notifyObservers("Break");
 
             } else if (run == repeat) {   //Laatste run is geweest
-                testStatus = AATModel.TEST_ENDED;
-                count = 0;
-                System.out.println("No results " + results.size());
-                for (Double d : results) {
-                    System.out.println(d);
-                }
                 this.setChanged();
                 notifyObservers("Test ended");
-            } else {           //Gewoon doorgaan met een volgende run
+                testStatus = AATModel.TEST_STOPPED;
+            } else {           //Verder gaan met een volgende run
                 testList = createRandomList(imageFiles); //create a new Random list
-                current = testList.get(count % repeat); //TODO: nog even naar kijken of dit wel klopt.
                 count = 0;
-                this.setChanged();
-                notifyObservers("Next Image");
+                showNextImage();
             }
         }
     }
 
+    //Volgend plaatje uit de lijst laten zien.
+    private void showNextImage() {
+        current = testList.get(count);    //Volgend plaatje laden.
+        System.out.println("Loaded " + current.toString());
+        this.setChanged();
+        notifyObservers("Show Image");
+        startMeasure(); //Begin de meting
+        count++;
+    }
 
+    //Geeft een integer met de grootte van het plaatje.
     public int getPictureSize() {
         return resize;
     }
 
 
-    //Start de meting zodra de view het plaatje geladen heeft.
-    public void startMeasure() {
-        startMeasure = System.currentTimeMillis();
+    //Returns the next Image
+    public BufferedImage getNextImage() {
+        return current.getImage();
     }
 
-    public void endMeasure() {
-        double reactionTime = System.currentTimeMillis() - startMeasure;
-        System.out.println(System.currentTimeMillis() - startMeasure);
-        //   System.out.println("result added");
-        results.add(reactionTime);
+
+    //Start de meting zodra de view het plaatje geladen heeft.
+    public void startMeasure() {
+        newMeasure.newMeasure(run,current.toString(),current.getType()); //Begin met de metingen opslaan.
+        startMeasure = System.currentTimeMillis();  //Begintijd
+    }
+
+    public long getMeasurement() {
+        return System.currentTimeMillis() - startMeasure;
+    }
+
+
+    public TableModel getResults() {
+   //     return newMeasure.getSimpleResults();
+        return newMeasure.getAllResults();
+    }
+
+    //--------------Input vanuit de Controller-------------------------------------//
+
+
+    //Methode die doorgeeft dat er een verandering van de Y-as is geweest
+    //Kijkt ook of het de controller in de maximum stand is geplaatst
+    public void changeYaxis(int value) {
+        if (value != resize) {
+            resize = value;
+            if (testStatus == AATModel.IMAGE_LOADED) { //alleen uitvoeren als de view een image geladen heeft.
+                newMeasure.addResult(resize,getMeasurement());     //Resultaat toevoegen
+                if (current.getType() == AATImage.PULL && value == 9) {   //Testen of het plaatje helemaal weggedrukt is.
+                    removeImage();
+                } else if (current.getType() == AATImage.PUSH && value == 1) {
+                    removeImage();
+                }
+            }
+            this.setChanged();
+            notifyObservers("Y-as");
+        }
+    }
+
+    //Aan de view doorgeven dat het plaatje weggedrukt is en de meting stoppen.
+    private void removeImage() {
+        this.setChanged();
+        notifyObservers("Wait screen");
+        testStatus = AATModel.TEST_WAIT_FOR_TRIGGER;
     }
 
     //Als de trigger ingedruk wordt, gaat de status naar IMAGE_LOADED
     public void triggerPressed() {
-        //    System.out.println("Trigger pressed");
-        if (testStatus == AATModel.TEST_ON_BREAK) {         //end the break
-            testStatus = AATModel.IMAGE_LOADED;
-            loadNextImage();
-        //    this.setChanged();
-        //    notifyObservers("Show Image");
-        }
         if (testStatus == AATModel.TEST_WAIT_FOR_TRIGGER) {
-            this.setChanged();
             testStatus = AATModel.IMAGE_LOADED;
-        //    loadNextImage();
-       //     notifyObservers("Show Image");
+            NextStep();
         }
-        if (testStatus == AATModel.TEST_START_INFO) {
-            this.setChanged();
-            testStatus = IMAGE_LOADED;
-            loadNextImage();
-            notifyObservers("Show Image");
-        }
-
-    }
-
-    //Returns the next Image
-    public BufferedImage getNextImage() {
-        return current.getImage();
     }
 }
 

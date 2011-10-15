@@ -1,4 +1,7 @@
 import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 /**
  * Created by IntelliJ IDEA.
@@ -7,50 +10,75 @@ import javax.swing.*;
  * Time: 3:22 PM
  * To change this template use File | Settings | File Templates.
  */
-public class AAT_Main  {
-
+public class AAT_Main {
 
 
     private AATModel model;
     private JFrame frame;
     private JPanel mainPanel;
     private JoystickController joystick;
+    private TestFrame testFrame;
+    private int screenWidth;
+    private int screenHeight;
 
-   /*
-   Definieer view classes, deze classes worden door Wilfried in Processing geschreven.
-         */
+    /*
+Definieer view classes, deze classes worden door Wilfried in Processing geschreven.
+    */
     private AATView aatView;
     private AATResults aatResults;
 
 
     public static void main(String[] args) {
-         AAT_Main main = new AAT_Main();
+        AAT_Main main = new AAT_Main();
     }
 
     private void show() {
-
-        frame.setContentPane(mainPanel);
+//        frame.setContentPane(mainPanel);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(1280,800);
+        frame.setSize(1280, 800);
         frame.pack();
         frame.setVisible(true);
     }
 
     public AAT_Main() {
-       frame = new JFrame("Approach Avoidance Task");
+        frame = new JFrame("Approach Avoidance Task");
         model = new AATModel();
-        aatView = new AATView(700, 700, 433, 433); //TODO size() in processing is statisch, voordat AAT geladen wordt scherm groote initialiseren
         aatResults = new AATResults();
-        model.addObserver(aatView);    //AAT als observer view toevoegen aan het model
+        testFrame = new TestFrame();
+        DisplayResults results = new DisplayResults();
+        Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+        screenWidth = (int) dim.getWidth();
+        screenHeight = (int) dim.getHeight();
+
+        model.addObserver(testFrame);
+        model.addObserver(results);
         joystick = new JoystickController(model);
         joystick.start(); //Start joystick Thread
-        aatView.init();
+
         aatResults.init();
-        mainPanel = new JPanel();
-        mainPanel.add(aatView);
-        mainPanel.add(aatResults);
-        aatView.setSize(1400,1400);
+        JMenuBar menuBar = new JMenuBar();
+        JMenu fileMenu = new JMenu("File");
+        JMenuItem startTest = new JMenuItem("Start new Test");
+        fileMenu.add(startTest);
+        menuBar.add(fileMenu);
+
+        startTest.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent actionEvent) {
+                if(aatView !=null) {
+                    model.deleteObserver(aatView);  //De vorige instantie uit de lijst van observers halen.
+                    testFrame.remove(aatView);
+                }
+                aatView = new AATView(screenWidth, screenHeight, 433, 433);
+                aatView.init();
+                model.addObserver(aatView);    //AAT als observer view toevoegen aan het model
+                testFrame.getContentPane().add(aatView);
+                model.startTest(1, 3);
+            }
+        });
+
+        frame.setJMenuBar(menuBar);
         this.show();
-        model.startTest(1,4);
+        //   model.startTest(1,4);
     }
 }
+
