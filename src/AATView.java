@@ -12,14 +12,7 @@ import java.util.Observer;
  * Date: 10/4/11
  * Time: 3:25 PM
  * To change this template use File | Settings | File Templates.
- * TODO: Betere methode van plaatjes laden.
- * TODO: Oplossing bedenken voor de image Setup. Misschien dat die waardes op een andere manier verkregen kunnen worden.
- * TODO: Zodat het laden van de plaatjes meer logisch wordt.
- * TODO: Zou het geen idee zijn om het formaat van het plaatje aan de schermgrootte aan te passen, ongeacht de grootte van het plaatje?
- * TODO: Bijv. gecentreerd op het scherm en altijd een bepaald percentage van de hoogte van scherm. zeg 50% bij het begin.
- * TODO: Nu heb je info van het plaatje nodig, nog voor het eerste plaatje geladen wordt. Je gaat er nu ook vanuit dat ieder plaatje
- * TODO: even groot zal zijn. Vast percentage is misschien logischer, omdat je dan alle plaatje even hoog of even breed maakt, ongeacht
- * TODO: de grootte van de plaatjes zoals ze opgeslagen zijn.
+TODO grootte van de plaatjes dynamisch maken. Afhankelijk van de schermgrootte
  */
 public class AATView extends PApplet implements Observer {
     private AATModel model;
@@ -32,7 +25,7 @@ public class AATView extends PApplet implements Observer {
 
     //Heb nu tijdelijk de grootte van de plaatjes toegevoegd aan de constructor. Deze waardes worden nu vanuit de main nog
     //doorgegeven. Is nu nog nodig omdat het model de plaatjes doorgeeft en het model ze niet zelf vanuit een bestand leest.
-    public AATView(int viewWidth, int viewHeight, int imgWidth, int imgHeight, int stepSize) {
+    public AATView(int viewWidth, int viewHeight,int stepSize) {
         // Tijdelijk, moet uit model komen.
         setVisible(true);
 
@@ -41,8 +34,8 @@ public class AATView extends PApplet implements Observer {
         this.viewWidth = viewWidth;
 
         //Nodig vanwege het passend maken van een plaatje op het scherm
-        this.imgWidth = imgWidth;
-        this.imgHeight = imgHeight;
+        this.imgWidth = 433;        //TODO veranderen zodat het dynamisch wordt
+        this.imgHeight = 433;
         this.stepSize = stepSize;
     }
 

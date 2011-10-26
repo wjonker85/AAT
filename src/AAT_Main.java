@@ -10,6 +10,7 @@ import java.awt.event.ActionListener;
  * Time: 3:22 PM
  * Main frame for the test. This frame is the controller from which test can be started. This is also the place where the user
  * can choose to display the results and save to file.
+ * TODO let the size of the images depend on the screen size.
  */
 public class AAT_Main {
 
@@ -34,7 +35,7 @@ Definieer view classes, deze classes worden door Wilfried in Processing geschrev
     }
 
     private void show() {
-//        frame.setContentPane(mainPanel);
+        frame.setContentPane(mainPanel);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(1280, 800);
         frame.pack();
@@ -46,6 +47,8 @@ Definieer view classes, deze classes worden door Wilfried in Processing geschrev
         model = new AATModel();
         aatResults = new AATResults();
         testFrame = new TestFrame();
+        mainPanel = new JPanel();
+        mainPanel.setSize(800,600);
         DisplayResults results = new DisplayResults();
         Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
         screenWidth = (int) dim.getWidth();
@@ -70,7 +73,7 @@ Definieer view classes, deze classes worden door Wilfried in Processing geschrev
                     model.deleteObserver(aatView);  //Remove previous instance of the aatView from the observers list.
                     testFrame.remove(aatView);
                 }
-                aatView = new AATView(screenWidth, screenHeight, 433, 433, model.getStepRate());
+                aatView = new AATView(screenWidth, screenHeight,model.getStepRate());
                 aatView.init();             //Make sure the PApplet gets initialised.
                 model.addObserver(aatView);    //Add a new aatView to the observers list.
                 testFrame.getContentPane().add(aatView);
