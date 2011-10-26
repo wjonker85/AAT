@@ -46,7 +46,8 @@ public class AATModel extends Observable {
     private AATImage current;
     private int testStatus;
 
-    private ArrayList<File> imageFiles;
+    private ArrayList<File> neutralImages;
+    private ArrayList<File> affectiveImages;
     private ArrayList<AATImage> testList; //Random list that contains the push or pull images.
     private Hashtable<Integer, float[]> colorTable;
     private Pattern pattern;
@@ -56,9 +57,12 @@ public class AATModel extends Observable {
 
     //Constructor.
     public AATModel() {
-        File imageDir = new File("images");
+        File neutralDir = new File("images"+File.separator+"Neutral");
+        File affectiveDir = new File("images"+File.separator+"Affective");
         pattern = Pattern.compile(IMAGE_PATTERN);
-        imageFiles = getImages(imageDir); //create ArrayList with all image files;
+        neutralImages = getImages(neutralDir);
+        affectiveImages = getImages(affectiveDir);
+      //  imageFiles = getImages(imageDir); //create ArrayList with all image files;
         testStatus = AATModel.TEST_STOPPED;
         colorTable = new Hashtable<Integer, float[]>();
     }
@@ -81,12 +85,18 @@ public class AATModel extends Observable {
 
     //Maakt een lijst met AATImage objecten. Maakt van elk plaatje een push en pull versie en maakt er vervolgens een random lijst
     //van.
-    private ArrayList<AATImage> createRandomList(ArrayList<File> imageFiles) {
+    private ArrayList<AATImage> createRandomList() {
         ArrayList<AATImage> randomList = new ArrayList<AATImage>();
-        for (File image : imageFiles) {
-            AATImage pull = new AATImage(image,AATImage.PULL,(int) (Math.random()*10)); //Two instances for every image
+        for (File image : neutralImages) {
+            AATImage pull = new AATImage(image,AATImage.PULL,AATImage.NEUTRAL); //Two instances for every image
             randomList.add(pull);
-            AATImage push = new AATImage(image, AATImage.PUSH, (int) (Math.random()*10));
+            AATImage push = new AATImage(image, AATImage.PUSH, AATImage.NEUTRAL);
+            randomList.add(push);
+        }
+        for (File image : affectiveImages) {
+            AATImage pull = new AATImage(image,AATImage.PULL,AATImage.AFFECTIVE); //Two instances for every image
+            randomList.add(pull);
+            AATImage push = new AATImage(image, AATImage.PUSH, AATImage.AFFECTIVE);
             randomList.add(push);
         }
         Collections.shuffle(randomList);
@@ -97,7 +107,7 @@ public class AATModel extends Observable {
     public void startTest(int repeat, int breakAfter) {
         this.repeat = repeat;
         this.breakAfter = breakAfter;
-        testList = createRandomList(imageFiles);
+        testList = createRandomList();
         count = 0;
         run = 0;
         newMeasure = new MeasureData(id);
@@ -131,7 +141,7 @@ public class AATModel extends Observable {
             run++;
             count = 0;
             if (run == breakAfter) {    //Test is bij de break aangekomen.
-                testList = createRandomList(imageFiles); //Nieuwe random lijst maken.
+                testList = createRandomList(); //Nieuwe random lijst maken.
                 current = testList.get(0);
                 testStatus = AATModel.TEST_WAIT_FOR_TRIGGER;
                 this.setChanged();
@@ -142,7 +152,7 @@ public class AATModel extends Observable {
                 notifyObservers("Test ended");
                 testStatus = AATModel.TEST_STOPPED;
             } else {           //Verder gaan met een volgende run
-                testList = createRandomList(imageFiles); //create a new Random list
+                testList = createRandomList(); //create a new Random list
                 count = 0;
                 showNextImage();
             }
