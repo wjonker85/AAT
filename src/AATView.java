@@ -51,11 +51,11 @@ public class AATView extends PApplet implements Observer {
         //   imageLoad();
 
         //Some var initialising
-        stepSize = 9;
+        stepSize = 9; // TODO: uit model halen (model.getStepRate();)
         stepStart = 5; //Verandert naar 5
         inputY = stepStart; //Eerste plaatje begint op stepStart.
         stepCount = stepStart;
-        borderWidth = 10;
+        borderWidth = 7;
         imgBorderWidth = borderWidth;
         xPos = width / 2;
         yPos = height / 2;
@@ -101,63 +101,27 @@ public class AATView extends PApplet implements Observer {
     public void imageShow() {
         background(0);
         if (!blackScreen) {
+
+            float[] colors = model.getBorderColor(imgT);
+            rB = (int) colors[0];
+            gB = (int) colors[1];
+            bB = (int) colors[2];
+
             imageMode(CENTER);
             rectMode(CENTER);
             image(img, xPos, yPos, imgSizeX, imgSizeY);
-            if ((int) imgT == 0) {
-         //                  ab = 'a';
-                           rB = 245;
-                           gB = 254;
-                           bB = 2;
-                       } else {
-           //                ab = 'b';
-                           rB = 0;
-                           gB = 164;
-                           bB = 231;
-                       }
-            imgSizeX = imgRefactor * stepCount * stepX;
-            imgSizeY = imgRefactor * stepCount * stepY;
-         //
+
             stroke(rB, gB, bB);
             strokeWeight(imgBorderWidth);
             fill(0, 0, 0, 0);
             rect(xPos, yPos, imgSizeX, imgSizeY);
+            fill(255, 0, 0);
+            fill(255, 0, 0);
+            text("X: " + (int) imgSizeX + "px; Y: " + (int) imgSizeY + "px;" + " inputY: " + inputY, 5, 15);
         }
-        fill(255, 0, 0);
-        text("X: " + (int) imgSizeX + "px; Y: " + (int) imgSizeY + "px;" + " inputY: " + inputY, 5, 15);
+
+
     }
-
-    /*   public void keyPressed() {
-           if (key == 'n') {
-                imageLoad();
-            }
-        }
-
-    /*    public void imageLoad() {
-            float imgT = random(0, 2);
-            int i;
-            char ab;
-            i = (int) random(1, 6);
-
-            if ((int) imgT == 0) {
-                ab = 'a';
-                rB = 245;
-                gB = 254;
-                bB = 2;
-            } else {
-                ab = 'b';
-                rB = 0;
-                gB = 164;
-                bB = 231;
-            }
-
-         //   img = loadImage("images" + File.separator + ab + i + ".png");  //Zo zou het in Windows en Linux moeten werken
-
-         //   imgBorderWidth = (int) (borderWidth * stepCount);
-
-        }
-    */
-
 
     /*
         Update ontvangt alle berichten van het Model (MVC pattern). Aan de hand van deze berichten wordt bepaald wat deze View
@@ -207,6 +171,7 @@ public class AATView extends PApplet implements Observer {
             System.out.println("Test ended");
             this.setVisible(false);
         }
+
     }
 
 
