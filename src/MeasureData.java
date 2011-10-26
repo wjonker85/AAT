@@ -22,10 +22,10 @@ public class MeasureData {
         allMeasures = new ArrayList<MeasureObject>();
     }
 
-    //Start bij elk plaatje dat getoond moet worden een nieuwe meting.
-    public void newMeasure(int run, String imageName, int type) {
+    //New measure for each picture
+    public void newMeasure(int run, String imageName, int direction, int type) {
         System.out.println("Start nieuwe meting "+ imageName);
-        MeasureObject measureObject = new MeasureObject(run, imageName, type);
+        MeasureObject measureObject = new MeasureObject(run, imageName, direction, type);
         allMeasures.add(measureObject);
 
     }
@@ -51,6 +51,7 @@ public class MeasureData {
             ArrayList<Object> imageResults = new ArrayList<Object>();
                 imageResults.add(mObject.getRun());
                 imageResults.add(mObject.getImageName());
+                imageResults.add(mObject.getDirection());
                 imageResults.add(mObject.getType());
                 imageResults.add(mObject.getPosition(x));
                 imageResults.add(mObject.getTime(x));
@@ -68,6 +69,7 @@ public class MeasureData {
             ArrayList<Object> imageResults = new ArrayList<Object>();
             imageResults.add(mObject.getRun());
             imageResults.add(mObject.getImageName());
+            imageResults.add(mObject.getDirection());
             imageResults.add(mObject.getType());
             imageResults.add(mObject.getReactionTime());
             simpleResults.add(imageResults);
@@ -86,13 +88,15 @@ class MeasureObject {
 
     private int run;
     private String imageName;
+    private int direction;
     private int type;
 
-    public MeasureObject(int run, String imageName, int type) {
+    public MeasureObject(int run, String imageName, int direction, int type) {
         positionList = new ArrayList<Integer>();
         timeList = new ArrayList<Long>();
         this.run = run;
         this.imageName = imageName;
+        this.direction = direction;
         this.type = type;
 
     }
@@ -103,15 +107,23 @@ class MeasureObject {
     }
 
 
-    //returnen of het om een push of pull plaatje gaat
+    //Returns the current direction (Push or Pull)
+    public int getDirection() {
+        return direction;
+    }
+
+
+    //Returns if it's an affective or neutral image
     public int getType() {
         return type;
     }
 
+    //Returns the total reactionTime
     public long getReactionTime() {
         return timeList.get(size()-1);  //laatste object returnen
     }
 
+    //Current run.
     public int getRun() {
         return run;
     }

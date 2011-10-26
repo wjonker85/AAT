@@ -15,6 +15,7 @@ public class SimpleResultsTableModel extends AbstractTableModel {
     String[] columnNames = {
             "Run",
             "ImageName",
+            "Direction",
             "Type",
             "ReactionTime",
     };
@@ -25,6 +26,7 @@ public class SimpleResultsTableModel extends AbstractTableModel {
         data = new ArrayList<Object>();
         columns.add("Run");
         columns.add("ImageName");
+        columns.add("Direction");
         columns.add("Type");
         columns.add("ReactionTime");
         fireTableDataChanged();

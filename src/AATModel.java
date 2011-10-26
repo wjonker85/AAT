@@ -102,11 +102,12 @@ public class AATModel extends Observable {
         run = 0;
         newMeasure = new MeasureData(id);
         id++;          //ID verhogen
+        colorTable.put(AATImage.PULL, new float[]{0, 164, 231});
+        colorTable.put(AATImage.PUSH, new float[]{245,254,2});
         this.setChanged();
         notifyObservers("Start");
         testStatus = AATModel.TEST_WAIT_FOR_TRIGGER;   //Pas verder gaan als er op de trigger wordt gedrukt
-        colorTable.put(AATImage.PULL, new float[]{0, 164, 231});
-        colorTable.put(AATImage.PUSH, new float[]{245,254,2});
+
     }
 
 
@@ -163,7 +164,6 @@ public class AATModel extends Observable {
         return resize;
     }
 
-
     //returns colors for the direction being asked (push or pull)
     public float[] getBorderColor(int direction) {
            return colorTable.get(direction);
@@ -174,6 +174,10 @@ public class AATModel extends Observable {
         return current.getImage();
     }
 
+    public int getStepRate() {
+        return 9;
+    }
+
     //Returned of het om een push of pull image gaat.
     public int getDirection() {
         return current.getDirection();
@@ -181,7 +185,7 @@ public class AATModel extends Observable {
 
     //Start de meting zodra de view het plaatje geladen heeft.
     public void startMeasure() {
-        newMeasure.newMeasure(run,current.toString(),current.getDirection()); //Begin met de metingen opslaan.
+        newMeasure.newMeasure(run,current.toString(),current.getDirection(),current.getType()); //Begin met de metingen opslaan.
         startMeasure = System.currentTimeMillis();  //Begintijd
     }
 
