@@ -9,7 +9,7 @@ import java.util.Observer;
  * User: marcel
  * Date: 10/15/11
  * Time: 11:03 AM
- * To change this template use File | Settings | File Templates.
+ * Frame die de uitvoer in tabelvorm laat zien.
  */
 
 

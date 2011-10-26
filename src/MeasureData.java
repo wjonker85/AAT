@@ -22,6 +22,7 @@ public class MeasureData {
         allMeasures = new ArrayList<MeasureObject>();
     }
 
+    //Start bij elk plaatje dat getoond moet worden een nieuwe meting.
     public void newMeasure(int run, String imageName, int type) {
         System.out.println("Start nieuwe meting "+ imageName);
         MeasureObject measureObject = new MeasureObject(run, imageName, type);
@@ -29,6 +30,7 @@ public class MeasureData {
 
     }
 
+    //Elke beweging van de joystick wordt bijgehouden inclusief de bijbehorende reactietijd
     public void addResult(int size, long time) {
         System.out.println("Voeg resultaat toe: "+ size+" "+time);
         allMeasures.get(allMeasures.size()-1).addResult(size, time);

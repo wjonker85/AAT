@@ -38,6 +38,5 @@ public class AATResults extends PApplet implements Observer {
             }
         }
 
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
+     }
 }

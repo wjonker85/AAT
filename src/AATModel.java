@@ -15,8 +15,8 @@ import java.util.regex.Pattern;
  * Date: 10/4/11
  * Time: 3:12 PM
  * Model voor de AAT. Dit model houdt alle data bij, bepaalt welke view actief dient te zijn. Geeft ook de plaatje door.
- * TODO: Test werkt, nu nog op een juiste manier een meting uitvoeren. Zodat ook alle bewegingen geregistreerd worden, niet alleen
- * TODO: de totale reactietijd.
+ * TODO: De test moet nog weten wat de affectieve plaatjes en neutrale plaatjes zijn
+ * TODO: Misschien een testplaatje als eerste
  */
 public class AATModel extends Observable {
 
@@ -34,8 +34,7 @@ public class AATModel extends Observable {
     private static int TEST_WAIT_FOR_TRIGGER = 2;
 
 
-    private int resize = 5;
-    private int currentView = 0;
+    private int resize = 5;     //Begint met het midden van de joystick.
     private long startMeasure;
 
     private int repeat;
@@ -48,19 +47,18 @@ public class AATModel extends Observable {
     private AATImage current;
     private int testStatus;
 
-    private ArrayList<Double> results;
-    private ResultsTableModel resultsTable;
     private ArrayList<File> imageFiles;
     private ArrayList<AATImage> testList; //Random list that contains the push or pull images.
     private Pattern pattern;
     private static final String IMAGE_PATTERN =
             "([^\\s]+(\\.(?i)(jpg|png|gif|bmp))$)";        //regex for extension filtering
 
+
+    //Constructor.
     public AATModel() {
         File imageDir = new File("images");
         pattern = Pattern.compile(IMAGE_PATTERN);
         imageFiles = getImages(imageDir); //create ArrayList with all image files;
-        results = new ArrayList<Double>();
         testStatus = AATModel.TEST_STOPPED;
     }
 
@@ -72,7 +70,7 @@ public class AATModel extends Observable {
     }
 
 
-    //Use regular expression for the filtering of extensions
+    //Regular expression gebruiken om de files te filteren
     FileFilter extensionFilter = new FileFilter() {
         public boolean accept(File file) {
             Matcher matcher = pattern.matcher(file.getName());
@@ -85,9 +83,9 @@ public class AATModel extends Observable {
     private ArrayList<AATImage> createRandomList(ArrayList<File> imageFiles) {
         ArrayList<AATImage> randomList = new ArrayList<AATImage>();
         for (File image : imageFiles) {
-            AATImage pull = new AATImage(image, AATImage.PULL); //Two instances for every image
+            AATImage pull = new AATImage(image,AATImage.PULL,AATImage.AFFECTIVE); //Two instances for every image
             randomList.add(pull);
-            AATImage push = new AATImage(image, AATImage.PUSH);
+            AATImage push = new AATImage(image, AATImage.PUSH, AATImage.NEUTRAL);
             randomList.add(push);
         }
         Collections.shuffle(randomList);
@@ -99,24 +97,19 @@ public class AATModel extends Observable {
         this.repeat = repeat;
         this.breakAfter = breakAfter;
         testList = createRandomList(imageFiles);
-        resultsTable = new ResultsTableModel();
         count = 0;
         run = 0;
         newMeasure = new MeasureData(id);
-        id++;
+        id++;          //ID verhogen
         this.setChanged();
         notifyObservers("Start");
-        testStatus = AATModel.TEST_WAIT_FOR_TRIGGER;
+        testStatus = AATModel.TEST_WAIT_FOR_TRIGGER;   //Pas verder gaan als er op de trigger wordt gedrukt
     }
 
-
-    public void setCurrentView(int newView) {
-        currentView = newView;
-        this.notifyObservers("View changed");
-
-    }
 
     public int getCurrentView() {
+        int currentView;
+        currentView = 0;
         return currentView;
     }
 
@@ -173,20 +166,26 @@ public class AATModel extends Observable {
         return current.getImage();
     }
 
+    //Returned of het om een push of pull image gaat.
+    public int getDirection() {
+        return current.getDirection();
+    }
 
     //Start de meting zodra de view het plaatje geladen heeft.
     public void startMeasure() {
-        newMeasure.newMeasure(run,current.toString(),current.getType()); //Begin met de metingen opslaan.
+        newMeasure.newMeasure(run,current.toString(),current.getDirection()); //Begin met de metingen opslaan.
         startMeasure = System.currentTimeMillis();  //Begintijd
     }
 
+    //Geeft een meting
     public long getMeasurement() {
         return System.currentTimeMillis() - startMeasure;
     }
 
 
+    //Geeft een TableModel met de resultaten van een test.
     public TableModel getResults() {
-   //     return newMeasure.getSimpleResults();
+     //   return newMeasure.getSimpleResults();
         return newMeasure.getAllResults();
     }
 
@@ -200,9 +199,9 @@ public class AATModel extends Observable {
             resize = value;
             if (testStatus == AATModel.IMAGE_LOADED) { //alleen uitvoeren als de view een image geladen heeft.
                 newMeasure.addResult(resize,getMeasurement());     //Resultaat toevoegen
-                if (current.getType() == AATImage.PULL && value == 9) {   //Testen of het plaatje helemaal weggedrukt is.
+                if (current.getDirection() == AATImage.PULL && value == 9) {   //Testen of het plaatje helemaal weggedrukt is.
                     removeImage();
-                } else if (current.getType() == AATImage.PUSH && value == 1) {
+                } else if (current.getDirection() == AATImage.PUSH && value == 1) {
                     removeImage();
                 }
             }
@@ -227,15 +226,4 @@ public class AATModel extends Observable {
     }
 }
 
-//class resultData {
-
-//  private ArrayList runs;
-
-//   public resultData() {
-
-//   }
-
-//  public void add
-
-//}
 

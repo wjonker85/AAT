@@ -23,7 +23,7 @@ import java.util.Observer;
  */
 public class AATView extends PApplet implements Observer {
     public int viewWidth, viewHeight, borderWidth, stepSize, imgBorderWidth, rB, gB, bB, stepStart, inputY, inputT;
-    private int imgWidth, imgHeight;
+    private int imgWidth, imgHeight, imgT;
     public float stepX, stepY, imgSizeX, imgSizeY, stepCount, imgRefactor, viewRatio, imgRatio, xPos, yPos;
     public PImage img;
     private boolean blackScreen = true;
@@ -104,6 +104,20 @@ public class AATView extends PApplet implements Observer {
             imageMode(CENTER);
             rectMode(CENTER);
             image(img, xPos, yPos, imgSizeX, imgSizeY);
+            if ((int) imgT == 0) {
+         //                  ab = 'a';
+                           rB = 245;
+                           gB = 254;
+                           bB = 2;
+                       } else {
+           //                ab = 'b';
+                           rB = 0;
+                           gB = 164;
+                           bB = 231;
+                       }
+            imgSizeX = imgRefactor * stepCount * stepX;
+            imgSizeY = imgRefactor * stepCount * stepY;
+         //
             stroke(rB, gB, bB);
             strokeWeight(imgBorderWidth);
             fill(0, 0, 0, 0);
@@ -139,24 +153,23 @@ public class AATView extends PApplet implements Observer {
 
          //   img = loadImage("images" + File.separator + ab + i + ".png");  //Zo zou het in Windows en Linux moeten werken
 
+         //   imgBorderWidth = (int) (borderWidth * stepCount);
 
-            imgSizeX = imgRefactor * stepCount * stepX;
-            imgSizeY = imgRefactor * stepCount * stepY;
-            imgBorderWidth = (int) (borderWidth * stepCount);
         }
     */
 
-    //Update ontvangt alle berichten van het Model (MVC pattern)
-    //TODO: nog wel wat verbeteren. Kan denk ik met wat minder berichten en de berichten mogen ook wel wat duidelijker.
-    //TODO: plaatjes worden nu nog op teveel plekken geladen.
-    //Volgorde is telkens black - image -black image etc.
+
+    /*
+        Update ontvangt alle berichten van het Model (MVC pattern). Aan de hand van deze berichten wordt bepaald wat deze View
+        moet doen. Plaatjes alleen laten zien wanneer dat toegestaan is. Deze plaatjes met een vaste factor telkens laten vergroten
+        of verkleinen afhankelijk van de stand van de joystick.
+    */
     public void update(Observable observable, Object o) {
         model = (AATModel) observable;
 
         //Informatie van de Y-as van de joystick. Om de grootte van het getoonde plaatje op aan te passen.
         if (o.toString().equals("Y-as")) {
             inputY = model.getPictureSize();
-            //    println("AATView model.getPictureSize(): " + model.getPictureSize());
         }
 
         //Test heeft even een pauze. Mogelijkheid om een bericht te laten zien dat het pauze is.
@@ -183,6 +196,7 @@ public class AATView extends PApplet implements Observer {
         if (o.toString().equals("Show Image")) {
             System.out.println("Show Picture");
             img = convertImage(model.getNextImage());
+            imgT = model.getDirection();
             blackScreen = false;         //Plaatjes weer laten zien.
         }
 
@@ -193,10 +207,6 @@ public class AATView extends PApplet implements Observer {
             System.out.println("Test ended");
             this.setVisible(false);
         }
-
-
-        //Informatie of deze view wel of niet zichtbaar hoort te zijn.
-
     }
 
 
