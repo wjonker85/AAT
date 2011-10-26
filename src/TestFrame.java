@@ -8,10 +8,12 @@ import java.util.Observer;
  * User: marcel
  * Date: 10/15/11
  * Time: 11:26 AM
- * To change this template use File | Settings | File Templates.
+ * JFrame that contains the test view. An extra frame is needed so that the Processing object can be displayed.
+ * This frame lets the test be executed fullscreen.
  */
 public class TestFrame extends JFrame implements Observer {
 
+    //Make it a fullscreen frame
     public TestFrame() {
         setExtendedState(Frame.MAXIMIZED_BOTH);
         setUndecorated(true);
@@ -20,16 +22,16 @@ public class TestFrame extends JFrame implements Observer {
     }
 
 
+    /*
+            When a new test is started, this frame has to show the test. Frame gets
+            disposed when the test has ended.
+
+     */
     public void update(Observable observable, Object o) {
         AATModel model = (AATModel) observable;
 
         if (o.toString().equals("Start")) {
-            //         if (model.getCurrentView() == AATModel.TEST_VIEW) {
-//            this.setEnabled(true);
             this.setVisible(true);
-            //       } else {
-            //       this.setVisible(false);
-            //     }
         }
         if (o.toString().equals("Test ended")) {
             System.out.println("Einde van de test");
