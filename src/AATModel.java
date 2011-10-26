@@ -84,9 +84,9 @@ public class AATModel extends Observable {
     private ArrayList<AATImage> createRandomList(ArrayList<File> imageFiles) {
         ArrayList<AATImage> randomList = new ArrayList<AATImage>();
         for (File image : imageFiles) {
-            AATImage pull = new AATImage(image,AATImage.PULL,AATImage.AFFECTIVE); //Two instances for every image
+            AATImage pull = new AATImage(image,AATImage.PULL,(int) (Math.random()*10)); //Two instances for every image
             randomList.add(pull);
-            AATImage push = new AATImage(image, AATImage.PUSH, AATImage.NEUTRAL);
+            AATImage push = new AATImage(image, AATImage.PUSH, (int) (Math.random()*10));
             randomList.add(push);
         }
         Collections.shuffle(randomList);
@@ -197,8 +197,8 @@ public class AATModel extends Observable {
 
     //Geeft een TableModel met de resultaten van een test.
     public TableModel getResults() {
-     //   return newMeasure.getSimpleResults();
-        return newMeasure.getAllResults();
+        return newMeasure.getSimpleResults();
+     //   return newMeasure.getAllResults();
     }
 
     //--------------Input vanuit de Controller-------------------------------------//
