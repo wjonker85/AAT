@@ -13,12 +13,8 @@ import javax.swing.plaf.basic.BasicInternalFrameTitlePane;
  * De waarden van de y-as en of de "Throttle" button ingedrukt wordt.
  * <p/>
  * Y-as geeft waarden van -3 tot 3 via 0 als middenpunt
- * TODO: Nog abstracte class maken die als parent dient voor de verschillende vormen van input. Nu alleen eerst de joystick even werkend
- * TODO: krijgen.
- * TODO: Op dit moment kan hij alleen de y-as aflezen en omzetten naar waarden tussen -3 en 3. Dit voor het stapsgewijs resizen van de plaatjes.
- * TODO: Meting van de reactietijd werkt nog niet en het aflezen van de "Trigger" Button
- * <p/>
- * TODO: Methode maken die de joystick detecteerd
+TODO: Iets grotere foutmarge maken en nog wat meer stappen toevoegen.
+ TODO: Aantal stappen moet uit configuratiebestand komen.
  */
 public class JoystickController extends Thread {
 
@@ -123,7 +119,7 @@ public class JoystickController extends Thread {
         }
     }
 
-
+  //TODO: Nog veranderen zodat dit dynamisch gebeurt.
     //Changes float value to an Integer from 1 to 7.
     private int convertValue(float value) {
         if (value > 0 && value <= 0.33) {

@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
  * Date: 10/4/11
  * Time: 3:12 PM
  * Model voor de AAT. Dit model houdt alle data bij, bepaalt welke view actief dient te zijn. Geeft ook de plaatje door.
- * TODO: De test moet nog weten wat de affectieve plaatjes en neutrale plaatjes zijn
+ * TODO: Informatie lezen uit configuratiebestand
  * TODO: Misschien een testplaatje als eerste
  * TODO:
  */
@@ -207,6 +207,8 @@ public class AATModel extends Observable {
 
     //Geeft een TableModel met de resultaten van een test.
     public TableModel getResults() {
+        CSVWriter writer = new CSVWriter(newMeasure.getSimpleResults());
+        writer.writeData(new File("test.csv"));
         return newMeasure.getSimpleResults();
      //   return newMeasure.getAllResults();
     }
