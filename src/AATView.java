@@ -22,7 +22,7 @@ import java.util.Observer;
  * TODO: de grootte van de plaatjes zoals ze opgeslagen zijn.
  */
 public class AATView extends PApplet implements Observer {
-    public int viewWidth, viewHeight, borderWidth, stepSize, imgBorderWidth, rB, gB, bB, stepStart, inputY, inputT;
+    public int viewWidth, viewHeight, borderWidth, stepSize, imgBorderWidth, rB, gB, bB, stepStart, inputY;
     private int imgWidth, imgHeight, imgT;
     public float stepX, stepY, imgSizeX, imgSizeY, stepCount, imgRefactor, viewRatio, imgRatio, xPos, yPos;
     public PImage img;
@@ -34,9 +34,8 @@ public class AATView extends PApplet implements Observer {
     public AATView(int viewWidth, int viewHeight, int imgWidth, int imgHeight) {
         // Tijdelijk, moet uit model komen.
         setVisible(true);
-        System.out.println(viewWidth);
-        //Grote van de AATView scherm.
 
+        //Grote van de AATView scherm.
         this.viewHeight = viewHeight;
         this.viewWidth = viewWidth;
 
@@ -51,15 +50,16 @@ public class AATView extends PApplet implements Observer {
         //   imageLoad();
 
         //Some var initialising
-        stepSize = 9; // TODO: uit model halen (model.getStepRate();)
-        stepStart = 5; //Verandert naar 5
+        stepSize = model.getStepRate();
+        stepStart = 5; //(int) (model.getStepRate() / 2);
         inputY = stepStart; //Eerste plaatje begint op stepStart.
         stepCount = stepStart;
-        borderWidth = 7;
+        borderWidth = 5;
         imgBorderWidth = borderWidth;
         xPos = width / 2;
         yPos = height / 2;
         setupImage();
+        println("stepStart: "+ stepStart);
 
     }
 
@@ -94,8 +94,8 @@ public class AATView extends PApplet implements Observer {
 
     public void imageRefactor() {
         imgBorderWidth = (int) (imgRefactor * borderWidth * inputY);
-        imgSizeX = (float) (imgRefactor * inputY * stepX);
-        imgSizeY = (float) (imgRefactor * inputY * stepY);
+        imgSizeX = (imgRefactor * inputY * stepX);
+        imgSizeY = (imgRefactor * inputY * stepY);
     }
 
     public void imageShow() {
@@ -120,8 +120,7 @@ public class AATView extends PApplet implements Observer {
             text("X: " + (int) imgSizeX + "px; Y: " + (int) imgSizeY + "px;" + " inputY: " + inputY, 5, 15);
         }
 
-
-    }
+     }
 
     /*
         Update ontvangt alle berichten van het Model (MVC pattern). Aan de hand van deze berichten wordt bepaald wat deze View
