@@ -1,11 +1,9 @@
 import javax.swing.table.TableModel;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileFilter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Observable;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -17,6 +15,7 @@ import java.util.regex.Pattern;
  * Model voor de AAT. Dit model houdt alle data bij, bepaalt welke view actief dient te zijn. Geeft ook de plaatje door.
  * TODO: De test moet nog weten wat de affectieve plaatjes en neutrale plaatjes zijn
  * TODO: Misschien een testplaatje als eerste
+ * TODO:
  */
 public class AATModel extends Observable {
 
@@ -49,6 +48,7 @@ public class AATModel extends Observable {
 
     private ArrayList<File> imageFiles;
     private ArrayList<AATImage> testList; //Random list that contains the push or pull images.
+    private Hashtable<Integer, float[]> colorTable;
     private Pattern pattern;
     private static final String IMAGE_PATTERN =
             "([^\\s]+(\\.(?i)(jpg|png|gif|bmp))$)";        //regex for extension filtering
@@ -60,6 +60,7 @@ public class AATModel extends Observable {
         pattern = Pattern.compile(IMAGE_PATTERN);
         imageFiles = getImages(imageDir); //create ArrayList with all image files;
         testStatus = AATModel.TEST_STOPPED;
+        colorTable = new Hashtable<Integer, float[]>();
     }
 
 
@@ -104,6 +105,8 @@ public class AATModel extends Observable {
         this.setChanged();
         notifyObservers("Start");
         testStatus = AATModel.TEST_WAIT_FOR_TRIGGER;   //Pas verder gaan als er op de trigger wordt gedrukt
+        colorTable.put(AATImage.PULL, new float[]{0, 164, 231});
+        colorTable.put(AATImage.PUSH, new float[]{245,254,2});
     }
 
 
@@ -160,6 +163,11 @@ public class AATModel extends Observable {
         return resize;
     }
 
+
+    //returns colors for the direction being asked (push or pull)
+    public float[] getColors(int direction) {
+           return colorTable.get(direction);
+    }
 
     //Returns the next Image
     public BufferedImage getNextImage() {
