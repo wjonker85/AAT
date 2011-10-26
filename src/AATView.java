@@ -22,12 +22,13 @@ import java.util.Observer;
  * TODO: de grootte van de plaatjes zoals ze opgeslagen zijn.
  */
 public class AATView extends PApplet implements Observer {
+    private AATModel model;
     public int viewWidth, viewHeight, borderWidth, stepSize, imgBorderWidth, rB, gB, bB, stepStart, inputY;
     private int imgWidth, imgHeight, imgT;
     public float stepX, stepY, imgSizeX, imgSizeY, stepCount, imgRefactor, viewRatio, imgRatio, xPos, yPos;
     public PImage img;
     private boolean blackScreen = true;
-    private AATModel model;
+
 
     //Heb nu tijdelijk de grootte van de plaatjes toegevoegd aan de constructor. Deze waardes worden nu vanuit de main nog
     //doorgegeven. Is nu nog nodig omdat het model de plaatjes doorgeeft en het model ze niet zelf vanuit een bestand leest.
@@ -46,23 +47,41 @@ public class AATView extends PApplet implements Observer {
     }
 
     public void setup() {
-        //Set size of window
         size(viewWidth, viewHeight);
-        //   imageLoad();
+        stepStart = round((float) stepSize / 2f);
+        inputY = stepStart;             //Eerste plaatje begint op stepStart.
+        stepCount = stepStart;          //eerst stepCount begint op stepStart.
+        borderWidth = 5;                //Breedte border om img
+        imgBorderWidth = borderWidth;   //imgBorderWidth start met waarde borderWidth
+        xPos = width / 2;               //Midden x coordinaar scherm
+        yPos = height / 2;              //Midden y coordinaat scherm
+    }
 
-        //Some var initialising
-    //    System.out.println(model.toString());
-     //   stepSize = model.getStepRate();
-        stepStart = 5; //(int) (model.getStepRate() / 2);
-        inputY = stepStart; //Eerste plaatje begint op stepStart.
-        stepCount = stepStart;
-        borderWidth = 5;
-        imgBorderWidth = borderWidth;
-        xPos = width / 2;
-        yPos = height / 2;
+    public void draw() {
         setupImage();
-        println("stepStart: "+ stepStart);
+        imageShow();
+    }
 
+    public void imageShow() {
+        background(0);
+        if (!blackScreen) {
+
+            float[] colors = model.getBorderColor(imgT);
+            rB = (int) colors[0];
+            gB = (int) colors[1];
+            bB = (int) colors[2];
+
+            imageMode(CENTER);
+            rectMode(CENTER);
+            image(img, xPos, yPos, imgSizeX, imgSizeY);
+
+            stroke(rB, gB, bB);
+            strokeWeight(imgBorderWidth);
+            fill(0, 0, 0, 0);
+            rect(xPos, yPos, imgSizeX, imgSizeY);
+        }
+        fill(255, 0, 0);
+        text("X: " + (int) imgSizeX + "px; Y: " + (int) imgSizeY + "px;" + " inputY: " + inputY, 5, 15);
     }
 
     //Wilfried, even tijdelijk jouw code uit de setup gehaald en in deze methode geplaatst. Vanwege null pointer exception, omdat de plaatjes
@@ -86,43 +105,20 @@ public class AATView extends PApplet implements Observer {
         } else {
             imgRefactor = (float) viewHeight / (float) imgHeight;
         }
-        imageRefactor();
-    }
 
-    public void draw() {
-        imageRefactor();
-        imageShow();
-    }
-
-    public void imageRefactor() {
+        //resize the image
         imgBorderWidth = (int) (imgRefactor * borderWidth * inputY);
         imgSizeX = (imgRefactor * inputY * stepX);
         imgSizeY = (imgRefactor * inputY * stepY);
     }
 
-    public void imageShow() {
-        background(0);
-        if (!blackScreen) {
-
-            float[] colors = model.getBorderColor(imgT);
-            rB = (int) colors[0];
-            gB = (int) colors[1];
-            bB = (int) colors[2];
-
-            imageMode(CENTER);
-            rectMode(CENTER);
-            image(img, xPos, yPos, imgSizeX, imgSizeY);
-
-            stroke(rB, gB, bB);
-            strokeWeight(imgBorderWidth);
-            fill(0, 0, 0, 0);
-            rect(xPos, yPos, imgSizeX, imgSizeY);
-            fill(255, 0, 0);
-            fill(255, 0, 0);
-            text("X: " + (int) imgSizeX + "px; Y: " + (int) imgSizeY + "px;" + " inputY: " + inputY, 5, 15);
-        }
-
-     }
+    //Nodig om een BufferedImage om te zetten naar een PImage. Rechtstreeks geeft een exception
+    private PImage convertImage(BufferedImage buf) {
+        PImage img = new PImage(buf.getWidth(), buf.getHeight(), PConstants.ARGB);
+        buf.getRGB(0, 0, img.width, img.height, img.pixels, 0, img.width);
+        img.updatePixels();
+        return img;
+    }
 
     /*
         Update ontvangt alle berichten van het Model (MVC pattern). Aan de hand van deze berichten wordt bepaald wat deze View
@@ -173,15 +169,6 @@ public class AATView extends PApplet implements Observer {
             this.setVisible(false);
         }
 
-    }
-
-
-    //Nodig om een BufferedImage om te zetten naar een PImage. Rechtstreeks geeft een exception
-    private PImage convertImage(BufferedImage buf) {
-        PImage img = new PImage(buf.getWidth(), buf.getHeight(), PConstants.ARGB);
-        buf.getRGB(0, 0, img.width, img.height, img.pixels, 0, img.width);
-        img.updatePixels();
-        return img;
     }
 }
 
