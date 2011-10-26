@@ -165,7 +165,7 @@ public class AATModel extends Observable {
 
 
     //returns colors for the direction being asked (push or pull)
-    public float[] getColors(int direction) {
+    public float[] getBorderColor(int direction) {
            return colorTable.get(direction);
     }
 
