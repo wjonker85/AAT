@@ -70,7 +70,7 @@ Definieer view classes, deze classes worden door Wilfried in Processing geschrev
                     model.deleteObserver(aatView);  //Remove previous instance of the aatView from the observers list.
                     testFrame.remove(aatView);
                 }
-                aatView = new AATView(screenWidth, screenHeight, 433, 433);
+                aatView = new AATView(screenWidth, screenHeight, 433, 433, model.getStepRate());
                 aatView.init();             //Make sure the PApplet gets initialised.
                 model.addObserver(aatView);    //Add a new aatView to the observers list.
                 testFrame.getContentPane().add(aatView);

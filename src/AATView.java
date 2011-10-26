@@ -31,7 +31,7 @@ public class AATView extends PApplet implements Observer {
 
     //Heb nu tijdelijk de grootte van de plaatjes toegevoegd aan de constructor. Deze waardes worden nu vanuit de main nog
     //doorgegeven. Is nu nog nodig omdat het model de plaatjes doorgeeft en het model ze niet zelf vanuit een bestand leest.
-    public AATView(int viewWidth, int viewHeight, int imgWidth, int imgHeight) {
+    public AATView(int viewWidth, int viewHeight, int imgWidth, int imgHeight, int stepSize) {
         // Tijdelijk, moet uit model komen.
         setVisible(true);
 
@@ -42,6 +42,7 @@ public class AATView extends PApplet implements Observer {
         //Nodig vanwege het passend maken van een plaatje op het scherm
         this.imgWidth = imgWidth;
         this.imgHeight = imgHeight;
+        this.stepSize = stepSize;
     }
 
     public void setup() {
@@ -50,7 +51,8 @@ public class AATView extends PApplet implements Observer {
         //   imageLoad();
 
         //Some var initialising
-        stepSize = model.getStepRate();
+    //    System.out.println(model.toString());
+     //   stepSize = model.getStepRate();
         stepStart = 5; //(int) (model.getStepRate() / 2);
         inputY = stepStart; //Eerste plaatje begint op stepStart.
         stepCount = stepStart;
