@@ -34,8 +34,6 @@ public class AATView extends PApplet implements Observer {
         this.viewWidth = viewWidth;
 
         //Nodig vanwege het passend maken van een plaatje op het scherm
-        this.imgWidth = 433;        //TODO veranderen zodat het dynamisch wordt
-        this.imgHeight = 433;
         this.stepSize = stepSize;
     }
 
@@ -150,6 +148,8 @@ public class AATView extends PApplet implements Observer {
         if (o.toString().equals("Show Image")) {
             System.out.println("Show Picture");
             img = convertImage(model.getNextImage());
+            imgWidth = img.width;
+            imgHeight = img.height;
             imgT = model.getDirection();
             blackScreen = false;         //Plaatjes weer laten zien.
         }
