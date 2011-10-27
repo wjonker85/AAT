@@ -1,0 +1,20 @@
+#Stimuli variables
+
+ColoredBorders True
+BorderColorPush Geel
+BorderColorPull Blauw
+BorderWidth 12
+StepSize 7
+
+#Test variables
+Trails 2
+BreakAfter 3
+AffectiveDir Affective
+NeutralDir Neutral
+
+#for different languages
+LanguageFile English.AAT
+
+
+
+

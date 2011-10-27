@@ -1,6 +1,7 @@
-import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableModel;
-import java.io.*;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 
 /**
  * Created by IntelliJ IDEA.
@@ -19,36 +20,31 @@ public class CSVWriter {
     }
 
     public boolean writeData(File file) {
+        boolean newFile = !file.exists();
 
         try {
-                       FileInputStream test = new FileInputStream(file);
-            int checkEmpty = test.read();
-            test.close();
-            FileWriter writer = new FileWriter(file,true);
-            if(checkEmpty == -1 )   {             //Check if file is empty
 
-               System.out.println("Empty file");
+            FileWriter writer = new FileWriter(file, file.exists());
             String columnNames = "";        //Create first line with column names
+            if (newFile) {           //Add column headers only if file is empty
+                System.out.println("Dikke vinger");
+                for (int x = 0; x < tableModel.getColumnCount(); x++) {
+                    if (x < tableModel.getColumnCount() - 1) {
+                        columnNames += tableModel.getColumnName(x) + ",";
+                    } else {
+                        columnNames += tableModel.getColumnName(x) + "\n";
+                    }
 
-            for (int x = 0; x < tableModel.getColumnCount(); x++) {
-                if(x<tableModel.getColumnCount()-1) {
-                columnNames += tableModel.getColumnName(x) + ",";
                 }
-                else {
-                    columnNames+= tableModel.getColumnName(x)+"\n";
-                }
-
-            }
-            writer.append(columnNames);    //First line of the file contains the column names, only when file is empty
+                writer.append(columnNames);    //First line of the file contains the column names, only when file is empty
             }
             for (int itt = 0; itt < tableModel.getRowCount(); itt++) {
                 String row = "";
                 for (int i = 0; i < tableModel.getColumnCount(); i++) {
-                    if(i<tableModel.getColumnCount()-1) {
-                    row += tableModel.getValueAt(itt, i)+",";
-                    }
-                    else {
-                        row += tableModel.getValueAt(itt,i)+"\n";
+                    if (i < tableModel.getColumnCount() - 1) {
+                        row += tableModel.getValueAt(itt, i) + ",";
+                    } else {
+                        row += tableModel.getValueAt(itt, i) + "\n";
                     }
                 }
                 writer.append(row);          //Add a row of data to the CSV file

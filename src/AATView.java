@@ -66,10 +66,10 @@ public class AATView extends PApplet implements Observer {
         if (!blackScreen) {
             setupImage();
 
-            float[] colors = model.getBorderColor(imgT);
-            rB = (int) colors[0];
-            gB = (int) colors[1];
-            bB = (int) colors[2];
+       //     float[] colors = model.getBorderColor(imgT);
+       //     rB = (int) colors[0];
+       //     gB = (int) colors[1];
+       //     bB = (int) colors[2];
 
             imageMode(CENTER);
             rectMode(CENTER);

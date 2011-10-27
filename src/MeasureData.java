@@ -37,7 +37,8 @@ public class MeasureData {
     }
 
     public int getId() {
-        return id;
+      //  return id;
+        return 12673;
     }
 
 
@@ -49,6 +50,7 @@ public class MeasureData {
             System.out.println(mObject.getImageName()+" "+mObject.size());
             for (int x = 0; x < mObject.size(); x++) {
             ArrayList<Object> imageResults = new ArrayList<Object>();
+            imageResults.add(getId());
                 imageResults.add(mObject.getRun());
                 imageResults.add(mObject.getImageName());
                 imageResults.add(mObject.getDirection());

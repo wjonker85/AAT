@@ -1,8 +1,10 @@
 import javax.swing.table.TableModel;
-import java.awt.*;
+import javax.xml.soap.Text;
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileReader;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -19,18 +21,23 @@ import java.util.regex.Pattern;
  * number of runs, a break can be included after x runs. Neutral and affective cues can be chosen. Either a colored border. Different
  * image shapes or no visual cues created. In the last case the visual cues can be in the image. So that the test can have every
  * visual cue that is necessary.
- *
+ * <p/>
  * When a picture has to be pulled or pushed all joystick movements are recorded with their corresponding reaction times.
  * All the data for all participants are stored in a file and selections from those results can be exported so it can be analyzed
  * with R or SPSS. A researcher can choose the way the data has to be prepared. E.g. include mistakes or not.
- *
+ * <p/>
  * When a user has done the test it is possible that it can see his or her results graphically..
- *
- *
+ * <p/>
+ * <p/>
  * TODO: Informatie lezen uit configuratiebestand, dus alles nog wat dynamischer maken.
  * TODO: Iets doen met de verschillende opties van weergave.
  * TODO: Misschien een testplaatje als eerste
  * TODO: Nog eerst een testrun toevoegen.
+ * TODO: Id verhogen als er een nieuwe test gestart wordt
+ * TODO: Dat id moet dan 1 hoger zijn dan de hoogste die in het bestand staat.
+ * TODO: Alle informatie uit het hele data bestand inlezen.
+ * TODO: export functie met filter.
+ * TODO: Uitbreiden met practice runs
  */
 public class AATModel extends Observable {
 
@@ -47,6 +54,8 @@ public class AATModel extends Observable {
     private static int IMAGE_LOADED = 1;
     private static int TEST_WAIT_FOR_TRIGGER = 2;
 
+    private Hashtable<String, String> testOptions;
+
 
     private int resize = 5;     //Start with the middle of the joystick
 
@@ -57,8 +66,10 @@ public class AATModel extends Observable {
     private int count; //Counts the number of images shown.
     private int run;
     private int id = 0;
+    private boolean hasBorder;
     private MeasureData newMeasure;
     private long startMeasure;
+    private TestConfig testConfig;
 
     private AATImage current;
     private int testStatus;
@@ -66,7 +77,8 @@ public class AATModel extends Observable {
     private ArrayList<File> neutralImages;
     private ArrayList<File> affectiveImages;
     private ArrayList<AATImage> testList; //Random list that contains the push or pull images.
-    private Hashtable<Integer, float[]> colorTable;    //Contains the border colors
+    private Hashtable<Integer, String> colorTable;    //Contains the border colors
+    private File languageFile;
 
 
     private Pattern pattern;
@@ -75,15 +87,22 @@ public class AATModel extends Observable {
 
 
     //Constructor.
-    public AATModel() {
-        File neutralDir = new File("images"+File.separator+"Neutral");
-        File affectiveDir = new File("images"+File.separator+"Affective");
+    public AATModel(File config) {
+        testConfig = new TestConfig(new File("sampleConfig"));
+        File neutralDir = new File("images" + File.separator + testConfig.getValue("AffectiveDir"));
+        File affectiveDir = new File("images" + File.separator + testConfig.getValue("NeutralDir"));
+        languageFile = new File(testConfig.getValue("LanguageFile"));
+    //    TextReader textReader = new TextReader(languageFile);
         pattern = Pattern.compile(IMAGE_PATTERN);
         neutralImages = getImages(neutralDir);
         affectiveImages = getImages(affectiveDir);
-      //  imageFiles = getImages(imageDir); //create ArrayList with all image files;
+        //  imageFiles = getImages(imageDir); //create ArrayList with all image files;
         testStatus = AATModel.TEST_STOPPED;
-        colorTable = new Hashtable<Integer, float[]>();
+        if (testConfig.getValue("ColoredBorders").equals("True")) {
+            colorTable = new Hashtable<Integer, String>();
+            colorTable.put(AATImage.PULL, testConfig.getValue("BorderColorPull"));
+            colorTable.put(AATImage.PUSH, testConfig.getValue("BorderColorPush"));
+        }
     }
 
 
@@ -109,13 +128,13 @@ public class AATModel extends Observable {
     private ArrayList<AATImage> createRandomList() {
         ArrayList<AATImage> randomList = new ArrayList<AATImage>();
         for (File image : neutralImages) {                //Load the neutral images
-            AATImage pull = new AATImage(image,AATImage.PULL,AATImage.NEUTRAL); //Two instances for every image
+            AATImage pull = new AATImage(image, AATImage.PULL, AATImage.NEUTRAL); //Two instances for every image
             randomList.add(pull);
             AATImage push = new AATImage(image, AATImage.PUSH, AATImage.NEUTRAL);
             randomList.add(push);
         }
         for (File image : affectiveImages) {    //Load the affective images
-            AATImage pull = new AATImage(image,AATImage.PULL,AATImage.AFFECTIVE); //Two instances for every image
+            AATImage pull = new AATImage(image, AATImage.PULL, AATImage.AFFECTIVE); //Two instances for every image
             randomList.add(pull);
             AATImage push = new AATImage(image, AATImage.PUSH, AATImage.AFFECTIVE);
             randomList.add(push);
@@ -126,15 +145,13 @@ public class AATModel extends Observable {
 
     //Starts a new instance of the AAT. With no. times it has to repeat and when there will be a break.
     public void startTest(int repeat, int breakAfter) {
-        this.repeat = repeat;
-        this.breakAfter = breakAfter;
+        this.repeat = Integer.parseInt(testConfig.getValue("Trails"));
+        this.breakAfter = Integer.parseInt(testConfig.getValue("BreakAfter"));
         testList = createRandomList();
         count = 0;        //reset counters
         run = 0;
         newMeasure = new MeasureData(id);
         id++;          //new higher id
-        colorTable.put(AATImage.PULL, new float[]{0, 164, 231});
-        colorTable.put(AATImage.PUSH, new float[]{245,254,2});
         this.setChanged();
         notifyObservers("Start");      //Notify the observer that a new test is started.
         testStatus = AATModel.TEST_WAIT_FOR_TRIGGER;   //Test status is wait for the user to press the trigger button.
@@ -168,6 +185,7 @@ public class AATModel extends Observable {
                 this.setChanged();
                 notifyObservers("Test ended");
                 testStatus = AATModel.TEST_STOPPED;    //Notify observers about it
+                writeToFile();
             } else {           //Continue with a new run
                 testList = createRandomList(); //create a new Random list
                 count = 0;
@@ -192,8 +210,20 @@ public class AATModel extends Observable {
     }
 
     //returns colors for the direction being asked (push or pull)
-    public float[] getBorderColor(int direction) {
-           return colorTable.get(direction);
+    public String getBorderColor(int direction) {
+        return colorTable.get(direction);
+    }
+
+    public String getBreakText() {
+        return "";
+    }
+
+    public String getIntroductionText() {
+        return "";
+    }
+
+    public String getTestFinishedText() {
+        return "";
     }
 
     //Returns the next Image
@@ -203,7 +233,11 @@ public class AATModel extends Observable {
 
     //
     public int getStepRate() {
-        return 9;
+        return Integer.parseInt(testConfig.getValue("StepSize"));
+    }
+
+    public int getBorderWidth() {
+        return Integer.parseInt(testConfig.getValue("BorderWidth"));
     }
 
     //Returns the current direction (Push of Pull)
@@ -213,7 +247,7 @@ public class AATModel extends Observable {
 
     //Start a new measure for every new image.
     public void startMeasure() {
-        newMeasure.newMeasure(run,current.toString(),current.getDirection(),current.getType()); //Begin met de metingen opslaan.
+        newMeasure.newMeasure(run, current.toString(), current.getDirection(), current.getType()); //Begin met de metingen opslaan.
         startMeasure = System.currentTimeMillis();  //Begintijd
     }
 
@@ -222,13 +256,16 @@ public class AATModel extends Observable {
         return System.currentTimeMillis() - startMeasure;
     }
 
+    private void writeToFile() {
+        CSVWriter writer = new CSVWriter(newMeasure.getAllResults());
+        writer.writeData(new File("test.csv"));
+    }
 
     //Display results and write them to a file
     public TableModel getResults() {
-        CSVWriter writer = new CSVWriter(newMeasure.getSimpleResults());
-        writer.writeData(new File("test.csv"));
-        return newMeasure.getSimpleResults();
-     //   return newMeasure.getAllResults();
+
+        return newMeasure.getAllResults();
+        //   return newMeasure.getAllResults();
     }
 
     //--------------Input from the controller-------------------------------------//
@@ -243,7 +280,7 @@ public class AATModel extends Observable {
         if (value != resize) {
             resize = value;
             if (testStatus == AATModel.IMAGE_LOADED) { //Only listen when there is an image loaded
-                newMeasure.addResult(resize,getMeasurement());     //add results to the other measurements
+                newMeasure.addResult(resize, getMeasurement());     //add results to the other measurements
                 if (current.getDirection() == AATImage.PULL && value == 9) {   //check if the requested action has been performed
                     removeImage();
                 } else if (current.getDirection() == AATImage.PUSH && value == 1) {
@@ -273,4 +310,172 @@ public class AATModel extends Observable {
     }
 }
 
+/*
+ColoredBorders Boolean
+BorderColorA String
+BorderColorN String
+BorderWidth String
+StepSize
 
+#Test variables
+Trails
+BreakAfter
+AffectiveDir
+NeutralDir
+
+#for different languages
+LanguageFile
+
+
+*/
+class TestConfig {
+
+
+    private Map<String, String> testOptions = new HashMap<String, String>();
+    private File testConfig;
+    //All the configuration options
+    String[] options = {
+            "ColoredBorders",
+            "BorderColorPush",
+            "BorderColorPull",
+            "BorderWidth",
+            "StepSize",
+            "Trails",
+            "BreakAfter",
+            "AffectiveDir",
+            "NeutralDir",
+            "LanguageFile"
+
+    };
+
+    //Constructor, fills the Hashtable with
+    public TestConfig(File testConfig) {
+        this.testConfig = testConfig;
+        testOptions = new Hashtable<String, String>();
+        for (int x = 0; x < options.length; x++) {
+            testOptions.put(options[x], "");
+
+        }
+        readConfig();
+    }
+
+    private void readConfig() {
+        String strLine;
+        StringTokenizer st;
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(testConfig));
+            while ((strLine = br.readLine()) != null) {
+                st = new StringTokenizer(strLine, " ");
+                while (st.hasMoreTokens()) {
+                    String token = st.nextToken();
+                    if (token.contains("#")) {
+                        strLine = null;
+                    }
+                    if (testOptions.containsKey(token)) {
+                        for (Map.Entry<String, String> entry : testOptions.entrySet()) {
+                            if (entry.getKey().equals(token)) {
+                                entry.setValue(st.nextToken());
+                                strLine = null;
+                                break;
+                            }
+                        }
+
+                    }
+
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+    }
+
+
+    public String getValue(String key) {
+        return testOptions.get(key);
+    }
+}
+
+class TextReader {
+
+    private Map<String, String> testText = new HashMap<String, String>();
+    private File languageFile;
+
+    //All the configuration options
+    String[] options = {
+            "Introduction",
+            "Break",
+            "Finished"
+    };
+
+    public TextReader(File languageFile) {
+        this.languageFile = languageFile;
+        for (int x = 0; x < options.length; x++) {
+            testText.put(options[x], "");
+        }
+        readConfig();
+        test();
+    }
+
+    private String transform(String s) {
+        s = s.replace("<", "");
+        s = s.replace(">", "");
+        return s;
+    }
+
+    private void readConfig() {
+        String strLine;
+        StringTokenizer st;
+        boolean firstKey = true;
+        String key = "";
+        String text = "";
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(languageFile));
+            while ((strLine = br.readLine()) != null) {
+                st = new StringTokenizer(strLine, " ");
+                while (st.hasMoreTokens()) {
+                    String token = st.nextToken();
+                    if (token.contains("#")) {
+                        strLine = null;
+                    }
+                    if (token.contains(("<"))) {
+                        if (!token.contains("</")) {
+                            key = transform(token);
+                            firstKey = true;
+                        } else {
+                            firstKey = false;
+
+                        }
+
+                        if (firstKey) {
+                            strLine = null;
+                        }
+                        strLine = null;
+                    } else {
+                        System.out.println("kutzooi "+key);
+                        if (testText.containsKey(key)) {
+                                text+=strLine;
+                            System.out.println(strLine);
+                            for (Map.Entry<String, String> entry : testText.entrySet()) {
+                                if (entry.getKey().equals(key)) {
+                                    entry.setValue(st.nextToken());
+                                    strLine = null;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception
+                e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+    }
+
+    private void test() {
+        System.out.println(testText.keySet());
+        System.out.println(testText.values());
+
+    }
+
+}

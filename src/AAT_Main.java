@@ -2,6 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 
 /**
  * Created by IntelliJ IDEA.
@@ -44,7 +45,7 @@ Definieer view classes, deze classes worden door Wilfried in Processing geschrev
 
     public AAT_Main() {
         frame = new JFrame("Approach Avoidance Task");
-        model = new AATModel();
+        model = new AATModel(new File("Blaat"));
         aatResults = new AATResults();
         testFrame = new TestFrame();
         mainPanel = new JPanel();
