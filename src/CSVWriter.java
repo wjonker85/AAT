@@ -1,8 +1,6 @@
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableModel;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 
 /**
  * Created by IntelliJ IDEA.
@@ -21,9 +19,17 @@ public class CSVWriter {
     }
 
     public boolean writeData(File file) {
+
         try {
-            FileWriter writer = new FileWriter(file);
+                       FileInputStream test = new FileInputStream(file);
+            int checkEmpty = test.read();
+            test.close();
+            FileWriter writer = new FileWriter(file,true);
+            if(checkEmpty == -1 )   {             //Check if file is empty
+
+               System.out.println("Empty file");
             String columnNames = "";        //Create first line with column names
+
             for (int x = 0; x < tableModel.getColumnCount(); x++) {
                 if(x<tableModel.getColumnCount()-1) {
                 columnNames += tableModel.getColumnName(x) + ",";
@@ -33,8 +39,8 @@ public class CSVWriter {
                 }
 
             }
-            writer.append(columnNames);    //First line of the file contains the column names
-
+            writer.append(columnNames);    //First line of the file contains the column names, only when file is empty
+            }
             for (int itt = 0; itt < tableModel.getRowCount(); itt++) {
                 String row = "";
                 for (int i = 0; i < tableModel.getColumnCount(); i++) {
