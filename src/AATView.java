@@ -12,7 +12,7 @@ import java.util.Observer;
  * Date: 10/4/11
  * Time: 3:25 PM
  * To change this template use File | Settings | File Templates.
-TODO grootte van de plaatjes dynamisch maken. Afhankelijk van de schermgrootte
+ * TODO grootte van de plaatjes dynamisch maken. Afhankelijk van de schermgrootte
  */
 public class AATView extends PApplet implements Observer {
     private AATModel model;
@@ -25,7 +25,7 @@ public class AATView extends PApplet implements Observer {
 
     //Heb nu tijdelijk de grootte van de plaatjes toegevoegd aan de constructor. Deze waardes worden nu vanuit de main nog
     //doorgegeven. Is nu nog nodig omdat het model de plaatjes doorgeeft en het model ze niet zelf vanuit een bestand leest.
-    public AATView(int viewWidth, int viewHeight,int stepSize) {
+    public AATView(int viewWidth, int viewHeight, int stepSize) {
         // Tijdelijk, moet uit model komen.
         setVisible(true);
 
@@ -33,7 +33,7 @@ public class AATView extends PApplet implements Observer {
         this.viewHeight = viewHeight;
         this.viewWidth = viewWidth;
 
-        //Nodig vanwege het passend maken van een plaatje op het scherm
+        //Hoeveel stappen heeft joystick
         this.stepSize = stepSize;
     }
 
@@ -49,13 +49,22 @@ public class AATView extends PApplet implements Observer {
     }
 
     public void draw() {
-        setupImage();
         imageShow();
+        infoShow("bla");
+    }
+
+    private void infoShow(String infoText) {
+        if (blackScreen) {
+            fill(255);
+            textSize(30);
+            text("Dit is een AAT test \n text erachter", xPos,  yPos);
+        }
     }
 
     public void imageShow() {
         background(0);
         if (!blackScreen) {
+            setupImage();
 
             float[] colors = model.getBorderColor(imgT);
             rB = (int) colors[0];
@@ -71,8 +80,9 @@ public class AATView extends PApplet implements Observer {
             fill(0, 0, 0, 0);
             rect(xPos, yPos, imgSizeX, imgSizeY);
         }
-        fill(255, 0, 0);
-        text("X: " + (int) imgSizeX + "px; Y: " + (int) imgSizeY + "px;" + " inputY: " + inputY, 5, 15);
+
+        //fill(255, 0, 0);
+        //text("X: " + (int) imgSizeX + "px; Y: " + (int) imgSizeY + "px;" + " inputY: " + inputY, 5, 15);
     }
 
     //Wilfried, even tijdelijk jouw code uit de setup gehaald en in deze methode geplaatst. Vanwege null pointer exception, omdat de plaatjes
@@ -141,7 +151,6 @@ public class AATView extends PApplet implements Observer {
         if (o.toString().equals("Start")) {
             System.out.println("Test started");
             blackScreen = true;
-
         }
 
         //Bericht uit het model dat het volgende plaatje getoond mag worden.
@@ -151,7 +160,7 @@ public class AATView extends PApplet implements Observer {
             imgWidth = img.width;
             imgHeight = img.height;
             imgT = model.getDirection();
-            blackScreen = false;         //Plaatjes weer laten zien.
+            blackScreen = true;         //Plaatjes weer laten zien.
         }
 
         //Einde van de test.
@@ -161,7 +170,6 @@ public class AATView extends PApplet implements Observer {
             System.out.println("Test ended");
             this.setVisible(false);
         }
-
     }
 }
 
