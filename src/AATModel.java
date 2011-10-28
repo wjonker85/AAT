@@ -1,5 +1,4 @@
 import javax.swing.table.TableModel;
-import javax.xml.soap.Text;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
@@ -70,6 +69,7 @@ public class AATModel extends Observable {
     private MeasureData newMeasure;
     private long startMeasure;
     private TestConfig testConfig;
+    private TextReader textReader;
 
     private AATImage current;
     private int testStatus;
@@ -92,7 +92,7 @@ public class AATModel extends Observable {
         File neutralDir = new File("images" + File.separator + testConfig.getValue("AffectiveDir"));
         File affectiveDir = new File("images" + File.separator + testConfig.getValue("NeutralDir"));
         languageFile = new File(testConfig.getValue("LanguageFile"));
-    //    TextReader textReader = new TextReader(languageFile);
+        textReader = new TextReader(languageFile);
         pattern = Pattern.compile(IMAGE_PATTERN);
         neutralImages = getImages(neutralDir);
         affectiveImages = getImages(affectiveDir);
@@ -215,15 +215,15 @@ public class AATModel extends Observable {
     }
 
     public String getBreakText() {
-        return "";
+        return textReader.getValue("Break");
     }
 
     public String getIntroductionText() {
-        return "";
+        return textReader.getValue("Introduction");
     }
 
     public String getTestFinishedText() {
-        return "";
+        return textReader.getValue("Finished");
     }
 
     //Returns the next Image
@@ -310,24 +310,6 @@ public class AATModel extends Observable {
     }
 }
 
-/*
-ColoredBorders Boolean
-BorderColorA String
-BorderColorN String
-BorderWidth String
-StepSize
-
-#Test variables
-Trails
-BreakAfter
-AffectiveDir
-NeutralDir
-
-#for different languages
-LanguageFile
-
-
-*/
 class TestConfig {
 
 
@@ -431,45 +413,39 @@ class TextReader {
         try {
             BufferedReader br = new BufferedReader(new FileReader(languageFile));
             while ((strLine = br.readLine()) != null) {
-                st = new StringTokenizer(strLine, " ");
-                while (st.hasMoreTokens()) {
-                    String token = st.nextToken();
-                    if (token.contains("#")) {
-                        strLine = null;
+                if (strLine.startsWith("#")) {
+                    strLine = null;
+                }
+                assert strLine != null;
+                if (strLine.startsWith(("<"))) {
+                    if (!strLine.startsWith("</")) {
+                        key = transform(strLine);
+                        text = "";
                     }
-                    if (token.contains(("<"))) {
-                        if (!token.contains("</")) {
-                            key = transform(token);
-                            firstKey = true;
-                        } else {
-                            firstKey = false;
-
-                        }
-
-                        if (firstKey) {
+                } else {
+                    if (testText.containsKey(key)) {
+                        text += strLine+"\n";      //Read text lines
+                    }
+                }
+                if (!strLine.startsWith("</")) {
+                    for (Map.Entry<String, String> entry : testText.entrySet()) {       //Replace value
+                        if (entry.getKey().equals(key)) {
+                            entry.setValue(text);
                             strLine = null;
-                        }
-                        strLine = null;
-                    } else {
-                        System.out.println("kutzooi "+key);
-                        if (testText.containsKey(key)) {
-                                text+=strLine;
-                            System.out.println(strLine);
-                            for (Map.Entry<String, String> entry : testText.entrySet()) {
-                                if (entry.getKey().equals(key)) {
-                                    entry.setValue(st.nextToken());
-                                    strLine = null;
-                                    break;
-                                }
-                            }
+                            break;
                         }
                     }
                 }
             }
+            //  }
         } catch (Exception
                 e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
+    }
+
+    public String getValue(String key) {
+        return testText.get(key);
     }
 
     private void test() {

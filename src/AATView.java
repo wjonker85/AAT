@@ -12,7 +12,8 @@ import java.util.Observer;
  * Date: 10/4/11
  * Time: 3:25 PM
  * To change this template use File | Settings | File Templates.
- * TODO grootte van de plaatjes dynamisch maken. Afhankelijk van de schermgrootte
+ * TODO: Doorgeven of er een border getekend moet worden. Zo ja, dan moeten ook de twee kleuren doorgegeven worden.
+ * TODO: Sowieso
  */
 public class AATView extends PApplet implements Observer {
     private AATModel model;
@@ -21,6 +22,8 @@ public class AATView extends PApplet implements Observer {
     public float stepX, stepY, imgSizeX, imgSizeY, stepCount, imgRefactor, viewRatio, imgRatio, xPos, yPos;
     public PImage img;
     private boolean blackScreen = true;
+    private boolean showInfo = true;
+    private String displayText = "";
 
 
     //Heb nu tijdelijk de grootte van de plaatjes toegevoegd aan de constructor. Deze waardes worden nu vanuit de main nog
@@ -49,44 +52,51 @@ public class AATView extends PApplet implements Observer {
     }
 
     public void draw() {
-        imageShow();
-        infoShow("bla");
+        if (!blackScreen) {
+            imageShow();
+        } else if (showInfo) {
+            infoShow(displayText);
+        } else {
+            background(0);
+        }
     }
 
     private void infoShow(String infoText) {
-        if (blackScreen) {
-            fill(255);
-            textSize(30);
-            text("Dit is een AAT test \n text erachter", xPos,  yPos);
-        }
+        //   if (blackScreen) {
+        background(0);
+        fill(255);
+        textSize(30);
+        text(infoText, xPos, yPos);
+        //   }
     }
 
     public void imageShow() {
         background(0);
-        if (!blackScreen) {
-            setupImage();
+        //  if (!blackScreen) {
+        setupImage();
 
-       //     float[] colors = model.getBorderColor(imgT);
-       //     rB = (int) colors[0];
-       //     gB = (int) colors[1];
-       //     bB = (int) colors[2];
+        //     float[] colors = model.getBorderColor(imgT);
+        //     rB = (int) colors[0];
+        //     gB = (int) colors[1];
+        //     bB = (int) colors[2];
 
-            imageMode(CENTER);
-            rectMode(CENTER);
-            image(img, xPos, yPos, imgSizeX, imgSizeY);
+        imageMode(CENTER);
+        rectMode(CENTER);
+        image(img, xPos, yPos, imgSizeX, imgSizeY);
 
-            stroke(rB, gB, bB);
-            strokeWeight(imgBorderWidth);
-            fill(0, 0, 0, 0);
-            rect(xPos, yPos, imgSizeX, imgSizeY);
-        }
-
-        //fill(255, 0, 0);
-        //text("X: " + (int) imgSizeX + "px; Y: " + (int) imgSizeY + "px;" + " inputY: " + inputY, 5, 15);
+        stroke(rB, gB, bB);
+        strokeWeight(imgBorderWidth);
+        fill(0, 0, 0, 0);
+        rect(xPos, yPos, imgSizeX, imgSizeY);
     }
+
+    //fill(255, 0, 0);
+    //text("X: " + (int) imgSizeX + "px; Y: " + (int) imgSizeY + "px;" + " inputY: " + inputY, 5, 15);
+    //  }
 
     //Wilfried, even tijdelijk jouw code uit de setup gehaald en in deze methode geplaatst. Vanwege null pointer exception, omdat de plaatjes
     //nu uit het model komen.
+    //TODO: Nog een boolean die bepaald of de border getoond mag worden.
     private void setupImage() {
         //Ratio scherm en plaatje, nodig bij bepalen vergroot /verklein factor
         viewRatio = (float) viewHeight / (float) viewWidth;
@@ -137,20 +147,25 @@ public class AATView extends PApplet implements Observer {
         //Test heeft even een pauze. Mogelijkheid om een bericht te laten zien dat het pauze is.
         //Nu eerst alleen een zwart scherm
         if (o.toString().equals("Break")) {
+            displayText = model.getBreakText();
             blackScreen = true;
+            showInfo = true;
             System.out.println("Test is on break");
         }
 
         //Plaatje is weggedrukt. Nu een zwart scherm laten zien.
         if (o.toString().equals("Wait screen")) {
             blackScreen = true;
+            showInfo = false;
         }
 
         //De test is gestart. Mogelijkheid om instructies te geven.
         //Nu eerst alleen een zwart scherm
         if (o.toString().equals("Start")) {
             System.out.println("Test started");
+            displayText = model.getIntroductionText();
             blackScreen = true;
+            showInfo = true;
         }
 
         //Bericht uit het model dat het volgende plaatje getoond mag worden.
@@ -160,14 +175,17 @@ public class AATView extends PApplet implements Observer {
             imgWidth = img.width;
             imgHeight = img.height;
             imgT = model.getDirection();
-            blackScreen = true;         //Plaatjes weer laten zien.
+            blackScreen = false;         //Plaatjes weer laten zien.
+            showInfo = false;
         }
 
         //Einde van de test.
         //Mogelijkheid tot het tonen van een bericht of mogelijk de optie om resultaten te laten zien.
         //Nu eerst alleen het scherm onzichtbaar maken.
+        //TODO: Scherm moet nog niet direct verdwijnen, eerst nog de tekst laten zien.
         if (o.toString().equals("Test ended")) {
             System.out.println("Test ended");
+            displayText = model.getTestFinishedText();
             this.setVisible(false);
         }
     }
