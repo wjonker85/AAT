@@ -17,7 +17,7 @@ import java.util.Observer;
  */
 public class AATView extends PApplet implements Observer {
     private AATModel model;
-    public int viewWidth, viewHeight, borderWidth, stepSize, imgBorderWidth, rB, gB, bB, stepStart, inputY;
+    public int viewWidth, viewHeight, borderWidth, stepSize, imgBorderWidth, stepStart, inputY;
     private int imgWidth, imgHeight, imgT;
     public float stepX, stepY, imgSizeX, imgSizeY, stepCount, imgRefactor, viewRatio, imgRatio, xPos, yPos;
     public PImage img;
@@ -74,26 +74,26 @@ public class AATView extends PApplet implements Observer {
 
     public void imageShow() {
         background(0);
-        //  if (!blackScreen) {
         setupImage();
-
-        //     float[] colors = model.getBorderColor(imgT);
-        //     rB = (int) colors[0];
-        //     gB = (int) colors[1];
-        //     bB = (int) colors[2];
 
         imageMode(CENTER);
         rectMode(CENTER);
         image(img, xPos, yPos, imgSizeX, imgSizeY);
 
-        stroke(rB, gB, bB);
+        stroke(unhex(model.getBorderColor(imgT)));
         strokeWeight(imgBorderWidth);
         fill(0, 0, 0, 0);
         rect(xPos, yPos, imgSizeX, imgSizeY);
+
+
+        fill(255, 0, 0);
+        textSize(15);
+        textAlign(LEFT);
+        text("X: " + (int) imgSizeX + "px; Y: " + (int) imgSizeY + "px;" + " inputY: " + inputY, 5, 15);
+        //text("Border color (int): " + hi, 5, 30);
     }
 
-    //fill(255, 0, 0);
-    //text("X: " + (int) imgSizeX + "px; Y: " + (int) imgSizeY + "px;" + " inputY: " + inputY, 5, 15);
+
     //  }
 
     //Wilfried, even tijdelijk jouw code uit de setup gehaald en in deze methode geplaatst. Vanwege null pointer exception, omdat de plaatjes
