@@ -144,7 +144,7 @@ public class AATModel extends Observable {
     }
 
     //Starts a new instance of the AAT. With no. times it has to repeat and when there will be a break.
-    public void startTest(int repeat, int breakAfter) {
+    public void startTest() {
         this.repeat = Integer.parseInt(testConfig.getValue("Trails"));
         this.breakAfter = Integer.parseInt(testConfig.getValue("BreakAfter"));
         testList = createRandomList();
@@ -212,6 +212,15 @@ public class AATModel extends Observable {
     //returns colors for the direction being asked (push or pull)
     public String getBorderColor(int direction) {
         return colorTable.get(direction);
+    }
+
+    public boolean hasColoredBorders() {
+        if(testConfig.getValue("ColoredBorders").equals("True")) {
+            return true;
+        }
+        else {
+            return false;
+        }
     }
 
     public String getBreakText() {
@@ -326,7 +335,8 @@ class TestConfig {
             "BreakAfter",
             "AffectiveDir",
             "NeutralDir",
-            "LanguageFile"
+            "LanguageFile",
+            "PracticeTrails"
 
     };
 
@@ -385,6 +395,7 @@ class TextReader {
     //All the configuration options
     String[] options = {
             "Introduction",
+            "Practice",
             "Break",
             "Finished"
     };

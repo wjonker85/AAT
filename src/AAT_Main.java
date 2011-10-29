@@ -78,7 +78,7 @@ Definieer view classes, deze classes worden door Wilfried in Processing geschrev
                 aatView.init();             //Make sure the PApplet gets initialised.
                 model.addObserver(aatView);    //Add a new aatView to the observers list.
                 testFrame.getContentPane().add(aatView);
-                model.startTest(1, 9);
+                model.startTest();
             }
         });
 

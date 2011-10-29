@@ -44,7 +44,7 @@ public class MeasureData {
 
     //Geeft een tableModel terug met alle data.
     public AbstractTableModel getAllResults() {
-        ResultsTableModel allResults = new ResultsTableModel();
+        ResultsDataTableModel allResults = new ResultsDataTableModel();
         System.out.println("Aantal metingen "+allMeasures.size());
         for (MeasureObject mObject : allMeasures) {
             System.out.println(mObject.getImageName()+" "+mObject.size());

@@ -15,7 +15,7 @@ import java.util.Vector;
 
 
 
-public class ResultsTableModel extends AbstractTableModel {
+public class ResultsDataTableModel extends AbstractTableModel {
     private ArrayList<Object> data;
     private ArrayList<String> columns;
     String[] columnNames = {
@@ -30,7 +30,7 @@ public class ResultsTableModel extends AbstractTableModel {
 
 
 
-    public ResultsTableModel() {
+    public ResultsDataTableModel() {
         columns = new ArrayList();
         data = new ArrayList();
         columns.add("ID");
