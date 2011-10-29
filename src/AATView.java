@@ -49,6 +49,7 @@ public class AATView extends PApplet implements Observer {
         imgBorderWidth = borderWidth;   //imgBorderWidth start met waarde borderWidth
         xPos = width / 2;               //Midden x coordinaar scherm
         yPos = height / 2;              //Midden y coordinaat scherm
+        noCursor();
     }
 
     public void draw() {
