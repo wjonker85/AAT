@@ -4,7 +4,7 @@ ColoredBorders True
 BorderColorPush FF68B399
 BorderColorPull FF006699
 BorderWidth 12
-StepSize 11
+StepSize 9
 
 #Test variables
 Trails 2
@@ -13,7 +13,7 @@ AffectiveDir Affective
 NeutralDir Neutral
 
 #for different languages
-LanguageFile Dutch.AAT
+LanguageFile English.AAT
 
 
 ParticipantsFile Participants.csv
