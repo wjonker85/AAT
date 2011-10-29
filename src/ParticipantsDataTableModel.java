@@ -1,5 +1,6 @@
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
+import java.util.Vector;
 
 /**
  * Created by IntelliJ IDEA.
@@ -19,12 +20,17 @@ public class ParticipantsDataTableModel extends AbstractTableModel {
 
 
     //Create the number of column dynamic.
-    public ParticipantsDataTableModel(String[] columnNames) {
-        columns = new ArrayList();
-        data = new ArrayList();
+    public ParticipantsDataTableModel() {
+        columns = new ArrayList<String>();
+        data = new ArrayList<Object>();
+    }
+
+    public void setColumnNames(String[] columnNames) {
+
         this.columnNames = columnNames;
         for(int x = 0;x<columnNames.length;x++) {
             columns.add(columnNames[x]);
+            System.out.println(columnNames[x]);
         }
         fireTableDataChanged();
     }
@@ -52,6 +58,9 @@ public class ParticipantsDataTableModel extends AbstractTableModel {
     }
 
     public void setValueAt(Object value, int row, int col) {
+        System.out.println("Data setten op "+row+" "+col);
+        System.out.println(data.size());
+     //   data.set(0,"mmm");
         if (row <= getRowCount()) {
             data.set(((row * getColumnCount()) + col), value);
         } else {
@@ -66,5 +75,8 @@ public class ParticipantsDataTableModel extends AbstractTableModel {
     }
 
 
+    public void display() {
+        System.out.println(data);
+    }
 
 }

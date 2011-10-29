@@ -79,6 +79,9 @@ Definieer view classes, deze classes worden door Wilfried in Processing geschrev
                 model.addObserver(aatView);    //Add a new aatView to the observers list.
                 testFrame.getContentPane().add(aatView);
                 model.startTest();
+                QuestionFrame questionFrame = new QuestionFrame(model);
+                questionFrame.displayQuestions(model.getExtraQuestions());
+                questionFrame.display();
             }
         });
 

@@ -6,17 +6,18 @@ import java.util.ArrayList;
  * User: marcel
  * Date: 10/15/11
  * Time: 1:29 PM
- * MeasureData bevat all gemeten data. Dus per plaatje alles wat van belang is. Voor elke persoon die de test zal doen
- * zal er een nieuwe MeasureData aangemaakt worden.
- * Lijkt nu goed te werken. Alle data wordt goed opgeslagen.
- * TODO: de data uit deze class nog wegschrijven naar een bestand.
+ * This class registers all the actions taken by the participant, together with the time it has taken to perform that action
+ * since the moment the picture this measurement belongs to was shown on the screen.
+ * These measurements can be used to calculate reactionTime. It's also possible to see how the participant moved the joystick.
+ * E.g. Directly in the right direction or first to the wrong direction.
+ *
  */
 public class MeasureData {
 
-    private ArrayList<MeasureObject> allMeasures;
+    private ArrayList<MeasureObject> allMeasures;  //Every single measure has a different measure object.
     private int id;
 
-    //Constructor maakt een nieuwe lijst met MeasureObjecten. id = het id van de persoon die de test heeft gedaan.
+    //Constructor creates a empty arrayList of MeasureObjects.
     public MeasureData(int id) {
         this.id = id;
         allMeasures = new ArrayList<MeasureObject>();
@@ -30,19 +31,18 @@ public class MeasureData {
 
     }
 
-    //Elke beweging van de joystick wordt bijgehouden inclusief de bijbehorende reactietijd
+    //Everytime the participant changes the joystick, it's movement is recorded.
     public void addResult(int size, long time) {
         System.out.println("Voeg resultaat toe: "+ size+" "+time);
         allMeasures.get(allMeasures.size()-1).addResult(size, time);
     }
 
     public int getId() {
-      //  return id;
-        return 12673;
+        return id;
     }
 
 
-    //Geeft een tableModel terug met alle data.
+    //Returns a tablemodel with all results.
     public AbstractTableModel getAllResults() {
         ResultsDataTableModel allResults = new ResultsDataTableModel();
         System.out.println("Aantal metingen "+allMeasures.size());
@@ -62,27 +62,12 @@ public class MeasureData {
         }
         return allResults;
     }
-
-
-    //Geeft een TableModel met alleen de simpele resultaten, dus per plaatje de reactietijd.
-    public AbstractTableModel getSimpleResults() {
-        SimpleResultsTableModel simpleResults = new SimpleResultsTableModel();
-        for (MeasureObject mObject : allMeasures) {
-            ArrayList<Object> imageResults = new ArrayList<Object>();
-            imageResults.add(mObject.getRun());
-            imageResults.add(mObject.getImageName());
-            imageResults.add(mObject.getDirection());
-            imageResults.add(mObject.getType());
-            imageResults.add(mObject.getReactionTime());
-            simpleResults.add(imageResults);
-        }
-        return simpleResults;
-    }
 }
 
 
-//Simpele data structuur die alle gemeten informatie bevat. Aan de hand van deze structuur kunnen andere datastructuren zoals
-//tableModels of misschien grafieken gemaakt worden. Natuurlijk ook de fileOutput;
+/*
+A MeasureObject contains the measurements for a single picture. For this picture all the movements from the joystick are recorded
+ */
 class MeasureObject {
 
     private ArrayList<Integer> positionList;

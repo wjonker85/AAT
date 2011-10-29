@@ -78,7 +78,12 @@ public class AATModel extends Observable {
     private ArrayList<File> affectiveImages;
     private ArrayList<AATImage> testList; //Random list that contains the push or pull images.
     private Hashtable<Integer, String> colorTable;    //Contains the border colors
+    private HashMap<String, String> extraQuestions;
+    private ParticipantsDataTableModel participantsData;
+
     private File languageFile;
+    private File participantsFile;
+    private File dataFile;
 
 
     private Pattern pattern;
@@ -88,7 +93,11 @@ public class AATModel extends Observable {
 
     //Constructor.
     public AATModel(File config) {
+        participantsData = new ParticipantsDataTableModel();
         testConfig = new TestConfig(new File("sampleConfig"));
+        participantsFile = new File(testConfig.getValue("ParticipantsFile"));
+        dataFile = new File(testConfig.getValue("DataFile"));
+        id = getHighestID(participantsFile);
         File neutralDir = new File("images" + File.separator + testConfig.getValue("AffectiveDir"));
         File affectiveDir = new File("images" + File.separator + testConfig.getValue("NeutralDir"));
         languageFile = new File(testConfig.getValue("LanguageFile"));
@@ -121,6 +130,19 @@ public class AATModel extends Observable {
         }
     };
 
+    //Returns the hightest ID given to a participant so far.
+    private int getHighestID(File file) {
+       if(file.exists()) {
+           CSVReader csvReader = new CSVReader(file);
+           int columns = csvReader.getColumnNames().size();
+           int dataSize = csvReader.getData().size();
+           return Integer.parseInt(csvReader.getData().get(dataSize-columns).toString());    //Return first element from the last row.
+       }
+        else{
+           return 0;
+       }
+    }
+
     /*
         Creates a randomised list, containing the affective and neutral images. Every image gets loaded twice, one for the
         pull condition and one for the push condition.
@@ -150,11 +172,12 @@ public class AATModel extends Observable {
         testList = createRandomList();
         count = 0;        //reset counters
         run = 0;
-        newMeasure = new MeasureData(id);
         id++;          //new higher id
+        newMeasure = new MeasureData(id);
         this.setChanged();
         notifyObservers("Start");      //Notify the observer that a new test is started.
         testStatus = AATModel.TEST_WAIT_FOR_TRIGGER;   //Test status is wait for the user to press the trigger button.
+        //TODO: Create more states for the test. Show the question Frame, Practice trails
     }
 
     //Which view is enabled
@@ -166,6 +189,7 @@ public class AATModel extends Observable {
 
     /*
         This method determines the next step to be taken in the test.
+        TODO: Nog uitbreiden met de andere states
 
     */
     private void NextStep() {
@@ -215,10 +239,9 @@ public class AATModel extends Observable {
     }
 
     public boolean hasColoredBorders() {
-        if(testConfig.getValue("ColoredBorders").equals("True")) {
+        if (testConfig.getValue("ColoredBorders").equals("True")) {
             return true;
-        }
-        else {
+        } else {
             return false;
         }
     }
@@ -249,6 +272,45 @@ public class AATModel extends Observable {
         return Integer.parseInt(testConfig.getValue("BorderWidth"));
     }
 
+    //Read the optional extra questions from the language file specified in the configuration file.
+    public ArrayList<QuestionObject> getExtraQuestions() {
+        return textReader.getExtraQuestions();
+    }
+
+
+    //Create a list with the answers to the optional questions.
+    public void addExtraQuestions(HashMap<String, String> extraQuestions) {
+        this.extraQuestions = extraQuestions;
+        this.addParticipantsData();
+    }
+
+
+
+    /*
+    This method adds data to the Participants Data table. This data consists of at least the ID number. Next to the the
+    answers to the optional questions from the configuration files will be added to it.
+     */
+    private void addParticipantsData() {
+        String[] columnNames = new String[extraQuestions.size() + 1];     //TODO checken of dit klopt
+        columnNames[0] = "ID"; //The Participant always has an ID
+        int x = 1;
+        for (String key : extraQuestions.keySet()) {
+            columnNames[x] = key;
+            x++;
+        }
+        participantsData.setColumnNames(columnNames);         //Set the column headers for the table Data
+        ArrayList<Object> results = new ArrayList<Object>();
+        results.add(id);
+        int i = 1;
+
+        for (String key : extraQuestions.keySet()) {
+            results.add(extraQuestions.get(key));
+            i++;
+        }
+        participantsData.add(results);
+        participantsData.display();
+    }
+
     //Returns the current direction (Push of Pull)
     public int getDirection() {
         return current.getDirection();
@@ -265,9 +327,12 @@ public class AATModel extends Observable {
         return System.currentTimeMillis() - startMeasure;
     }
 
+    //Write results to file. The Measured data and Participants data go to seperate files
     private void writeToFile() {
         CSVWriter writer = new CSVWriter(newMeasure.getAllResults());
-        writer.writeData(new File("test.csv"));
+        CSVWriter writer2 = new CSVWriter(this.participantsData);
+        writer.writeData(dataFile);
+        writer2.writeData(participantsFile);
     }
 
     //Display results and write them to a file
@@ -319,6 +384,11 @@ public class AATModel extends Observable {
     }
 }
 
+
+/*
+This class reads the configuration file belonging to a AAT Test. All the important options like Directories, no of trials, Bordercolors etc.
+can be set in this file
+ */
 class TestConfig {
 
 
@@ -336,7 +406,9 @@ class TestConfig {
             "AffectiveDir",
             "NeutralDir",
             "LanguageFile",
-            "PracticeTrails"
+            "PracticeTrails",
+            "ParticipantsFile",
+            "DataFile"
 
     };
 
@@ -387,24 +459,41 @@ class TestConfig {
     }
 }
 
+
+/*
+Reads from the language file specified in the test configuration. This makes it possible to use the same test in
+different languages. This file can also contain optional questions that a researcher might be interested in.
+ */
 class TextReader {
 
     private Map<String, String> testText = new HashMap<String, String>();
+    private ArrayList<QuestionObject> extraQuestions;
+
     private File languageFile;
+
+
+    private ArrayList<String> questionKeys;
 
     //All the configuration options
     String[] options = {
             "Introduction",
-            "Practice",
+            "Start",
             "Break",
             "Finished"
     };
+
 
     public TextReader(File languageFile) {
         this.languageFile = languageFile;
         for (int x = 0; x < options.length; x++) {
             testText.put(options[x], "");
         }
+        questionKeys = new ArrayList<String>();
+        questionKeys.add("<Question>");
+        questionKeys.add("</Question>");
+        questionKeys.add("<Option>");
+        questionKeys.add("<Key>");
+        extraQuestions = new ArrayList<QuestionObject>();
         readConfig();
         test();
     }
@@ -417,10 +506,9 @@ class TextReader {
 
     private void readConfig() {
         String strLine;
-        StringTokenizer st;
-        boolean firstKey = true;
         String key = "";
         String text = "";
+        QuestionObject newQuestion = null;
         try {
             BufferedReader br = new BufferedReader(new FileReader(languageFile));
             while ((strLine = br.readLine()) != null) {
@@ -430,12 +518,23 @@ class TextReader {
                 assert strLine != null;
                 if (strLine.startsWith(("<"))) {
                     if (!strLine.startsWith("</")) {
-                        key = transform(strLine);
-                        text = "";
+                        if (strLine.startsWith("<Question>")) {     //Line indicates that there is a question.
+                            newQuestion = new QuestionObject();
+                        } else if (testText.containsKey(transform(strLine))) {
+                            key = transform(strLine);
+                            text = "";
+                        } else {
+                            readQuestion(strLine, newQuestion);
+                        }
+                    } else {
+                        if (strLine.startsWith("</Question")) {    //End of the question
+                            extraQuestions.add(newQuestion);
+                            newQuestion = new QuestionObject();
+                        }
                     }
                 } else {
                     if (testText.containsKey(key)) {
-                        text += strLine+"\n";      //Read text lines
+                        text += strLine + "\n";      //Read text lines
                     }
                 }
                 if (!strLine.startsWith("</")) {
@@ -448,9 +547,7 @@ class TextReader {
                     }
                 }
             }
-            //  }
-        } catch (Exception
-                e) {
+        } catch (Exception e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
     }
@@ -459,10 +556,83 @@ class TextReader {
         return testText.get(key);
     }
 
-    private void test() {
-        System.out.println(testText.keySet());
-        System.out.println(testText.values());
+    private void readQuestion(String line, QuestionObject question) {
+        StringTokenizer st = new StringTokenizer(line, " ");
+        String token = st.nextToken();
+        //   System.out.println(token);
+        String result = "";
+        if (line.length() > token.length()) {
+            result = line.substring(token.length() + 1);
+        }
+        if (token.startsWith("<Key")) {
+            //         System.out.println("Key "+result);
+            question.setKey(result);
+        }
+        if (token.startsWith("<Text>")) {
+            //      System.out.println("Text "+result);
+            question.setQuestion(result);
+        }
+        if (token.startsWith("<Option>")) {
+            //      System.out.println("Option "+ result);
+            question.addOptions(result);
+        }
 
     }
 
+    public ArrayList<QuestionObject> getExtraQuestions() {
+        return extraQuestions;
+    }
+
+    private void test() {
+        //     System.out.println(testText.keySet());
+        //    System.out.println(testText.values());
+        for (QuestionObject object : extraQuestions) {
+            System.out.println("Vraag " + object.getQuestion());
+            System.out.println("Options " + object.getOptions());
+            System.out.println("Key " + object.getKey());
+        }
+        //  System.out.println(extraQuestions);
+
+    }
+
+}
+
+
+/*
+Data structure which contains a optional question from the configuration files. This can be used to show the question + (Answer options)
+to the screen. The key String is used as a column header for use in a table or CSV file.
+ */
+class QuestionObject {
+
+    private String key;
+    private String question;
+    private ArrayList<String> options;
+
+    public QuestionObject() {
+        options = new ArrayList<String>();
+    }
+
+    public void setKey(String key) {
+        this.key = key;
+    }
+
+    public void setQuestion(String question) {
+        this.question = question;
+    }
+
+    public void addOptions(String option) {
+        options.add(option);
+    }
+
+    public String getKey() {
+        return key;
+    }
+
+    public String getQuestion() {
+        return question;
+    }
+
+    public ArrayList<String> getOptions() {
+        return options;
+    }
 }

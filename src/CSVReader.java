@@ -1,6 +1,7 @@
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.util.ArrayList;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
@@ -9,20 +10,21 @@ import java.util.Vector;
  * User: marcel
  * Date: 10/27/11
  * Time: 11:06 AM
- * To change this template use File | Settings | File Templates.
+ * This class reads a CSV file. First line of this file contains the columns for a table, the rest is data.
  */
-public class CSVReader  {
+public class CSVReader {
 
 
-    private Vector<String> data;
-    private Vector<String> fragments;
-    private Vector<String> configData;
+    private ArrayList<Object> data;
+    private ArrayList<String> columnNames;
+
 
     public CSVReader(File file) {
 
-        data = new Vector<String>();
-        fragments = new Vector<String>();
-        configData = new Vector<String>();
+        data = new ArrayList<Object>();
+        columnNames = new ArrayList<String>();
+        int lines = 0;
+
         int fragSize = 0;
 
         try {
@@ -32,79 +34,30 @@ public class CSVReader  {
 
             int tokenNumber = 0;
             while ((strLine = br.readLine()) != null) {
+
                 st = new StringTokenizer(strLine, ",");
                 while (st.hasMoreTokens()) {
-                    tokenNumber++;
                     String token = st.nextToken();
-                    if (token.equals("<config>")) {
-                        System.out.println("Config gevonden");
-                     //   st.nextToken();
-                        readConfig(br);
+                    if (lines == 0) {        //First line contains the column names
+                        columnNames.add(token);
                     }
-                    else if (token.equals("<person>")) {
-                        fragSize++;
-          //              fragments.add(valueOf(fragSize));
-                        String fragment = st.nextToken();
-                        fragments.add(fragment);       //voeg een nieuw fragment toe.
-                    } else {
-                        if (tokenNumber == 1) {
-            //                data.add(valueOf(fragSize));
-                            data.add(token);
-                        } else {
-                            data.add(token);
-                        }
+                    else {
+                        data.add(token);
                     }
                 }
-                if (tokenNumber == 5) {
-                    data.add(" ");
-                }
-                tokenNumber = 0;
+                lines++;
             }
-
         } catch (Exception e) {
-          //  throw new CsvReaderException(e.getMessage());
+            //  throw new CsvReaderException(e.getMessage());
         }
     }
 
     //Data is een vector met Sentences;
-    public Vector getData() {
+    public ArrayList<Object> getData() {
         return data;
     }
 
-    public Vector getFragments() {
-        return fragments;
-    }
-
-    public Vector getConfigData() {
-        return configData;
-    }
-
-    private void readConfig(BufferedReader br) {
-        try {
-            String strLine;
-            StringTokenizer st;
-            int tokenNumber = 0;
-            while ((strLine = br.readLine()) != null && !strLine.equals("</config>")) {
-                st = new StringTokenizer(strLine, ",");
-                while (st.hasMoreTokens()) {
-                    tokenNumber++;
-                    String token = st.nextToken();
-                    System.out.println(token);
-                    configData.add(token);
-                }
-            }
-        } catch (Exception e) {
-           // throw new CsvReaderException(e.getMessage());
-        }
-    }
-}
-
-class CsvReaderException extends Exception {
-
-    String error;
-
-    public CsvReaderException(String err) {
-        super(err);
-        error = err;
+    public ArrayList<String> getColumnNames() {
+        return columnNames;
     }
 }

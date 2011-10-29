@@ -25,3 +25,23 @@ BLAUWE rand: TREK de joystick naar je toe, GELE rand: DUW de joystick van je af.
 <Finished>
 De taak is nu afgelopen. Heel erg bedankt!
 </Finished>
+
+<Question>
+<Text> Zomaar een vraag?
+<Option> JA
+<Option> Nee
+<Key> Vraagje
+</Question>
+
+<Question>
+<Text> Vraag nummer twee
+<Option> Antwoord 1
+<Option> Antwoord 2
+<Option> Antwoord 3
+<Key> vraag2
+</Question>
+
+<Question>
+<Text> Nu nog een vraag zonder antwoord mogelijkheden.
+<Key> vraag3
+</Question>

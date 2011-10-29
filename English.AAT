@@ -25,3 +25,10 @@ BLUE border: pull the joystick towards you, YELLOW edge: Push the joystick away 
 <Finished>
 The task is now finished. Thank you!
 </Finished>
+
+<Question>
+<Text> Zomaar een vraag?
+<Option> JA
+<Option> Nee
+<Key> Vraagje
+</Question>
