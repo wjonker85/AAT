@@ -66,6 +66,7 @@ public class AATView extends PApplet implements Observer {
         background(0);
         fill(255);
         textSize(30);
+        textAlign(CENTER);
         text(infoText, xPos, yPos);
         //   }
     }
