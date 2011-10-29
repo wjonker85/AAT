@@ -50,6 +50,7 @@ public class AATView extends PApplet implements Observer {
         xPos = width / 2;               //Midden x coordinaar scherm
         yPos = height / 2;              //Midden y coordinaat scherm
         noCursor();
+        frameRate(24);
     }
 
     public void draw() {
@@ -80,17 +81,19 @@ public class AATView extends PApplet implements Observer {
         rectMode(CENTER);
         image(img, xPos, yPos, imgSizeX, imgSizeY);
 
-        stroke(unhex(model.getBorderColor(imgT)));
-        strokeWeight(imgBorderWidth);
-        fill(0, 0, 0, 0);
-        rect(xPos, yPos, imgSizeX, imgSizeY);
+        if (model.hasColoredBorders()) {
+            stroke(unhex(model.getBorderColor(imgT)));
+            strokeWeight(imgBorderWidth);
+            fill(0, 0, 0, 0);
+            rect(xPos, yPos, imgSizeX, imgSizeY);
+        }
 
 
+        //Beetje debug code
         fill(255, 0, 0);
         textSize(15);
         textAlign(LEFT);
         text("X: " + (int) imgSizeX + "px; Y: " + (int) imgSizeY + "px;" + " inputY: " + inputY, 5, 15);
-        //text("Border color (int): " + hi, 5, 30);
     }
 
 
