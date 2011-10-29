@@ -1,11 +1,27 @@
 <Introduction>
-Joo doe nu maar die test.
-Blauw is trekken
-Geel is duwen
+Do not forget:
+Pull the plates with a BLUE border towards you, push the plates with a yellow edge away from you.
+ 
+Click with your index finger to start the test!
 </Introduction>
+<Start>
+This was the last exercise.
+
+During the test there is a break.
+
+Do not forget:
+
+BLUE edge, pull the joystick towards you, YELLOW edge: Push the joystick away from you.
+
+Still have questions? Ask them now or start the test!
+</Start>
 <Break>
-Het is nu pauze lul
+You can have now an one minute break if you want.
+
+Do not forget:
+
+BLUE border: pull the joystick towards you, YELLOW edge: Push the joystick away from you.
 </break>
 <Finished>
-Einde gelukkig of niet
+The task is now finished. Thank you!
 </Finished>
