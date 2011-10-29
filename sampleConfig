@@ -1,14 +1,14 @@
 #Stimuli variables
 
 ColoredBorders True
-BorderColorPush E6FF00
-BorderColorPull 2200FF
+BorderColorPush FF68B399
+BorderColorPull FF006699
 BorderWidth 12
 StepSize 11
 
 #Test variables
 Trails 2
-BreakAfter 1
+BreakAfter 3
 AffectiveDir Affective
 NeutralDir Neutral
 
