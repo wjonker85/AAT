@@ -23,4 +23,8 @@ public class AATViewResults extends PApplet implements Observer {
         this.viewWidth = viewWidth;
 
     }
+
+    public void update(Observable observable, Object o) {
+        model = (AATModel) observable;
+    }
 }
