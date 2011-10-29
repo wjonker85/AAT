@@ -1,10 +1,10 @@
 #Stimuli variables
 
 ColoredBorders True
-BorderColorPush Geel
-BorderColorPull Blauw
+BorderColorPush E6FF00
+BorderColorPull 2200FF
 BorderWidth 12
-StepSize 7
+StepSize 11
 
 #Test variables
 Trails 2
@@ -13,7 +13,7 @@ AffectiveDir Affective
 NeutralDir Neutral
 
 #for different languages
-LanguageFile English.AAT
+LanguageFile Dutch.AAT
 
 
 
