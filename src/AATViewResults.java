@@ -28,18 +28,16 @@ public class AATViewResults extends PApplet implements Observer {
     }
 
     public void setup(){
-        size(200,200);
+        size(viewHeight,viewWidth);
+        noCursor();
     }
 
     public void draw(){
-        rectMode(CORNERS);
-        rect(0,0, 200, 200);
-        boxPlot.drawBoxPlot(0, 0, 1.5f, "Reactie tijd (ms)", "Conditie", "Één", "Twee", "Drie", "Vier");
+        /*drawBoxPlot(x, y, scalefactor, Y-as tekst, X-as tekst, conditie 1 label, conditie 2 label, conditie 3 label, conditie 4 label)
+         bij scalefactor 1, is afmeting plaatje 500x500
+          */
+        boxPlot.drawBoxPlot(0, 0, 1f, "Reactie tijd (ms)", "Conditie", "Één", "Twee", "Drie", "Vier");
     }
-
-
-
-
 
     public void update(Observable observable, Object o) {
         model = (AATModel) observable;
