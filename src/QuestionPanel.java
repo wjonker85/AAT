@@ -11,28 +11,22 @@ import java.util.Map;
  * User: marcel
  * Date: 10/29/11
  * Time: 1:15 PM
- * A
- */
+ * This is a panel that contains all the additional questions a researcher might be interested in.
+*/
 public class QuestionPanel extends JPanel {
 
 
-    //  private JPanel mainPanel;
     private JPanel questionsPanel;
-    private JPanel submitPanel;
-    private JButton submitButton;
-    private AATModel model;
     private Map<String, Component> questionsMap = new HashMap<String, Component>();
 
     public QuestionPanel(final AATModel model) {
         this.setBackground(Color.black);
         this.setForeground(Color.white);
-         this.setLayout(new BoxLayout(this,BoxLayout.Y_AXIS));
-        this.model = model;
-        submitPanel = new JPanel();
+        this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        questionsPanel = new JPanel(new SpringLayout());
+        JPanel submitPanel = new JPanel();
         submitPanel.setBackground(Color.BLACK);
         submitPanel.setForeground(Color.WHITE);
-        questionsPanel = new JPanel();
-        questionsPanel.setLayout(new BoxLayout(questionsPanel, BoxLayout.Y_AXIS));
         questionsPanel.setBackground(Color.black);
         questionsPanel.setForeground(Color.WHITE);
         JScrollPane scrollPane = new JScrollPane(questionsPanel);
@@ -40,7 +34,7 @@ public class QuestionPanel extends JPanel {
         scrollPane.setBackground(Color.black);
         scrollPane.setForeground(Color.white);
         this.add(scrollPane);
-        submitButton = new JButton("Submit");
+        JButton submitButton = new JButton("Submit");
         submitButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent actionEvent) {
                 model.addExtraQuestions(getResults());
@@ -50,10 +44,6 @@ public class QuestionPanel extends JPanel {
         });
         submitPanel.add(submitButton);
         this.add(submitPanel);
-        // setContentPane(mainPanel);
-        //setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        //  pack();
-        //  setVisible(false);
     }
 
     private void setDisabled() {
@@ -63,35 +53,33 @@ public class QuestionPanel extends JPanel {
 
     public void displayQuestions(ArrayList<QuestionObject> questions) {
         for (QuestionObject questionObject : questions) {
-            JPanel questionPanel = new JPanel();
-         //   questionPanel.setLayout(new BoxLayout(questionPanel, BoxLayout.X_AXIS));
-            questionPanel.setBackground(Color.black);
-            questionPanel.setForeground(Color.WHITE);
-            JLabel question = new JLabel(questionObject.getQuestion());
+            JLabel question = new JLabel(questionObject.getQuestion(), JLabel.TRAILING);
             question.setBackground(Color.black);
             question.setForeground(Color.WHITE);
-            question.setFont(new Font("Roman",30,30));
-            questionPanel.add(question);
+            question.setFont(new Font("Roman", 30, 30));
+            questionsPanel.add(question);
             if (questionObject.getOptions().size() > 1) {
-                JComboBox<String> answerOptions = new JComboBox(questionObject.getOptions().toArray());
+                JComboBox<Object> answerOptions = new JComboBox<Object>(questionObject.getOptions().toArray());
+                question.setLabelFor(answerOptions);
                 answerOptions.setBackground(Color.WHITE);
                 answerOptions.setForeground(Color.BLACK);
-                questionPanel.add(answerOptions);
+                questionsPanel.add(answerOptions);
                 questionsMap.put(questionObject.getKey(), answerOptions);
             } else {
                 JTextField textInput = new JTextField(10);
+                question.setLabelFor(textInput);
                 textInput.setBackground(Color.WHITE);
                 textInput.setForeground(Color.BLACK);
-                questionPanel.add(textInput);
+                questionsPanel.add(textInput);
                 questionsMap.put(questionObject.getKey(), textInput);
             }
-            questionsPanel.add(questionPanel);
+            questionsPanel.setOpaque(true);
         }
+        SpringUtilities.makeCompactGrid(questionsPanel,
+                questions.size(), 2, //rows, cols
+                6, 6,        //initX, initY
+                6, 6);       //xPad, yPad
 
-    }
-
-    public void display() {
-        this.setVisible(true);
     }
 
     private HashMap<String, String> getResults() {
