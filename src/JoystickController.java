@@ -117,7 +117,6 @@ public class JoystickController extends Thread {
                     prevYValue = yAxisValue;
                 }
                 if (trigger.getPollData() == 1 && prevTrigger != 1.0f) {   // only changes
-                    System.out.println("Trigger ingedrukt");
                     model.triggerPressed(); //Notify model that the trigger button is pressed.
                     prevTrigger = 1.0f;
                 } else if (trigger.getPollData() == 0) {   // reset prevTrigger
