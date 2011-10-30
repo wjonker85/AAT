@@ -65,7 +65,7 @@ public class BoxPlot extends PApplet {
 
     public void draw() {
         background(0);
-        drawBoxPlot(0, 0, 1.3f, "Reactie tijd (ms)", "Conditie", labelsArray[0], labelsArray[1], labelsArray[2], labelsArray[3]);
+        drawBoxPlot(0, 0, 1.3f, "Reaction Time (ms)", "Condition", labelsArray[0], labelsArray[1], labelsArray[2], labelsArray[3]);
     }
 
     public void drawBoxPlot(int x, int y, float s, String yText, String xText, String c1Text, String c2Text, String c3Text, String c4Text) {
