@@ -9,9 +9,9 @@ import processing.core.PApplet;
  */
 public class BoxPlot extends PApplet {
     float rH, minV, maxV;
-    float[] array1, array2, array3, array4, minValue, q1, median, q3, maxValue;
+    float[] minValue, q1, median, q3, maxValue;
     String[] labelsArray;
-    int viewWidth,viewHeight;
+    int viewWidth, viewHeight;
     DescriptiveStats stat1;
     DescriptiveStats stat2;
     DescriptiveStats stat3;
@@ -60,19 +60,18 @@ public class BoxPlot extends PApplet {
 
         public void setup() {
         size(viewHeight, viewWidth);
-        System.out.println(viewHeight+" "+viewWidth);
-     //   noCursor();
+        smooth();
     }
 
     public void draw() {
-        drawBoxPlot(0, 0, 1f, "Reactie tijd (ms)", "Conditie", labelsArray[0], labelsArray[1], labelsArray[2], labelsArray[3]);
-
+        background(0);
+        drawBoxPlot(0, 0, 1.3f, "Reactie tijd (ms)", "Conditie", labelsArray[0], labelsArray[1], labelsArray[2], labelsArray[3]);
     }
 
     public void drawBoxPlot(int x, int y, float s, String yText, String xText, String c1Text, String c2Text, String c3Text, String c4Text) {
         //1 is 500 x 500 en kan dus op basis van scherm worden aangepast.
         scale(s);
-
+        translate(x, y);
         line(75, 40, 75, 455); //Y As
         line(75, 455, 475, 455); // X As
 
@@ -81,6 +80,8 @@ public class BoxPlot extends PApplet {
 
         // Boxplotten tekenen
         int vPos = 100;
+        stroke(255);
+        fill(0);
         rectMode(CORNERS);
         for (int n = 0; n < 4; n++) {
             line(vPos + 25, 450 - (resizeFac * minValue[n]) + minFactor, vPos + 25, 450 - (resizeFac * maxValue[n]) + minFactor); //Verticale lijn
@@ -104,7 +105,7 @@ public class BoxPlot extends PApplet {
 
         //Y as ms waarden weergeven;
         for (int n = 0; n <= 8; n++) {
-            text((int) msStartStep, 70, textY);
+            text((int) msStartStep+" -", 76, textY);
             textY = textY - 50;
             msStartStep += round(msStepSize);
         }
