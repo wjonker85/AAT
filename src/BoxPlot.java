@@ -9,7 +9,7 @@ import processing.core.PApplet;
  */
 public class BoxPlot extends PApplet {
     float rH, minV, maxV;
-    float[] array1, array2, array3, array4, minValue, q1, median, q3, maxValue;
+    float[] minValue, q1, median, q3, maxValue;
     DescriptiveStats stat1;
     DescriptiveStats stat2;
     DescriptiveStats stat3;
