@@ -79,7 +79,7 @@ public class AATModel extends Observable {
     private ArrayList<AATImage> testList; //Random list that contains the push or pull images.
     private Hashtable<Integer, String> colorTable;    //Contains the border colors
     private HashMap<String, String> extraQuestions;
-    private ParticipantsDataTableModel participantsData;
+    private DynamicTableModel dynamic;
 
     private File languageFile;
     private File participantsFile;
@@ -93,7 +93,7 @@ public class AATModel extends Observable {
 
     //Constructor.
     public AATModel(File config) {
-        participantsData = new ParticipantsDataTableModel();
+        dynamic = new DynamicTableModel();
         testConfig = new TestConfig(new File("sampleConfig"));
         participantsFile = new File(testConfig.getValue("ParticipantsFile"));
         dataFile = new File(testConfig.getValue("DataFile"));
@@ -112,6 +112,7 @@ public class AATModel extends Observable {
             colorTable.put(AATImage.PULL, testConfig.getValue("BorderColorPull"));
             colorTable.put(AATImage.PUSH, testConfig.getValue("BorderColorPush"));
         }
+        DataExporter dataExporter = new DataExporter(new File("export.csv"),participantsFile,dataFile,this);
     }
 
 
@@ -132,15 +133,14 @@ public class AATModel extends Observable {
 
     //Returns the hightest ID given to a participant so far.
     private int getHighestID(File file) {
-       if(file.exists()) {
-           CSVReader csvReader = new CSVReader(file);
-           int columns = csvReader.getColumnNames().size();
-           int dataSize = csvReader.getData().size();
-           return Integer.parseInt(csvReader.getData().get(dataSize-columns).toString());    //Return first element from the last row.
-       }
-        else{
-           return 0;
-       }
+        if (file.exists()) {
+            CSVReader csvReader = new CSVReader(file);
+            int columns = csvReader.getColumnNames().size();
+            int dataSize = csvReader.getData().size();
+            return Integer.parseInt(csvReader.getData().get(dataSize - columns).toString());    //Return first element from the last row.
+        } else {
+            return 0;
+        }
     }
 
     /*
@@ -218,6 +218,15 @@ public class AATModel extends Observable {
         }
     }
 
+
+    //Return the total number of images a participant gets shown
+    public int getTotalImageCount() {
+        int affective = affectiveImages.size();
+        int neutral = neutralImages.size();
+        int runCount = Integer.parseInt(testConfig.getValue("Trails"));
+        return 2*(affective+neutral)*runCount;
+    }
+
     //Show the next image in the list
     private void showNextImage() {
         current = testList.get(count);    //change current to the next image
@@ -285,20 +294,20 @@ public class AATModel extends Observable {
     }
 
 
-
     /*
-    This method adds data to the Participants Data table. This data consists of at least the ID number. Next to the the
-    answers to the optional questions from the configuration files will be added to it.
-     */
+   This method adds data to the Participants Data table. This data consists of at least the ID number. Next to the the
+   answers to the optional questions from the configuration files will be added to it.
+    */
     private void addParticipantsData() {
-        String[] columnNames = new String[extraQuestions.size() + 1];     //TODO checken of dit klopt
-        columnNames[0] = "ID"; //The Participant always has an ID
+        ArrayList<String> columnNames = new ArrayList<String>();
+
+        columnNames.add("ID"); //The Participant always has an ID
         int x = 1;
         for (String key : extraQuestions.keySet()) {
-            columnNames[x] = key;
+            columnNames.add(key);
             x++;
         }
-        participantsData.setColumnNames(columnNames);         //Set the column headers for the table Data
+        dynamic.setColumnNames(columnNames);         //Set the column headers for the table Data
         ArrayList<Object> results = new ArrayList<Object>();
         results.add(id);
         int i = 1;
@@ -307,8 +316,8 @@ public class AATModel extends Observable {
             results.add(extraQuestions.get(key));
             i++;
         }
-        participantsData.add(results);
-        participantsData.display();
+        dynamic.add(results);
+        dynamic.display();
     }
 
     //Returns the current direction (Push of Pull)
@@ -330,7 +339,7 @@ public class AATModel extends Observable {
     //Write results to file. The Measured data and Participants data go to seperate files
     private void writeToFile() {
         CSVWriter writer = new CSVWriter(newMeasure.getAllResults());
-        CSVWriter writer2 = new CSVWriter(this.participantsData);
+        CSVWriter writer2 = new CSVWriter(this.dynamic);
         writer.writeData(dataFile);
         writer2.writeData(participantsFile);
     }
@@ -394,6 +403,7 @@ class TestConfig {
 
     private Map<String, String> testOptions = new HashMap<String, String>();
     private File testConfig;
+
     //All the configuration options
     String[] options = {
             "ColoredBorders",
@@ -412,7 +422,7 @@ class TestConfig {
 
     };
 
-    //Constructor, fills the Hashtable with
+    //Constructor, fills the Hashtable with the options
     public TestConfig(File testConfig) {
         this.testConfig = testConfig;
         testOptions = new Hashtable<String, String>();
@@ -423,6 +433,10 @@ class TestConfig {
         readConfig();
     }
 
+    /*
+    Reads the configuration file. Every time the reader discovers a key that is in the options list. It reads it's value from
+    the configuration file and updates it's value in the HashMap
+     */
     private void readConfig() {
         String strLine;
         StringTokenizer st;
@@ -475,7 +489,7 @@ class TextReader {
     private ArrayList<String> questionKeys;
 
     //All the configuration options
-    String[] options = {
+    String[] options = {              //Keys defining the different texts
             "Introduction",
             "Start",
             "Break",
@@ -489,21 +503,26 @@ class TextReader {
             testText.put(options[x], "");
         }
         questionKeys = new ArrayList<String>();
-        questionKeys.add("<Question>");
+        questionKeys.add("<Question>");         //Keys defining questions
         questionKeys.add("</Question>");
         questionKeys.add("<Option>");
         questionKeys.add("<Key>");
         extraQuestions = new ArrayList<QuestionObject>();
         readConfig();
-        test();
     }
 
+    //Remove < and > character from a string
     private String transform(String s) {
         s = s.replace("<", "");
         s = s.replace(">", "");
         return s;
     }
 
+    /*
+    This method reads the Language file defined in the config file. This file contains the different texts that are showed during
+    the test. This file also contains optional extra questions that can be asked to the participant at the start of a new test.
+    For example ask for gender or age.
+     */
     private void readConfig() {
         String strLine;
         String key = "";
@@ -552,49 +571,40 @@ class TextReader {
         }
     }
 
+
+    //Returns the requested value belonging to a key in the Hashmap
     public String getValue(String key) {
         return testText.get(key);
     }
 
+    /*
+    Input from the languagefiles is checked for lines that indicate there is an extra question
+    When there is a <Question> a new question is available. The <Text> is followed by the question line
+    <Option> is followed by an answer option. When there are no options given, then this question is a open question.
+    <Key> is the name the variable for the answers will be given.
+     */
     private void readQuestion(String line, QuestionObject question) {
         StringTokenizer st = new StringTokenizer(line, " ");
         String token = st.nextToken();
-        //   System.out.println(token);
         String result = "";
+
         if (line.length() > token.length()) {
             result = line.substring(token.length() + 1);
         }
         if (token.startsWith("<Key")) {
-            //         System.out.println("Key "+result);
             question.setKey(result);
         }
         if (token.startsWith("<Text>")) {
-            //      System.out.println("Text "+result);
             question.setQuestion(result);
         }
         if (token.startsWith("<Option>")) {
-            //      System.out.println("Option "+ result);
             question.addOptions(result);
         }
-
     }
 
     public ArrayList<QuestionObject> getExtraQuestions() {
         return extraQuestions;
     }
-
-    private void test() {
-        //     System.out.println(testText.keySet());
-        //    System.out.println(testText.values());
-        for (QuestionObject object : extraQuestions) {
-            System.out.println("Vraag " + object.getQuestion());
-            System.out.println("Options " + object.getOptions());
-            System.out.println("Key " + object.getKey());
-        }
-        //  System.out.println(extraQuestions);
-
-    }
-
 }
 
 

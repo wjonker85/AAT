@@ -10,7 +10,7 @@ import java.util.Vector;
  * TableModel with the data from the participants. If the test contains no extra questions, the only thing this will contain is the
  * user id. If there are more questions asked. Then there will be more.
  */
-public class ParticipantsDataTableModel extends AbstractTableModel {
+public class DynamicTableModel extends AbstractTableModel {
 
 
     private ArrayList<Object> data;
@@ -20,16 +20,16 @@ public class ParticipantsDataTableModel extends AbstractTableModel {
 
 
     //Create the number of column dynamic.
-    public ParticipantsDataTableModel() {
+    public DynamicTableModel() {
         columns = new ArrayList<String>();
         data = new ArrayList<Object>();
     }
 
-    public void setColumnNames(String[] columnNames) {
-
-        this.columnNames = columnNames;
-        for(int x = 0;x<columnNames.length;x++) {
-            columns.add(columnNames[x]);
+    public void setColumnNames(ArrayList<String> columns) {
+        columnNames = new String[columns.size()];
+        this.columns = columns;
+        for(int x = 0;x<columns.size();x++) {
+            columnNames[x]=columns.get(x);
             System.out.println(columnNames[x]);
         }
         fireTableDataChanged();
@@ -58,9 +58,6 @@ public class ParticipantsDataTableModel extends AbstractTableModel {
     }
 
     public void setValueAt(Object value, int row, int col) {
-        System.out.println("Data setten op "+row+" "+col);
-        System.out.println(data.size());
-     //   data.set(0,"mmm");
         if (row <= getRowCount()) {
             data.set(((row * getColumnCount()) + col), value);
         } else {
@@ -74,6 +71,14 @@ public class ParticipantsDataTableModel extends AbstractTableModel {
         return true;
     }
 
+    public void removeRow(int row) {
+        int startPos = row*getColumnCount();
+        int endPos = startPos+getColumnCount()-1;
+        for(int x = endPos;x>=startPos;x--) {
+            System.out.println("Remove "+data.get(x));
+            data.remove(x);
+        }
+    }
 
     public void display() {
         System.out.println(data);

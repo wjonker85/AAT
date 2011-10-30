@@ -79,8 +79,5 @@ public class ResultsDataTableModel extends AbstractTableModel {
     public boolean isCellEditable(int row, int col) {
         return true;
     }
-
-
-
 }
 
