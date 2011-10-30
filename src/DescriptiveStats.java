@@ -33,20 +33,20 @@ public class DescriptiveStats extends PApplet {
 
     public float q1() {
         newArray = sort(newArray);
-        int pos = (int) ceil((newArray.length) * .25f) - 1;
+        int pos = ceil((newArray.length) * .25f) - 1;
         return newArray[pos];
     }
 
     public float q3() {
         newArray = sort(newArray);
-        int pos = (int) ceil((newArray.length) * .75f) - 1;
+        int pos = ceil((newArray.length) * .75f) - 1;
         return newArray[pos];
     }
 
     public float minValue() {
         newArray = sort(newArray);
-        int posQ1 = (int) ceil((newArray.length) * .25f) - 1;
-        int posQ3 = (int) ceil((newArray.length) * .75f) - 1;
+        int posQ1 = ceil((newArray.length) * .25f) - 1;
+        int posQ3 = ceil((newArray.length) * .75f) - 1;
         float ika = newArray[posQ3] - newArray[posQ1];
         float minValue = newArray[posQ1] - (1.5f * ika);
 
@@ -63,8 +63,8 @@ public class DescriptiveStats extends PApplet {
 
     public float maxValue() {
         newArray = sort(newArray);
-        int posQ1 = (int) ceil((newArray.length) * .25f) - 1;
-        int posQ3 = (int) ceil((newArray.length) * .75f) - 1;
+        int posQ1 = ceil((newArray.length) * .25f) - 1;
+        int posQ3 = ceil((newArray.length) * .75f) - 1;
         float ika = newArray[posQ3] - newArray[posQ1];
         float maxValue = newArray[posQ3] + (1.5f * ika);
 
