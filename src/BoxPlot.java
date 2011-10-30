@@ -60,6 +60,8 @@ public class BoxPlot extends PApplet {
 
         public void setup() {
         size(viewHeight, viewWidth);
+        frameRate(3); //hoeft allemaal niet zo rap, statisch plaat, bespaart stroom en groen is goed, vandaar!!
+        noCursor();
         smooth();
     }
 
@@ -72,6 +74,7 @@ public class BoxPlot extends PApplet {
         //1 is 500 x 500 en kan dus op basis van scherm worden aangepast.
         scale(s);
         translate(x, y);
+        fill(211, 206, 151);
         line(75, 40, 75, 455); //Y As
         line(75, 455, 475, 455); // X As
 
@@ -80,8 +83,8 @@ public class BoxPlot extends PApplet {
 
         // Boxplotten tekenen
         int vPos = 100;
-        stroke(255);
-        fill(0);
+        stroke(224, 3, 81);
+        fill(62, 88, 172);
         rectMode(CORNERS);
         for (int n = 0; n < 4; n++) {
             line(vPos + 25, 450 - (resizeFac * minValue[n]) + minFactor, vPos + 25, 450 - (resizeFac * maxValue[n]) + minFactor); //Verticale lijn
