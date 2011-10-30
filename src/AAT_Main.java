@@ -27,9 +27,6 @@ public class AAT_Main {
     /*
 Definieer view classes, deze classes worden door Wilfried in Processing geschreven.
     */
-    private AATView aatView;
-    private AATResults aatResults;
-
 
     public static void main(String[] args) {
         AAT_Main main = new AAT_Main();
@@ -45,22 +42,21 @@ Definieer view classes, deze classes worden door Wilfried in Processing geschrev
 
     public AAT_Main() {
         frame = new JFrame("Approach Avoidance Task");
-        model = new AATModel(new File("Blaat"));
-        aatResults = new AATResults();
-        testFrame = new TestFrame();
+        model = new AATModel(new File("sampleConfig"));
+     //   aatResults = new AATResults();
+        testFrame = new TestFrame(model);
         mainPanel = new JPanel();
         mainPanel.setSize(800,600);
-        DisplayResults results = new DisplayResults();
+    //    DisplayResults results = new DisplayResults();
         Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
         screenWidth = (int) dim.getWidth();
         screenHeight = (int) dim.getHeight();
-
-        model.addObserver(testFrame);
-        model.addObserver(results);
-        joystick = new JoystickController(model);
+                joystick = new JoystickController(model);
         joystick.start(); //Start joystick Thread
 
-        aatResults.init();
+        model.addObserver(testFrame);
+  //      model.addObserver(results);
+     //   aatResults.init();
         JMenuBar menuBar = new JMenuBar();
         JMenu fileMenu = new JMenu("File");
         JMenuItem startTest = new JMenuItem("Start new Test");
@@ -70,18 +66,7 @@ Definieer view classes, deze classes worden door Wilfried in Processing geschrev
         //Start a new test.
         startTest.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent actionEvent) {
-                if(aatView !=null) {
-                    model.deleteObserver(aatView);  //Remove previous instance of the aatView from the observers list.
-                    testFrame.remove(aatView);
-                }
-                aatView = new AATView(screenWidth, screenHeight,model.getStepRate());
-                aatView.init();             //Make sure the PApplet gets initialised.
-                model.addObserver(aatView);    //Add a new aatView to the observers list.
-                testFrame.getContentPane().add(aatView);
                 model.startTest();
-                QuestionFrame questionFrame = new QuestionFrame(model);
-                questionFrame.displayQuestions(model.getExtraQuestions());
-                questionFrame.display();
             }
         });
 

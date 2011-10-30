@@ -9,17 +9,22 @@ import javax.swing.plaf.basic.BasicInternalFrameTitlePane;
  * User: marcel
  * Date: 10/4/11
  * Time: 5:09 PM
- * JoystickController die met behulp van de JInput library verbinding maakt met een aangesloten joystick. Twee functies zijn van belang
- * De waarden van de y-as en of de "Throttle" button ingedrukt wordt.
- * <p/>
- * Y-as geeft waarden van -3 tot 3 via 0 als middenpunt
-TODO: Iets grotere foutmarge maken en nog wat meer stappen toevoegen.
+ * This joystick controller reads the y-axis from a joystick and listens to the Trigger button of that joystick
+ * The class searches for a joystick with the help of the JInput library. This library connects this java program to the
+ * Operating system (Windows or Linux). Because of different readouts on linux and windows the search and assignment of buttons is
+ * somewhat different. Detection methods try to overcome this.
+ *
+ * When a participant moves the joystick it will return an integer value depending on how far the joystick is moved from its center.
+ * The accuracy of this is based on the stipsize and error margin values in the config
+ * TODO: Iets grotere foutmarge maken en nog wat meer stappen toevoegen.
  TODO: Aantal stappen moet uit configuratiebestand komen.
  */
 public class JoystickController extends Thread {
 
     private static final int DELAY = 5;  // ms  (polling interval)
     private static final float EPSILON = 0.0001f;
+    private int stepSize;
+    private float margin;
     private AATModel model;
     private Component yAxis;
     private Component trigger;
@@ -29,6 +34,8 @@ public class JoystickController extends Thread {
 
     public JoystickController(AATModel model) {
         this.model = model;
+        stepSize = model.getStepRate();
+        margin = 0.05f;
         ControllerEnvironment ce = ControllerEnvironment.getDefaultEnvironment(); //Verbinding via het os met de joystick maken.
 
         Controller[] cs = ce.getControllers();      //Lijst met alle aangesloten controllers
@@ -104,11 +111,13 @@ public class JoystickController extends Thread {
                 yAxisValue = yAxis.getPollData();
                 if (yAxisValue != prevYValue) {  // value has changed
                     //    if (Math.abs(currValue) > EPSILON) {
-                    model.changeYaxis(convertValue(yAxisValue));
+                    model.changeYaxis(convertValue2(yAxisValue));
+                 //   convertValue2(yAxisValue);
                     //  }
                     prevYValue = yAxisValue;
                 }
                 if (trigger.getPollData() == 1 && prevTrigger != 1.0f) {   // only changes
+                    System.out.println("Trigger ingedrukt");
                     model.triggerPressed(); //Notify model that the trigger button is pressed.
                     prevTrigger = 1.0f;
                 } else if (trigger.getPollData() == 0) {   // reset prevTrigger
@@ -119,34 +128,14 @@ public class JoystickController extends Thread {
         }
     }
 
-  //TODO: Nog veranderen zodat dit dynamisch gebeurt.
-    //Changes float value to an Integer from 1 to 7.
-    private int convertValue(float value) {
-        if (value > 0 && value <= 0.33) {
-            return 6;
-        }
-        if (value > 0.33 && value <= 0.66) {
-            return 7;
-        }
-        if(value >0.66 && value < 1)  {
-            return 8;
-        }
-        if (value == 1) {
-            return 9;
-        }
-        if (value < 0 && value > -0.33) {
-            return 4;
-        }
-        if (value <= -0.33 && value > -0.66) {
-            return 3;
-        }
-        if(value<=-0.66 && value > -1)
-            return 2;
-        if (value == -1) {
-            return 1;
-        } else {
-            return 5;      //Stick in the middle
-        }
+    /*
+    Converts the float value between -1 and 1 to an integer value.
+     */
+    public int convertValue2(float value) {
+        int middlePos = (stepSize+1)/2;
+        int steps = stepSize - middlePos;
+        float increment = (float) 1/steps;
+        int returnValue = (int) (value/increment);
+        return middlePos+returnValue;
     }
-
 }

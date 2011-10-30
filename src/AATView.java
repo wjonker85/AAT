@@ -28,16 +28,16 @@ public class AATView extends PApplet implements Observer {
 
     //Heb nu tijdelijk de grootte van de plaatjes toegevoegd aan de constructor. Deze waardes worden nu vanuit de main nog
     //doorgegeven. Is nu nog nodig omdat het model de plaatjes doorgeeft en het model ze niet zelf vanuit een bestand leest.
-    public AATView(int viewWidth, int viewHeight, int stepSize) {
-        // Tijdelijk, moet uit model komen.
-        setVisible(true);
-
+    public AATView(AATModel model, int viewHeight,int viewWidth) {
+        System.out.println("New AAT View started");
+        this.model = model;
         //Grote van de AATView scherm.
         this.viewHeight = viewHeight;
         this.viewWidth = viewWidth;
-
         //Hoeveel stappen heeft joystick
-        this.stepSize = stepSize;
+        this.stepSize = model.getStepRate();
+        displayText = model.getIntroductionText(); //Test starts with an introduction tekst.
+
     }
 
     public void setup() {
@@ -49,7 +49,7 @@ public class AATView extends PApplet implements Observer {
         imgBorderWidth = borderWidth;   //imgBorderWidth start met waarde borderWidth
         xPos = width / 2;               //Midden x coordinaar scherm
         yPos = height / 2;              //Midden y coordinaat scherm
-        noCursor();
+     //   noCursor();
         frameRate(24);
     }
 
@@ -74,6 +74,7 @@ public class AATView extends PApplet implements Observer {
     }
 
     public void imageShow() {
+
         background(0);
         setupImage();
 
@@ -142,8 +143,6 @@ public class AATView extends PApplet implements Observer {
         of verkleinen afhankelijk van de stand van de joystick.
     */
     public void update(Observable observable, Object o) {
-        model = (AATModel) observable;
-
         //Informatie van de Y-as van de joystick. Om de grootte van het getoonde plaatje op aan te passen.
         if (o.toString().equals("Y-as")) {
             inputY = model.getPictureSize();
@@ -166,18 +165,23 @@ public class AATView extends PApplet implements Observer {
 
         //De test is gestart. Mogelijkheid om instructies te geven.
         //Nu eerst alleen een zwart scherm
-        if (o.toString().equals("Start")) {
-            System.out.println("Test started");
-            displayText = model.getIntroductionText();
-            blackScreen = true;
-            showInfo = true;
-        }
+     //   if (o.toString().equals("Start")) {
+      //      System.out.println("Test started");
+      //      displayText = model.getIntroductionText();
+      //      System.out.println(displayText+" moiooo");
+      //      blackScreen = true;
+      //      showInfo = true;
+
+
+      //  }
 
         //Bericht uit het model dat het volgende plaatje getoond mag worden.
         if (o.toString().equals("Show Image")) {
             System.out.println("Show Picture");
             img = convertImage(model.getNextImage());
+            System.out.println("imgWidth "+img.width+" "+img.height);
             imgWidth = img.width;
+
             imgHeight = img.height;
             imgT = model.getDirection();
             blackScreen = false;         //Plaatjes weer laten zien.

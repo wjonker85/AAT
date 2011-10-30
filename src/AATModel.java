@@ -28,14 +28,10 @@ import java.util.regex.Pattern;
  * When a user has done the test it is possible that it can see his or her results graphically..
  * <p/>
  * <p/>
- * TODO: Informatie lezen uit configuratiebestand, dus alles nog wat dynamischer maken.
+ * <p/>
  * TODO: Iets doen met de verschillende opties van weergave.
  * TODO: Misschien een testplaatje als eerste
  * TODO: Nog eerst een testrun toevoegen.
- * TODO: Id verhogen als er een nieuwe test gestart wordt
- * TODO: Dat id moet dan 1 hoger zijn dan de hoogste die in het bestand staat.
- * TODO: Alle informatie uit het hele data bestand inlezen.
- * TODO: export functie met filter.
  * TODO: Uitbreiden met practice runs
  */
 public class AATModel extends Observable {
@@ -52,6 +48,7 @@ public class AATModel extends Observable {
     private static int TEST_STOPPED = 0;
     private static int IMAGE_LOADED = 1;
     private static int TEST_WAIT_FOR_TRIGGER = 2;
+    private static int TEST_WAIT_FOR_QUESTIONS = 3;
 
     private Hashtable<String, String> testOptions;
 
@@ -65,7 +62,7 @@ public class AATModel extends Observable {
     private int count; //Counts the number of images shown.
     private int run;
     private int id = 0;
-    private boolean hasBorder;
+
     private MeasureData newMeasure;
     private long startMeasure;
     private TestConfig testConfig;
@@ -94,7 +91,7 @@ public class AATModel extends Observable {
     //Constructor.
     public AATModel(File config) {
         dynamic = new DynamicTableModel();
-        testConfig = new TestConfig(new File("sampleConfig"));
+        testConfig = new TestConfig(config);
         participantsFile = new File(testConfig.getValue("ParticipantsFile"));
         dataFile = new File(testConfig.getValue("DataFile"));
         id = getHighestID(participantsFile);
@@ -105,14 +102,14 @@ public class AATModel extends Observable {
         pattern = Pattern.compile(IMAGE_PATTERN);
         neutralImages = getImages(neutralDir);
         affectiveImages = getImages(affectiveDir);
-        //  imageFiles = getImages(imageDir); //create ArrayList with all image files;
+
         testStatus = AATModel.TEST_STOPPED;
         if (testConfig.getValue("ColoredBorders").equals("True")) {
             colorTable = new Hashtable<Integer, String>();
             colorTable.put(AATImage.PULL, testConfig.getValue("BorderColorPull"));
             colorTable.put(AATImage.PUSH, testConfig.getValue("BorderColorPush"));
         }
-        DataExporter dataExporter = new DataExporter(new File("export.csv"),participantsFile,dataFile,this);
+        DataExporter dataExporter = new DataExporter(new File("export.csv"), participantsFile, dataFile, this);
     }
 
 
@@ -175,8 +172,14 @@ public class AATModel extends Observable {
         id++;          //new higher id
         newMeasure = new MeasureData(id);
         this.setChanged();
-        notifyObservers("Start");      //Notify the observer that a new test is started.
-        testStatus = AATModel.TEST_WAIT_FOR_TRIGGER;   //Test status is wait for the user to press the trigger button.
+        if (textReader.getExtraQuestions().size() > 0) {   //When there are extra question, show them
+            testStatus = AATModel.TEST_WAIT_FOR_QUESTIONS;
+            notifyObservers("Show questions");      //Notify the observer that a new test is started.
+        } else {
+            testStatus = AATModel.TEST_WAIT_FOR_TRIGGER;   //Test status is wait for the user to press the trigger button.
+            notifyObservers("Start");
+        }
+
         //TODO: Create more states for the test. Show the question Frame, Practice trails
     }
 
@@ -224,7 +227,7 @@ public class AATModel extends Observable {
         int affective = affectiveImages.size();
         int neutral = neutralImages.size();
         int runCount = Integer.parseInt(testConfig.getValue("Trails"));
-        return 2*(affective+neutral)*runCount;
+        return 2 * (affective + neutral) * runCount;
     }
 
     //Show the next image in the list
@@ -291,6 +294,12 @@ public class AATModel extends Observable {
     public void addExtraQuestions(HashMap<String, String> extraQuestions) {
         this.extraQuestions = extraQuestions;
         this.addParticipantsData();
+        System.out.println("Extra questions added");
+        this.setChanged();
+        this.notifyObservers("Start");
+        testStatus = AATModel.TEST_WAIT_FOR_TRIGGER;   //Test status is wait for the user to press the trigger button.
+        System.out.println("Test status "+testStatus);
+
     }
 
 
@@ -364,7 +373,7 @@ public class AATModel extends Observable {
             resize = value;
             if (testStatus == AATModel.IMAGE_LOADED) { //Only listen when there is an image loaded
                 newMeasure.addResult(resize, getMeasurement());     //add results to the other measurements
-                if (current.getDirection() == AATImage.PULL && value == 9) {   //check if the requested action has been performed
+                if (current.getDirection() == AATImage.PULL && value == getStepRate()) {   //check if the requested action has been performed
                     removeImage();
                 } else if (current.getDirection() == AATImage.PUSH && value == 1) {
                     removeImage();
@@ -386,7 +395,9 @@ public class AATModel extends Observable {
     to image loaded. then call nextstep so the model can determine the appropriate next action to take
     */
     public void triggerPressed() {
+        System.out.println("Trigger2 "+testStatus);
         if (testStatus == AATModel.TEST_WAIT_FOR_TRIGGER) {
+            System.out.println("Trigger pressed");
             testStatus = AATModel.IMAGE_LOADED;
             NextStep();
         }

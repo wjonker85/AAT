@@ -25,7 +25,6 @@ public class MeasureData {
 
     //New measure for each picture
     public void newMeasure(int run, String imageName, int direction, int type) {
-        System.out.println("Start nieuwe meting "+ imageName);
         MeasureObject measureObject = new MeasureObject(run, imageName, direction, type);
         allMeasures.add(measureObject);
 
@@ -33,7 +32,6 @@ public class MeasureData {
 
     //Everytime the participant changes the joystick, it's movement is recorded.
     public void addResult(int size, long time) {
-        System.out.println("Voeg resultaat toe: "+ size+" "+time);
         allMeasures.get(allMeasures.size()-1).addResult(size, time);
     }
 
@@ -45,7 +43,7 @@ public class MeasureData {
     //Returns a tablemodel with all results.
     public AbstractTableModel getAllResults() {
         ResultsDataTableModel allResults = new ResultsDataTableModel();
-        System.out.println("Aantal metingen "+allMeasures.size());
+
         for (MeasureObject mObject : allMeasures) {
             System.out.println(mObject.getImageName()+" "+mObject.size());
             for (int x = 0; x < mObject.size(); x++) {
