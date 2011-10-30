@@ -9,13 +9,18 @@ import processing.core.PApplet;
  */
 public class BoxPlot extends PApplet {
     float rH, minV, maxV;
-    float[] minValue, q1, median, q3, maxValue;
+    float[] array1, array2, array3, array4, minValue, q1, median, q3, maxValue;
+    String[] labelsArray;
+    int viewWidth,viewHeight;
     DescriptiveStats stat1;
     DescriptiveStats stat2;
     DescriptiveStats stat3;
     DescriptiveStats stat4;
 
-    BoxPlot(float[] array1, float[] array2, float[] array3, float[] array4) {
+    BoxPlot(float[] array1, float[] array2, float[] array3, float[] array4,String[] labelsArray,int viewWidth,int viewHeight) {
+        this.labelsArray = labelsArray;
+        this.viewHeight = viewHeight;
+        this.viewWidth = viewWidth;
         stat1 = new DescriptiveStats(array1);
         stat2 = new DescriptiveStats(array2);
         stat3 = new DescriptiveStats(array3);
@@ -51,6 +56,17 @@ public class BoxPlot extends PApplet {
         this.median = median;
         this.q3 = q3;
         this.maxValue = maxValue;
+    }
+
+        public void setup() {
+        size(viewHeight, viewWidth);
+        System.out.println(viewHeight+" "+viewWidth);
+     //   noCursor();
+    }
+
+    public void draw() {
+        drawBoxPlot(0, 0, 1f, "Reactie tijd (ms)", "Conditie", labelsArray[0], labelsArray[1], labelsArray[2], labelsArray[3]);
+
     }
 
     public void drawBoxPlot(int x, int y, float s, String yText, String xText, String c1Text, String c2Text, String c3Text, String c4Text) {

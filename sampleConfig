@@ -7,7 +7,7 @@ BorderWidth 12
 StepSize 9
 
 #Test variables
-Trails 2
+Trails 1
 BreakAfter 3
 AffectiveDir Affective
 NeutralDir Neutral
@@ -17,7 +17,7 @@ LanguageFile English.AAT
 
 
 ParticipantsFile Participants.csv
-DataFile Data.sav
+DataFile Data.csv
 
 
 

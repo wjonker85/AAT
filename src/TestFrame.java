@@ -14,6 +14,7 @@ import java.util.Observer;
 public class TestFrame extends JFrame implements Observer {
 
     private AATView aatView;
+    private AATViewResults aatResults;
     private AATModel model;
     private QuestionPanel qPanel;
 
@@ -36,6 +37,7 @@ public class TestFrame extends JFrame implements Observer {
      */
     public void update(Observable observable, Object o) {
         if (o.toString().equals("Start")) {
+            this.getContentPane().removeAll();
             this.setVisible(true);
             this.getContentPane().remove(qPanel);
             this.setLayout(null);
@@ -63,12 +65,28 @@ public class TestFrame extends JFrame implements Observer {
             //  this.setVisible(true);
         }
 
-        if (o.toString().equals("Test ended")) {
-            System.out.println("Einde van de test");
-            this.dispose();
-            this.setEnabled(false);
-            this.setVisible(false);
-
+        if (o.toString().equals("Display results")) {
+            this.getContentPane().removeAll();
+            System.out.println("Display results");
+            model.deleteObserver(aatView);
+            Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+            int screenWidth = (int) dim.getWidth();
+            int screenHeight = (int) dim.getHeight();
+            this.setLayout(null);
+   //         if (aatResults != null) {
+    //            model.deleteObserver(aatResults);
+    //        }
+            aatResults = new AATViewResults(screenWidth, screenHeight, model);
+         //   aatResults.init();
+            this.getContentPane().add(aatResults);
         }
+
+     //   if (o.toString().equals("Test ended")) {
+     //       System.out.println("Einde van de test");
+     //       this.dispose();
+     //       this.setEnabled(false);
+     //       this.setVisible(false);
+
+      //  }
     }
 }

@@ -67,9 +67,9 @@ Definieer view classes, deze classes worden door Wilfried in Processing geschrev
         startTest.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent actionEvent) {
                 model.startTest();
-                QuestionFrame questionFrame = new QuestionFrame(model);
-                questionFrame.displayQuestions(model.getExtraQuestions());
-                questionFrame.display();
+            //    QuestionFrame questionFrame = new QuestionFrame(model);
+            //    questionFrame.displayQuestions(model.getExtraQuestions());
+            //    questionFrame.display();
             }
         });
 

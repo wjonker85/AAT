@@ -40,6 +40,16 @@ public class MeasureData {
     }
 
 
+    public ArrayList<Long> getMeasures(int direction, int type) {
+        ArrayList<Long> results = new ArrayList<Long>();
+        for(MeasureObject measure : allMeasures) {
+             if(measure.getDirection() == direction && measure.getType() == type) {
+                 results.add(measure.getReactionTime());
+             }
+        }
+        return results;
+    }
+
     //Returns a tablemodel with all results.
     public AbstractTableModel getAllResults() {
         ResultsDataTableModel allResults = new ResultsDataTableModel();

@@ -49,6 +49,7 @@ public class AATModel extends Observable {
     private static int IMAGE_LOADED = 1;
     private static int TEST_WAIT_FOR_TRIGGER = 2;
     private static int TEST_WAIT_FOR_QUESTIONS = 3;
+    private static int TEST_SHOW_RESULTS = 4;
 
     private Hashtable<String, String> testOptions;
 
@@ -209,10 +210,11 @@ public class AATModel extends Observable {
                 notifyObservers("Break");      //Notify observer that there is a break.
 
             } else if (run == repeat) {   //No more runs left, Test has ended
-                this.setChanged();
-                notifyObservers("Test ended");
+                System.out.println("Einde van de test");
                 testStatus = AATModel.TEST_STOPPED;    //Notify observers about it
                 writeToFile();
+                this.setChanged();
+                notifyObservers("Test ended");
             } else {           //Continue with a new run
                 testList = createRandomList(); //create a new Random list
                 count = 0;
@@ -298,7 +300,7 @@ public class AATModel extends Observable {
         this.setChanged();
         this.notifyObservers("Start");
         testStatus = AATModel.TEST_WAIT_FOR_TRIGGER;   //Test status is wait for the user to press the trigger button.
-        System.out.println("Test status "+testStatus);
+        System.out.println("Test status " + testStatus);
 
     }
 
@@ -384,6 +386,25 @@ public class AATModel extends Observable {
         }
     }
 
+    //Fetches the results voor the latest participant.
+    public HashMap<String, float[]> getResultsPerCondition() {
+        HashMap<String, float[]> results = new HashMap<String, float[]>();
+        results.put("Pull & Neutral", convertToArray(newMeasure.getMeasures(AATImage.PULL, AATImage.NEUTRAL)));
+        results.put("Pull & Affective", convertToArray(newMeasure.getMeasures(AATImage.PULL, AATImage.AFFECTIVE)));
+        results.put("Push & Neutral", convertToArray(newMeasure.getMeasures(AATImage.PUSH, AATImage.NEUTRAL)));
+        results.put("Push & Affective", convertToArray(newMeasure.getMeasures(AATImage.PUSH, AATImage.AFFECTIVE)));
+        return results;
+    }
+
+    private float[] convertToArray(ArrayList<Long> input) {
+        float[] array = new float[input.size()]; //Create a new array
+        for (int x = 0; x < input.size(); x++) {
+            long l = input.get(x);
+            array[x] = (float) l;
+        }
+        return array;
+    }
+
     //Remove image when the user has performed the action. Set test status to wait for trigger
     private void removeImage() {
         this.setChanged();
@@ -395,11 +416,16 @@ public class AATModel extends Observable {
     to image loaded. then call nextstep so the model can determine the appropriate next action to take
     */
     public void triggerPressed() {
-        System.out.println("Trigger2 "+testStatus);
+        //     System.out.println("Trigger2 "+testStatus);
         if (testStatus == AATModel.TEST_WAIT_FOR_TRIGGER) {
             System.out.println("Trigger pressed");
             testStatus = AATModel.IMAGE_LOADED;
             NextStep();
+        }
+        if (testStatus == AATModel.TEST_STOPPED) {
+            this.setChanged();
+            this.notifyObservers("Display results");
+            testStatus = AATModel.TEST_SHOW_RESULTS;
         }
     }
 }
