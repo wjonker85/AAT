@@ -1,8 +1,8 @@
 #Stimuli variables
 
 ColoredBorders True
-BorderColorPush FF68B399
-BorderColorPull FF006699
+BorderColorPush FFFF00FF
+BorderColorPull 00A4E7FF
 BorderWidth 12
 StepSize 9
 
