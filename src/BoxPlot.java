@@ -104,7 +104,7 @@ public class BoxPlot extends PApplet {
      * Standaard setup() functie van processing
      */
     public void setup() {
-        size(viewHeight, viewWidth);
+        size(screen.width, screen.height);
 
         /**
          * hoeft allemaal niet zo rap, statisch plaat, bespaart stroom en groen is goed, vandaar!!
