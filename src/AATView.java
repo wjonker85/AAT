@@ -45,7 +45,7 @@ public class AATView extends PApplet implements Observer {
         stepStart = round((float) stepSize / 2f);
         inputY = stepStart;             //Eerste plaatje begint op stepStart.
         stepCount = stepStart;          //eerst stepCount begint op stepStart.
-        borderWidth = 5;                //Breedte border om img
+        borderWidth = model.getBorderWidth();                //Breedte border om img
         imgBorderWidth = borderWidth;   //imgBorderWidth start met waarde borderWidth
         xPos = width / 2;               //Midden x coordinaar scherm
         yPos = height / 2;              //Midden y coordinaat scherm
