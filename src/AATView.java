@@ -28,12 +28,14 @@ public class AATView extends PApplet implements Observer {
 
     //Heb nu tijdelijk de grootte van de plaatjes toegevoegd aan de constructor. Deze waardes worden nu vanuit de main nog
     //doorgegeven. Is nu nog nodig omdat het model de plaatjes doorgeeft en het model ze niet zelf vanuit een bestand leest.
-    public AATView(AATModel model, int viewHeight,int viewWidth) {
+    public AATView(AATModel model, int viewHeight, int viewWidth) {
         System.out.println("New AAT View started");
         this.model = model;
+
         //Grote van de AATView scherm.
         this.viewHeight = viewHeight;
         this.viewWidth = viewWidth;
+
         //Hoeveel stappen heeft joystick
         this.stepSize = model.getStepRate();
         displayText = model.getIntroductionText(); //Test starts with an introduction tekst.
@@ -49,7 +51,7 @@ public class AATView extends PApplet implements Observer {
         imgBorderWidth = borderWidth;   //imgBorderWidth start met waarde borderWidth
         xPos = width / 2;               //Midden x coordinaar scherm
         yPos = height / 2;              //Midden y coordinaat scherm
-     //   noCursor();
+        noCursor();
         frameRate(24);
     }
 
@@ -64,37 +66,32 @@ public class AATView extends PApplet implements Observer {
     }
 
     private void infoShow(String infoText) {
-        //   if (blackScreen) {
         background(0);
         fill(255);
         textSize(30);
         textAlign(CENTER);
-        text(infoText, xPos, yPos);
-        //   }
+        float scaleFactorText = ((float) width / (textWidth(infoText)+40f)); //+40 pixels, omdat anders soms scale factor net te groot is waardoor text precies op rand of net paar pixels buiten rand valt
+        scale(scaleFactorText);
+        text(infoText, (xPos / scaleFactorText), (viewHeight * .25f));
     }
 
     public void imageShow() {
-
         background(0);
-        setupImage();
 
+        /* Dit gedeelte zorcht ervoor dat wanneer imageShow() in draw() wordt aangeroepen het plaatje met juiste afmeting wordt teruggegegeven */
+        setupImage(); //Afmeting van plaatje bepalen
         imageMode(CENTER);
-        rectMode(CENTER);
-        image(img, xPos, yPos, imgSizeX, imgSizeY);
+        image(img, xPos, yPos, imgSizeX, imgSizeY);     //Plaatje met juiste afmeting weergeven wanneer imageShow in draw() wordt aangeroepen
 
+
+        /* Wanneer in config file ColoredBorders True is, border weergeven, anders niet */
         if (model.hasColoredBorders()) {
-            stroke(unhex(model.getBorderColor(imgT)));
-            strokeWeight(imgBorderWidth);
-            fill(0, 0, 0, 0);
-            rect(xPos, yPos, imgSizeX, imgSizeY);
+            rectMode(CENTER);
+            stroke(unhex(model.getBorderColor(imgT)));  //argb waarde uit model halen
+            strokeWeight(imgBorderWidth);               //Border with bepalen op basis van BorderWidth X in config file uit model halen
+            fill(0, 0, 0, 0);                           // fill is transparant, zodat plaatje zichtbaar is
+            rect(xPos, yPos, imgSizeX, imgSizeY);       // Border met juist kleur en afmeting weergeven imgSizeX & imgSizeY zijn bekend omdat deze zijn berekend door setupImage() welke eerder in dit object is opgeroepen
         }
-
-
-        //Beetje debug code
-        fill(255, 0, 0);
-        textSize(15);
-        textAlign(LEFT);
-        text("X: " + (int) imgSizeX + "px; Y: " + (int) imgSizeY + "px;" + " inputY: " + inputY, 5, 15);
     }
 
 
@@ -102,7 +99,6 @@ public class AATView extends PApplet implements Observer {
 
     //Wilfried, even tijdelijk jouw code uit de setup gehaald en in deze methode geplaatst. Vanwege null pointer exception, omdat de plaatjes
     //nu uit het model komen.
-    //TODO: Nog een boolean die bepaald of de border getoond mag worden.
     private void setupImage() {
         //Ratio scherm en plaatje, nodig bij bepalen vergroot /verklein factor
         viewRatio = (float) viewHeight / (float) viewWidth;
@@ -165,16 +161,16 @@ public class AATView extends PApplet implements Observer {
 
         //De test is gestart. Mogelijkheid om instructies te geven.
         //Nu eerst alleen een zwart scherm
-     //   if (o.toString().equals("Start")) {
-      //      System.out.println("Test started");
-      //      displayText = model.getIntroductionText();
-      //      System.out.println(displayText+" moiooo");
-      //      blackScreen = true;
-      //      showInfo = true;
+        //   if (o.toString().equals("Start")) {
+        //      System.out.println("Test started");
+        //      displayText = model.getIntroductionText();
+        //      System.out.println(displayText+" moiooo");
+        //      blackScreen = true;
+        //      showInfo = true;
 
 
-      //  }
-        if(o.toString().equals("Practice ended")) {
+        //  }
+        if (o.toString().equals("Practice ended")) {
             System.out.println("End of practice");
             displayText = model.getTestStartText();
             blackScreen = true;
@@ -185,7 +181,7 @@ public class AATView extends PApplet implements Observer {
         if (o.toString().equals("Show Image")) {
             System.out.println("Show Picture");
             img = convertImage(model.getNextImage());
-            System.out.println("imgWidth "+img.width+" "+img.height);
+            System.out.println("imgWidth " + img.width + " " + img.height);
             imgWidth = img.width;
 
             imgHeight = img.height;
@@ -203,9 +199,10 @@ public class AATView extends PApplet implements Observer {
             displayText = model.getTestFinishedText();
             blackScreen = true;
             showInfo = true;
-        //    this.setVisible(false);
+            //    this.setVisible(false);
         }
-        if(o.toString().equals("Display results")) {
+
+        if (o.toString().equals("Display results")) {
             this.setVisible(false);
             this.setEnabled(false);
         }
