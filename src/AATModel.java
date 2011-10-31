@@ -1,4 +1,5 @@
 import javax.swing.table.TableModel;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
@@ -47,10 +48,13 @@ public class AATModel extends Observable {
     //Test status
     private static int TEST_STOPPED = 0;
     private static int IMAGE_LOADED = 1;
+    private static int PRACTICE_IMAGE_LOADED = 6;
     private static int TEST_WAIT_FOR_TRIGGER = 2;
     private static int TEST_WAIT_FOR_QUESTIONS = 3;
     private static int TEST_SHOW_FINISHED = 5;
     private static int TEST_SHOW_RESULTS = 4;
+
+    private boolean practice;
 
     private Hashtable<String, String> testOptions;
 
@@ -62,8 +66,10 @@ public class AATModel extends Observable {
     private int repeat;
     private int breakAfter;
     private int count; //Counts the number of images shown.
+    private int practiceCount;
     private int run;
     private int id = 0;
+    private int practiceBeforeTrail = 0;
 
     private MeasureData newMeasure;
     private long startMeasure;
@@ -76,6 +82,7 @@ public class AATModel extends Observable {
     private ArrayList<File> neutralImages;
     private ArrayList<File> affectiveImages;
     private ArrayList<AATImage> testList; //Random list that contains the push or pull images.
+    private ArrayList<AATImage> practiceList;
     private Hashtable<Integer, String> colorTable;    //Contains the border colors
     private HashMap<String, String> extraQuestions;
     private DynamicTableModel dynamic;
@@ -108,8 +115,8 @@ public class AATModel extends Observable {
         testStatus = AATModel.TEST_STOPPED;
         if (testConfig.getValue("ColoredBorders").equals("True")) {
             colorTable = new Hashtable<Integer, String>();
-            colorTable.put(AATImage.PULL, testConfig.getValue("BorderColorPull"));
-            colorTable.put(AATImage.PUSH, testConfig.getValue("BorderColorPush"));
+            colorTable.put(AATImage.PULL, "FF"+testConfig.getValue("BorderColorPull"));
+            colorTable.put(AATImage.PUSH, "FF"+testConfig.getValue("BorderColorPush"));  //Also add alpha channel for processing
         }
         DataExporter dataExporter = new DataExporter(new File("export.csv"), participantsFile, dataFile, this);
     }
@@ -142,6 +149,32 @@ public class AATModel extends Observable {
         }
     }
 
+
+    private ArrayList<AATImage> createRandomPracticeList(int size) {   //TODO practice verbeteren
+        ArrayList<AATImage> list = new ArrayList<AATImage>();
+     //   if (testConfig.getValue("PracticeDir").length() > 0) {
+            //If there is a practicedir use it, otherwise generate image
+     //   } else {
+            System.out.println("Lijst maken");
+            String hexColor = testConfig.getValue("PracticeFillColor");
+            Color c;
+            if (hexColor.length() > 0) {
+                c = Color.decode("#"+hexColor);
+            } else {
+                c = Color.gray;
+            }
+            System.out.println("Color "+c.getRGB());
+            for (int x = 0; x < size; x++) {
+                     AATImage pull = new AATImage(AATImage.PULL,c);
+                    list.add(pull);
+                     AATImage push = new AATImage(AATImage.PUSH,c);
+                list.add(push);
+            }
+       // }
+        Collections.shuffle(list); //randomise the list.
+        return list;
+    }
+
     /*
         Creates a randomised list, containing the affective and neutral images. Every image gets loaded twice, one for the
         pull condition and one for the push condition.
@@ -166,8 +199,23 @@ public class AATModel extends Observable {
 
     //Starts a new instance of the AAT. With no. times it has to repeat and when there will be a break.
     public void startTest() {
+
         this.repeat = Integer.parseInt(testConfig.getValue("Trails"));
         this.breakAfter = Integer.parseInt(testConfig.getValue("BreakAfter"));
+
+        if(hasPractice()) {        //If set in the config, first do a practice.
+            practiceList = createRandomPracticeList(6);
+            System.out.println("Practice contains no items "+practiceList.size());
+            practice = true;
+            repeat++;     //Make these one higher, because of the practice
+            breakAfter++;
+            practiceCount = 0; //reset the counter
+        }
+        String trailPractice = testConfig.getValue("NoPracticeTrail");
+        if(!trailPractice.equals("")) {          //Check if before the first trail and the trail after the break a
+                                                 //practice needs to be shown.
+            practiceBeforeTrail = Integer.parseInt(trailPractice);
+        }
         testList = createRandomList();
         count = 0;        //reset counters
         run = 0;
@@ -177,12 +225,21 @@ public class AATModel extends Observable {
         if (textReader.getExtraQuestions().size() > 0) {   //When there are extra question, show them
             testStatus = AATModel.TEST_WAIT_FOR_QUESTIONS;
             notifyObservers("Show questions");      //Notify the observer that a new test is started.
-        } else {
-            testStatus = AATModel.TEST_WAIT_FOR_TRIGGER;   //Test status is wait for the user to press the trigger button.
+        }
+        else {
+            testStatus = AATModel.TEST_WAIT_FOR_TRIGGER;   //Start the test
             notifyObservers("Start");
         }
 
         //TODO: Create more states for the test. Show the question Frame, Practice trails
+    }
+
+    private boolean hasPractice() {
+        String s = testConfig.getValue("PracticeRepeat");
+        if(s.equals("") || s.equals("0")) {
+            return false;
+        }
+        return true;
     }
 
     //Which view is enabled
@@ -198,6 +255,20 @@ public class AATModel extends Observable {
 
     */
     private void NextStep() {
+        if(testStatus == AATModel.PRACTICE_IMAGE_LOADED) {
+            if(practiceCount < practiceList.size()) {
+            showNextImage();
+            }
+            else {
+                run++;
+                practice = false; //Practice has ended
+                testStatus = AATModel.TEST_WAIT_FOR_TRIGGER;
+                this.setChanged();
+                this.notifyObservers("Practice ended");
+
+            }
+        }
+        else {
         if (count < testList.size()) {     //Just show the next image
             showNextImage();
         } else {          //No more images in the list
@@ -222,6 +293,7 @@ public class AATModel extends Observable {
                 showNextImage();
             }
         }
+        }
     }
 
 
@@ -235,12 +307,18 @@ public class AATModel extends Observable {
 
     //Show the next image in the list
     private void showNextImage() {
+        if(practice) {
+            current = practiceList.get(practiceCount);
+            practiceCount++;
+        }
+        else {
         current = testList.get(count);    //change current to the next image
         System.out.println("Loaded " + current.toString());
+        count++;
+        }
         this.setChanged();
         notifyObservers("Show Image");      //Notify observers
         startMeasure(); //Start the measurement.
-        count++;
     }
 
     //Geeft een integer met de grootte van het plaatje.
@@ -267,6 +345,10 @@ public class AATModel extends Observable {
 
     public String getIntroductionText() {
         return textReader.getValue("Introduction");
+    }
+
+    public String getTestStartText() {
+        return textReader.getValue("Start");
     }
 
     public String getTestFinishedText() {
@@ -300,9 +382,13 @@ public class AATModel extends Observable {
         System.out.println("Extra questions added");
         this.setChanged();
         this.notifyObservers("Start");
+     //   if(practice) {
+     //     System.out.println("Do a practice run");
+     //   }
+     //   else {
         testStatus = AATModel.TEST_WAIT_FOR_TRIGGER;   //Test status is wait for the user to press the trigger button.
         System.out.println("Test status " + testStatus);
-
+    //    }
     }
 
 
@@ -374,7 +460,7 @@ public class AATModel extends Observable {
     public void changeYaxis(int value) {
         if (value != resize) {
             resize = value;
-            if (testStatus == AATModel.IMAGE_LOADED) { //Only listen when there is an image loaded
+            if (testStatus == AATModel.IMAGE_LOADED || testStatus == AATModel.PRACTICE_IMAGE_LOADED) { //Only listen when there is an image loaded
                 newMeasure.addResult(resize, getMeasurement());     //add results to the other measurements
                 if (current.getDirection() == AATImage.PULL && value == getStepRate()) {   //check if the requested action has been performed
                     removeImage();
@@ -417,8 +503,8 @@ public class AATModel extends Observable {
     to image loaded. then call nextstep so the model can determine the appropriate next action to take
     */
     public void triggerPressed() {                   //TODO: verbeteren  Switch is mooier
-             System.out.println("Trigger2 "+testStatus);
-        if(testStatus == AATModel.TEST_SHOW_FINISHED) {
+        System.out.println("Trigger2 " + testStatus);
+        if (testStatus == AATModel.TEST_SHOW_FINISHED) {
             testStatus = AATModel.TEST_SHOW_RESULTS;
             this.setChanged();
             this.notifyObservers("Display results");
@@ -426,8 +512,14 @@ public class AATModel extends Observable {
 
         if (testStatus == AATModel.TEST_WAIT_FOR_TRIGGER) {
             System.out.println("Trigger pressed");
+            if(practice) {
+                testStatus = AATModel.PRACTICE_IMAGE_LOADED;
+                System.out.println("Practice plaatje laden");
+            }
+            else {
             testStatus = AATModel.IMAGE_LOADED;
-            NextStep();
+            }
+            NextStep();    //Determine next step in the test.
         }
         if (testStatus == AATModel.TEST_STOPPED) {
             System.out.println("Hier is de test gestopt");
@@ -462,7 +554,10 @@ class TestConfig {
             "AffectiveDir",
             "NeutralDir",
             "LanguageFile",
-            "PracticeTrails",
+            "PracticeDir",
+            "PracticeFillColor",
+            "PracticeRepeat",
+            "NoPracticeTrail",
             "ParticipantsFile",
             "DataFile"
 

@@ -1,20 +1,56 @@
-#Stimuli variables
+# Configuration file for the AAT.
+#
+# The next options are for determining the course of the test.
+#
+# Trails - defines the number of trails
+# BreakAfter - after how much Trails the test is on a break. Set this to a higher number than the trails
+#	       if you a break is not necessary.
+# PracticeRepeat - How many practice images are needed at the beginning of the test. The total number of images
+# 		   Shown is twice this amount. (Every image has a pull and push variant). Comment this or set to 0 when you don't want a practice.
+# NoPracticeTrail - Next to the normal practice, it is possible to have a number of practice Pictures at the beginning of the first Trail and
+		    the Trail after the break.
+
+Trails 2
+BreakAfter 1
+PracticeRepeat 8
+NoPracticeTrail 1
+
+#The next options are for the way images should be shown on screen. A test can use the build in method that can create a colored border around
+#An image.
+# ColoredBorders - If this is set to True, then the program will show a colored border around the image
+# BorderColorPush - Determines the color to be used for the push images. Color is in hex value.
+# BorderColorPull - Same for the pull images.
+# BorderWidth - Specifies the width the border has in the center position.
+# PracticeFillColor - Specifies the color the practice image gets. This only works if the PracticeDir is not set
+# StepSize - Determines how often the image gets resized. This has to be an odd number.
 
 ColoredBorders True
-BorderColorPush FFFF00FF
-BorderColorPull 00A4E7FF
+BorderColorPush FF00FF
+BorderColorPull A4E7FF
+PracticeFillColor FFDEDE
 BorderWidth 12
 StepSize 9
 
-#Test variables
-Trails 1
-BreakAfter 2
+#Next options are for the specification of directories
+# AffectiveDir - This is the directory containing the affective images
+# NeutralDir - The directory containing the neutral images
+# PracticeDir - A directory containing Practice images. If this is not set, the program will use self-generated images with the specified color.
+
 AffectiveDir Affective
 NeutralDir Neutral
+#PracticeDir
 
-#for different languages
+
+#It is possible for the same test to have different languages. 
+#LanguageFile specifies the language file used for this test. Change this value to another language file for the test to be performed in a 
+#different language.
+
 LanguageFile English.AAT
 
+
+# The next to options specify the data files that will be used to store all the data in. These files are in CSV format.
+# ParticipantsFile - For all the data gather about the participants
+# DataFile - In this file all measurements will be saved. 
 
 ParticipantsFile Participants.csv
 DataFile Data.csv

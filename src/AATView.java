@@ -174,6 +174,12 @@ public class AATView extends PApplet implements Observer {
 
 
       //  }
+        if(o.toString().equals("Practice ended")) {
+            System.out.println("End of practice");
+            displayText = model.getTestStartText();
+            blackScreen = true;
+            showInfo = true;
+        }
 
         //Bericht uit het model dat het volgende plaatje getoond mag worden.
         if (o.toString().equals("Show Image")) {
