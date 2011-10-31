@@ -37,14 +37,6 @@ import java.util.regex.Pattern;
  */
 public class AATModel extends Observable {
 
-    //Verschillende berichten die naar de views gestuurd kunnen worden.
-
-    //Welke views dienen actief te worden
-    public static int TEST_VIEW = 0;
-    public static int SINGLE_RESULTS = 1;
-    public static int OVERALL_RESULTS = 3;
-
-
     //Test status
     private static int TEST_STOPPED = 0;
     private static int IMAGE_LOADED = 1;
@@ -56,11 +48,6 @@ public class AATModel extends Observable {
 
     private boolean practice;
 
-    private Hashtable<String, String> testOptions;
-
-
-    private int resize = 5;     //Start with the middle of the joystick
-
 
     //Test variables
     private int repeat;
@@ -70,6 +57,7 @@ public class AATModel extends Observable {
     private int run;
     private int id = 0;
     private int practiceBeforeTrail = 0;
+    private int resize;
 
     private MeasureData newMeasure;
     private long startMeasure;
@@ -115,8 +103,8 @@ public class AATModel extends Observable {
         testStatus = AATModel.TEST_STOPPED;
         if (testConfig.getValue("ColoredBorders").equals("True")) {
             colorTable = new Hashtable<Integer, String>();
-            colorTable.put(AATImage.PULL, "FF"+testConfig.getValue("BorderColorPull"));
-            colorTable.put(AATImage.PUSH, "FF"+testConfig.getValue("BorderColorPush"));  //Also add alpha channel for processing
+            colorTable.put(AATImage.PULL, "FF" + testConfig.getValue("BorderColorPull"));
+            colorTable.put(AATImage.PUSH, "FF" + testConfig.getValue("BorderColorPush"));  //Also add alpha channel for processing
         }
         DataExporter dataExporter = new DataExporter(new File("export.csv"), participantsFile, dataFile, this);
     }
@@ -149,29 +137,45 @@ public class AATModel extends Observable {
         }
     }
 
-
+    /*
+    Creates a random list with practice images. If there is a directory specified in the config, it will load the
+    imageFile from that directory. Otherwise it will generate a list with self-created images containing a single color
+    as specified in the config.
+     */
     private ArrayList<AATImage> createRandomPracticeList(int size) {   //TODO practice verbeteren
         ArrayList<AATImage> list = new ArrayList<AATImage>();
-     //   if (testConfig.getValue("PracticeDir").length() > 0) {
-            //If there is a practicedir use it, otherwise generate image
-     //   } else {
+        if (!testConfig.getValue("PracticeDir").equals("")) {  //image dir is set
+            String practiceDir = testConfig.getValue("PracticeDir");
+            System.out.println("Practice Dir "+practiceDir);
+            for (int x = 0; x < size; x++) {
+                for (File image : getImages(new File(practiceDir))) {
+                    AATImage pull = new AATImage(image, AATImage.PULL, AATImage.PRACTICE); //Add push and pull version
+                    AATImage push = new AATImage(image, AATImage.PUSH, AATImage.PRACTICE);
+                    list.add(pull);
+                    list.add(push);
+                }
+            }
+        } else {
             System.out.println("Lijst maken");
             String hexColor = testConfig.getValue("PracticeFillColor");
             Color c;
             if (hexColor.length() > 0) {
-                c = Color.decode("#"+hexColor);
+                c = Color.decode("#" + hexColor);
             } else {
                 c = Color.gray;
             }
-            System.out.println("Color "+c.getRGB());
+            System.out.println("Color " + c.getRGB());
             for (int x = 0; x < size; x++) {
-                     AATImage pull = new AATImage(AATImage.PULL,c);
-                    list.add(pull);
-                     AATImage push = new AATImage(AATImage.PUSH,c);
+                AATImage pull = new AATImage(AATImage.PULL, c);
+                list.add(pull);
+                AATImage push = new AATImage(AATImage.PUSH, c);
                 list.add(push);
             }
-       // }
-        Collections.shuffle(list); //randomise the list.
+            // }
+
+
+        }
+         Collections.shuffle(list); //randomise the list.
         return list;
     }
 
@@ -203,17 +207,17 @@ public class AATModel extends Observable {
         this.repeat = Integer.parseInt(testConfig.getValue("Trails"));
         this.breakAfter = Integer.parseInt(testConfig.getValue("BreakAfter"));
 
-        if(hasPractice()) {        //If set in the config, first do a practice.
+        if (hasPractice()) {        //If set in the config, first do a practice.
             practiceList = createRandomPracticeList(6);
-            System.out.println("Practice contains no items "+practiceList.size());
+            System.out.println("Practice contains no items " + practiceList.size());
             practice = true;
             repeat++;     //Make these one higher, because of the practice
             breakAfter++;
             practiceCount = 0; //reset the counter
         }
         String trailPractice = testConfig.getValue("NoPracticeTrail");
-        if(!trailPractice.equals("")) {          //Check if before the first trail and the trail after the break a
-                                                 //practice needs to be shown.
+        if (!trailPractice.equals("")) {          //Check if before the first trail and the trail after the break a
+            //practice needs to be shown.
             practiceBeforeTrail = Integer.parseInt(trailPractice);
         }
         testList = createRandomList();
@@ -225,8 +229,7 @@ public class AATModel extends Observable {
         if (textReader.getExtraQuestions().size() > 0) {   //When there are extra question, show them
             testStatus = AATModel.TEST_WAIT_FOR_QUESTIONS;
             notifyObservers("Show questions");      //Notify the observer that a new test is started.
-        }
-        else {
+        } else {
             testStatus = AATModel.TEST_WAIT_FOR_TRIGGER;   //Start the test
             notifyObservers("Start");
         }
@@ -236,30 +239,20 @@ public class AATModel extends Observable {
 
     private boolean hasPractice() {
         String s = testConfig.getValue("PracticeRepeat");
-        if(s.equals("") || s.equals("0")) {
+        if (s.equals("") || s.equals("0")) {
             return false;
         }
         return true;
     }
 
-    //Which view is enabled
-    public int getCurrentView() {
-        int currentView;
-        currentView = 0;
-        return currentView;
-    }
-
     /*
         This method determines the next step to be taken in the test.
-        TODO: Nog uitbreiden met de andere states
-
     */
     private void NextStep() {
-        if(testStatus == AATModel.PRACTICE_IMAGE_LOADED) {
-            if(practiceCount < practiceList.size()) {
-            showNextImage();
-            }
-            else {
+        if (testStatus == AATModel.PRACTICE_IMAGE_LOADED) {
+            if (practiceCount < practiceList.size()) {
+                showNextImage();
+            } else {
                 run++;
                 practice = false; //Practice has ended
                 testStatus = AATModel.TEST_WAIT_FOR_TRIGGER;
@@ -267,32 +260,31 @@ public class AATModel extends Observable {
                 this.notifyObservers("Practice ended");
 
             }
-        }
-        else {
-        if (count < testList.size()) {     //Just show the next image
-            showNextImage();
-        } else {          //No more images in the list
-            run++;
-            count = 0;
-            if (run == breakAfter) {    //Test needs a break
-                testList = createRandomList(); //create a new random list
-                current = testList.get(0);
-                testStatus = AATModel.TEST_WAIT_FOR_TRIGGER;
-                this.setChanged();
-                notifyObservers("Break");      //Notify observer that there is a break.
-
-            } else if (run == repeat) {   //No more runs left, Test has ended
-                System.out.println("Einde van de test");
-                testStatus = AATModel.TEST_STOPPED;    //Notify observers about it
-                writeToFile();
-                this.setChanged();
-                notifyObservers("Wait screen");   //First show black screen
-            } else {           //Continue with a new run
-                testList = createRandomList(); //create a new Random list
-                count = 0;
+        } else {
+            if (count < testList.size()) {     //Just show the next image
                 showNextImage();
+            } else {          //No more images in the list
+                run++;
+                count = 0;
+                if (run == breakAfter) {    //Test needs a break
+                    testList = createRandomList(); //create a new random list
+                    current = testList.get(0);
+                    testStatus = AATModel.TEST_WAIT_FOR_TRIGGER;
+                    this.setChanged();
+                    notifyObservers("Break");      //Notify observer that there is a break.
+
+                } else if (run == repeat) {   //No more runs left, Test has ended
+                    System.out.println("Einde van de test");
+                    testStatus = AATModel.TEST_STOPPED;    //Notify observers about it
+                    writeToFile();
+                    this.setChanged();
+                    notifyObservers("Wait screen");   //First show black screen
+                } else {           //Continue with a new run
+                    testList = createRandomList(); //create a new Random list
+                    count = 0;
+                    showNextImage();
+                }
             }
-        }
         }
     }
 
@@ -307,14 +299,13 @@ public class AATModel extends Observable {
 
     //Show the next image in the list
     private void showNextImage() {
-        if(practice) {
+        if (practice) {
             current = practiceList.get(practiceCount);
             practiceCount++;
-        }
-        else {
-        current = testList.get(count);    //change current to the next image
-        System.out.println("Loaded " + current.toString());
-        count++;
+        } else {
+            current = testList.get(count);    //change current to the next image
+            System.out.println("Loaded " + current.toString());
+            count++;
         }
         this.setChanged();
         notifyObservers("Show Image");      //Notify observers
@@ -331,6 +322,7 @@ public class AATModel extends Observable {
         return colorTable.get(direction);
     }
 
+    //Returns whether the pictures should have a colored border
     public boolean hasColoredBorders() {
         if (testConfig.getValue("ColoredBorders").equals("True")) {
             return true;
@@ -360,11 +352,12 @@ public class AATModel extends Observable {
         return current.getImage();
     }
 
-    //
+    //In how many steps does an image gets resized
     public int getStepRate() {
         return Integer.parseInt(testConfig.getValue("StepSize"));
     }
 
+    //returns the width of the border
     public int getBorderWidth() {
         return Integer.parseInt(testConfig.getValue("BorderWidth"));
     }
@@ -382,13 +375,13 @@ public class AATModel extends Observable {
         System.out.println("Extra questions added");
         this.setChanged();
         this.notifyObservers("Start");
-     //   if(practice) {
-     //     System.out.println("Do a practice run");
-     //   }
-     //   else {
+        //   if(practice) {
+        //     System.out.println("Do a practice run");
+        //   }
+        //   else {
         testStatus = AATModel.TEST_WAIT_FOR_TRIGGER;   //Test status is wait for the user to press the trigger button.
         System.out.println("Test status " + testStatus);
-    //    }
+        //    }
     }
 
 
@@ -512,12 +505,11 @@ public class AATModel extends Observable {
 
         if (testStatus == AATModel.TEST_WAIT_FOR_TRIGGER) {
             System.out.println("Trigger pressed");
-            if(practice) {
+            if (practice) {
                 testStatus = AATModel.PRACTICE_IMAGE_LOADED;
                 System.out.println("Practice plaatje laden");
-            }
-            else {
-            testStatus = AATModel.IMAGE_LOADED;
+            } else {
+                testStatus = AATModel.IMAGE_LOADED;
             }
             NextStep();    //Determine next step in the test.
         }
@@ -568,7 +560,7 @@ class TestConfig {
         this.testConfig = testConfig;
         testOptions = new Hashtable<String, String>();
         for (int x = 0; x < options.length; x++) {
-            testOptions.put(options[x], "");
+            testOptions.put(options[x],"");
 
         }
         readConfig();
@@ -584,12 +576,14 @@ class TestConfig {
         try {
             BufferedReader br = new BufferedReader(new FileReader(testConfig));
             while ((strLine = br.readLine()) != null) {
+                if(strLine.startsWith("#")) {
+                    strLine = null;
+                }
+                if(strLine!=null) {
                 st = new StringTokenizer(strLine, " ");
                 while (st.hasMoreTokens()) {
                     String token = st.nextToken();
-                    if (token.contains("#")) {
-                        strLine = null;
-                    }
+                    System.out.println(token);
                     if (testOptions.containsKey(token)) {
                         for (Map.Entry<String, String> entry : testOptions.entrySet()) {
                             if (entry.getKey().equals(token)) {
@@ -600,7 +594,7 @@ class TestConfig {
                         }
 
                     }
-
+                }
                 }
             }
         } catch (Exception e) {
@@ -641,7 +635,7 @@ class TextReader {
     public TextReader(File languageFile) {
         this.languageFile = languageFile;
         for (int x = 0; x < options.length; x++) {
-            testText.put(options[x], "");
+            testText.put(options[x],"");
         }
         questionKeys = new ArrayList<String>();
         questionKeys.add("<Question>");         //Keys defining questions
