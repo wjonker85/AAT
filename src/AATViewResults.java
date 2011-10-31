@@ -29,18 +29,9 @@ public class AATViewResults extends JPanel {
         this.viewWidth = viewWidth;
         this.setSize(viewWidth,viewHeight);
         //        this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-        Set labels = model.getResultsPerCondition().keySet();        //Get results from the model
-        labelsArray = Arrays.copyOf(labels.toArray(), labels.toArray().length, String[].class);    //Convert labels to array
 
-        array1 = model.getResultsPerCondition().get(labelsArray[0]);
-        test(array1);
-        array2 = model.getResultsPerCondition().get(labelsArray[1]);
-        test(array2);
-        array3 = model.getResultsPerCondition().get(labelsArray[2]);
-        test(array3);
-        array4 = model.getResultsPerCondition().get(labelsArray[3]);
         test(array4);
-        System.out.println("Array Size "+array1.length);
+   //     System.out.println("Array Size "+array1.length);
         boxPlot = new BoxPlot(array1, array2, array3, array4,labelsArray, viewWidth,viewHeight);
         boxPlot.init();
         this.add(boxPlot);
@@ -55,7 +46,7 @@ public class AATViewResults extends JPanel {
 
     private void test(float[] data) {
         for(int x =0;x<data.length;x++) {
-            System.out.println("ReactionTime "+data[x]);
+    //        System.out.println("ReactionTime "+data[x]);
         }
     }
 

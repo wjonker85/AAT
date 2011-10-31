@@ -8,7 +8,7 @@ StepSize 9
 
 #Test variables
 Trails 1
-BreakAfter 3
+BreakAfter 2
 AffectiveDir Affective
 NeutralDir Neutral
 

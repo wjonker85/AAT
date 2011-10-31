@@ -199,6 +199,10 @@ public class AATView extends PApplet implements Observer {
             showInfo = true;
         //    this.setVisible(false);
         }
+        if(o.toString().equals("Display results")) {
+            this.setVisible(false);
+            this.setEnabled(false);
+        }
     }
 }
 

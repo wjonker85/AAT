@@ -55,7 +55,7 @@ public class MeasureData {
         ResultsDataTableModel allResults = new ResultsDataTableModel();
 
         for (MeasureObject mObject : allMeasures) {
-            System.out.println(mObject.getImageName()+" "+mObject.size());
+        //    System.out.println(mObject.getImageName()+" "+mObject.size());
             for (int x = 0; x < mObject.size(); x++) {
             ArrayList<Object> imageResults = new ArrayList<Object>();
             imageResults.add(getId());

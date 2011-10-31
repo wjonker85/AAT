@@ -49,6 +49,7 @@ public class AATModel extends Observable {
     private static int IMAGE_LOADED = 1;
     private static int TEST_WAIT_FOR_TRIGGER = 2;
     private static int TEST_WAIT_FOR_QUESTIONS = 3;
+    private static int TEST_SHOW_FINISHED = 5;
     private static int TEST_SHOW_RESULTS = 4;
 
     private Hashtable<String, String> testOptions;
@@ -214,7 +215,7 @@ public class AATModel extends Observable {
                 testStatus = AATModel.TEST_STOPPED;    //Notify observers about it
                 writeToFile();
                 this.setChanged();
-                notifyObservers("Test ended");
+                notifyObservers("Wait screen");   //First show black screen
             } else {           //Continue with a new run
                 testList = createRandomList(); //create a new Random list
                 count = 0;
@@ -415,17 +416,25 @@ public class AATModel extends Observable {
     /*When the test is waiting for the trigger, check if the trigger is pressed and then change the test status
     to image loaded. then call nextstep so the model can determine the appropriate next action to take
     */
-    public void triggerPressed() {
-        //     System.out.println("Trigger2 "+testStatus);
+    public void triggerPressed() {                   //TODO: verbeteren  Switch is mooier
+             System.out.println("Trigger2 "+testStatus);
+        if(testStatus == AATModel.TEST_SHOW_FINISHED) {
+            testStatus = AATModel.TEST_SHOW_RESULTS;
+            this.setChanged();
+            this.notifyObservers("Display results");
+        }
+
         if (testStatus == AATModel.TEST_WAIT_FOR_TRIGGER) {
             System.out.println("Trigger pressed");
             testStatus = AATModel.IMAGE_LOADED;
             NextStep();
         }
         if (testStatus == AATModel.TEST_STOPPED) {
+            System.out.println("Hier is de test gestopt");
+            testStatus = AATModel.TEST_SHOW_FINISHED;
             this.setChanged();
-            this.notifyObservers("Display results");
-            testStatus = AATModel.TEST_SHOW_RESULTS;
+            this.notifyObservers("Test ended");
+
         }
     }
 }

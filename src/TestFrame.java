@@ -1,7 +1,9 @@
 import javax.swing.*;
 import java.awt.*;
+import java.util.Arrays;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Set;
 
 /**
  * Created by IntelliJ IDEA.
@@ -21,8 +23,10 @@ public class TestFrame extends JFrame implements Observer {
     //Make it a fullscreen frame
     public TestFrame(AATModel model) {
         this.model = model;
-        this.setLayout(new GridBagLayout());
+      //  this.setLayout(new GridBagLayout());
+        this.getContentPane().setLayout(new GridBagLayout());
         qPanel = new QuestionPanel(model);
+        this.setBackground(Color.black);
         setExtendedState(Frame.MAXIMIZED_BOTH);
         setUndecorated(true);
         setEnabled(true);
@@ -67,26 +71,36 @@ public class TestFrame extends JFrame implements Observer {
 
         if (o.toString().equals("Display results")) {
             this.getContentPane().removeAll();
+            this.revalidate();
+          //  this.removeAll();
             System.out.println("Display results");
             model.deleteObserver(aatView);
             Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
             int screenWidth = (int) dim.getWidth();
             int screenHeight = (int) dim.getHeight();
-            this.setLayout(null);
-   //         if (aatResults != null) {
-    //            model.deleteObserver(aatResults);
-    //        }
-            aatResults = new AATViewResults(screenWidth, screenHeight, model);
-         //   aatResults.init();
-            this.getContentPane().add(aatResults);
+            this.getContentPane().setLayout(null);
+         //  this.setLayout(new GridBagLayout());
+           this.setLayout(null);
+            Set labels = model.getResultsPerCondition().keySet();        //Get results from the model
+            String[] labelsArray = Arrays.copyOf(labels.toArray(), labels.toArray().length, String[].class);    //Convert labels to array
+
+            float[] array1 = model.getResultsPerCondition().get(labelsArray[0]);    //Fill the 4 float arrays;
+            float[] array2 = model.getResultsPerCondition().get(labelsArray[1]);
+            float[] array3 = model.getResultsPerCondition().get(labelsArray[2]);
+            float[] array4 = model.getResultsPerCondition().get(labelsArray[3]);
+            BoxPlot showBoxPlot = new BoxPlot(array1, array2, array3, array4, labelsArray, screenWidth, screenHeight);
+            showBoxPlot.init();
+            showBoxPlot.setBounds((int) (0.25*screenWidth),0,screenWidth/2,screenHeight);
+         //                  this.add(showBoxPlot, new GridBagConstraints());
+            this.getContentPane().add(showBoxPlot);   //Show the results
         }
 
-     //   if (o.toString().equals("Test ended")) {
-     //       System.out.println("Einde van de test");
-     //       this.dispose();
-     //       this.setEnabled(false);
-     //       this.setVisible(false);
+        //   if (o.toString().equals("Test ended")) {
+        //       System.out.println("Einde van de test");
+        //       this.dispose();
+        //       this.setEnabled(false);
+        //       this.setVisible(false);
 
-      //  }
+        //  }
     }
 }

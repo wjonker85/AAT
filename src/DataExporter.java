@@ -168,14 +168,14 @@ public class DataExporter {
      */
     private void writeToFile(File file, int errorMargin) {
         int totalImage = model.getTotalImageCount();
-        System.out.println(totalImage);
+      //  System.out.println(totalImage);
         float fraction = 1f/(100f/errorMargin);
         float maxErrors = (float) totalImage*fraction;
-        System.out.println("Max errors = "+maxErrors);
+     //   System.out.println("Max errors = "+maxErrors);
         for(String id: NoMistakes.keySet()) {
                float count = NoMistakes.get(id);
                if(count>maxErrors) {
-                   System.out.println(id+" should be removed");
+        //           System.out.println(id+" should be removed");
                    removeID(id);
                }
            }
@@ -188,7 +188,7 @@ public class DataExporter {
      */
     private void removeID(String IDremove) {
          for(int x = exportData.getRowCount()-1;x>=0;x--) {
-             System.out.println("X waarde "+x);
+        //     System.out.println("X waarde "+x);
              String userID = exportData.getValueAt(x,0).toString();
              if(userID.equals(IDremove)) {
                  exportData.removeRow(x);
