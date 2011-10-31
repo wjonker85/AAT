@@ -17,7 +17,7 @@ public class BoxPlot extends PApplet {
     DescriptiveStats stat3;
     DescriptiveStats stat4;
 
-    BoxPlot(float[] array1, float[] array2, float[] array3, float[] array4,String[] labelsArray,int viewWidth,int viewHeight) {
+    BoxPlot(float[] array1, float[] array2, float[] array3, float[] array4, String[] labelsArray, int viewWidth, int viewHeight) {
         this.labelsArray = labelsArray;
         this.viewHeight = viewHeight;
         this.viewWidth = viewWidth;
@@ -58,7 +58,7 @@ public class BoxPlot extends PApplet {
         this.maxValue = maxValue;
     }
 
-        public void setup() {
+    public void setup() {
         size(viewHeight, viewWidth);
         frameRate(3); //hoeft allemaal niet zo rap, statisch plaat, bespaart stroom en groen is goed, vandaar!!
         noCursor();
@@ -67,14 +67,19 @@ public class BoxPlot extends PApplet {
 
     public void draw() {
         background(0);
-        drawBoxPlot(0, 0, 1.3f, "Reaction Time (ms)", "Condition", labelsArray[0], labelsArray[1], labelsArray[2], labelsArray[3]);
+        drawBoxPlot(0, 0, scaleFactor(), "Reaction Time (ms)", "Condition", labelsArray[0], labelsArray[1], labelsArray[2], labelsArray[3]);
+    }
+
+    public float scaleFactor() {
+        return (float) viewHeight / 500f;
     }
 
     public void drawBoxPlot(int x, int y, float s, String yText, String xText, String c1Text, String c2Text, String c3Text, String c4Text) {
         //1 is 500 x 500 en kan dus op basis van scherm worden aangepast.
         scale(s);
         translate(x, y);
-        fill(211, 206, 151);
+
+        fill(255);
         line(75, 40, 75, 455); //Y As
         line(75, 455, 475, 455); // X As
 
@@ -108,7 +113,7 @@ public class BoxPlot extends PApplet {
 
         //Y as ms waarden weergeven;
         for (int n = 0; n <= 8; n++) {
-            text((int) msStartStep+" -", 76, textY);
+            text((int) msStartStep + " -", 76, textY);
             textY = textY - 50;
             msStartStep += round(msStepSize);
         }
