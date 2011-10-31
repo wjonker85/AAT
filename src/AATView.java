@@ -13,11 +13,14 @@ import java.util.Observer;
  * Time: 3:25 PM
  * To change this template use File | Settings | File Templates.
  * TODO: Sowieso
- * ========================================
+ */
+
+/**
  * AATView is verantwoordelijk voor het tonen van test (Dat zijn de plaatjes, en instructie tekst). De resultaten
  * weergegeven door BoxPlot.java.
  */
 public class AATView extends PApplet implements Observer {
+
     /**
      * Variabelen en object aanmaken welke nodig zijn voor juiste werking AATView.java
      */
@@ -50,6 +53,7 @@ public class AATView extends PApplet implements Observer {
 
     }
 
+
     /**
      * Wordt geladen wanneer AATView voor het eerst wordt opgeroep
      */
@@ -65,6 +69,7 @@ public class AATView extends PApplet implements Observer {
         noCursor();                                         //Geen cursor weergeven tijdens AAT
         frameRate(24);                                      //Standaard framerate is 60, dit is echter hoger dan nodig
     }
+
 
     /**
      * De draw functie, omdat framerate(24) is wordt deze functie 24x per seconden doorlopen tijdens AAT
@@ -110,6 +115,7 @@ public class AATView extends PApplet implements Observer {
         text(infoText, (xPos / scaleFactorText), ((float) viewHeight * .25f) / scaleFactorText);
     }
 
+
     /**
      * Geeft de waarden imgBorderWidth, imgSizeX & imgSizeY welke door imageShow() gebruikt worden.
      */
@@ -149,6 +155,7 @@ public class AATView extends PApplet implements Observer {
         imgSizeY = (imgRefactor * inputY * stepY);
     }
 
+
     /**
      * imageShow is verantwoordelijk voor weergave plaatje en border van plaatje wanneer in config file ColoredBorders
      * True is. Deze functie bevat niet de resize functie, de juiste groote van het plaatje border en breedte van border
@@ -185,8 +192,6 @@ public class AATView extends PApplet implements Observer {
     }
 
 
-    //  }
-
     /**
      * Nodig om een BufferedImage om te zetten naar een PImage. Rechtstreeks geeft een exception
      *
@@ -199,6 +204,7 @@ public class AATView extends PApplet implements Observer {
         img.updatePixels();
         return img;
     }
+
 
     /**
      * Update ontvangt alle berichten van het Model (MVC pattern). Aan de hand van deze berichten wordt bepaald wat
