@@ -89,7 +89,7 @@ public class DescriptiveStats extends PApplet {
 
     /**
      * maxValue is de laatste waarde welke binnen de q3 + 1.5 IKA regel valt.
-     * @return
+     * @return maxValue (float)
      */
     public float maxValue() {
         newArray = sort(newArray);
