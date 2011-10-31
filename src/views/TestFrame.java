@@ -95,5 +95,10 @@ public class TestFrame extends JFrame implements Observer {
             showBoxPlot.setBounds(diff, -20, screenWidth, ((int) 0.8 * screenHeight));   //Setbounds for correct position
             this.getContentPane().add(showBoxPlot);   //Show the results
         }
+
+        if(o.toString().equals("Finished")) {
+            this.setEnabled(false);
+            this.dispose();
+        }
     }
 }

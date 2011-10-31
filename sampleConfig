@@ -10,8 +10,7 @@
 
 Trails 2
 BreakAfter 1
-PracticeRepeat 8
-NoPracticeTrail 1
+PracticeRepeat 6
 
 #The next options are for the way images should be shown on screen. A test can use the build in method that can create a colored border around
 #An image.
@@ -27,7 +26,7 @@ BorderColorPush F5FE02
 BorderColorPull 00A4E7
 PracticeFillColor FFDEDE
 BorderWidth 8
-StepSize 9
+StepSize 11
 
 #Next options are for the specification of directories
 # AffectiveDir - This is the directory containing the affective images

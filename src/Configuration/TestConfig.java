@@ -13,9 +13,9 @@ import java.util.StringTokenizer;
  * User: marcel
  * Date: 10/31/11
  * Time: 7:46 PM
- *
+ * <p/>
  * This class reads the configuration file belonging to a AAT Test. All the important options like Directories, no of trials, Bordercolors etc.
-* can be set in this file
+ * can be set in this file
  */
 
 public class TestConfig {
@@ -64,24 +64,24 @@ public class TestConfig {
         try {
             BufferedReader br = new BufferedReader(new FileReader(testConfig));
             while ((strLine = br.readLine()) != null) {
-                if(strLine.startsWith("#")) {
+                if (strLine.startsWith("#")) {
                     strLine = null;
                 }
-                if(strLine!=null) {
-                st = new StringTokenizer(strLine, " ");
-                while (st.hasMoreTokens()) {
-                    String token = st.nextToken();
-                    if (testOptions.containsKey(token)) {
-                        for (Map.Entry<String, String> entry : testOptions.entrySet()) {
-                            if (entry.getKey().equals(token)) {
-                                entry.setValue(st.nextToken());
-                                strLine = null;
-                                break;
+                if (strLine != null) {
+                    st = new StringTokenizer(strLine, " ");
+                    while (st.hasMoreTokens()) {
+                        String token = st.nextToken();
+                        if (testOptions.containsKey(token)) {
+                            for (Map.Entry<String, String> entry : testOptions.entrySet()) {
+                                if (entry.getKey().equals(token)) {
+                                    entry.setValue(st.nextToken());
+                                    strLine = null;
+                                    break;
+                                }
                             }
-                        }
 
+                        }
                     }
-                }
                 }
             }
         } catch (Exception e) {

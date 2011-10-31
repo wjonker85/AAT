@@ -2,7 +2,6 @@ package DataStructures;
 
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
-import java.util.Vector;
 
 /**
  * Created by IntelliJ IDEA.
@@ -27,7 +26,6 @@ public class ResultsDataTableModel extends AbstractTableModel {
     };
 
 
-
     public ResultsDataTableModel() {
         columns = new ArrayList();
         data = new ArrayList();
@@ -43,7 +41,7 @@ public class ResultsDataTableModel extends AbstractTableModel {
     }
 
     public void add(ArrayList result) {
-          data.addAll(result);
+        data.addAll(result);
     }
 
     public int getRowCount() {

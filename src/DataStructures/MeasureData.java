@@ -12,7 +12,6 @@ import java.util.ArrayList;
  * since the moment the picture this measurement belongs to was shown on the screen.
  * These measurements can be used to calculate reactionTime. It's also possible to see how the participant moved the joystick.
  * E.g. Directly in the right direction or first to the wrong direction.
- *
  */
 public class MeasureData {
 
@@ -34,7 +33,7 @@ public class MeasureData {
 
     //Everytime the participant changes the joystick, it's movement is recorded.
     public void addResult(int size, long time) {
-        allMeasures.get(allMeasures.size()-1).addResult(size, time);
+        allMeasures.get(allMeasures.size() - 1).addResult(size, time);
     }
 
     public int getId() {
@@ -44,10 +43,10 @@ public class MeasureData {
 
     public ArrayList<Long> getMeasures(int direction, int type) {
         ArrayList<Long> results = new ArrayList<Long>();
-        for(MeasureObject measure : allMeasures) {
-             if(measure.getDirection() == direction && measure.getType() == type) {
-                 results.add(measure.getReactionTime());
-             }
+        for (MeasureObject measure : allMeasures) {
+            if (measure.getDirection() == direction && measure.getType() == type) {
+                results.add(measure.getReactionTime());
+            }
         }
         return results;
     }
@@ -57,10 +56,10 @@ public class MeasureData {
         ResultsDataTableModel allResults = new ResultsDataTableModel();
 
         for (MeasureObject mObject : allMeasures) {
-        //    System.out.println(mObject.getImageName()+" "+mObject.size());
+            //    System.out.println(mObject.getImageName()+" "+mObject.size());
             for (int x = 0; x < mObject.size(); x++) {
-            ArrayList<Object> imageResults = new ArrayList<Object>();
-            imageResults.add(getId());
+                ArrayList<Object> imageResults = new ArrayList<Object>();
+                imageResults.add(getId());
                 imageResults.add(mObject.getRun());
                 imageResults.add(mObject.getImageName());
                 imageResults.add(mObject.getDirection());
@@ -117,7 +116,7 @@ class MeasureObject {
 
     //Returns the total reactionTime
     public long getReactionTime() {
-        return timeList.get(size()-1);  //laatste object returnen
+        return timeList.get(size() - 1);  //laatste object returnen
     }
 
     //Current run.

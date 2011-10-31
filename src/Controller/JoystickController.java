@@ -5,8 +5,6 @@ import net.java.games.input.Component;
 import net.java.games.input.Controller;
 import net.java.games.input.ControllerEnvironment;
 
-import javax.swing.plaf.basic.BasicInternalFrameTitlePane;
-
 /**
  * Created by IntelliJ IDEA.
  * User: marcel
@@ -16,7 +14,7 @@ import javax.swing.plaf.basic.BasicInternalFrameTitlePane;
  * The class searches for a joystick with the help of the JInput library. This library connects this java program to the
  * Operating system (Windows or Linux). Because of different readouts on linux and windows the search and assignment of buttons is
  * somewhat different. Detection methods try to overcome this.
- *
+ * <p/>
  * When a participant moves the joystick it will return an integer value depending on how far the joystick is moved from its center.
  * The accuracy of this is based on the stipsize and error margin values in the config
  */
@@ -63,16 +61,14 @@ public class JoystickController extends Thread {
     //Find the trigger button. Button may be called Trigger or Button 0.
     private Component getTrigger(Controller con) {
         Component trigger = con.getComponent(Component.Identifier.Button.TRIGGER);
-        if(trigger !=null) {
+        if (trigger != null) {
             return trigger;
-        }
-        else {
+        } else {
             trigger = con.getComponent(Component.Identifier.Button._0);
         }
-        if(trigger !=null) {
+        if (trigger != null) {
             return trigger;
-        }
-        else {
+        } else {
             System.out.println("No trigger button found");
             return null;
         }
@@ -128,10 +124,10 @@ public class JoystickController extends Thread {
     Converts the float value between -1 and 1 to an integer value.
      */
     public int convertValue2(float value) {
-        int middlePos = (stepSize+1)/2;
+        int middlePos = (stepSize + 1) / 2;
         int steps = stepSize - middlePos;
-        float increment = (float) 1/steps;
-        int returnValue = (int) (value/increment);
-        return middlePos+returnValue;
+        float increment = (float) 1 / steps;
+        int returnValue = (int) (value / increment);
+        return middlePos + returnValue;
     }
 }

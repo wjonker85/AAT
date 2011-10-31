@@ -153,7 +153,6 @@ public class AATModel extends Observable {
     }
 
 
-
     //Loads all image files in a given directory. Extension filter with regular expression.
     private ArrayList<File> getImages(File dir) {
         File[] files = dir.listFiles(extensionFilter);
@@ -242,7 +241,6 @@ public class AATModel extends Observable {
     }
 
 
-
     //Checks the configuration if a practice trail is needed
     private boolean hasPractice() {
         String s = testConfig.getValue("PracticeRepeat");
@@ -288,7 +286,7 @@ public class AATModel extends Observable {
                     notifyObservers("Break");      //Notify observer that there is a break.
 
                 } else if (run == repeat) {   //No more runs left, Test has ended
-                //    System.out.println("Einde van de test");
+                    //    System.out.println("Einde van de test");
                     testStatus = AATModel.TEST_STOPPED;    //Notify observers about it
                     writeToFile();
                     this.setChanged();
@@ -385,7 +383,7 @@ public class AATModel extends Observable {
 
 
     public boolean hasData() {
-        if(dataFile.length()>0) {
+        if (dataFile.length() > 0) {
             return true;
         }
         return false;
@@ -462,7 +460,7 @@ public class AATModel extends Observable {
         //   return newMeasure.getAllResults();
     }
 
-        //Fetches the results voor the latest participant.
+    //Fetches the results voor the latest participant.
     public HashMap<String, float[]> getResultsPerCondition() {
         HashMap<String, float[]> results = new HashMap<String, float[]>();
         results.put("Pull & Neutral", convertToArray(newMeasure.getMeasures(AATImage.PULL, AATImage.NEUTRAL)));
@@ -471,7 +469,6 @@ public class AATModel extends Observable {
         results.put("Push & Affective", convertToArray(newMeasure.getMeasures(AATImage.PUSH, AATImage.AFFECTIVE)));
         return results;
     }
-
 
 
     private float[] convertToArray(ArrayList<Long> input) {
@@ -518,6 +515,11 @@ public class AATModel extends Observable {
     to image loaded. then call nextstep so the model can determine the appropriate next action to take
     */
     public void triggerPressed() {                   //TODO: verbeteren  Switch is mooier
+        if(testStatus == AATModel.TEST_SHOW_RESULTS) {
+            this.setChanged();
+            this.notifyObservers("Finished");
+        }
+
         if (testStatus == AATModel.TEST_SHOW_FINISHED) {
             testStatus = AATModel.TEST_SHOW_RESULTS;
             this.setChanged();
@@ -542,7 +544,7 @@ public class AATModel extends Observable {
 
 //--------------------------User input, answers to the questions ----------------------------------------
 
-       //Create a list with the answers to the optional questions.
+    //Create a list with the answers to the optional questions.
     public void addExtraQuestions(HashMap<String, String> extraQuestions) {
         this.extraQuestions = extraQuestions;
         this.addParticipantsData();

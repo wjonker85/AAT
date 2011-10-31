@@ -3,10 +3,14 @@ import Model.AATModel;
 import views.ExportDataDialog;
 import views.TestFrame;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 
 /**
  * Created by IntelliJ IDEA.
@@ -14,7 +18,7 @@ import java.io.File;
  * Date: 10/4/11
  * Time: 3:22 PM
  * Main frame for the test. This frame is the controller from which test can be started. This is also the place where the user
- * can choose to display the results and save to file.
+ * can choose to export the gathered data for further analysis
  */
 
 public class AAT_Main extends JFrame {
@@ -32,26 +36,38 @@ public class AAT_Main extends JFrame {
     }
 
     public AAT_Main() {
+        this.setEnabled(true);
+        this.setVisible(true);
         mainPanel = new JPanel();
-        mainPanel.setSize(800, 600);
+        mainPanel.setBackground(Color.black);
+        mainPanel.setLayout(new GridBagLayout());
+        BufferedImage buttonIcon = null;
+        try {
+            buttonIcon = ImageIO.read(new File("playButton100.png"));
+        } catch (IOException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+        final JButton runButton = new JButton(new ImageIcon(buttonIcon));
+        runButton.setBorder(BorderFactory.createEmptyBorder());
+        runButton.setContentAreaFilled(false);
+        runButton.setEnabled(false);
+        runButton.setPreferredSize(new Dimension(100, 100));
+        mainPanel.add(runButton, new GridBagConstraints());
         JMenuBar menuBar = new JMenuBar();
         JMenu fileMenu = new JMenu("File");
         JMenuItem loadTest = new JMenuItem("Load new AAT");
-        final JMenuItem startTest = new JMenuItem("Start test");
-        startTest.setEnabled(false);
         final JMenuItem exportData = new JMenuItem("Export Data");
         exportData.setEnabled(false);
         JMenuItem exit = new JMenuItem("Exit");
         fileMenu.add(loadTest);
-        fileMenu.add(startTest);
         fileMenu.add(exportData);
         fileMenu.add(exit);
         menuBar.add(fileMenu);
-        //...create and add some menus...
         menuBar.add(Box.createHorizontalGlue());
-        JMenuItem about = new JMenuItem("About");
-//...create the rightmost menu...
-        menuBar.add(about);
+        JMenu aboutMenu = new JMenu("About");
+        JMenuItem about = new JMenuItem("About AAT");
+        aboutMenu.add(about);
+        menuBar.add(aboutMenu);
 
         about.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent actionEvent) {
@@ -61,14 +77,14 @@ public class AAT_Main extends JFrame {
             }
         });
 
-        //Start a new test.
+        //Load a new test.
         loadTest.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent actionEvent) {
                 File configFile = fileOpenDialog();
                 if (configFile.exists()) {
                     model = new AATModel(configFile);
                     testFrame = new TestFrame(model);
-                    startTest.setEnabled(true);
+                    runButton.setEnabled(true);
                     if (model.hasData()) {
                         exportData.setEnabled(true);
                     }
@@ -76,7 +92,9 @@ public class AAT_Main extends JFrame {
             }
         });
 
-        startTest.addActionListener(new ActionListener() {
+
+        //Start a new test
+        runButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent actionEvent) {
                 joystick = new JoystickController(model);
                 joystick.start(); //Start joystick Thread
@@ -86,12 +104,16 @@ public class AAT_Main extends JFrame {
             }
         });
 
+
+        //Export data
         exportData.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent actionEvent) {
                 ExportDataDialog export = new ExportDataDialog(model);
             }
         });
 
+
+        //Exit
         exit.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent actionEvent) {
                 System.exit(0); //quit the application
@@ -100,14 +122,13 @@ public class AAT_Main extends JFrame {
 
         setJMenuBar(menuBar);
         setContentPane(mainPanel);
+        setPreferredSize(new Dimension(400, 400));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(1280, 800);
         pack();
-        this.setEnabled(true);
-        this.setVisible(true);
-
     }
 
+
+    //File dialog to select a file to be opened
     public File fileOpenDialog() {
 
         JFileChooser fc = new JFileChooser();
@@ -130,10 +151,10 @@ class SimpleAboutDialog extends JDialog {
 
         Box b = Box.createVerticalBox();
         b.add(Box.createGlue());
-        b.add(new JLabel("This test was created by"));
-        b.add(new JLabel("Marcel Zuur"));
-        b.add(new JLabel("       &      "));
-        b.add(new JLabel("Wilfried Jonker"));
+        b.add(new JLabel("          This AAT was created by"));
+        b.add(new JLabel("          Marcel Zuur"));
+        b.add(new JLabel("                 &      "));
+        b.add(new JLabel("          Wilfried Jonker"));
         b.add(Box.createGlue());
         getContentPane().add(b, "Center");
 
@@ -151,3 +172,4 @@ class SimpleAboutDialog extends JDialog {
         setSize(250, 150);
     }
 }
+

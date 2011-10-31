@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
-import java.util.Vector;
 
 /**
  * Created by IntelliJ IDEA.
@@ -42,8 +41,7 @@ public class CSVReader {
                     String token = st.nextToken();
                     if (lines == 0) {        //First line contains the column names
                         columnNames.add(token);
-                    }
-                    else {
+                    } else {
                         data.add(token);
                     }
                 }

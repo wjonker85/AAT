@@ -4,8 +4,6 @@ import DataStructures.AATImage;
 import DataStructures.DynamicTableModel;
 import DataStructures.ResultsDataTableModel;
 import Model.AATModel;
-import io.CSVReader;
-import io.CSVWriter;
 
 import java.io.File;
 import java.util.ArrayList;

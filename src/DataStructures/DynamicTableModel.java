@@ -2,7 +2,6 @@ package DataStructures;
 
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
-import java.util.Vector;
 
 /**
  * Created by IntelliJ IDEA.
@@ -21,7 +20,6 @@ public class DynamicTableModel extends AbstractTableModel {
     String[] columnNames;
 
 
-
     //Create the number of column dynamic.
     public DynamicTableModel() {
         columns = new ArrayList<String>();
@@ -31,14 +29,14 @@ public class DynamicTableModel extends AbstractTableModel {
     public void setColumnNames(ArrayList<String> columns) {
         columnNames = new String[columns.size()];
         this.columns = columns;
-        for(int x = 0;x<columns.size();x++) {
-            columnNames[x]=columns.get(x);
+        for (int x = 0; x < columns.size(); x++) {
+            columnNames[x] = columns.get(x);
         }
         fireTableDataChanged();
     }
 
     public void add(ArrayList result) {
-          data.addAll(result);
+        data.addAll(result);
     }
 
     public int getRowCount() {
@@ -74,9 +72,9 @@ public class DynamicTableModel extends AbstractTableModel {
     }
 
     public void removeRow(int row) {
-        int startPos = row*getColumnCount();
-        int endPos = startPos+getColumnCount()-1;
-        for(int x = endPos;x>=startPos;x--) {
+        int startPos = row * getColumnCount();
+        int endPos = startPos + getColumnCount() - 1;
+        for (int x = endPos; x >= startPos; x--) {
             data.remove(x);
         }
     }

@@ -23,6 +23,7 @@ public class DescriptiveStats extends PApplet {
 
     /**
      * Weinig onduidelijk aan naam van deze functie, geeft gemiddelde van een array terug
+     *
      * @return gemiddelde (float)
      */
     public float average() {
@@ -37,6 +38,7 @@ public class DescriptiveStats extends PApplet {
      * Mediaan wordt berekent op basis van methode Moore & McCabe. Discissue blijft of je bij oneven aantal
      * gemiddelde neemt, of de eerst waarde na het 50e percentiel zoals dat wel bij q1 en q3 gebeurd. Moore McCabe
      * kiezen gemiddelde van de twee waarden vanneer het aantal waarneming bestaat uit een oneven aantal.
+     *
      * @return mediaan (float)
      */
     public float median() {
@@ -49,6 +51,7 @@ public class DescriptiveStats extends PApplet {
 
     /**
      * Eerste kwartiel, is de eerste waarneming na het 25e percentiel.
+     *
      * @return q1 (float)
      */
     public float q1() {
@@ -59,6 +62,7 @@ public class DescriptiveStats extends PApplet {
 
     /**
      * Derder kwartiel, is de eerste waarneming na het 75e percentiel.
+     *
      * @return q3 (float)
      */
     public float q3() {
@@ -69,6 +73,7 @@ public class DescriptiveStats extends PApplet {
 
     /**
      * minValue is de eerste waarde welke binnen de q1 - 1.5 IKA regel valt.
+     *
      * @return minValue (float)
      */
     public float minValue() {
@@ -91,6 +96,7 @@ public class DescriptiveStats extends PApplet {
 
     /**
      * maxValue is de laatste waarde welke binnen de q3 + 1.5 IKA regel valt.
+     *
      * @return maxValue (float)
      */
     public float maxValue() {

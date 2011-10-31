@@ -17,7 +17,7 @@ public class AATImage {
 
     private int type;
     private int direction;
-//    private File imageFile;
+    //    private File imageFile;
     private String name;
     private BufferedImage image;
     public static int PUSH = 0;
@@ -53,7 +53,7 @@ public class AATImage {
         Graphics2D g = PracticeImage.createGraphics();
         g.setBackground(color);
         g.setColor(color);
-        g.fillRect(0, 0, 433, 433);
+        g.fillRect(0, 0, 750, 750);
         return PracticeImage;
     }
 
