@@ -107,10 +107,10 @@ public class BoxPlot extends PApplet {
         size(screen.width, screen.height);
 
         /**
-         * hoeft allemaal niet zo rap, statisch plaat, bespaart stroom en groen is goed, vandaar!!
+         * hoeft allemaal niet zo rap, statisch plaat, bespaart stroom en groen is goed, vandaar!! En hoe smoother hoe
+         * beter, dus altijd smooth() zijn waar  mogelijk :)
          */
-        frameRate(3);
-        noCursor();
+        frameRate(24);
         smooth();
     }
 
