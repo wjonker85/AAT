@@ -71,15 +71,14 @@ public class TestFrame extends JFrame implements Observer {
 
         if (o.toString().equals("Display results")) {
             this.getContentPane().removeAll();
-            this.revalidate();
+        //    this.revalidate();
           //  this.removeAll();
             System.out.println("Display results");
             model.deleteObserver(aatView);
             Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
             int screenWidth = (int) dim.getWidth();
             int screenHeight = (int) dim.getHeight();
-            this.getContentPane().setLayout(null);
-         //  this.setLayout(new GridBagLayout());
+        //    this.getContentPane().setLayout(null);
            this.setLayout(null);
             Set labels = model.getResultsPerCondition().keySet();        //Get results from the model
             String[] labelsArray = Arrays.copyOf(labels.toArray(), labels.toArray().length, String[].class);    //Convert labels to array
@@ -90,17 +89,10 @@ public class TestFrame extends JFrame implements Observer {
             float[] array4 = model.getResultsPerCondition().get(labelsArray[3]);
             BoxPlot showBoxPlot = new BoxPlot(array1, array2, array3, array4, labelsArray, screenWidth, screenHeight);
             showBoxPlot.init();
-            showBoxPlot.setBounds((int) (0.25*screenWidth),0,screenWidth/2,screenHeight);
-         //                  this.add(showBoxPlot, new GridBagConstraints());
+            int width = (int) (500*showBoxPlot.scaleFactor());
+            int diff = (screenWidth -width)/2;
+            showBoxPlot.setBounds(diff,-20,screenWidth,((int) 0.8*screenHeight));   //Setbounds for correct position
             this.getContentPane().add(showBoxPlot);   //Show the results
         }
-
-        //   if (o.toString().equals("Test ended")) {
-        //       System.out.println("Einde van de test");
-        //       this.dispose();
-        //       this.setEnabled(false);
-        //       this.setVisible(false);
-
-        //  }
     }
 }
