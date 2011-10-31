@@ -25,10 +25,10 @@ NoPracticeTrail 1
 # StepSize - Determines how often the image gets resized. This has to be an odd number.
 
 ColoredBorders True
-BorderColorPush FF00FF
-BorderColorPull A4E7FF
+BorderColorPush F5FE02
+BorderColorPull 00A4E7
 PracticeFillColor FFDEDE
-BorderWidth 12
+BorderWidth 8
 StepSize 9
 
 #Next options are for the specification of directories
