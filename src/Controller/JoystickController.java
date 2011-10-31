@@ -1,3 +1,6 @@
+package Controller;
+
+import Model.AATModel;
 import net.java.games.input.Component;
 import net.java.games.input.Controller;
 import net.java.games.input.ControllerEnvironment;
@@ -16,8 +19,6 @@ import javax.swing.plaf.basic.BasicInternalFrameTitlePane;
  *
  * When a participant moves the joystick it will return an integer value depending on how far the joystick is moved from its center.
  * The accuracy of this is based on the stipsize and error margin values in the config
- * TODO: Iets grotere foutmarge maken en nog wat meer stappen toevoegen.
- TODO: Aantal stappen moet uit configuratiebestand komen.
  */
 public class JoystickController extends Thread {
 
@@ -59,9 +60,7 @@ public class JoystickController extends Thread {
     }
 
 
-    //Find the trigger button. Button may be called Trigger or Button 0, maybe even different with other joysticks.
-    //TODO: Check different systems/joysticks
-
+    //Find the trigger button. Button may be called Trigger or Button 0.
     private Component getTrigger(Controller con) {
         Component trigger = con.getComponent(Component.Identifier.Button.TRIGGER);
         if(trigger !=null) {
@@ -83,7 +82,7 @@ public class JoystickController extends Thread {
     private Controller findJoystick(Controller[] controllers) {
         for (int x = 0; x < controllers.length; x++) {
             if (controllers[x].getType().equals(Controller.Type.STICK)) {
-                System.out.println("JoystickController found " + controllers[x].getName());
+                System.out.println("Controller.JoystickController found " + controllers[x].getName());
                 return controllers[x];
             }
         }
@@ -91,8 +90,9 @@ public class JoystickController extends Thread {
     }
 
 
-    //Will be run in a seperate Thread. Will poll the joystick with a given delay. Will poll the y-axis and the trigger button
-    //Will call methods in the model when there is a change.
+    /* Will be run in a seperate Thread. Will poll the joystick with a given delay. Will poll the y-axis and the trigger button
+    Will call methods in the model when there is a change.
+    */
     private void pollController(Controller c) {
         float prevYValue = 0.0f;
         float yAxisValue;
@@ -110,10 +110,7 @@ public class JoystickController extends Thread {
             if (pollIsValid) {
                 yAxisValue = yAxis.getPollData();
                 if (yAxisValue != prevYValue) {  // value has changed
-                    //    if (Math.abs(currValue) > EPSILON) {
                     model.changeYaxis(convertValue2(yAxisValue));
-                 //   convertValue2(yAxisValue);
-                    //  }
                     prevYValue = yAxisValue;
                 }
                 if (trigger.getPollData() == 1 && prevTrigger != 1.0f) {   // only changes

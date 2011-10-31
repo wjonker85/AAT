@@ -1,3 +1,6 @@
+package views;
+
+import Model.AATModel;
 import processing.core.PApplet;
 import processing.core.PConstants;
 import processing.core.PImage;
@@ -12,7 +15,6 @@ import java.util.Observer;
  * Date: 10/4/11
  * Time: 3:25 PM
  * To change this template use File | Settings | File Templates.
- * TODO: Sowieso
  */
 
 /**

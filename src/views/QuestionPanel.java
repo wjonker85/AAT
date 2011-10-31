@@ -1,3 +1,8 @@
+package views;
+
+import DataStructures.QuestionObject;
+import Model.AATModel;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -11,13 +16,16 @@ import java.util.Map;
  * User: marcel
  * Date: 10/29/11
  * Time: 1:15 PM
- * This is a panel that contains all the additional questions a researcher might be interested in.
-*/
+ * This is a panel that contains all the additional questions a researcher might be interested in.  These
+ * questions come from the language file that is specified in the configuration. These questions are displayed for the
+ * actual test is started. But only if there are any.
+ */
 public class QuestionPanel extends JPanel {
 
 
     private JPanel questionsPanel;
     private Map<String, Component> questionsMap = new HashMap<String, Component>();
+
 
     public QuestionPanel(final AATModel model) {
         this.setBackground(Color.black);
@@ -51,6 +59,10 @@ public class QuestionPanel extends JPanel {
         this.setEnabled(false);
     }
 
+    /*
+    Displays every question Object in the ArrayList<DataStructures.QuestionObject> A question can be open, have a textField on the screen
+    or closed and have a combobox with answers
+     */
     public void displayQuestions(ArrayList<QuestionObject> questions) {
         for (QuestionObject questionObject : questions) {
             JLabel question = new JLabel(questionObject.getQuestion(), JLabel.TRAILING);
@@ -82,6 +94,11 @@ public class QuestionPanel extends JPanel {
 
     }
 
+
+    /*
+   All the components are kept in a hash map, This provides a flexibal way to have an unlimited nr of components
+   and keep track of them
+    */
     private HashMap<String, String> getResults() {
         HashMap<String, String> results = new HashMap<String, String>();
         for (String key : questionsMap.keySet()) {

@@ -1,3 +1,5 @@
+package DataStructures;
+
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -18,11 +20,11 @@ public class AATImage {
 //    private File imageFile;
     private String name;
     private BufferedImage image;
-    static int PUSH = 0;
-    static int PULL = 1;
-    static int NEUTRAL = 0;
-    static int AFFECTIVE = 1;
-    static int PRACTICE = 2;
+    public static int PUSH = 0;
+    public static int PULL = 1;
+    public static int NEUTRAL = 0;
+    public static int AFFECTIVE = 1;
+    public static int PRACTICE = 2;
 
     public AATImage(File imageFile, int direction, int type) {
         this.direction = direction;

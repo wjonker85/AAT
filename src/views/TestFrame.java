@@ -1,3 +1,7 @@
+package views;
+
+import Model.AATModel;
+
 import javax.swing.*;
 import java.awt.*;
 import java.util.Arrays;
@@ -16,14 +20,13 @@ import java.util.Set;
 public class TestFrame extends JFrame implements Observer {
 
     private AATView aatView;
-    private AATViewResults aatResults;
     private AATModel model;
     private QuestionPanel qPanel;
 
     //Make it a fullscreen frame
     public TestFrame(AATModel model) {
         this.model = model;
-      //  this.setLayout(new GridBagLayout());
+        //  this.setLayout(new GridBagLayout());
         this.getContentPane().setLayout(new GridBagLayout());
         qPanel = new QuestionPanel(model);
         this.setBackground(Color.black);
@@ -35,11 +38,12 @@ public class TestFrame extends JFrame implements Observer {
 
 
     /*
-            When a new test is started, this frame has to show the test. Frame gets
-            disposed when the test has ended.
-
+       The model determines which screen needs to be active. The questions screen, the test screen of the results screen
+       It does this by sending update messages to it's Observers, like this class is an observer of the model.
      */
     public void update(Observable observable, Object o) {
+
+        //AAT Test screen
         if (o.toString().equals("Start")) {
             this.getContentPane().removeAll();
             this.setVisible(true);
@@ -59,27 +63,24 @@ public class TestFrame extends JFrame implements Observer {
 
         }
 
+
+        //Questions Screen
         if (o.toString().equals("Show questions")) {
             this.setVisible(true);
-            System.out.println("Show questions");
+            //    System.out.println("Show questions");
             this.getContentPane().setBackground(Color.black);
-            //   this.add(qPanel);
             this.getContentPane().add(qPanel, new GridBagConstraints());
             qPanel.displayQuestions(model.getExtraQuestions());
-            //  this.setVisible(true);
         }
 
+        //Results Screen
         if (o.toString().equals("Display results")) {
             this.getContentPane().removeAll();
-        //    this.revalidate();
-          //  this.removeAll();
-            System.out.println("Display results");
             model.deleteObserver(aatView);
             Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
             int screenWidth = (int) dim.getWidth();
             int screenHeight = (int) dim.getHeight();
-        //    this.getContentPane().setLayout(null);
-           this.setLayout(null);
+            this.setLayout(null);
             Set labels = model.getResultsPerCondition().keySet();        //Get results from the model
             String[] labelsArray = Arrays.copyOf(labels.toArray(), labels.toArray().length, String[].class);    //Convert labels to array
 
@@ -89,9 +90,9 @@ public class TestFrame extends JFrame implements Observer {
             float[] array4 = model.getResultsPerCondition().get(labelsArray[3]);
             BoxPlot showBoxPlot = new BoxPlot(array1, array2, array3, array4, labelsArray, screenWidth, screenHeight);
             showBoxPlot.init();
-            int width = (int) (500*showBoxPlot.scaleFactor());
-            int diff = (screenWidth -width)/2;
-            showBoxPlot.setBounds(diff,-20,screenWidth,((int) 0.8*screenHeight));   //Setbounds for correct position
+            int width = (int) (500 * showBoxPlot.scaleFactor());
+            int diff = (screenWidth - width) / 2;
+            showBoxPlot.setBounds(diff, -20, screenWidth, ((int) 0.8 * screenHeight));   //Setbounds for correct position
             this.getContentPane().add(showBoxPlot);   //Show the results
         }
     }

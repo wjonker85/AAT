@@ -1,3 +1,12 @@
+package io;
+
+import DataStructures.AATImage;
+import DataStructures.DynamicTableModel;
+import DataStructures.ResultsDataTableModel;
+import Model.AATModel;
+import io.CSVReader;
+import io.CSVWriter;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,8 +17,6 @@ import java.util.HashMap;
  * Date: 10/29/11
  * Time: 4:24 PM
  * This class is used to export all the registered data in a form that can be used to do the data analysis.
- * TODO: Nog een optie of de extra participant data ook aan de uitvoer gekoppeld moet gaan worden. Dit zal niet het lastigst zijn.
- * TODO: Nog even uitzoeken hoe het met het percentage zit.
  */
 public class DataExporter {
 
@@ -18,12 +25,18 @@ public class DataExporter {
     private ResultsDataTableModel resultsData;
     private HashMap<String, Integer> NoMistakes;
     private AATModel model;
+    private int centerPos;
+    private int minRtime, maxRtime, errorPerc;
 
-
-    public DataExporter(File exportFile, File participantsFile, File dataFile, AATModel model) {
+    //Constructor, based on information from the views.ExportDataDialog
+    public DataExporter(AATModel model, int minRTime, int maxRtime, int errorPerc) {
         this.model = model;
-        CSVReader partReader = new CSVReader(participantsFile);       //Read all stored participants data
-        CSVReader dataReader = new CSVReader(dataFile);              //read all stored measurement data.
+        this.minRtime = minRTime;
+        this.maxRtime = maxRtime;
+        this.errorPerc = errorPerc;
+        centerPos = (model.getStepRate() + 1) / 2;
+        CSVReader partReader = new CSVReader(model.getParticipantsFile());       //Read all stored participants data
+        CSVReader dataReader = new CSVReader(model.getDataFile());              //read all stored measurement data.
         partipantsTable = new DynamicTableModel();
         partipantsTable.setColumnNames(partReader.getColumnNames());
         partipantsTable.add(partReader.getData());
@@ -39,12 +52,6 @@ public class DataExporter {
         columnNames.add("ReactionTime");
         exportData.setColumnNames(columnNames);
         NoMistakes = new HashMap<String, Integer>();
-        createReactionTimeTable();
-        CSVWriter writer = new CSVWriter(exportData);
-                writer.writeData(new File("Before.csv"));
-        exportData.display();
-        writeToFile(new File("export.csv"),100);
-        writer.writeData(new File("After.csv"));
     }
 
 
@@ -66,7 +73,7 @@ public class DataExporter {
             String run = resultsData.getValueAt(x, 1).toString();
             String image = resultsData.getValueAt(x, 2).toString();      //Next image in the list
             String direction = resultsData.getValueAt(x, 3).toString();
-                        String type = resultsData.getValueAt(x, 4).toString();
+            String type = resultsData.getValueAt(x, 4).toString();
 
             if (x < resultsData.getRowCount() - 1) {
                 nextImage = resultsData.getValueAt(x + 1, 2).toString();
@@ -86,8 +93,8 @@ public class DataExporter {
 
             } else {
                 firstLine = true;
-                if (correctStartPosition(firstMovement, 5) && checkTime(200, 3000, Integer.parseInt(reactionTime))) {
-                    if(wrongFirstDirection(firstMovement,direction,5)) {
+                if (correctStartPosition(firstMovement) && checkTime(minRtime, maxRtime, Integer.parseInt(reactionTime))) {
+                    if (wrongFirstDirection(firstMovement, direction)) {
                         updateMistakeCount(id);
                     }
 
@@ -98,8 +105,7 @@ public class DataExporter {
                     result.add(type);
                     result.add(reactionTime);
                     exportData.add(result);
-                }
-                else {
+                } else {
                     updateMistakeCount(id); //Add a mistake to the id
                 }
             }
@@ -110,10 +116,10 @@ public class DataExporter {
     Checks if the joystick was in the center at the moment the image was shown. This is based on the asked direction.
         The correct position is always the center position + or - 1
      */
-    private boolean correctStartPosition(String firstPos,int center) {
+    private boolean correctStartPosition(String firstPos) {
         int pos = Integer.parseInt(firstPos);   //First position measured
-            if (pos != center - 1 && pos !=center+1) {
-                return false;
+        if (pos != centerPos - 1 && pos != centerPos + 1) {
+            return false;
         }
         return true;
     }
@@ -123,18 +129,18 @@ public class DataExporter {
       Checks if the joystick was pushed or pulled in the right direction, or that the participant pulled the wrong direction first
       This is only a problem if it happens too often.
      */
-    private boolean wrongFirstDirection(String firstPos, String direction, int center) {
+    private boolean wrongFirstDirection(String firstPos, String direction) {
         int dir = Integer.parseInt(direction);
         int pos = Integer.parseInt(firstPos);
-            if (dir == AATImage.PUSH) {
-                if (pos != center - 1) {
-                    return true;           //Add a mistake
-                }
-            } else if(dir == AATImage.PULL) {
-                if (pos != center + 1) {     //Wrong start movement
-                    return true;
-                }
+        if (dir == AATImage.PUSH) {
+            if (pos != centerPos - 1) {
+                return true;           //Add a mistake
             }
+        } else if (dir == AATImage.PULL) {
+            if (pos != centerPos + 1) {     //Wrong start movement
+                return true;
+            }
+        }
         return false;
     }
 
@@ -166,33 +172,34 @@ public class DataExporter {
     Writes the data to file, but first checks if one ore more participants made too much mistakes. If so then these results
     are not written to the export file.
      */
-    private void writeToFile(File file, int errorMargin) {
+    public void writeToFile(File file) {
+        createReactionTimeTable();
         int totalImage = model.getTotalImageCount();
-      //  System.out.println(totalImage);
-        float fraction = 1f/(100f/errorMargin);
-        float maxErrors = (float) totalImage*fraction;
-     //   System.out.println("Max errors = "+maxErrors);
-        for(String id: NoMistakes.keySet()) {
-               float count = NoMistakes.get(id);
-               if(count>maxErrors) {
-        //           System.out.println(id+" should be removed");
-                   removeID(id);
-               }
-           }
+        float fraction = 1f / (100f / errorPerc);
+        float maxErrors = (float) totalImage * fraction;
+
+        for (String id : NoMistakes.keySet()) {
+            float count = NoMistakes.get(id);
+            if (count > maxErrors) {
+                removeID(id);
+            }
+        }
         CSVWriter writer = new CSVWriter(exportData);
         writer.writeData(file);
     }
 
     /*
-    Walks too the export Table and removes every instance of the given id
+    Walks through the export Table and removes every instance of the given id
      */
     private void removeID(String IDremove) {
-         for(int x = exportData.getRowCount()-1;x>=0;x--) {
-        //     System.out.println("X waarde "+x);
-             String userID = exportData.getValueAt(x,0).toString();
-             if(userID.equals(IDremove)) {
-                 exportData.removeRow(x);
-             }
-         }
+        for (int x = exportData.getRowCount() - 1; x >= 0; x--) {
+            //     System.out.println("X waarde "+x);
+            String userID = exportData.getValueAt(x, 0).toString();
+            if (userID.equals(IDremove)) {
+                exportData.removeRow(x);
+            }
+        }
     }
 }
+
+

@@ -1,3 +1,5 @@
+package io;
+
 import javax.swing.table.TableModel;
 import java.io.File;
 import java.io.FileWriter;
@@ -8,7 +10,7 @@ import java.io.IOException;
  * User: marcel
  * Date: 10/26/11
  * Time: 3:54 PM
- * Output a TableModel to a CSV file.
+ * Output a TableModel to a CSV file. Can use any TableModel as input
  */
 public class CSVWriter {
 
@@ -19,6 +21,7 @@ public class CSVWriter {
         this.tableModel = tableModel;
     }
 
+    //Write data to file. Appends if there already is data in the file
     public boolean writeData(File file) {
         boolean newFile = !file.exists();
 
@@ -27,7 +30,7 @@ public class CSVWriter {
             FileWriter writer = new FileWriter(file, file.exists());
             String columnNames = "";        //Create first line with column names
             if (newFile) {           //Add column headers only if file is empty
-                System.out.println("Dikke vinger");
+
                 for (int x = 0; x < tableModel.getColumnCount(); x++) {
                     if (x < tableModel.getColumnCount() - 1) {
                         columnNames += tableModel.getColumnName(x) + ",";

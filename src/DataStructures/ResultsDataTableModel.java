@@ -1,3 +1,5 @@
+package DataStructures;
+
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
 import java.util.Vector;
@@ -7,13 +9,9 @@ import java.util.Vector;
  * User: marcel
  * Date: 10/14/11
  * Time: 8:24 PM
- * Maak gebruik van een uitbreiding van AbstractTableModel voor een goede gestructureerde manier van data opslaan.
- * Deze class is gewoon als een tabel te gebruiken, of als input voor een JTable
- * TODO: ID toevoegen zodat er meerdere personen deze test kunnen maken.
+ * This class contains tableData. It's a usefull structure, not only for displaying data on the screen, but also
+ * for what it is used for in this program. To easily write and read data to and from csv files.
  */
-
-
-
 
 public class ResultsDataTableModel extends AbstractTableModel {
     private ArrayList<Object> data;

@@ -1,3 +1,8 @@
+import Controller.JoystickController;
+import Model.AATModel;
+import views.ExportDataDialog;
+import views.TestFrame;
+
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -10,8 +15,8 @@ import java.io.File;
  * Time: 3:22 PM
  * Main frame for the test. This frame is the controller from which test can be started. This is also the place where the user
  * can choose to display the results and save to file.
- * TODO let the size of the images depend on the screen size.
  */
+
 public class AAT_Main extends JFrame {
 
 
@@ -22,32 +27,39 @@ public class AAT_Main extends JFrame {
     private File configFile;
 
 
-    /*
-Definieer view classes, deze classes worden door Wilfried in Processing geschreven.
-    */
-
     public static void main(String[] args) {
         AAT_Main main = new AAT_Main();
-
     }
 
     public AAT_Main() {
         mainPanel = new JPanel();
         mainPanel.setSize(800, 600);
-        //      model.addObserver(results);
-        //   aatResults.init();
         JMenuBar menuBar = new JMenuBar();
         JMenu fileMenu = new JMenu("File");
         JMenuItem loadTest = new JMenuItem("Load new AAT");
         final JMenuItem startTest = new JMenuItem("Start test");
         startTest.setEnabled(false);
-        JMenuItem exportData = new JMenuItem("Export Data");
+        final JMenuItem exportData = new JMenuItem("Export Data");
+        exportData.setEnabled(false);
         JMenuItem exit = new JMenuItem("Exit");
         fileMenu.add(loadTest);
         fileMenu.add(startTest);
         fileMenu.add(exportData);
         fileMenu.add(exit);
         menuBar.add(fileMenu);
+        //...create and add some menus...
+        menuBar.add(Box.createHorizontalGlue());
+        JMenuItem about = new JMenuItem("About");
+//...create the rightmost menu...
+        menuBar.add(about);
+
+        about.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent actionEvent) {
+                SimpleAboutDialog aboutDialog = new SimpleAboutDialog(null);
+                aboutDialog.setEnabled(true);
+                aboutDialog.setVisible(true);
+            }
+        });
 
         //Start a new test.
         loadTest.addActionListener(new ActionListener() {
@@ -55,12 +67,12 @@ Definieer view classes, deze classes worden door Wilfried in Processing geschrev
                 File configFile = fileOpenDialog();
                 if (configFile.exists()) {
                     model = new AATModel(configFile);
-                            testFrame = new TestFrame(model);
+                    testFrame = new TestFrame(model);
                     startTest.setEnabled(true);
+                    if (model.hasData()) {
+                        exportData.setEnabled(true);
+                    }
                 }
-                //    QuestionFrame questionFrame = new QuestionFrame(model);
-                //    questionFrame.displayQuestions(model.getExtraQuestions());
-                //    questionFrame.display();
             }
         });
 
@@ -71,6 +83,12 @@ Definieer view classes, deze classes worden door Wilfried in Processing geschrev
 
                 model.addObserver(testFrame);
                 model.startTest();
+            }
+        });
+
+        exportData.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent actionEvent) {
+                ExportDataDialog export = new ExportDataDialog(model);
             }
         });
 
@@ -103,3 +121,33 @@ Definieer view classes, deze classes worden door Wilfried in Processing geschrev
     }
 }
 
+
+//Simple dialog copied from the internet
+class SimpleAboutDialog extends JDialog {
+
+    public SimpleAboutDialog(JFrame parent) {
+        super(parent, "About Dialog", true);
+
+        Box b = Box.createVerticalBox();
+        b.add(Box.createGlue());
+        b.add(new JLabel("This test was created by"));
+        b.add(new JLabel("Marcel Zuur"));
+        b.add(new JLabel("       &      "));
+        b.add(new JLabel("Wilfried Jonker"));
+        b.add(Box.createGlue());
+        getContentPane().add(b, "Center");
+
+        JPanel p2 = new JPanel();
+        JButton ok = new JButton("Ok");
+        p2.add(ok);
+        getContentPane().add(p2, "South");
+
+        ok.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
+                setVisible(false);
+            }
+        });
+
+        setSize(250, 150);
+    }
+}

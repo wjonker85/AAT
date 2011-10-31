@@ -1,3 +1,5 @@
+package DataStructures;
+
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
 
@@ -74,7 +76,7 @@ public class MeasureData {
 
 
 /*
-A MeasureObject contains the measurements for a single picture. For this picture all the movements from the joystick are recorded
+A DataStructures.MeasureObject contains the measurements for a single picture. For this picture all the movements from the joystick are recorded
  */
 class MeasureObject {
 

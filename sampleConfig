@@ -7,8 +7,6 @@
 #	       if you a break is not necessary.
 # PracticeRepeat - How many practice images are needed at the beginning of the test. The total number of images
 # 		   Shown is twice this amount. (Every image has a pull and push variant). Comment this or set to 0 when you don't want a practice.
-# NoPracticeTrail - Next to the normal practice, it is possible to have a number of practice Pictures at the beginning of the first Trail and
-		    the Trail after the break.
 
 Trails 2
 BreakAfter 1

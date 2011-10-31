@@ -1,3 +1,5 @@
+package DataStructures;
+
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
 import java.util.Vector;
@@ -7,8 +9,9 @@ import java.util.Vector;
  * User: marcel
  * Date: 10/29/11
  * Time: 11:28 AM
- * TableModel with the data from the participants. If the test contains no extra questions, the only thing this will contain is the
- * user id. If there are more questions asked. Then there will be more.
+ * Dynamic table model, which means that this table is flexibel in it's number of columns. The number of columns and
+ * their names can be defined with an ArrayList containing them. This is especially useful for storing the answers to
+ * the optional questions. This way the number of questions that can be asked is unlimited.
  */
 public class DynamicTableModel extends AbstractTableModel {
 
@@ -30,7 +33,6 @@ public class DynamicTableModel extends AbstractTableModel {
         this.columns = columns;
         for(int x = 0;x<columns.size();x++) {
             columnNames[x]=columns.get(x);
-            System.out.println(columnNames[x]);
         }
         fireTableDataChanged();
     }
@@ -75,7 +77,6 @@ public class DynamicTableModel extends AbstractTableModel {
         int startPos = row*getColumnCount();
         int endPos = startPos+getColumnCount()-1;
         for(int x = endPos;x>=startPos;x--) {
-            System.out.println("Remove "+data.get(x));
             data.remove(x);
         }
     }
