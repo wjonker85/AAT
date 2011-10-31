@@ -72,7 +72,7 @@ public class AATView extends PApplet implements Observer {
         textAlign(CENTER);
         float scaleFactorText = ((float) width / (textWidth(infoText)+40f)); //+40 pixels, omdat anders soms scale factor net te groot is waardoor text precies op rand of net paar pixels buiten rand valt
         scale(scaleFactorText);
-        text(infoText, (xPos / scaleFactorText), (viewHeight * .25f));
+        text(infoText, (xPos / scaleFactorText),  ((float)viewHeight *.25f) / scaleFactorText);  //infotext is tekst die getoond moet worden, Xpos is midden, maar door de scale factor zal is Xpos niet meer het visuele middden van scherm, daarom (xPos / scaleFactorText). In hoogte moet tekst vanaf 1/4 scherm komen, vandaar viewHeig * .25, maar ook ier moet weer rekening gehouden worden met scalefactor, daarom ((float)viewHeight *.25f) / scaleFactorText
     }
 
     public void imageShow() {
