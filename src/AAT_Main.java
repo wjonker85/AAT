@@ -41,6 +41,7 @@ public class AAT_Main extends JFrame {
         mainPanel = new JPanel();
         mainPanel.setBackground(Color.black);
         mainPanel.setLayout(new GridBagLayout());
+        this.setTitle("Approach avoidance Task");
         BufferedImage buttonIcon = null;
         try {
             buttonIcon = ImageIO.read(new File("playButton100.png"));
@@ -84,6 +85,7 @@ public class AAT_Main extends JFrame {
                 if (configFile.exists()) {
                     model = new AATModel(configFile);
                     testFrame = new TestFrame(model);
+                model.addObserver(testFrame);
                     runButton.setEnabled(true);
                     if (model.hasData()) {
                         exportData.setEnabled(true);
@@ -98,9 +100,7 @@ public class AAT_Main extends JFrame {
             public void actionPerformed(ActionEvent actionEvent) {
                 joystick = new JoystickController(model);
                 joystick.start(); //Start joystick Thread
-
-                model.addObserver(testFrame);
-                model.startTest();
+               model.startTest();
             }
         });
 

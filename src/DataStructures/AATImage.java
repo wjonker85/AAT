@@ -49,7 +49,7 @@ public class AATImage {
     }
 
     private BufferedImage getPracticeImage(Color color) {
-        BufferedImage PracticeImage = new BufferedImage(433, 433, BufferedImage.TYPE_INT_RGB);
+        BufferedImage PracticeImage = new BufferedImage(750, 750, BufferedImage.TYPE_INT_RGB);
         Graphics2D g = PracticeImage.createGraphics();
         g.setBackground(color);
         g.setColor(color);

@@ -88,6 +88,7 @@ public class AATModel extends Observable {
     private DynamicTableModel dynamic;
 
     //Files where the data needs to be saved to.
+    private String workingDir;
     private File participantsFile;
     private File dataFile;
 
@@ -102,12 +103,14 @@ public class AATModel extends Observable {
     public AATModel(File config) {
         dynamic = new DynamicTableModel();
         testConfig = new TestConfig(config);
-        participantsFile = new File(testConfig.getValue("ParticipantsFile"));
-        dataFile = new File(testConfig.getValue("DataFile"));
+        workingDir = config.getParentFile().getAbsolutePath();
+        participantsFile = new File(workingDir + File.separator + testConfig.getValue("ParticipantsFile"));
+        dataFile = new File(workingDir + File.separator + testConfig.getValue("DataFile"));
+        System.out.println("Test path " + config.getParentFile().getAbsolutePath());
         id = getHighestID(participantsFile);
-        File neutralDir = new File("images" + File.separator + testConfig.getValue("AffectiveDir"));
-        File affectiveDir = new File("images" + File.separator + testConfig.getValue("NeutralDir"));
-        File languageFile = new File(testConfig.getValue("LanguageFile"));
+        File neutralDir = new File(workingDir + File.separator + "images" + File.separator + testConfig.getValue("AffectiveDir"));
+        File affectiveDir = new File(workingDir + File.separator + "images" + File.separator + testConfig.getValue("NeutralDir"));
+        File languageFile = new File(workingDir + File.separator + testConfig.getValue("LanguageFile"));
         textReader = new TextReader(languageFile);
         pattern = Pattern.compile(IMAGE_PATTERN);
         neutralImages = getImages(neutralDir);
@@ -142,13 +145,16 @@ public class AATModel extends Observable {
         run = 0;
         id++;          //new higher id
         newMeasure = new MeasureData(id);
-        this.setChanged();
+
         if (textReader.getExtraQuestions().size() > 0) {   //When there are extra question, show them
             testStatus = AATModel.TEST_WAIT_FOR_QUESTIONS;
+            this.setChanged();
             notifyObservers("Show questions");      //Notify the observer that a new test is started.
         } else {
-            testStatus = AATModel.TEST_WAIT_FOR_TRIGGER;   //Start the test
+            addParticipantsData();
+            this.setChanged();
             notifyObservers("Start");
+            testStatus = AATModel.TEST_WAIT_FOR_TRIGGER;   //Start the test
         }
     }
 
@@ -425,15 +431,19 @@ public class AATModel extends Observable {
         ArrayList<String> columnNames = new ArrayList<String>();
 
         columnNames.add("ID"); //The Participant always has an ID
-        for (String key : extraQuestions.keySet()) {
-            columnNames.add(key);
+        if (extraQuestions != null) {
+            for (String key : extraQuestions.keySet()) {
+                columnNames.add(key);
+            }
         }
         dynamic.setColumnNames(columnNames);         //Set the column headers for the table Data
         ArrayList<Object> results = new ArrayList<Object>();
         results.add(id);
 
-        for (String key : extraQuestions.keySet()) {
-            results.add(extraQuestions.get(key));
+        if (extraQuestions != null) {
+            for (String key : extraQuestions.keySet()) {
+                results.add(extraQuestions.get(key));
+            }
         }
         dynamic.add(results);
         dynamic.display();
@@ -493,9 +503,9 @@ public class AATModel extends Observable {
             resize = value;
             if (testStatus == AATModel.IMAGE_LOADED || testStatus == AATModel.PRACTICE_IMAGE_LOADED) { //Only listen when there is an image loaded
                 newMeasure.addResult(resize, getMeasurement());     //add results to the other measurements
-                if (current.getDirection() == AATImage.PULL && value == getStepRate()) {   //check if the requested action has been performed
+                if (current.getDirection() == AATImage.PULL && value == 1) {   //check if the requested action has been performed
                     removeImage();
-                } else if (current.getDirection() == AATImage.PUSH && value == 1) {
+                } else if (current.getDirection() == AATImage.PUSH && value == getStepRate()) {
                     removeImage();
                 }
             }
@@ -514,8 +524,8 @@ public class AATModel extends Observable {
     /*When the test is waiting for the trigger, check if the trigger is pressed and then change the test status
     to image loaded. then call nextstep so the model can determine the appropriate next action to take
     */
-    public void triggerPressed() {                   //TODO: verbeteren  Switch is mooier
-        if(testStatus == AATModel.TEST_SHOW_RESULTS) {
+    public void triggerPressed() {
+        if (testStatus == AATModel.TEST_SHOW_RESULTS) {
             this.setChanged();
             this.notifyObservers("Finished");
         }

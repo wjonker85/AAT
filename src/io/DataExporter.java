@@ -130,11 +130,11 @@ public class DataExporter {
     private boolean wrongFirstDirection(String firstPos, String direction) {
         int dir = Integer.parseInt(direction);
         int pos = Integer.parseInt(firstPos);
-        if (dir == AATImage.PUSH) {
+        if (dir == AATImage.PULL) {
             if (pos != centerPos - 1) {
                 return true;           //Add a mistake
             }
-        } else if (dir == AATImage.PULL) {
+        } else if (dir == AATImage.PUSH) {
             if (pos != centerPos + 1) {     //Wrong start movement
                 return true;
             }

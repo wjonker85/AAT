@@ -28,7 +28,10 @@ public class TestFrame extends JFrame implements Observer {
         this.model = model;
         //  this.setLayout(new GridBagLayout());
         this.getContentPane().setLayout(new GridBagLayout());
+        //   if(model.getExtraQuestions().size()>0) {
         qPanel = new QuestionPanel(model);
+
+        //   }
         this.setBackground(Color.black);
         setExtendedState(Frame.MAXIMIZED_BOTH);
         setUndecorated(true);
@@ -45,22 +48,19 @@ public class TestFrame extends JFrame implements Observer {
 
         //AAT Test screen
         if (o.toString().equals("Start")) {
-            this.getContentPane().removeAll();
             this.setVisible(true);
-            this.getContentPane().remove(qPanel);
             this.setLayout(null);
-            Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
-            int screenWidth = (int) dim.getWidth();
-            int screenHeight = (int) dim.getHeight();
+
             if (aatView != null) {
                 model.deleteObserver(aatView);
             }
-            aatView = new AATView(model, screenHeight, screenWidth);
-            aatView.init();             //Make sure the PApplet gets initialised.
-            model.addObserver(aatView);    //Add a new aatView to the observers list.
+            Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+            int screenWidth = (int) dim.getWidth();
+            int screenHeight = (int) dim.getHeight();
+            AATView aatView = new AATView(model, screenHeight, screenWidth);
+            aatView.init();
+            model.addObserver(aatView);
             this.getContentPane().add(aatView);
-            model.startTest();
-
         }
 
 
@@ -68,6 +68,7 @@ public class TestFrame extends JFrame implements Observer {
         if (o.toString().equals("Show questions")) {
             this.setVisible(true);
             //    System.out.println("Show questions");
+            qPanel = new QuestionPanel(model);
             this.getContentPane().setBackground(Color.black);
             this.getContentPane().add(qPanel, new GridBagConstraints());
             qPanel.displayQuestions(model.getExtraQuestions());
@@ -76,6 +77,8 @@ public class TestFrame extends JFrame implements Observer {
         //Results Screen
         if (o.toString().equals("Display results")) {
             this.getContentPane().removeAll();
+            this.getContentPane().setBackground(Color.black);
+            this.setBackground(Color.black);
             model.deleteObserver(aatView);
             Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
             int screenWidth = (int) dim.getWidth();
@@ -96,7 +99,7 @@ public class TestFrame extends JFrame implements Observer {
             this.getContentPane().add(showBoxPlot);   //Show the results
         }
 
-        if(o.toString().equals("Finished")) {
+        if (o.toString().equals("Finished")) {
             this.setEnabled(false);
             this.dispose();
         }
