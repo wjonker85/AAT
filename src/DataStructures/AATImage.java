@@ -1,3 +1,20 @@
+/** This file is part of Foobar.
+ *
+ * Foobar is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Foobar is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+
 package DataStructures;
 
 import javax.imageio.ImageIO;
@@ -48,11 +65,11 @@ public class AATImage {
     }
 
     private BufferedImage getPracticeImage(Color color) {
-        BufferedImage PracticeImage = new BufferedImage(750, 750, BufferedImage.TYPE_INT_RGB);
+        BufferedImage PracticeImage = new BufferedImage(433, 433, BufferedImage.TYPE_INT_RGB);
         Graphics2D g = PracticeImage.createGraphics();
         g.setBackground(color);
         g.setColor(color);
-        g.fillRect(0, 0, 750, 750);
+        g.fillRect(0, 0, 433, 433);
         return PracticeImage;
     }
 

@@ -1,3 +1,20 @@
+/** This file is part of Foobar.
+ *
+ * Foobar is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Foobar is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+
 package io;
 
 import DataStructures.AATImage;
@@ -5,12 +22,9 @@ import DataStructures.DynamicTableModel;
 import DataStructures.ResultsDataTableModel;
 import Model.AATModel;
 
-import javax.swing.*;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Observable;
-import java.util.Observer;
 
 /**
  * Created by IntelliJ IDEA.
@@ -21,7 +35,6 @@ import java.util.Observer;
  */
 public class DataExporter {
 
-    private DynamicTableModel partipantsTable;
     private DynamicTableModel exportData;
     private ResultsDataTableModel resultsData;
     private HashMap<String, Integer> NoMistakes;
@@ -38,7 +51,7 @@ public class DataExporter {
         centerPos = (model.getStepRate() + 1) / 2;
         CSVReader partReader = new CSVReader(model.getParticipantsFile());       //Read all stored participants data
         CSVReader dataReader = new CSVReader(model.getDataFile());              //read all stored measurement data.
-        partipantsTable = new DynamicTableModel();
+        DynamicTableModel partipantsTable = new DynamicTableModel();
         partipantsTable.setColumnNames(partReader.getColumnNames());
         partipantsTable.add(partReader.getData());
         resultsData = new ResultsDataTableModel();
@@ -46,7 +59,7 @@ public class DataExporter {
         exportData = new DynamicTableModel();
         ArrayList<String> columnNames = new ArrayList<String>();
         columnNames.add("ID");
-        columnNames.add("Run");
+        columnNames.add("Trail");
         columnNames.add("Image");
         columnNames.add("Direction");
         columnNames.add("Type");
@@ -64,8 +77,8 @@ public class DataExporter {
     private void createReactionTimeTable() {
         String reactionTime = "";
         String firstMovement = "";
-        String nextImage = "";
-        String nextDirection = "";
+        String nextImage;
+        String nextDirection;
         boolean firstLine = true;
 
         for (int x = 0; x < resultsData.getRowCount(); x++) {    //Calculate reactionTimes  Start at next line.
@@ -106,8 +119,6 @@ public class DataExporter {
                     result.add(type);
                     result.add(reactionTime);
                     exportData.add(result);
-                } else {
-                    System.out.println("Results not added");
                 }
             }
         }
@@ -119,10 +130,7 @@ public class DataExporter {
      */
     private boolean correctStartPosition(String firstPos) {
         int pos = Integer.parseInt(firstPos);   //First position measured
-        if (pos != centerPos - 1 && pos != centerPos + 1) {
-            return false;
-        }
-        return true;
+        return !(pos != centerPos - 1 && pos != centerPos + 1);
     }
 
 
@@ -134,11 +142,11 @@ public class DataExporter {
         int dir = Integer.parseInt(direction);
         int pos = Integer.parseInt(firstPos);
         if (dir == AATImage.PULL) {
-            if (pos != centerPos - 1) {
+            if (pos != centerPos + 1) {
                 return true;           //Add a mistake
             }
         } else if (dir == AATImage.PUSH) {
-            if (pos != centerPos + 1) {     //Wrong start movement
+            if (pos != centerPos - 1) {     //Wrong start movement
                 return true;
             }
         }
@@ -150,11 +158,7 @@ public class DataExporter {
     boundaries.
      */
     private boolean checkTime(int low, int high, int reactionTime) {
-        if (reactionTime > low && reactionTime < high) {
-            return true;
-        } else {
-            return false;
-        }
+        return reactionTime > low && reactionTime < high;
     }
 
     //Update the mistakes counter for a given id.
@@ -178,9 +182,9 @@ public class DataExporter {
         int totalImage = model.getTotalImageCount();
         float fraction = 1f / (100f / errorPerc);
         float maxErrors = (float) totalImage * fraction;
-
         for (String id : NoMistakes.keySet()) {
             float count = NoMistakes.get(id);
+         System.out.println("Max errors "+maxErrors+ " ID "+id+ "has "+count);
             if (count > maxErrors) {
                 removeID(id);
             }

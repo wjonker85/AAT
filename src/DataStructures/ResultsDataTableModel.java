@@ -1,3 +1,20 @@
+/** This file is part of Foobar.
+ *
+ * Foobar is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Foobar is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+
 package DataStructures;
 
 import javax.swing.table.AbstractTableModel;
@@ -17,7 +34,7 @@ public class ResultsDataTableModel extends AbstractTableModel {
     private ArrayList<String> columns;
     String[] columnNames = {
             "ID",
-            "Run",
+            "Trail",
             "ImageName",
             "Direction",
             "Type",
@@ -27,10 +44,10 @@ public class ResultsDataTableModel extends AbstractTableModel {
 
 
     public ResultsDataTableModel() {
-        columns = new ArrayList();
-        data = new ArrayList();
+        columns = new ArrayList<String>();
+        data = new ArrayList<Object>();
         columns.add("ID");
-        columns.add("Run");
+        columns.add("Trail");
         columns.add("ImageName");
         columns.add("Direction");
         columns.add("Type");
@@ -40,7 +57,7 @@ public class ResultsDataTableModel extends AbstractTableModel {
 
     }
 
-    public void add(ArrayList result) {
+    public void add(ArrayList<Object> result) {
         data.addAll(result);
     }
 

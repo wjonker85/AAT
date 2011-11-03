@@ -1,3 +1,20 @@
+/** This file is part of Foobar.
+ *
+ * Foobar is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Foobar is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+
 import Controller.JoystickController;
 import Model.AATModel;
 import views.ExportDataDialog;
@@ -89,7 +106,7 @@ public class AAT_Main extends JFrame implements Observer {
 
         about.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent actionEvent) {
-                String text = "<h1>Approach avoidance task</h1>";
+                String text = "<center><h1>Approach avoidance task</h1></center>";
                 text += "<center>Created By</center>";
                 text += "<center><h3>Marcel Zuur</h3></center>";
                 text += "<center>&</center>";
@@ -179,22 +196,6 @@ public class AAT_Main extends JFrame implements Observer {
         return file;
     }
 
-    private String getLicense() {
-        File license = new File("License" + File.separatorChar + "lgpl.html");
-        String text = "";
-        String strLine;
-        try {
-            BufferedReader br = new BufferedReader(new FileReader(license));
-            while ((strLine = br.readLine()) != null) {
-                text += strLine + "\n";
-                System.out.println(strLine);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        }
-        return text;
-    }
-
     public void update(Observable observable, Object o) {
         if (o.toString().equals("Finished")) {
             joystick.exit();
@@ -211,25 +212,21 @@ class LicenseDialog extends JDialog {
         super(parent, "About AAT", true);
         JEditorPane textPane = new JEditorPane();
         textPane.setContentType("text/html");
-        File f = new File("License" + File.separatorChar + "lgpl.html");
+        JScrollPane scrollPane = new JScrollPane(textPane);
+        File f = new File("License" + File.separatorChar + "gpl.html");
         java.net.URL fileURL = null;
         try {
             fileURL = f.toURI().toURL(); // Transform path into URL
         } catch (MalformedURLException e1) {
             e1.printStackTrace();
         }
-
         try {
             textPane.setPage(fileURL); // Load the file to the editor
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-
-        //    textPane.setText(text);
         Box b = Box.createVerticalBox();
-        b.add(Box.createGlue());
-        JScrollPane scrollPane = new JScrollPane(textPane);
         b.add(scrollPane);
 
         getContentPane().add(b, "Center");
@@ -245,7 +242,7 @@ class LicenseDialog extends JDialog {
                 setVisible(false);
             }
         });
-
+        doLayout();
         setSize(400, 300);
     }
 }

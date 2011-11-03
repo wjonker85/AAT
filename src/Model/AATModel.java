@@ -1,3 +1,20 @@
+/** This file is part of Foobar.
+ *
+ * Foobar is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Foobar is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+
 package Model;
 
 import Configuration.TestConfig;
@@ -9,7 +26,6 @@ import DataStructures.QuestionObject;
 import io.CSVReader;
 import io.CSVWriter;
 
-import javax.swing.table.TableModel;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -18,8 +34,8 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Created by IntelliJ IDEA.
+
+/** Created by IntelliJ IDEA.
  * User: marcel
  * Date: 10/4/11
  * Time: 3:12 PM
@@ -38,7 +54,7 @@ import java.util.regex.Pattern;
  * When a user has done the test he can see his results with four boxplots. One for every condition.
  * <p/>
  * <p/>
- * <p/>   TODO checken voor borderwidth, bordercolor, stepsize
+ * <p/>
  */
 
 public class AATModel extends Observable {
@@ -60,13 +76,13 @@ public class AATModel extends Observable {
     //Test variables
     private int repeat;
     private int breakAfter;
-    private int practiceRepeat;
     private int count; //Counts the number of images shown.
 
     //Test view variables
     private int borderWidth;
     private int stepSize;
     private String practiceFillColor;
+    private boolean coloredBorders;
 
     //progress variables
     private int practiceCount;
@@ -98,8 +114,6 @@ public class AATModel extends Observable {
 
     private DynamicTableModel dynamic;
 
-    //Files where the data needs to be saved to.
-    private String workingDir;
     private File participantsFile;
     private File dataFile;
 
@@ -125,8 +139,7 @@ public class AATModel extends Observable {
     //Starts a new instance of the AAT. With no. times it has to repeat and when there will be a break.
     public void startTest() {
 
-        if (hasPractice()) {        //If set in the config, first do a practice.
-            practice = true;
+        if (practice) {        //If set in the config, first do a practice.
             repeat++;     //Make these one higher, because of the practice
             breakAfter++;
             System.out.println("Heeft practice");
@@ -152,14 +165,16 @@ public class AATModel extends Observable {
         }
     }
 
-    /*
-    Load all the configuration data from the config file and the language file specified in that config
-    Checks the config file for validity and throws a FalseConfigException when the config contains errors.
+    /**
+     * Load all the configuration data from the config file and the language file specified in that config
+     * Checks the config file for validity and throws a FalseConfigException when the config contains errors.
+     * @param config The config file
+     * @throws Model.AATModel.FalseConfigException When there are mistakes in the config file
      */
-    public void loadConfig(File config) throws FalseConfigException {   //TODO bladiebla
+    public void loadConfig(File config) throws FalseConfigException {
         dynamic = new DynamicTableModel();
         testConfig = new TestConfig(config);
-        workingDir = config.getParentFile().getAbsolutePath();
+        String workingDir = config.getParentFile().getAbsolutePath();
         String partFile = testConfig.getValue("ParticipantsFile");
         if (partFile.equals("")) {
             throw new FalseConfigException("Participants file is not set");
@@ -204,6 +219,7 @@ public class AATModel extends Observable {
         if (!doBorders.equals("True") && !doBorders.equals("False")) {
             throw new FalseConfigException("ColoredBorders has a false value, must be True or False");
         }
+        coloredBorders = doBorders.equals("True");
 
         if (testConfig.getValue("ColoredBorders").equals("True")) {
             colorTable = new Hashtable<Integer, String>();
@@ -241,7 +257,13 @@ public class AATModel extends Observable {
         } catch (Exception e) {
             throw new FalseConfigException("StepSize is not configured properly");
         }
+        if (stepSize % 2 == 0) {
+            throw new FalseConfigException("Stepsize should be and odd number");
+        }
+        resize = (stepSize + 1) / 2;
+
         if (!testConfig.getValue("PracticeRepeat").equals("")) {  //When a value for practice repeat is set, check validity
+            int practiceRepeat;
             try {
 
                 practiceRepeat = Integer.parseInt(testConfig.getValue("PracticeRepeat"));
@@ -249,6 +271,7 @@ public class AATModel extends Observable {
                 throw new FalseConfigException("PracticeRepeat is not configured properly");
             }
             if (practiceRepeat > 0) {
+                practice = true;
                 String practDir = testConfig.getValue("PracticeDir");
                 if (practDir.equals("")) {
                     practiceFillColor = testConfig.getValue("PracticeFillColor");
@@ -275,7 +298,9 @@ public class AATModel extends Observable {
         }
     }
 
-
+    /**
+     * False configuration exception
+     */
     public class FalseConfigException extends Exception {
 
         public FalseConfigException(String error) {
@@ -284,14 +309,20 @@ public class AATModel extends Observable {
 
     }
 
-    //Loads all image files in a given directory. Extension filter with regular expression.
+    /**Loads all image files in a given directory. Extension filter with regular expression.
+     *
+     * @param dir  Directory containing images
+     * @return  ArrayList<File> with all image files in a directory
+     */
     private ArrayList<File> getImages(File dir) {
         File[] files = dir.listFiles(extensionFilter);
         return new ArrayList<File>(Arrays.asList(files));
     }
 
 
-    //Create fileFilter based on regular expression.
+    /**
+     * Filter so that only the image files in a directory will be selected
+     */
     FileFilter extensionFilter = new FileFilter() {
         public boolean accept(File file) {
             Matcher matcher = pattern.matcher(file.getName());
@@ -299,7 +330,11 @@ public class AATModel extends Observable {
         }
     };
 
-    //Returns the hightest ID given to a participant so far.
+    /**
+     * Reads the participants data file and gets the highes assigned id number
+     * @param file The participants data file
+     * @return Highest id number based on that file. If there is no file it will return 0
+     */
     private int getHighestID(File file) {
         if (file.exists()) {
             CSVReader csvReader = new CSVReader(file);
@@ -311,10 +346,13 @@ public class AATModel extends Observable {
         }
     }
 
-    /*
-    Creates a random list with practice images. If there is a directory specified in the config, it will load the
-    imageFile from that directory. Otherwise it will generate a list with self-created images containing a single color
-    as specified in the config.
+    /**
+     * Creates a random list with practice images. If there is a directory specified in the config, it will load the
+     * imageFile from that directory. Otherwise it will generate a list with self-created images containing a single color
+     * as specified in the config.
+     *
+     * @param size The size specified in the config file. The size * 2 will be the size of the list
+     * @return arraylist containing practice AATImage objects
      */
     private ArrayList<AATImage> createRandomPracticeList(int size) {
         ArrayList<AATImage> list = new ArrayList<AATImage>();
@@ -351,9 +389,11 @@ public class AATModel extends Observable {
         return list;
     }
 
-    /*
-        Creates a randomised list, containing the affective and neutral images. Every image gets loaded twice, one for the
-        pull condition and one for the push condition.
+    /**
+     * Creates a randomised list, containing the affective and neutral images. Every image gets loaded twice, one for the
+     * pull condition and one for the push condition.
+     *
+     * @return Randomised arrayList with AATImages
      */
     private ArrayList<AATImage> createRandomList() {
         ArrayList<AATImage> randomList = new ArrayList<AATImage>();
@@ -373,27 +413,16 @@ public class AATModel extends Observable {
         return randomList;
     }
 
-
-    //Checks the configuration if a practice trail is needed
-    private boolean hasPractice() {
-        String s = testConfig.getValue("PracticeRepeat");
-        if (s.equals("") || s.equals("0")) {
-            return false;
-        }
-        return true;
-    }
-
-
 //---------------------------Test Progress---------------------------------------------------------
 
-    /*
-        This method determines the next step to be taken in the test.
-        Based on testStatus and the current image shown to the participant
-        Makes sure that the correct images are shown(practice/real test). Puts the test on break
-        if that's necessary. And watches when the test is finished. Together with the joystick inputs this method
-        determines the progress of the AAT.
+    /**
+     * This method determines the next step to be taken in the test.
+     * Based on testStatus and the current image shown to the participant
+     * Makes sure that the correct images are shown(practice/real test). Puts the test on break
+     * if that's necessary. And watches when the test is finished. Together with the joystick inputs this method
+     * determines the progress of the AAT.
     */
-    private void NextStep() {        //TODO
+    private void NextStep() {
         if (testStatus == AATModel.PRACTICE_IMAGE_LOADED) {
             if (practiceCount < practiceList.size()) {
                 showNextImage();
@@ -433,7 +462,10 @@ public class AATModel extends Observable {
         }
     }
 
-    //Show the next image in the list
+    /**
+     * Displays the next image. Will display from the practicelist or the normal testlist, depending on the status
+     * of the test
+     */
     private void showNextImage() {
         if (practice) {
             current = practiceList.get(practiceCount);
@@ -455,7 +487,12 @@ public class AATModel extends Observable {
 //---------------------Getter and Setter methods for the different Observers and Controllers -------------
 
 
-    //Return the total number of images a participant gets shown
+    /**
+     * Counts the total number of images shown to a participant. Is needed by the data exporter to
+     * calculate percentages
+     *
+     * @return int total image count
+     */
     public int getTotalImageCount() {
         int affective = affectiveImages.size();
         int neutral = neutralImages.size();
@@ -464,95 +501,148 @@ public class AATModel extends Observable {
     }
 
 
-    //Geeft een integer met de grootte van het plaatje.
+    /**
+     *
+     * @return an integer from 1 to stepSize, which determines how much larger or smaller the picture
+     * has to be shown on the screen
+     */
     public int getPictureSize() {
         return resize;
     }
 
-    //returns colors for the direction being asked (push or pull)
+    /**
+     * Images can have a border created by this program. This method returns that borders color.
+     * @param direction push or pull
+     * @return The corresponding color
+     */
     public String getBorderColor(int direction) {
         return colorTable.get(direction);
     }
 
-    //Returns whether the pictures should have a colored border
+    /**
+     * Check whether a colored border has to de drawn around an image
+     * @return boolean, true for colored borders
+     */
     public boolean hasColoredBorders() {
-        if (testConfig.getValue("ColoredBorders").equals("True")) {
-            return true;
-        } else {
-            return false;
-        }
+        return coloredBorders;
     }
 
+    /**
+     * When the test is on a break, a Break text is shown on the screen. This text comes from the languageFile
+     * @return Break text to be shown on the screen
+     */
     public String getBreakText() {
         return textReader.getValue("Break");
     }
 
+    /**
+     * When the test is started, a general introduction is shown on the screen. This text comes from the languageFile
+     * @return The introduction text.
+     */
     public String getIntroductionText() {
         return textReader.getValue("Introduction");
     }
 
+    /**
+     * This text is shown after the practice runs. Or when there are no practice runs, this text is the first text to
+     * be shown.
+     * @return
+     */
     public String getTestStartText() {
         return textReader.getValue("Start");
     }
 
+    /**
+     * The text to display when the test has ended
+     * @return Finished text
+     */
     public String getTestFinishedText() {
         return textReader.getValue("Finished");
     }
 
-    //In how many steps does an image gets resized
+    /**
+     * The stepRate determines in how many steps the the image is resized. The middle number is the middle position
+     * of the joystick
+     * @return The steprate as specified in the configuration file.
+     */
     public int getStepRate() {
         return stepSize;
     }
 
-    //returns the width of the border
+    /**
+     *
+     * @return Width of the border around an image
+     */
     public int getBorderWidth() {
         return borderWidth;
     }
 
-    //Read the optional extra questions from the language file specified in the configuration file.
+    /**
+     * In the language file it is possible to add extra questions that are asked to the participant before the
+     * real test is started.
+     * @return ArrayList with questionObjects. These objects are passed to the questionsView that displays them
+     */
     public ArrayList<QuestionObject> getExtraQuestions() {
         return questionsList;
     }
 
+    /**
+     *
+     * @return whether the data file contains data
+     */
 
     public boolean hasData() {
-        if (dataFile.length() > 0) {
-            return true;
-        }
-        return false;
+        return dataFile.length() > 0;
     }
 
 
-    //Returns the current direction (Push of Pull)
+    /**
+     * The AATImage object also stores the direction (push or pull) of an image. This method returns the
+     * direction for the image that is currently shown on the screen
+     * @return Direction for the current image
+     */
     public int getDirection() {
         return current.getDirection();
     }
 
-
+    /**
+     *
+     * @return The file containing the participants data
+     */
     public File getParticipantsFile() {
         return participantsFile;
     }
 
+    /**
+     *
+     * @return The file containing the data file
+     */
     public File getDataFile() {
         return dataFile;
     }
 
 //-------------------- Measure the data and write them to file when finished ---------------
 
-    //Start a new measure for every new image.
+    /**
+     * Every time when a new image is shown on the screen a new measure is started.
+     */
     public void startMeasure() {
         newMeasure.newMeasure(run, current.toString(), current.getDirection(), current.getType()); //Begin met de metingen opslaan.
         startMeasure = System.currentTimeMillis();  //Begintijd
     }
 
-    //Get measurement. Measurement is in milliseconds
+    /**
+     * This method is called every time when the joystick is pulled or pushed while a picture is shown on the
+     * screen. It returns the time between the start of the measure and the current joystick movement
+     * @return ReactionTime in ms.
+     */
     public long getMeasurement() {
         return System.currentTimeMillis() - startMeasure;
     }
 
-    /*
-   This method adds data to the Participants Data table. This data consists of at least the ID number. Next to the the
-   answers to the optional questions from the configuration files will be added to it.
+    /**
+     * This method adds data to the Participants Data table. This data consists of at least the ID number. Next to the the
+     * answers to the optional questions from the configuration files will be added to it.
     */
     private void addParticipantsData() {
         ArrayList<String> columnNames = new ArrayList<String>();
@@ -578,26 +668,23 @@ public class AATModel extends Observable {
 
 
     /*
-    This methods writes data to 2 seperate files. One for the data from the participant and the other
-    one are the results. Data is appended to an existing file if there is any.
+     *This methods writes data to 2 seperate files. One for the data from the participant and the other
+     *one are the results. Data is appended to an existing file if there is any.
      */
     private void writeToFile() {
         CSVWriter writer = new CSVWriter(newMeasure.getAllResults());
         CSVWriter writer2 = new CSVWriter(this.dynamic);
-        writer.writeData(dataFile,true);
-        writer2.writeData(participantsFile,true);
+        writer.writeData(dataFile, true);
+        writer2.writeData(participantsFile, true);
     }
 
 //------------------------------Get results from the test -------------------------------
 
-    //Display results and write them to a file
-    public TableModel getResults() {
-
-        return newMeasure.getAllResults();
-        //   return newMeasure.getAllResults();
-    }
-
-    //Fetches the results voor the latest participant.
+    /**
+     * This methode creates a hashmap with float arrays containing the results of a single participant.
+     * This data is used as input for the boxplots shown at the end of the test
+     * @return Hashmap with results for the boxplot
+     */
     public HashMap<String, float[]> getResultsPerCondition() {
         HashMap<String, float[]> results = new HashMap<String, float[]>();
         results.put("Pull & Neutral", convertToArray(newMeasure.getMeasures(AATImage.PULL, AATImage.NEUTRAL)));
@@ -607,7 +694,11 @@ public class AATModel extends Observable {
         return results;
     }
 
-
+    /**
+     * Converts The measurement data to an array. The boxplots needs float arrays as input.
+     * @param input ArrayList containing longs.
+     * @return Array containing floats
+     */
     private float[] convertToArray(ArrayList<Long> input) {
         float[] array = new float[input.size()]; //Create a new array
         for (int x = 0; x < input.size(); x++) {
@@ -620,10 +711,11 @@ public class AATModel extends Observable {
     //--------------Input from the joystick controller-------------------------------------//
 
 
-    /*
-        Gets changes in the movement from the y-axis of the joystick.
-        Test status has to be changed when the joystick reaches the maximum distance. It depends on the direction that belongs to
-        the current image. When the user performs the requested action, when finished the test status has to go to wait for trigger.
+    /**
+     * Gets changes in the movement from the y-axis of the joystick.
+     * Test status has to be changed when the joystick reaches the maximum distance. It depends on the direction that belongs to
+     * the current image. When the user performs the requested action, when finished the test status has to go to wait for trigger.
+     * @param value This value represents the position of the joystick. This information comes from the joystick controller
      */
     public void changeYaxis(int value) {
         if (value != resize) {
@@ -642,15 +734,19 @@ public class AATModel extends Observable {
         }
     }
 
-    //Remove image when the user has performed the action. Set test status to wait for trigger
+    /**
+     * This method is called when a participant has pulled or pushed the image completely. It notifies the observers
+     * that the current image has to be removed from the view.
+     */
     private void removeImage() {
         this.setChanged();
         notifyObservers("Wait screen");
         testStatus = AATModel.TEST_WAIT_FOR_TRIGGER;
     }
 
-    /*When the test is waiting for the trigger, check if the trigger is pressed and then change the test status
-    to image loaded. then call nextstep so the model can determine the appropriate next action to take
+    /**
+     * When the test is waiting for the trigger, check if the trigger is pressed and then change the test status
+     * to image loaded. then call nextstep so the model can determine the appropriate next action to take
     */
     public void triggerPressed() {
         if (testStatus == AATModel.TEST_SHOW_RESULTS) {
@@ -674,13 +770,16 @@ public class AATModel extends Observable {
                 testStatus = AATModel.IMAGE_LOADED;
             }
             NextStep();    //Determine next step in the test.
-            return;
         }
     }
 
 //--------------------------User input, answers to the questions ----------------------------------------
 
-    //Create a list with the answers to the optional questions.
+    /**
+     * This method is called when the participant has answered the optional questions. The answers are added to
+     * the participants data file and the views are notified that the AAT can be started
+     * @param extraQuestions  The answers to the extra questions. The hashmap contains the key and the answer
+     */
     public void addExtraQuestions(HashMap<String, String> extraQuestions) {
         this.extraQuestions = extraQuestions;
         this.addParticipantsData();
