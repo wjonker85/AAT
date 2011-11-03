@@ -1,17 +1,17 @@
-/** This file is part of Foobar.
+/** This file is part of Approach Avoidance Task.
  *
- * Foobar is free software: you can redistribute it and/or modify
+ * Approach Avoidance Task is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * Foobar is distributed in the hope that it will be useful,
+ * Approach Avoidance Task is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Approach Avoidance Task.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -53,8 +53,11 @@ public class AAT_Main extends JFrame implements Observer {
     private TestFrame testFrame;
     final JMenuItem exportData;
 
+    /**
+     * Start the main thread.
+     * @param args
+     */
     public static void main(String[] args) {
-
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 UIManager.put("swing.boldMetal", Boolean.FALSE);
@@ -63,7 +66,7 @@ public class AAT_Main extends JFrame implements Observer {
         });
     }
 
-
+    //Build the user interface
     public AAT_Main() {
         mainPanel = new JPanel();
         mainPanel.setBackground(Color.black);
@@ -78,7 +81,7 @@ public class AAT_Main extends JFrame implements Observer {
         try {
             buttonIcon = ImageIO.read(new File("playButton100.png"));
         } catch (IOException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
         }
         final JButton runButton = new JButton(new ImageIcon(buttonIcon));
         runButton.setBorder(BorderFactory.createEmptyBorder());
@@ -228,14 +231,11 @@ class LicenseDialog extends JDialog {
 
         Box b = Box.createVerticalBox();
         b.add(scrollPane);
-
         getContentPane().add(b, "Center");
-
         JPanel p2 = new JPanel();
         JButton ok = new JButton("Ok");
         p2.add(ok);
         getContentPane().add(p2, "South");
-
 
         ok.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
