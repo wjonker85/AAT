@@ -152,7 +152,7 @@ public class AATView extends PApplet implements Observer {
         /**
          * De daadwerkelijke breedt, hoogte en boorderwidth in variabelen stoppen.
          */
-        imgBorderWidth = (int) (imgRefactor * borderWidth * inputY);
+        imgBorderWidth = (borderWidth * inputY);
         imgSizeX = (imgRefactor * inputY * stepX);
         imgSizeY = (imgRefactor * inputY * stepY);
     }
