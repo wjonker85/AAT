@@ -50,21 +50,21 @@ public class ExportDataDialog extends JFrame {
         ePercent.setLabelFor(errorPerc);
         p.add(ePercent);
         p.add(errorPerc);
-        JLabel partData = new JLabel("Include participants data");
-        includePartData = new JCheckBox();
-        partData.setLabelFor(includePartData);
-        p.add(partData);
-        p.add(includePartData);
-        JLabel inclP = new JLabel("Include practice data");
-        includePract = new JCheckBox();
-        includePract.setSelected(true);
-        inclP.setLabelFor(includePract);
-        p.add(inclP);
-        p.add(includePract);
+        //    JLabel partData = new JLabel("Include participants data");
+        //   includePartData = new JCheckBox();
+        //   partData.setLabelFor(includePartData);
+        //   p.add(partData);
+        //   p.add(includePartData);
+        //   JLabel inclP = new JLabel("Include practice data");
+        //   includePract = new JCheckBox();
+        //   includePract.setSelected(true);
+        //   inclP.setLabelFor(includePract);
+        //   p.add(inclP);
+        //   p.add(includePract);
 
         //Layout everything in a nice Form
         SpringUtilities.makeCompactGrid(p,
-                5, 2, //rows, cols
+                3, 2, //rows, cols
                 6, 6,        //initX, initY
                 6, 6);       //xPad, yPad
 
@@ -76,17 +76,30 @@ public class ExportDataDialog extends JFrame {
         JButton cancelButton = new JButton("Cancel");
         cancelButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent actionEvent) {
-                setEnabled(false);
-                setVisible(false);
+                dispose();
             }
         });
 
         submitButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent actionEvent) {
-                if (submitData()) {
+                try {
+                    submitData();
                     File saveFile = fileSaveDialog();
                     exporter.writeToFile(saveFile);
+                    setEnabled(false);
+
+                } catch (SubmitDataException e) {
+                    JOptionPane.showMessageDialog(null,
+                            e.getMessage(),
+                            "Problem submitting input",
+                            JOptionPane.ERROR_MESSAGE);
+                } catch (DataExporter.ExportDataException e) {
+                    JOptionPane.showMessageDialog(null,
+                            e.getMessage(),
+                            "Problem with exporting",
+                            JOptionPane.ERROR_MESSAGE);
                 }
+                dispose();
             }
         });
         controlPanel.add(cancelButton);
@@ -107,26 +120,45 @@ public class ExportDataDialog extends JFrame {
     /*
     Submits the entered values to the data exporter
      */
-    private boolean submitData() {
-        int min, max, perc;
+    private void submitData() throws SubmitDataException {
+        int min, max, perc=10;
 
         try {
             min = Integer.parseInt(minRTime.getText());
+        } catch (Exception e) {
+            throw new SubmitDataException("Minimum reaction-time is not a number");
+        }
+        if (min < 0) {
+            throw new SubmitDataException("Minimum reaction-time can't be lower than 0 ms");
+        }
+        try {
             max = Integer.parseInt(maxRtime.getText());
+        } catch (Exception e) {
+            throw new SubmitDataException("Maximum reaction-time is not a number");
+        }
+        if (max <= min) {
+            throw new SubmitDataException("Maximum reaction-time can't be smaller or equal to the minimum reaction-time");
+        }
+        try {
             perc = Integer.parseInt(errorPerc.getText());
         } catch (Exception e) {
-            System.out.println("Something wrong with the entered data");
-            return false;
+            System.out.println("Error percentage is not a number");
+        }
+        if (perc < 0) {
+            throw new SubmitDataException("Error percentage can't be smaller than 0%");
+        }
+        if (perc > 100) {
+            throw new SubmitDataException("Error percentage can't be higher than 100%");
         }
         exporter = new DataExporter(model, min, max, perc);
-        return true;
-
     }
 
+
     /*
-    Create a dialog for the selection of the file where the exported data is saved to
-    Has a file filter for csv files
-     */
+   Create a dialog for the selection of the file where the exported data is saved to
+   Has a file filter for csv files
+    */
+
     public File fileSaveDialog() {
         File export = new File("export.csv");
         JFileChooser fc = new JFileChooser();
@@ -140,6 +172,13 @@ public class ExportDataDialog extends JFrame {
             export = fc.getSelectedFile();
         }
         return export;
+    }
+
+    private class SubmitDataException extends Exception {
+
+        public SubmitDataException(String error) {
+            super(error);
+        }
     }
 }
 

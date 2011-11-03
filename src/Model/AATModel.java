@@ -218,8 +218,8 @@ public class AATModel extends Observable {
             if (!(pushColor.length() == 6) || !matcher.matches()) {
                 throw new FalseConfigException("The color specified for the push border is not a valid 6 character hex value");
             }
-            colorTable.put(AATImage.PULL, "FF" + testConfig.getValue("BorderColorPull"));
-            colorTable.put(AATImage.PUSH, "FF" + testConfig.getValue("BorderColorPush"));  //Also add alpha channel for processing
+            colorTable.put(AATImage.PULL, "FF" + pullColor);
+            colorTable.put(AATImage.PUSH, "FF" + pushColor);  //Also add alpha channel for processing
             try {
                 borderWidth = Integer.parseInt(testConfig.getValue("BorderWidth"));
             } catch (Exception e) {
@@ -393,7 +393,7 @@ public class AATModel extends Observable {
         if that's necessary. And watches when the test is finished. Together with the joystick inputs this method
         determines the progress of the AAT.
     */
-    private void NextStep() {
+    private void NextStep() {        //TODO
         if (testStatus == AATModel.PRACTICE_IMAGE_LOADED) {
             if (practiceCount < practiceList.size()) {
                 showNextImage();
@@ -420,10 +420,10 @@ public class AATModel extends Observable {
 
                 } else if (run == repeat) {   //No more runs left, Test has ended
                     //    System.out.println("Einde van de test");
-                    testStatus = AATModel.TEST_STOPPED;    //Notify observers about it
+                    testStatus = AATModel.TEST_SHOW_FINISHED;    //Notify observers about it
                     writeToFile();
                     this.setChanged();
-                    notifyObservers("Wait screen");   //First show black screen
+                    notifyObservers("Show finished");   //First show black screen
                 } else {           //Continue with a new run
                     testList = createRandomList(); //create a new Random list
                     count = 0;
@@ -628,11 +628,12 @@ public class AATModel extends Observable {
     public void changeYaxis(int value) {
         if (value != resize) {
             resize = value;
+            System.out.println(value);
             if (testStatus == AATModel.IMAGE_LOADED || testStatus == AATModel.PRACTICE_IMAGE_LOADED) { //Only listen when there is an image loaded
                 newMeasure.addResult(resize, getMeasurement());     //add results to the other measurements
-                if (current.getDirection() == AATImage.PULL && value == 1) {   //check if the requested action has been performed
+                if (current.getDirection() == AATImage.PULL && value == getStepRate()) {   //check if the requested action has been performed
                     removeImage();
-                } else if (current.getDirection() == AATImage.PUSH && value == getStepRate()) {
+                } else if (current.getDirection() == AATImage.PUSH && value == 1) {
                     removeImage();
                 }
             }
@@ -674,13 +675,6 @@ public class AATModel extends Observable {
             }
             NextStep();    //Determine next step in the test.
             return;
-        }
-        if (testStatus == AATModel.TEST_STOPPED) {
-            testStatus = AATModel.TEST_SHOW_FINISHED;
-            this.setChanged();
-            this.notifyObservers("Test ended");
-            return;
-
         }
     }
 

@@ -84,7 +84,7 @@ public class AAT_Main extends JFrame implements Observer {
 
         about.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent actionEvent) {
-                SimpleAboutDialog aboutDialog = new SimpleAboutDialog(null);
+                AboutDialog aboutDialog = new AboutDialog(null);
                 aboutDialog.setEnabled(true);
                 aboutDialog.setVisible(true);
             }
@@ -164,7 +164,6 @@ public class AAT_Main extends JFrame implements Observer {
 
     public void update(Observable observable, Object o) {
         if (o.toString().equals("Finished")) {
-            System.out.println("Finished te test");
             joystick.exit();
             exportData.setEnabled(true);
         }
@@ -173,18 +172,21 @@ public class AAT_Main extends JFrame implements Observer {
 
 
 //Simple dialog copied from the internet
-class SimpleAboutDialog extends JDialog {
+class AboutDialog extends JDialog {
 
-    public SimpleAboutDialog(JFrame parent) {
-        super(parent, "About Dialog", true);
-
+    public AboutDialog(JFrame parent) {
+        super(parent, "About AAT", true);
+       JTextPane t = new JTextPane();
+        t.setContentType("text/html");
+        String text = "<h1>Approach avoidance task</h1>";
+                text+= "<center>Created By</center>";
+                text+= "<center><h3>Marcel Zuur</h3></center>";
+                text+= "<center>&</center>";
+                text+= "<center><h3>Wilfried Jonker</h3></center>";
         Box b = Box.createVerticalBox();
         b.add(Box.createGlue());
-        b.add(new JLabel("          This AAT was created by"));
-        b.add(new JLabel("          Marcel Zuur"));
-        b.add(new JLabel("                 &      "));
-        b.add(new JLabel("          Wilfried Jonker"));
-        b.add(Box.createGlue());
+       b.add(t);
+        t.setText(text);
         getContentPane().add(b, "Center");
 
         JPanel p2 = new JPanel();
@@ -198,7 +200,7 @@ class SimpleAboutDialog extends JDialog {
             }
         });
 
-        setSize(250, 150);
+        setSize(400, 300);
     }
 }
 

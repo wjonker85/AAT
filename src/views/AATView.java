@@ -273,7 +273,7 @@ public class AATView extends PApplet implements Observer {
          * Nu eerst alleen het scherm onzichtbaar maken.
          * TODO: Scherm moet nog niet direct verdwijnen, eerst nog de tekst laten zien.
          */
-        if (o.toString().equals("Test ended")) {
+        if (o.toString().equals("Show finished")) {
             displayText = model.getTestFinishedText();
             blackScreen = true;
             showInfo = true;

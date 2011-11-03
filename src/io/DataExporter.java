@@ -107,7 +107,7 @@ public class DataExporter {
                     result.add(reactionTime);
                     exportData.add(result);
                 } else {
-                    updateMistakeCount(id); //Add a mistake to the id
+                    System.out.println("Results not added");
                 }
             }
         }
@@ -173,7 +173,7 @@ public class DataExporter {
     Writes the data to file, but first checks if one ore more participants made too much mistakes. If so then these results
     are not written to the export file.
      */
-    public void writeToFile(File file) {
+    public void writeToFile(File file) throws ExportDataException {
         createReactionTimeTable();
         int totalImage = model.getTotalImageCount();
         float fraction = 1f / (100f / errorPerc);
@@ -185,8 +185,13 @@ public class DataExporter {
                 removeID(id);
             }
         }
+        if(exportData.getRowCount()>0) {
         CSVWriter writer = new CSVWriter(exportData);
         writer.writeData(file);
+        }
+        else {
+            throw new ExportDataException("There is no data to export");
+        }
     }
 
     /*
@@ -202,6 +207,12 @@ public class DataExporter {
         }
     }
 
+    public class ExportDataException extends Exception {
+
+        public ExportDataException(String error) {
+            super(error);
+        }
+    }
 }
 
 

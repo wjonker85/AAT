@@ -17,7 +17,6 @@ public class AATImage {
 
     private int type;
     private int direction;
-    //    private File imageFile;
     private String name;
     private BufferedImage image;
     public static int PUSH = 0;
