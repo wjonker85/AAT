@@ -22,12 +22,16 @@ public class CSVWriter {
     }
 
     //Write data to file. Appends if there already is data in the file
-    public boolean writeData(File file) {
+    public boolean writeData(File file, boolean append) {
         boolean newFile = !file.exists();
+      //  boolean appendTo
+      //  if(append && newFile) {
+
+     //   }
 
         try {
 
-            FileWriter writer = new FileWriter(file, file.exists());
+            FileWriter writer = new FileWriter(file, append);
             String columnNames = "";        //Create first line with column names
             if (newFile) {           //Add column headers only if file is empty
 

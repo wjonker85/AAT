@@ -187,7 +187,7 @@ public class DataExporter {
         }
         if(exportData.getRowCount()>0) {
         CSVWriter writer = new CSVWriter(exportData);
-        writer.writeData(file);
+        writer.writeData(file,false);
         }
         else {
             throw new ExportDataException("There is no data to export");

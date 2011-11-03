@@ -9,8 +9,11 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -79,14 +82,28 @@ public class AAT_Main extends JFrame implements Observer {
         menuBar.add(Box.createHorizontalGlue());
         JMenu aboutMenu = new JMenu("About");
         JMenuItem about = new JMenuItem("About AAT");
+        JMenuItem license = new JMenuItem("License");
         aboutMenu.add(about);
+        aboutMenu.add(license);
         menuBar.add(aboutMenu);
 
         about.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent actionEvent) {
-                AboutDialog aboutDialog = new AboutDialog(null);
-                aboutDialog.setEnabled(true);
+                String text = "<h1>Approach avoidance task</h1>";
+                text += "<center>Created By</center>";
+                text += "<center><h3>Marcel Zuur</h3></center>";
+                text += "<center>&</center>";
+                text += "<center><h3>Wilfried Jonker</h3></center>";
+                AboutDialog aboutDialog = new AboutDialog(null, text);
                 aboutDialog.setVisible(true);
+            }
+        });
+
+        license.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent actionEvent) {
+                LicenseDialog licenseDialog = new LicenseDialog(null);
+
+                licenseDialog.setVisible(true);
             }
         });
 
@@ -99,10 +116,10 @@ public class AAT_Main extends JFrame implements Observer {
                         try {
 
                             model.loadConfig(configFile);
-                        runButton.setEnabled(true);
-                        if (model.hasData()) {
-                            exportData.setEnabled(true);
-                        }
+                            runButton.setEnabled(true);
+                            if (model.hasData()) {
+                                exportData.setEnabled(true);
+                            }
                         } catch (AATModel.FalseConfigException e) {
                             JOptionPane.showMessageDialog(null,
                                     e.getMessage(),
@@ -162,6 +179,22 @@ public class AAT_Main extends JFrame implements Observer {
         return file;
     }
 
+    private String getLicense() {
+        File license = new File("License" + File.separatorChar + "lgpl.html");
+        String text = "";
+        String strLine;
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(license));
+            while ((strLine = br.readLine()) != null) {
+                text += strLine + "\n";
+                System.out.println(strLine);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+        return text;
+    }
+
     public void update(Observable observable, Object o) {
         if (o.toString().equals("Finished")) {
             joystick.exit();
@@ -171,28 +204,41 @@ public class AAT_Main extends JFrame implements Observer {
 }
 
 
-//Simple dialog copied from the internet
-class AboutDialog extends JDialog {
+//Dialog showing the license
+class LicenseDialog extends JDialog {
 
-    public AboutDialog(JFrame parent) {
+    public LicenseDialog(JFrame parent) {
         super(parent, "About AAT", true);
-       JTextPane t = new JTextPane();
-        t.setContentType("text/html");
-        String text = "<h1>Approach avoidance task</h1>";
-                text+= "<center>Created By</center>";
-                text+= "<center><h3>Marcel Zuur</h3></center>";
-                text+= "<center>&</center>";
-                text+= "<center><h3>Wilfried Jonker</h3></center>";
+        JEditorPane textPane = new JEditorPane();
+        textPane.setContentType("text/html");
+        File f = new File("License" + File.separatorChar + "lgpl.html");
+        java.net.URL fileURL = null;
+        try {
+            fileURL = f.toURI().toURL(); // Transform path into URL
+        } catch (MalformedURLException e1) {
+            e1.printStackTrace();
+        }
+
+        try {
+            textPane.setPage(fileURL); // Load the file to the editor
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+        //    textPane.setText(text);
         Box b = Box.createVerticalBox();
         b.add(Box.createGlue());
-       b.add(t);
-        t.setText(text);
+        JScrollPane scrollPane = new JScrollPane(textPane);
+        b.add(scrollPane);
+
         getContentPane().add(b, "Center");
 
         JPanel p2 = new JPanel();
         JButton ok = new JButton("Ok");
         p2.add(ok);
         getContentPane().add(p2, "South");
+
 
         ok.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
@@ -203,4 +249,39 @@ class AboutDialog extends JDialog {
         setSize(400, 300);
     }
 }
+
+//About dialog
+class AboutDialog extends JDialog {
+
+    public AboutDialog(JFrame parent, String text) {
+        super(parent, "About AAT", true);
+        JEditorPane textPane = new JEditorPane();
+        textPane.setContentType("text/html");
+        textPane.setText(text);
+
+
+        JScrollPane scrollPane = new JScrollPane(textPane);
+        //    textPane.setText(text);
+        Box b = Box.createVerticalBox();
+        b.add(Box.createGlue());
+        b.add(scrollPane);
+
+        getContentPane().add(b, "Center");
+
+        JPanel p2 = new JPanel();
+        JButton ok = new JButton("Ok");
+        p2.add(ok);
+        getContentPane().add(p2, "South");
+
+
+        ok.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
+                setVisible(false);
+            }
+        });
+
+        setSize(400, 300);
+    }
+}
+
 

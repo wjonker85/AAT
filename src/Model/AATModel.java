@@ -584,8 +584,8 @@ public class AATModel extends Observable {
     private void writeToFile() {
         CSVWriter writer = new CSVWriter(newMeasure.getAllResults());
         CSVWriter writer2 = new CSVWriter(this.dynamic);
-        writer.writeData(dataFile);
-        writer2.writeData(participantsFile);
+        writer.writeData(dataFile,true);
+        writer2.writeData(participantsFile,true);
     }
 
 //------------------------------Get results from the test -------------------------------
