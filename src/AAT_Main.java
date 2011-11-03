@@ -11,6 +11,8 @@ import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.Observable;
+import java.util.Observer;
 
 /**
  * Created by IntelliJ IDEA.
@@ -19,28 +21,38 @@ import java.io.IOException;
  * Time: 3:22 PM
  * Main frame for the test. This frame is the controller from which test can be started. This is also the place where the user
  * can choose to export the gathered data for further analysis
+ * TODO: beter about scherm.
  */
 
-public class AAT_Main extends JFrame {
+public class AAT_Main extends JFrame implements Observer {
 
 
     private AATModel model;
     private JPanel mainPanel;
     private JoystickController joystick;
     private TestFrame testFrame;
-    private File configFile;
-
+    final JMenuItem exportData;
 
     public static void main(String[] args) {
-        AAT_Main main = new AAT_Main();
+
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                UIManager.put("swing.boldMetal", Boolean.FALSE);
+                new AAT_Main().setVisible(true);
+            }
+        });
     }
 
+
     public AAT_Main() {
-        this.setEnabled(true);
-        this.setVisible(true);
         mainPanel = new JPanel();
         mainPanel.setBackground(Color.black);
         mainPanel.setLayout(new GridBagLayout());
+        model = new AATModel();
+        testFrame = new TestFrame(model);
+        model.addObserver(this);
+        model.addObserver(testFrame);
+        joystick = new JoystickController(model);
         this.setTitle("Approach avoidance Task");
         BufferedImage buttonIcon = null;
         try {
@@ -57,7 +69,7 @@ public class AAT_Main extends JFrame {
         JMenuBar menuBar = new JMenuBar();
         JMenu fileMenu = new JMenu("File");
         JMenuItem loadTest = new JMenuItem("Load new AAT");
-        final JMenuItem exportData = new JMenuItem("Export Data");
+        exportData = new JMenuItem("Export Data");
         exportData.setEnabled(false);
         JMenuItem exit = new JMenuItem("Exit");
         fileMenu.add(loadTest);
@@ -82,13 +94,22 @@ public class AAT_Main extends JFrame {
         loadTest.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent actionEvent) {
                 File configFile = fileOpenDialog();
-                if (configFile.exists()) {
-                    model = new AATModel(configFile);
-                    testFrame = new TestFrame(model);
-                model.addObserver(testFrame);
-                    runButton.setEnabled(true);
-                    if (model.hasData()) {
-                        exportData.setEnabled(true);
+                if (configFile != null) {
+                    if (configFile.exists()) {
+                        try {
+
+                            model.loadConfig(configFile);
+                        runButton.setEnabled(true);
+                        if (model.hasData()) {
+                            exportData.setEnabled(true);
+                        }
+                        } catch (AATModel.FalseConfigException e) {
+                            JOptionPane.showMessageDialog(null,
+                                    e.getMessage(),
+                                    "Configuration error",
+                                    JOptionPane.ERROR_MESSAGE);
+                        }
+
                     }
                 }
             }
@@ -100,7 +121,7 @@ public class AAT_Main extends JFrame {
             public void actionPerformed(ActionEvent actionEvent) {
                 joystick = new JoystickController(model);
                 joystick.start(); //Start joystick Thread
-               model.startTest();
+                model.startTest();
             }
         });
 
@@ -139,6 +160,14 @@ public class AAT_Main extends JFrame {
             file = fc.getSelectedFile();
         }
         return file;
+    }
+
+    public void update(Observable observable, Object o) {
+        if (o.toString().equals("Finished")) {
+            System.out.println("Finished te test");
+            joystick.exit();
+            exportData.setEnabled(true);
+        }
     }
 }
 

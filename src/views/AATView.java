@@ -274,17 +274,16 @@ public class AATView extends PApplet implements Observer {
          * TODO: Scherm moet nog niet direct verdwijnen, eerst nog de tekst laten zien.
          */
         if (o.toString().equals("Test ended")) {
-            System.out.println("Test ended jajaja");
             displayText = model.getTestFinishedText();
             blackScreen = true;
             showInfo = true;
             //    this.setVisible(false);
         }
 
-        if (o.toString().equals("Display results")) {
-            this.setVisible(false);
-            this.setEnabled(false);
-        }
+    //    if (o.toString().equals("Display results")) {
+     //       this.setVisible(false);
+     //       this.setEnabled(false);
+     //   }
     }
 }
 

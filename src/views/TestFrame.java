@@ -21,18 +21,14 @@ public class TestFrame extends JFrame implements Observer {
 
     private AATView aatView;
     private AATModel model;
-    private QuestionPanel qPanel;
+    private BoxPlot showBoxPlot;
 
     //Make it a fullscreen frame
     public TestFrame(AATModel model) {
         this.model = model;
-        //  this.setLayout(new GridBagLayout());
-        this.getContentPane().setLayout(new GridBagLayout());
-        //   if(model.getExtraQuestions().size()>0) {
-        qPanel = new QuestionPanel(model);
-
-        //   }
+        this.setLayout(new GridBagLayout());
         this.setBackground(Color.black);
+        this.getContentPane().setBackground(Color.black);
         setExtendedState(Frame.MAXIMIZED_BOTH);
         setUndecorated(true);
         setEnabled(true);
@@ -48,6 +44,8 @@ public class TestFrame extends JFrame implements Observer {
 
         //AAT Test screen
         if (o.toString().equals("Start")) {
+            this.getContentPane().removeAll();
+            this.getContentPane().revalidate();
             this.setVisible(true);
             this.setLayout(null);
 
@@ -66,24 +64,27 @@ public class TestFrame extends JFrame implements Observer {
 
         //Questions Screen
         if (o.toString().equals("Show questions")) {
+            QuestionPanel qPanel = new QuestionPanel(model);
             this.setVisible(true);
-            //    System.out.println("Show questions");
-            qPanel = new QuestionPanel(model);
-            this.getContentPane().setBackground(Color.black);
-            this.getContentPane().add(qPanel, new GridBagConstraints());
+            this.getContentPane().removeAll();
+            this.getContentPane().revalidate();
+            this.setLayout(new GridBagLayout());
+            doLayout();
+            System.out.println("Show questions");
             qPanel.displayQuestions(model.getExtraQuestions());
+            this.getContentPane().add(qPanel, new GridBagConstraints());
         }
 
         //Results Screen
         if (o.toString().equals("Display results")) {
+
+            this.setLayout(null);
             this.getContentPane().removeAll();
-            this.getContentPane().setBackground(Color.black);
-            this.setBackground(Color.black);
-            model.deleteObserver(aatView);
+            this.getContentPane().revalidate();
+
             Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
             int screenWidth = (int) dim.getWidth();
             int screenHeight = (int) dim.getHeight();
-            this.setLayout(null);
             Set labels = model.getResultsPerCondition().keySet();        //Get results from the model
             String[] labelsArray = Arrays.copyOf(labels.toArray(), labels.toArray().length, String[].class);    //Convert labels to array
 
@@ -92,16 +93,17 @@ public class TestFrame extends JFrame implements Observer {
             float[] array3 = model.getResultsPerCondition().get(labelsArray[2]);
             float[] array4 = model.getResultsPerCondition().get(labelsArray[3]);
             BoxPlot showBoxPlot = new BoxPlot(array1, array2, array3, array4, labelsArray, screenWidth, screenHeight);
-            showBoxPlot.init();
             int width = (int) (500 * showBoxPlot.scaleFactor());
             int diff = (screenWidth - width) / 2;
             showBoxPlot.setBounds(diff, -20, screenWidth, ((int) 0.8 * screenHeight));   //Setbounds for correct position
+            showBoxPlot.init();
             this.getContentPane().add(showBoxPlot);   //Show the results
         }
 
         if (o.toString().equals("Finished")) {
-            this.setEnabled(false);
-            this.dispose();
+            this.getContentPane().removeAll();
+            this.getContentPane().revalidate();
+            this.setVisible(false);
         }
     }
 }

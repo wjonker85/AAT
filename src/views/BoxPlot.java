@@ -22,6 +22,7 @@ public class BoxPlot extends PApplet {
      */
     float rH, minV, maxV;
     float[] minValue, q1, median, q3, maxValue;
+    float[] array1, array2, array3, array4;
     String[] labelsArray;
     int viewWidth, viewHeight;
 
@@ -48,6 +49,51 @@ public class BoxPlot extends PApplet {
         this.labelsArray = labelsArray;
         this.viewHeight = viewHeight;
         this.viewWidth = viewWidth;
+        this.array1 = array1;
+        this.array2 =array2;
+        this.array3 = array3;
+        this.array4 = array4;
+
+    }
+
+
+    /**
+     * Standaard setup() functie van processing
+     */
+    public void setup() {
+      //  size(viewWidth, viewHeight);
+        size(screen.width,screen.height);
+        /**
+         * hoeft allemaal niet zo rap, statisch plaat, bespaart stroom en groen is goed, vandaar!! En hoe smoother hoe
+         * beter, dus altijd smooth() zijn waar  mogelijk :)
+         */
+        frameRate(1);
+        //    smooth();
+    }
+
+
+    /**
+     * Standaard draw() functie uit processing.
+     */
+    public void draw() {
+        background(0);
+        drawBoxPlot(0, 0, scaleFactor(), "Reaction Time (ms)", "Condition", labelsArray[0], labelsArray[1], labelsArray[2], labelsArray[3]);
+    }
+
+
+    /**
+     * Scalefactor geeft vergrotings of verkleinings factor van het plaatje. Het plaat wordt getekend als 500x500 plaatje
+     * Wanneer de scherm een hoogte heeft van 800 pixxels is is de schaalfactor 800 / 500 = 1.6 zodat plaatje
+     * scherm vullend is.
+     *
+     * @return scaleFactor als float
+     */
+    public float scaleFactor() {
+        return (float) viewHeight / 500f;
+    }
+
+
+    private void calculate() {
         stat1 = new DescriptiveStats(array1);
         stat2 = new DescriptiveStats(array2);
         stat3 = new DescriptiveStats(array3);
@@ -103,42 +149,6 @@ public class BoxPlot extends PApplet {
 
 
     /**
-     * Standaard setup() functie van processing
-     */
-    public void setup() {
-        size(screen.width, screen.height);
-
-        /**
-         * hoeft allemaal niet zo rap, statisch plaat, bespaart stroom en groen is goed, vandaar!! En hoe smoother hoe
-         * beter, dus altijd smooth() zijn waar  mogelijk :)
-         */
-        frameRate(24);
-        smooth();
-    }
-
-
-    /**
-     * Standaard draw() functie uit processing.
-     */
-    public void draw() {
-        background(0);
-        drawBoxPlot(0, 0, scaleFactor(), "Reaction Time (ms)", "Condition", labelsArray[0], labelsArray[1], labelsArray[2], labelsArray[3]);
-    }
-
-
-    /**
-     * Scalefactor geeft vergrotings of verkleinings factor van het plaatje. Het plaat wordt getekend als 500x500 plaatje
-     * Wanneer de scherm een hoogte heeft van 800 pixxels is is de schaalfactor 800 / 500 = 1.6 zodat plaatje
-     * scherm vullend is.
-     *
-     * @return scaleFactor als float
-     */
-    public float scaleFactor() {
-        return (float) viewHeight / 500f;
-    }
-
-
-    /**
      * De drawBoxPlot functiie, zoals eerder aangeven bevat huidige class (BoxPlot.java) overbodige code omdat bedoelling
      * was om de BoxPlot class van AATViewResults aan te roepen. Met name de functie drawBoxPlot bevat daarom veel
      * overbosige code.
@@ -154,6 +164,7 @@ public class BoxPlot extends PApplet {
      * @param c4Text label conditie 4
      */
     public void drawBoxPlot(int x, int y, float s, String yText, String xText, String c1Text, String c2Text, String c3Text, String c4Text) {
+        calculate();
         scale(s);
         translate(x, y);
 

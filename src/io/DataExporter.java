@@ -5,9 +5,12 @@ import DataStructures.DynamicTableModel;
 import DataStructures.ResultsDataTableModel;
 import Model.AATModel;
 
+import javax.swing.*;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Observable;
+import java.util.Observer;
 
 /**
  * Created by IntelliJ IDEA.
@@ -198,6 +201,7 @@ public class DataExporter {
             }
         }
     }
+
 }
 
 

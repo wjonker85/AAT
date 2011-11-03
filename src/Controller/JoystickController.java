@@ -21,20 +21,17 @@ import net.java.games.input.ControllerEnvironment;
 public class JoystickController extends Thread {
 
     private static final int DELAY = 5;  // ms  (polling interval)
-    private static final float EPSILON = 0.0001f;
     private int stepSize;
-    private float margin;
     private AATModel model;
     private Component yAxis;
     private Component trigger;
-    private ControllerEnvironment ce;
     private Controller joyStick;
+    private boolean stopThread =false;
 
 
     public JoystickController(AATModel model) {
         this.model = model;
-        stepSize = model.getStepRate();
-        margin = 0.05f;
+
         ControllerEnvironment ce = ControllerEnvironment.getDefaultEnvironment(); //Verbinding via het os met de joystick maken.
 
         Controller[] cs = ce.getControllers();      //Lijst met alle aangesloten controllers
@@ -46,15 +43,17 @@ public class JoystickController extends Thread {
         joyStick = findJoystick(cs);   //Search for an attached joystick
         yAxis = joyStick.getComponent(Component.Identifier.Axis.Y);   //Y-as
         trigger = getTrigger(joyStick);  //Search for trigger button
-
-        //  pollComponent(cs[0], trigger);
-
-
     }
 
     //Start the thread
     public void run() {
+        stepSize = model.getStepRate();
         pollController(joyStick);
+    }
+
+    //Ends the thread
+    public void exit() {
+        stopThread = true;
     }
 
 
@@ -96,7 +95,7 @@ public class JoystickController extends Thread {
         boolean pollIsValid;  // new
 
         //       int i = 1;   // used to format the output
-        while (true) {
+        while (!stopThread) {
             try {
                 Thread.sleep(DELAY);      // wait a while
             } catch (Exception ex) {

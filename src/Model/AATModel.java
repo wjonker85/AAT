@@ -38,7 +38,7 @@ import java.util.regex.Pattern;
  * When a user has done the test he can see his results with four boxplots. One for every condition.
  * <p/>
  * <p/>
- * <p/>
+ * <p/>   TODO checken voor borderwidth, bordercolor, stepsize
  */
 
 public class AATModel extends Observable {
@@ -60,7 +60,15 @@ public class AATModel extends Observable {
     //Test variables
     private int repeat;
     private int breakAfter;
+    private int practiceRepeat;
     private int count; //Counts the number of images shown.
+
+    //Test view variables
+    private int borderWidth;
+    private int stepSize;
+    private String practiceFillColor;
+
+    //progress variables
     private int practiceCount;
     private int run;
     private int id = 0;
@@ -81,9 +89,12 @@ public class AATModel extends Observable {
     private ArrayList<AATImage> testList; //Random list that contains the push or pull images.
     private ArrayList<AATImage> practiceList;
 
+    private File practiceDir;
+
     //Hashmaps containing color information and the optional questions
     private Hashtable<Integer, String> colorTable;    //Contains the border colors
     private HashMap<String, String> extraQuestions;
+    private ArrayList<QuestionObject> questionsList;
 
     private DynamicTableModel dynamic;
 
@@ -95,33 +106,18 @@ public class AATModel extends Observable {
 
     //regex for extension filtering
     private Pattern pattern;
+    private Pattern hexPattern;
+
     private static final String IMAGE_PATTERN =
             "([^\\s]+(\\.(?i)(jpg|png|gif|bmp))$)";
 
+    private static final String HEX_PATTERN = "(^[0-9A-F]+$)";
 
     //Constructor.
-    public AATModel(File config) {
-        dynamic = new DynamicTableModel();
-        testConfig = new TestConfig(config);
-        workingDir = config.getParentFile().getAbsolutePath();
-        participantsFile = new File(workingDir + File.separator + testConfig.getValue("ParticipantsFile"));
-        dataFile = new File(workingDir + File.separator + testConfig.getValue("DataFile"));
-        System.out.println("Test path " + config.getParentFile().getAbsolutePath());
-        id = getHighestID(participantsFile);
-        File neutralDir = new File(workingDir + File.separator + "images" + File.separator + testConfig.getValue("AffectiveDir"));
-        File affectiveDir = new File(workingDir + File.separator + "images" + File.separator + testConfig.getValue("NeutralDir"));
-        File languageFile = new File(workingDir + File.separator + testConfig.getValue("LanguageFile"));
-        textReader = new TextReader(languageFile);
-        pattern = Pattern.compile(IMAGE_PATTERN);
-        neutralImages = getImages(neutralDir);
-        affectiveImages = getImages(affectiveDir);
-
-        testStatus = AATModel.TEST_STOPPED;
-        if (testConfig.getValue("ColoredBorders").equals("True")) {
-            colorTable = new Hashtable<Integer, String>();
-            colorTable.put(AATImage.PULL, "FF" + testConfig.getValue("BorderColorPull"));
-            colorTable.put(AATImage.PUSH, "FF" + testConfig.getValue("BorderColorPush"));  //Also add alpha channel for processing
-        }
+    public AATModel() {
+        pattern = Pattern.compile(IMAGE_PATTERN); //create regex
+        hexPattern = Pattern.compile(HEX_PATTERN);
+        //   testStatus = AATModel.TEST_STOPPED;
     }
 
 //------------------------------initialise AAT --------------------------------------------------
@@ -129,24 +125,22 @@ public class AATModel extends Observable {
     //Starts a new instance of the AAT. With no. times it has to repeat and when there will be a break.
     public void startTest() {
 
-        this.repeat = Integer.parseInt(testConfig.getValue("Trails"));
-        this.breakAfter = Integer.parseInt(testConfig.getValue("BreakAfter"));
-
         if (hasPractice()) {        //If set in the config, first do a practice.
-            practiceList = createRandomPracticeList(6);
             practice = true;
             repeat++;     //Make these one higher, because of the practice
             breakAfter++;
+            System.out.println("Heeft practice");
             practiceCount = 0; //reset the counter
         }
 
         testList = createRandomList();
         count = 0;        //reset counters
         run = 0;
+        id = getHighestID(this.participantsFile);
         id++;          //new higher id
         newMeasure = new MeasureData(id);
 
-        if (textReader.getExtraQuestions().size() > 0) {   //When there are extra question, show them
+        if (questionsList.size() > 0) {   //When there are extra question, show them
             testStatus = AATModel.TEST_WAIT_FOR_QUESTIONS;
             this.setChanged();
             notifyObservers("Show questions");      //Notify the observer that a new test is started.
@@ -158,6 +152,137 @@ public class AATModel extends Observable {
         }
     }
 
+    /*
+    Load all the configuration data from the config file and the language file specified in that config
+    Checks the config file for validity and throws a FalseConfigException when the config contains errors.
+     */
+    public void loadConfig(File config) throws FalseConfigException {   //TODO bladiebla
+        dynamic = new DynamicTableModel();
+        testConfig = new TestConfig(config);
+        workingDir = config.getParentFile().getAbsolutePath();
+        String partFile = testConfig.getValue("ParticipantsFile");
+        if (partFile.equals("")) {
+            throw new FalseConfigException("Participants file is not set");
+        }
+        String datFile = testConfig.getValue("DataFile");
+        if (datFile.equals("")) {
+            throw new FalseConfigException("Data file is not set");
+        }
+        participantsFile = new File(workingDir + File.separator + partFile);
+        dataFile = new File(workingDir + File.separator + datFile);
+
+        String langFile = testConfig.getValue("LanguageFile");
+        File languageFile = new File(workingDir + File.separator + langFile);
+        if (langFile.equals("") || !languageFile.exists()) {
+            throw new FalseConfigException("No language file specified");
+        }
+
+        id = getHighestID(participantsFile);
+        String nDir = testConfig.getValue("NeutralDir");
+        String aDir = testConfig.getValue("AffectiveDir");
+        File neutralDir = new File(workingDir + File.separator + aDir);
+        File affectiveDir = new File(workingDir + File.separator + nDir);
+        if (nDir.equals("") || !neutralDir.isDirectory()) {
+            throw new FalseConfigException("Directory for the neutral images is not set properly");
+        }
+        if (aDir.equals("") || !affectiveDir.isDirectory()) {
+            throw new FalseConfigException("Directory for the affective images is not set properly");
+        }
+
+        textReader = new TextReader(languageFile);
+        neutralImages = getImages(neutralDir);
+        if (neutralImages.size() == 0) {
+            throw new FalseConfigException("Neutral images directory contains no images");
+        }
+        affectiveImages = getImages(affectiveDir);
+        if (affectiveImages.size() == 0) {
+            throw new FalseConfigException("Affective images directory contains no images");
+        }
+        questionsList = textReader.getExtraQuestions();
+
+        String doBorders = testConfig.getValue("ColoredBorders");
+        if (!doBorders.equals("True") && !doBorders.equals("False")) {
+            throw new FalseConfigException("ColoredBorders has a false value, must be True or False");
+        }
+
+        if (testConfig.getValue("ColoredBorders").equals("True")) {
+            colorTable = new Hashtable<Integer, String>();
+            String pullColor = testConfig.getValue("BorderColorPull");
+            Matcher matcher = hexPattern.matcher(pullColor);
+            if (!(pullColor.length() == 6) || !matcher.matches()) {
+                throw new FalseConfigException("The color specified for the pull border is not a valid 6 character hex value");
+            }
+
+            String pushColor = testConfig.getValue("BorderColorPush");
+            matcher = hexPattern.matcher(pushColor);
+            if (!(pushColor.length() == 6) || !matcher.matches()) {
+                throw new FalseConfigException("The color specified for the push border is not a valid 6 character hex value");
+            }
+            colorTable.put(AATImage.PULL, "FF" + testConfig.getValue("BorderColorPull"));
+            colorTable.put(AATImage.PUSH, "FF" + testConfig.getValue("BorderColorPush"));  //Also add alpha channel for processing
+            try {
+                borderWidth = Integer.parseInt(testConfig.getValue("BorderWidth"));
+            } catch (Exception e) {
+                throw new FalseConfigException("Border width is not configured properly");
+            }
+        }
+        try {
+            repeat = Integer.parseInt(testConfig.getValue("Trails"));
+        } catch (Exception e) {
+            throw new FalseConfigException("Number of trails is not configured properly");
+        }
+        try {
+            breakAfter = Integer.parseInt(testConfig.getValue("BreakAfter"));
+        } catch (Exception e) {
+            throw new FalseConfigException("BreakAfter is not configured properly");
+        }
+        try {
+            stepSize = Integer.parseInt(testConfig.getValue("StepSize"));
+        } catch (Exception e) {
+            throw new FalseConfigException("StepSize is not configured properly");
+        }
+        if (!testConfig.getValue("PracticeRepeat").equals("")) {  //When a value for practice repeat is set, check validity
+            try {
+
+                practiceRepeat = Integer.parseInt(testConfig.getValue("PracticeRepeat"));
+            } catch (Exception e) {
+                throw new FalseConfigException("PracticeRepeat is not configured properly");
+            }
+            if (practiceRepeat > 0) {
+                String practDir = testConfig.getValue("PracticeDir");
+                if (practDir.equals("")) {
+                    practiceFillColor = testConfig.getValue("PracticeFillColor");
+                    Matcher matcher;
+                    hexPattern.matcher(practiceFillColor);
+                    matcher = hexPattern.matcher(practiceFillColor);
+                    if (!(practiceFillColor.length() == 6) || !matcher.matches()) {
+                        throw new FalseConfigException("The color specified for the practice image fill color is not a valid 6 character hex value");
+                    }
+                } else {
+                    practiceDir = new File(practDir);
+                    if (!practiceDir.isDirectory()) {
+                        throw new FalseConfigException("The directory for the practice images is nog properly configured");
+                    }
+                }
+                practiceList = createRandomPracticeList(practiceRepeat);
+                if (practiceList.size() == 0) {
+                    throw new FalseConfigException("Practice images directory contains no images");
+                }
+                practice = true;
+            }
+
+
+        }
+    }
+
+
+    public class FalseConfigException extends Exception {
+
+        public FalseConfigException(String error) {
+            super(error);
+        }
+
+    }
 
     //Loads all image files in a given directory. Extension filter with regular expression.
     private ArrayList<File> getImages(File dir) {
@@ -193,7 +318,7 @@ public class AATModel extends Observable {
      */
     private ArrayList<AATImage> createRandomPracticeList(int size) {
         ArrayList<AATImage> list = new ArrayList<AATImage>();
-        if (!testConfig.getValue("PracticeDir").equals("")) {  //image dir is set
+        if (practiceDir != null) {  //image dir is set
             String practiceDir = testConfig.getValue("PracticeDir");
 
             for (int x = 0; x < size; x++) {
@@ -205,19 +330,21 @@ public class AATModel extends Observable {
                 }
             }
         } else {             //Else let the test create the images itself
-            String hexColor = testConfig.getValue("PracticeFillColor");   //Fill color for the image
             Color c;
-            if (hexColor.length() > 0) {
-                c = Color.decode("#" + hexColor);
+            if (practiceFillColor.length() > 0) {
+                c = Color.decode("#" + practiceFillColor);
             } else {
                 c = Color.gray;
             }
 
+            int i = 0;
             for (int x = 0; x < size; x++) {
-                AATImage pull = new AATImage(AATImage.PULL, c);
+                AATImage pull = new AATImage(AATImage.PULL, c, i);
                 list.add(pull);
-                AATImage push = new AATImage(AATImage.PUSH, c);
+                i++;
+                AATImage push = new AATImage(AATImage.PUSH, c, i);
                 list.add(push);
+                i++;
             }
         }
         Collections.shuffle(list); //randomise the list.
@@ -374,17 +501,17 @@ public class AATModel extends Observable {
 
     //In how many steps does an image gets resized
     public int getStepRate() {
-        return Integer.parseInt(testConfig.getValue("StepSize"));
+        return stepSize;
     }
 
     //returns the width of the border
     public int getBorderWidth() {
-        return Integer.parseInt(testConfig.getValue("BorderWidth"));
+        return borderWidth;
     }
 
     //Read the optional extra questions from the language file specified in the configuration file.
     public ArrayList<QuestionObject> getExtraQuestions() {
-        return textReader.getExtraQuestions();
+        return questionsList;
     }
 
 
@@ -526,14 +653,17 @@ public class AATModel extends Observable {
     */
     public void triggerPressed() {
         if (testStatus == AATModel.TEST_SHOW_RESULTS) {
+            testStatus = AATModel.TEST_STOPPED;
             this.setChanged();
             this.notifyObservers("Finished");
+            return;
         }
 
         if (testStatus == AATModel.TEST_SHOW_FINISHED) {
             testStatus = AATModel.TEST_SHOW_RESULTS;
             this.setChanged();
             this.notifyObservers("Display results");
+            return;
         }
 
         if (testStatus == AATModel.TEST_WAIT_FOR_TRIGGER) {
@@ -543,11 +673,13 @@ public class AATModel extends Observable {
                 testStatus = AATModel.IMAGE_LOADED;
             }
             NextStep();    //Determine next step in the test.
+            return;
         }
         if (testStatus == AATModel.TEST_STOPPED) {
             testStatus = AATModel.TEST_SHOW_FINISHED;
             this.setChanged();
             this.notifyObservers("Test ended");
+            return;
 
         }
     }

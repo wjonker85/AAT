@@ -46,7 +46,8 @@ public class QuestionPanel extends JPanel {
         submitButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent actionEvent) {
                 model.addExtraQuestions(getResults());
-                setDisabled();
+                setVisible(false);
+             //   setDisabled();
 
             }
         });
@@ -105,7 +106,11 @@ public class QuestionPanel extends JPanel {
             Component c = questionsMap.get(key);
             if (c instanceof JTextField) {
                 JTextField t = (JTextField) c;
-                results.put(key, t.getText());
+                String input = t.getText();
+                if(t.getText().equals("")) {
+                  input = "N/A";  //Replace the empty input with "N/A"
+                }
+                results.put(key, input);
             }
             if (c instanceof JComboBox) {
                 JComboBox jc = (JComboBox) c;

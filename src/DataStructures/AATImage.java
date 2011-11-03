@@ -35,11 +35,11 @@ public class AATImage {
     }
 
     //Create a generated AAT Image. This creates an image that is just a square with the given color.
-    public AATImage(int direction, Color color) {
+    public AATImage(int direction, Color color, int nr) {
         this.direction = direction;
         this.image = getPracticeImage(color);
         this.type = AATImage.PRACTICE;
-        this.name = "Practice";
+        this.name = "Practice_"+nr;
     }
 
 
