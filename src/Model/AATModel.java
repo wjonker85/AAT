@@ -35,7 +35,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
-/** Created by IntelliJ IDEA.
+/**
+ * Created by IntelliJ IDEA.
  * User: marcel
  * Date: 10/4/11
  * Time: 3:12 PM
@@ -168,8 +169,10 @@ public class AATModel extends Observable {
     /**
      * Load all the configuration data from the config file and the language file specified in that config
      * Checks the config file for validity and throws a FalseConfigException when the config contains errors.
+     *
      * @param config The config file
-     * @throws Model.AATModel.FalseConfigException When there are mistakes in the config file
+     * @throws Model.AATModel.FalseConfigException
+     *          When there are mistakes in the config file
      */
     public void loadConfig(File config) throws FalseConfigException {
         dynamic = new DynamicTableModel();
@@ -309,10 +312,11 @@ public class AATModel extends Observable {
 
     }
 
-    /**Loads all image files in a given directory. Extension filter with regular expression.
+    /**
+     * Loads all image files in a given directory. Extension filter with regular expression.
      *
-     * @param dir  Directory containing images
-     * @return  ArrayList<File> with all image files in a directory
+     * @param dir Directory containing images
+     * @return ArrayList<File> with all image files in a directory
      */
     private ArrayList<File> getImages(File dir) {
         File[] files = dir.listFiles(extensionFilter);
@@ -332,6 +336,7 @@ public class AATModel extends Observable {
 
     /**
      * Reads the participants data file and gets the highes assigned id number
+     *
      * @param file The participants data file
      * @return Highest id number based on that file. If there is no file it will return 0
      */
@@ -421,7 +426,7 @@ public class AATModel extends Observable {
      * Makes sure that the correct images are shown(practice/real test). Puts the test on break
      * if that's necessary. And watches when the test is finished. Together with the joystick inputs this method
      * determines the progress of the AAT.
-    */
+     */
     private void NextStep() {
         if (testStatus == AATModel.PRACTICE_IMAGE_LOADED) {
             if (practiceCount < practiceList.size()) {
@@ -502,9 +507,8 @@ public class AATModel extends Observable {
 
 
     /**
-     *
      * @return an integer from 1 to stepSize, which determines how much larger or smaller the picture
-     * has to be shown on the screen
+     *         has to be shown on the screen
      */
     public int getPictureSize() {
         return resize;
@@ -512,6 +516,7 @@ public class AATModel extends Observable {
 
     /**
      * Images can have a border created by this program. This method returns that borders color.
+     *
      * @param direction push or pull
      * @return The corresponding color
      */
@@ -521,6 +526,7 @@ public class AATModel extends Observable {
 
     /**
      * Check whether a colored border has to de drawn around an image
+     *
      * @return boolean, true for colored borders
      */
     public boolean hasColoredBorders() {
@@ -529,6 +535,7 @@ public class AATModel extends Observable {
 
     /**
      * When the test is on a break, a Break text is shown on the screen. This text comes from the languageFile
+     *
      * @return Break text to be shown on the screen
      */
     public String getBreakText() {
@@ -537,6 +544,7 @@ public class AATModel extends Observable {
 
     /**
      * When the test is started, a general introduction is shown on the screen. This text comes from the languageFile
+     *
      * @return The introduction text.
      */
     public String getIntroductionText() {
@@ -546,6 +554,7 @@ public class AATModel extends Observable {
     /**
      * This text is shown after the practice runs. Or when there are no practice runs, this text is the first text to
      * be shown.
+     *
      * @return
      */
     public String getTestStartText() {
@@ -554,6 +563,7 @@ public class AATModel extends Observable {
 
     /**
      * The text to display when the test has ended
+     *
      * @return Finished text
      */
     public String getTestFinishedText() {
@@ -563,6 +573,7 @@ public class AATModel extends Observable {
     /**
      * The stepRate determines in how many steps the the image is resized. The middle number is the middle position
      * of the joystick
+     *
      * @return The steprate as specified in the configuration file.
      */
     public int getStepRate() {
@@ -570,7 +581,6 @@ public class AATModel extends Observable {
     }
 
     /**
-     *
      * @return Width of the border around an image
      */
     public int getBorderWidth() {
@@ -580,6 +590,7 @@ public class AATModel extends Observable {
     /**
      * In the language file it is possible to add extra questions that are asked to the participant before the
      * real test is started.
+     *
      * @return ArrayList with questionObjects. These objects are passed to the questionsView that displays them
      */
     public ArrayList<QuestionObject> getExtraQuestions() {
@@ -587,7 +598,6 @@ public class AATModel extends Observable {
     }
 
     /**
-     *
      * @return whether the data file contains data
      */
 
@@ -599,6 +609,7 @@ public class AATModel extends Observable {
     /**
      * The AATImage object also stores the direction (push or pull) of an image. This method returns the
      * direction for the image that is currently shown on the screen
+     *
      * @return Direction for the current image
      */
     public int getDirection() {
@@ -606,7 +617,6 @@ public class AATModel extends Observable {
     }
 
     /**
-     *
      * @return The file containing the participants data
      */
     public File getParticipantsFile() {
@@ -614,7 +624,6 @@ public class AATModel extends Observable {
     }
 
     /**
-     *
      * @return The file containing the data file
      */
     public File getDataFile() {
@@ -634,6 +643,7 @@ public class AATModel extends Observable {
     /**
      * This method is called every time when the joystick is pulled or pushed while a picture is shown on the
      * screen. It returns the time between the start of the measure and the current joystick movement
+     *
      * @return ReactionTime in ms.
      */
     public long getMeasurement() {
@@ -643,7 +653,7 @@ public class AATModel extends Observable {
     /**
      * This method adds data to the Participants Data table. This data consists of at least the ID number. Next to the the
      * answers to the optional questions from the configuration files will be added to it.
-    */
+     */
     private void addParticipantsData() {
         ArrayList<String> columnNames = new ArrayList<String>();
 
@@ -683,6 +693,7 @@ public class AATModel extends Observable {
     /**
      * This methode creates a hashmap with float arrays containing the results of a single participant.
      * This data is used as input for the boxplots shown at the end of the test
+     *
      * @return Hashmap with results for the boxplot
      */
     public HashMap<String, float[]> getResultsPerCondition() {
@@ -696,6 +707,7 @@ public class AATModel extends Observable {
 
     /**
      * Converts The measurement data to an array. The boxplots needs float arrays as input.
+     *
      * @param input ArrayList containing longs.
      * @return Array containing floats
      */
@@ -715,6 +727,7 @@ public class AATModel extends Observable {
      * Gets changes in the movement from the y-axis of the joystick.
      * Test status has to be changed when the joystick reaches the maximum distance. It depends on the direction that belongs to
      * the current image. When the user performs the requested action, when finished the test status has to go to wait for trigger.
+     *
      * @param value This value represents the position of the joystick. This information comes from the joystick controller
      */
     public void changeYaxis(int value) {
@@ -747,7 +760,7 @@ public class AATModel extends Observable {
     /**
      * When the test is waiting for the trigger, check if the trigger is pressed and then change the test status
      * to image loaded. then call nextstep so the model can determine the appropriate next action to take
-    */
+     */
     public void triggerPressed() {
         if (testStatus == AATModel.TEST_SHOW_RESULTS) {
             testStatus = AATModel.TEST_STOPPED;
@@ -778,7 +791,8 @@ public class AATModel extends Observable {
     /**
      * This method is called when the participant has answered the optional questions. The answers are added to
      * the participants data file and the views are notified that the AAT can be started
-     * @param extraQuestions  The answers to the extra questions. The hashmap contains the key and the answer
+     *
+     * @param extraQuestions The answers to the extra questions. The hashmap contains the key and the answer
      */
     public void addExtraQuestions(HashMap<String, String> extraQuestions) {
         this.extraQuestions = extraQuestions;

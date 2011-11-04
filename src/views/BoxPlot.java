@@ -67,7 +67,7 @@ public class BoxPlot extends PApplet {
         this.viewHeight = viewHeight;
         this.viewWidth = viewWidth;
         this.array1 = array1;
-        this.array2 =array2;
+        this.array2 = array2;
         this.array3 = array3;
         this.array4 = array4;
 

@@ -26,9 +26,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Observable;
@@ -55,6 +53,7 @@ public class AAT_Main extends JFrame implements Observer {
 
     /**
      * Start the main thread.
+     *
      * @param args
      */
     public static void main(String[] args) {
@@ -107,6 +106,7 @@ public class AAT_Main extends JFrame implements Observer {
         aboutMenu.add(license);
         menuBar.add(aboutMenu);
 
+        //Show the about dialog
         about.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent actionEvent) {
                 String text = "<center><h1>Approach avoidance task</h1></center>";
@@ -119,6 +119,8 @@ public class AAT_Main extends JFrame implements Observer {
             }
         });
 
+
+        //Show the license dialog
         license.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent actionEvent) {
                 LicenseDialog licenseDialog = new LicenseDialog(null);
@@ -134,8 +136,7 @@ public class AAT_Main extends JFrame implements Observer {
                 if (configFile != null) {
                     if (configFile.exists()) {
                         try {
-
-                            model.loadConfig(configFile);
+                            model.loadConfig(configFile);     //Only start when config is valid
                             runButton.setEnabled(true);
                             if (model.hasData()) {
                                 exportData.setEnabled(true);
@@ -255,14 +256,10 @@ class AboutDialog extends JDialog {
         JEditorPane textPane = new JEditorPane();
         textPane.setContentType("text/html");
         textPane.setText(text);
-
-
         JScrollPane scrollPane = new JScrollPane(textPane);
-        //    textPane.setText(text);
         Box b = Box.createVerticalBox();
         b.add(Box.createGlue());
         b.add(scrollPane);
-
         getContentPane().add(b, "Center");
 
         JPanel p2 = new JPanel();
@@ -270,13 +267,11 @@ class AboutDialog extends JDialog {
         p2.add(ok);
         getContentPane().add(p2, "South");
 
-
         ok.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
                 setVisible(false);
             }
         });
-
         setSize(400, 300);
     }
 }

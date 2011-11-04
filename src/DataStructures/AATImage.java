@@ -55,7 +55,7 @@ public class AATImage {
         this.direction = direction;
         this.image = getPracticeImage(color);
         this.type = AATImage.PRACTICE;
-        this.name = "Practice_"+nr;
+        this.name = "Practice_" + nr;
     }
 
 

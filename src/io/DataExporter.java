@@ -184,16 +184,15 @@ public class DataExporter {
         float maxErrors = (float) totalImage * fraction;
         for (String id : NoMistakes.keySet()) {
             float count = NoMistakes.get(id);
-         System.out.println("Max errors "+maxErrors+ " ID "+id+ "has "+count);
+            System.out.println("Max errors " + maxErrors + " ID " + id + "has " + count);
             if (count > maxErrors) {
                 removeID(id);
             }
         }
-        if(exportData.getRowCount()>0) {
-        CSVWriter writer = new CSVWriter(exportData);
-        writer.writeData(file,false);
-        }
-        else {
+        if (exportData.getRowCount() > 0) {
+            CSVWriter writer = new CSVWriter(exportData);
+            writer.writeData(file, false);
+        } else {
             throw new ExportDataException("There is no data to export");
         }
     }

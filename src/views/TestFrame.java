@@ -62,10 +62,12 @@ public class TestFrame extends JFrame implements Observer {
         //AAT Test screen
         if (o.toString().equals("Start")) {
             this.getContentPane().removeAll();
-            this.getContentPane().revalidate();
+            this.getContentPane().invalidate();
+            this.getContentPane().validate();
+            //  this.getContentPane().revalidate();
             this.setVisible(true);
             this.setLayout(null);
-
+            setExtendedState(Frame.MAXIMIZED_BOTH);
             if (aatView != null) {
                 model.deleteObserver(aatView);
             }
@@ -81,23 +83,31 @@ public class TestFrame extends JFrame implements Observer {
 
         //Questions Screen
         if (o.toString().equals("Show questions")) {
+
             QuestionPanel qPanel = new QuestionPanel(model);
             this.setVisible(true);
             this.getContentPane().removeAll();
-            this.getContentPane().revalidate();
+            this.getContentPane().invalidate();
+
+            //   this.getContentPane().revalidate();
             this.setLayout(new GridBagLayout());
-            doLayout();
+            this.getContentPane().add(qPanel, new GridBagConstraints());
+        //    doLayout();
             System.out.println("Show questions");
             qPanel.displayQuestions(model.getExtraQuestions());
-            this.getContentPane().add(qPanel, new GridBagConstraints());
+            this.getContentPane().validate();
+            setExtendedState(Frame.MAXIMIZED_BOTH);
         }
 
         //Results Screen
         if (o.toString().equals("Display results")) {
 
+            this.getContentPane().invalidate();
             this.setLayout(null);
+
             this.getContentPane().removeAll();
-            this.getContentPane().revalidate();
+            this.getContentPane().validate();
+            //   this.getContentPane().revalidate();
 
             Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
             int screenWidth = (int) dim.getWidth();
@@ -119,7 +129,9 @@ public class TestFrame extends JFrame implements Observer {
 
         if (o.toString().equals("Finished")) {
             this.getContentPane().removeAll();
-            this.getContentPane().revalidate();
+            this.getContentPane().invalidate();
+            this.getContentPane().validate();
+            //    this.getContentPane().revalidate();
             this.setVisible(false);
         }
     }

@@ -37,15 +37,13 @@ import java.io.File;
 public class ExportDataDialog extends JFrame {
 
     private JTextField minRTime, maxRtime, errorPerc;
-    private JCheckBox includePartData, includePract;
     private AATModel model;
-    private JPanel mainPanel;
     private DataExporter exporter;
 
     public ExportDataDialog(AATModel model) {
         this.model = model;
         this.setName("Export Data");
-        mainPanel = new JPanel();
+        JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 
         JPanel p = new JPanel(new SpringLayout());
@@ -209,17 +207,13 @@ class ExtensionFileFilter extends FileFilter {
 
     String extensions[];
 
-    public ExtensionFileFilter(String description, String extension) {
-        this(description, new String[]{extension});
-    }
-
     public ExtensionFileFilter(String description, String extensions[]) {
         if (description == null) {
             this.description = extensions[0];
         } else {
             this.description = description;
         }
-        this.extensions = (String[]) extensions.clone();
+        this.extensions = extensions.clone();
         toLower(this.extensions);
     }
 

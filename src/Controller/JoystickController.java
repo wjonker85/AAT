@@ -43,7 +43,7 @@ public class JoystickController extends Thread {
     private Component yAxis;
     private Component trigger;
     private Controller joyStick;
-    private boolean stopThread =false;
+    private boolean stopThread = false;
 
 
     public JoystickController(AATModel model) {

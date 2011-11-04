@@ -64,7 +64,7 @@ public class QuestionPanel extends JPanel {
             public void actionPerformed(ActionEvent actionEvent) {
                 model.addExtraQuestions(getResults());
                 setVisible(false);
-             //   setDisabled();
+                //   setDisabled();
 
             }
         });
@@ -72,9 +72,11 @@ public class QuestionPanel extends JPanel {
         this.add(submitPanel);
     }
 
-    /*
-    Displays every question Object in the ArrayList<DataStructures.QuestionObject> A question can be open, have a textField on the screen
-    or closed and have a combobox with answers
+    /**
+     * Displays every question Object in the ArrayList<DataStructures.QuestionObject> A question can be open, have a textField on the screen
+     * or closed and have a combobox with answers
+     *
+     * @param questions The optional question received from the model
      */
     public void displayQuestions(ArrayList<QuestionObject> questions) {
         for (QuestionObject questionObject : questions) {
@@ -84,7 +86,8 @@ public class QuestionPanel extends JPanel {
             question.setFont(new Font("Roman", 30, 30));
             questionsPanel.add(question);
             if (questionObject.getOptions().size() > 1) {
-                JComboBox<Object> answerOptions = new JComboBox<Object>(questionObject.getOptions().toArray());
+                //      JComboBox<Object> answerOptions = new JComboBox<Object>(questionObject.getOptions().toArray());
+                JComboBox answerOptions = new JComboBox(questionObject.getOptions().toArray());
                 question.setLabelFor(answerOptions);
                 answerOptions.setBackground(Color.WHITE);
                 answerOptions.setForeground(Color.BLACK);
@@ -119,8 +122,8 @@ public class QuestionPanel extends JPanel {
             if (c instanceof JTextField) {
                 JTextField t = (JTextField) c;
                 String input = t.getText();
-                if(t.getText().equals("")) {
-                  input = "N/A";  //Replace the empty input with "N/A"
+                if (t.getText().equals("")) {
+                    input = "N/A";  //Replace the empty input with "N/A"
                 }
                 results.put(key, input);
             }
