@@ -79,12 +79,9 @@ public class BoxPlot extends PApplet {
      */
     public void setup() {
         size(viewWidth, viewHeight);
-        /**
-         * hoeft allemaal niet zo rap, statisch plaat, bespaart stroom en groen is goed, vandaar!! En hoe smoother hoe
-         * beter, dus altijd smooth() zijn waar  mogelijk :)
-         */
-        frameRate(1);
-        //    smooth();
+        noLoop();                       //Blaatje is statisch, dus mag noLoop() zijn
+        smooth();                       //Smooth is beter, dus het is beter om smooth te hebben :
+        background(0);
     }
 
 
@@ -92,7 +89,6 @@ public class BoxPlot extends PApplet {
      * Standaard draw() functie uit processing.
      */
     public void draw() {
-        background(0);
         drawBoxPlot(0, 0, scaleFactor(), "Reaction Time (ms)", "Condition", labelsArray[0], labelsArray[1], labelsArray[2], labelsArray[3]);
     }
 
