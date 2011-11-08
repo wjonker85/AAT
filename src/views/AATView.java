@@ -86,7 +86,7 @@ public class AATView extends PApplet implements Observer {
         xPos = width / 2;                                   //Midden x coordinaar scherm
         yPos = height / 2;                                  //Midden y coordinaat scherm
         noCursor();                                         //Geen cursor weergeven tijdens AAT
-        frameRate(24);                                      //Standaard framerate is 60, dit is echter hoger dan nodig
+        noLoop();                                           //Wijzegingen op scherm worden geteken met redraw, wat gebeurt wanneer model wijzeging doorgeeft.
     }
 
 
@@ -239,6 +239,7 @@ public class AATView extends PApplet implements Observer {
          */
         if (o.toString().equals("Y-as")) {
             inputY = model.getPictureSize();
+            redraw();
         }
 
         /**
@@ -250,6 +251,7 @@ public class AATView extends PApplet implements Observer {
             blackScreen = true;
             showInfo = true;
             System.out.println("Test is on break");
+            redraw();
         }
 
         /**
@@ -258,6 +260,7 @@ public class AATView extends PApplet implements Observer {
         if (o.toString().equals("Wait screen")) {
             blackScreen = true;
             showInfo = false;
+            redraw();
         }
 
         /**
@@ -268,6 +271,7 @@ public class AATView extends PApplet implements Observer {
             displayText = model.getTestStartText();
             blackScreen = true;
             showInfo = true;
+            redraw();
         }
 
         /**
@@ -283,6 +287,7 @@ public class AATView extends PApplet implements Observer {
             imgT = model.getDirection();
             blackScreen = false;         //Plaatjes weer laten zien.
             showInfo = false;
+            redraw();
         }
 
         /**
@@ -294,6 +299,7 @@ public class AATView extends PApplet implements Observer {
             displayText = model.getTestFinishedText();
             blackScreen = true;
             showInfo = true;
+            redraw();
         }
 
     }
