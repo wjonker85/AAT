@@ -8,9 +8,9 @@
 # PracticeRepeat - How many practice images are needed at the beginning of the test. The total number of images
 # 		   Shown is twice this amount. (Every image has a pull and push variant). Comment this or set to 0 when you don't want a practice.
 
-Trails 2
+Trials 2
 BreakAfter 1
-PracticeRepeat 6
+PracticeRepeat 1
 
 #The next options are for the way images should be shown on screen. A test can use the build in method that can create a colored border around
 #An image.
@@ -19,19 +19,25 @@ PracticeRepeat 6
 # BorderColorPull - Same for the pull images.
 # BorderWidth - Specifies the width the border has in the center position.
 # PracticeFillColor - Specifies the color the practice image gets. This only works if the PracticeDir is not set
-# StepSize - Determines how often the image gets resized. This has to be an odd number.
+# StepSize - Determines how often the image gets resized. This has to be an odd number. A higher number is smoother, but can make the pc slow
+# DataSteps - Determines how many resize steps get recorded in the data file. This also has to be an odd number
+# PullTag & PushTag - These are needed when ColoredBorders is set to False. Image file names should contain these tags.
 
 ColoredBorders True
 BorderColorPush F5FE02
 BorderColorPull 00A4E7
 PracticeFillColor FFDEDE
-BorderWidth 8
-StepSize 11
+BorderWidth 20
+StepSize 31
+DataSteps 9
+PullTag pull
+PushTag push
 
 #Next options are for the specification of directories
 # AffectiveDir - This is the directory containing the affective images
 # NeutralDir - The directory containing the neutral images
-# PracticeDir - A directory containing Practice images. If this is not set, the program will use self-generated images with the specified color.
+# PracticeDir - A directory containing Practice images. If this is not set, the program will use self-generated images with the specified fill
+# color. It will also use the border colors that are specified. 
 
 AffectiveDir Affective
 NeutralDir Neutral
