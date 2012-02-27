@@ -15,6 +15,7 @@
  *
  */
 
+import AAT.AatObject;
 import Controller.JoystickController;
 import Model.AATModel;
 import views.ExportDataDialog;
@@ -26,9 +27,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Observable;
@@ -52,9 +51,11 @@ public class AAT_Main extends JFrame implements Observer {
     private JoystickController joystick;
     private TestFrame testFrame;
     final JMenuItem exportData;
+    final JButton runButton;
 
     /**
      * Start the main thread.
+     *
      * @param args
      */
     public static void main(String[] args) {
@@ -83,7 +84,7 @@ public class AAT_Main extends JFrame implements Observer {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        final JButton runButton = new JButton(new ImageIcon(buttonIcon));
+        runButton = new JButton(new ImageIcon(buttonIcon));
         runButton.setBorder(BorderFactory.createEmptyBorder());
         runButton.setContentAreaFilled(false);
         runButton.setEnabled(false);
@@ -107,6 +108,7 @@ public class AAT_Main extends JFrame implements Observer {
         aboutMenu.add(license);
         menuBar.add(aboutMenu);
 
+        //Show the about dialog
         about.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent actionEvent) {
                 String text = "<center><h1>Approach avoidance task</h1></center>";
@@ -119,6 +121,8 @@ public class AAT_Main extends JFrame implements Observer {
             }
         });
 
+
+        //Show the license dialog
         license.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent actionEvent) {
                 LicenseDialog licenseDialog = new LicenseDialog(null);
@@ -134,17 +138,19 @@ public class AAT_Main extends JFrame implements Observer {
                 if (configFile != null) {
                     if (configFile.exists()) {
                         try {
-
-                            model.loadConfig(configFile);
+                            model.loadNewAAT(configFile);     //Only start when config is valid
                             runButton.setEnabled(true);
-                            if (model.hasData()) {
+                            if (model.getTest().hasData()) {
                                 exportData.setEnabled(true);
                             }
-                        } catch (AATModel.FalseConfigException e) {
+                        } catch (AatObject.FalseConfigException e) {
+                            runButton.setEnabled(false);
+                            exportData.setEnabled(false);
                             JOptionPane.showMessageDialog(null,
                                     e.getMessage(),
                                     "Configuration error",
                                     JOptionPane.ERROR_MESSAGE);
+                            System.out.println("Configuration error: "+e.getMessage());
                         }
 
                     }
@@ -159,6 +165,7 @@ public class AAT_Main extends JFrame implements Observer {
                 joystick = new JoystickController(model);
                 joystick.start(); //Start joystick Thread
                 model.startTest();
+                runButton.setEnabled(false);
             }
         });
 
@@ -167,6 +174,7 @@ public class AAT_Main extends JFrame implements Observer {
         exportData.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent actionEvent) {
                 ExportDataDialog export = new ExportDataDialog(model);
+                export.setVisible(true);
             }
         });
 
@@ -202,7 +210,10 @@ public class AAT_Main extends JFrame implements Observer {
     public void update(Observable observable, Object o) {
         if (o.toString().equals("Finished")) {
             joystick.exit();
+            joystick = null; //Remove instance when finished
             exportData.setEnabled(true);
+            runButton.setEnabled(true);
+            
         }
     }
 }
@@ -255,14 +266,10 @@ class AboutDialog extends JDialog {
         JEditorPane textPane = new JEditorPane();
         textPane.setContentType("text/html");
         textPane.setText(text);
-
-
         JScrollPane scrollPane = new JScrollPane(textPane);
-        //    textPane.setText(text);
         Box b = Box.createVerticalBox();
         b.add(Box.createGlue());
         b.add(scrollPane);
-
         getContentPane().add(b, "Center");
 
         JPanel p2 = new JPanel();
@@ -270,13 +277,11 @@ class AboutDialog extends JDialog {
         p2.add(ok);
         getContentPane().add(p2, "South");
 
-
         ok.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
                 setVisible(false);
             }
         });
-
         setSize(400, 300);
     }
 }

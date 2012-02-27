@@ -17,7 +17,7 @@
 
 package Configuration;
 
-import DataStructures.QuestionObject;
+import AAT.QuestionObject;
 
 import java.io.BufferedReader;
 import java.io.File;

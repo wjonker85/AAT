@@ -34,7 +34,7 @@ public class ResultsDataTableModel extends AbstractTableModel {
     private ArrayList<String> columns;
     String[] columnNames = {
             "ID",
-            "Trail",
+            "Trial",
             "ImageName",
             "Direction",
             "Type",
@@ -47,7 +47,7 @@ public class ResultsDataTableModel extends AbstractTableModel {
         columns = new ArrayList<String>();
         data = new ArrayList<Object>();
         columns.add("ID");
-        columns.add("Trail");
+        columns.add("Trial");
         columns.add("ImageName");
         columns.add("Direction");
         columns.add("Type");

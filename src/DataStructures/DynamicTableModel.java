@@ -33,21 +33,21 @@ public class DynamicTableModel extends AbstractTableModel {
 
 
     private ArrayList<Object> data;
-    private ArrayList<String> columns;
+    private ArrayList<Object> columns;
     String[] columnNames;
 
 
     //Create the number of column dynamic.
     public DynamicTableModel() {
-        columns = new ArrayList<String>();
+        columns = new ArrayList<Object>();
         data = new ArrayList<Object>();
     }
 
-    public void setColumnNames(ArrayList<String> columns) {
+    public void setColumnNames(ArrayList<Object> columns) {
         columnNames = new String[columns.size()];
         this.columns = columns;
         for (int x = 0; x < columns.size(); x++) {
-            columnNames[x] = columns.get(x);
+            columnNames[x] = columns.get(x).toString();
         }
         fireTableDataChanged();
     }
@@ -96,8 +96,8 @@ public class DynamicTableModel extends AbstractTableModel {
         }
     }
 
-    public void display() {
-        System.out.println(data);
-    }
+  //  public void display() {
+    //    System.out.println(data);
+  //  }
 
 }

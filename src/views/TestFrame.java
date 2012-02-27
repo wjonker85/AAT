@@ -36,9 +36,8 @@ import java.util.Set;
  */
 public class TestFrame extends JFrame implements Observer {
 
-    private AATView aatView;
+  //  private AATView aatView;
     private AATModel model;
-    private BoxPlot showBoxPlot;
 
     //Make it a fullscreen frame
     public TestFrame(AATModel model) {
@@ -61,21 +60,23 @@ public class TestFrame extends JFrame implements Observer {
 
         //AAT Test screen
         if (o.toString().equals("Start")) {
-            this.getContentPane().removeAll();
-            this.getContentPane().revalidate();
             this.setVisible(true);
             this.setLayout(null);
-
-            if (aatView != null) {
-                model.deleteObserver(aatView);
-            }
+            this.getContentPane().setBackground(new Color(0));
+            this.getContentPane().removeAll();
+            this.invalidate();
+            this.revalidate();
             Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
             int screenWidth = (int) dim.getWidth();
             int screenHeight = (int) dim.getHeight();
             AATView aatView = new AATView(model, screenHeight, screenWidth);
-            aatView.init();
             model.addObserver(aatView);
             this.getContentPane().add(aatView);
+            setExtendedState(Frame.MAXIMIZED_BOTH);
+            aatView.setBounds(0,0,screenWidth,screenHeight);
+
+              aatView.repaint();
+          //    this.revalidate();
         }
 
 
@@ -83,21 +84,24 @@ public class TestFrame extends JFrame implements Observer {
         if (o.toString().equals("Show questions")) {
             QuestionPanel qPanel = new QuestionPanel(model);
             this.setVisible(true);
+            this.setEnabled(true);
             this.getContentPane().removeAll();
-            this.getContentPane().revalidate();
+            this.getContentPane().invalidate();
+            this.getContentPane().validate();
             this.setLayout(new GridBagLayout());
-            doLayout();
-            System.out.println("Show questions");
-            qPanel.displayQuestions(model.getExtraQuestions());
             this.getContentPane().add(qPanel, new GridBagConstraints());
+            qPanel.displayQuestions(model.getTest().getExtraQuestions());
+            setExtendedState(Frame.MAXIMIZED_BOTH);
+            requestFocus();
         }
 
         //Results Screen
         if (o.toString().equals("Display results")) {
-
             this.setLayout(null);
+            this.getContentPane().setBackground(new Color(0));
             this.getContentPane().removeAll();
-            this.getContentPane().revalidate();
+            this.invalidate();
+            this.validate();
 
             Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
             int screenWidth = (int) dim.getWidth();
@@ -109,17 +113,23 @@ public class TestFrame extends JFrame implements Observer {
             float[] array2 = model.getResultsPerCondition().get(labelsArray[1]);
             float[] array3 = model.getResultsPerCondition().get(labelsArray[2]);
             float[] array4 = model.getResultsPerCondition().get(labelsArray[3]);
+
             BoxPlot showBoxPlot = new BoxPlot(array1, array2, array3, array4, labelsArray, screenWidth, screenHeight);
+
             int width = (int) (500 * showBoxPlot.scaleFactor());
             int diff = (screenWidth - width) / 2;
-            showBoxPlot.setBounds(diff, -20, screenWidth, ((int) 0.8 * screenHeight));   //Setbounds for correct position
+            showBoxPlot.setBounds(diff, -20, screenWidth, screenHeight);   //Setbounds for correct position
             showBoxPlot.init();
             this.getContentPane().add(showBoxPlot);   //Show the results
+            repaint();
+            showBoxPlot.repaint();
         }
 
         if (o.toString().equals("Finished")) {
             this.getContentPane().removeAll();
-            this.getContentPane().revalidate();
+            this.getContentPane().invalidate();
+            this.getContentPane().validate();
+            //    this.getContentPane().revalidate();
             this.setVisible(false);
         }
     }

@@ -47,7 +47,8 @@ public class TestConfig {
             "BorderColorPull",
             "BorderWidth",
             "StepSize",
-            "Trails",
+            "DataSteps",
+            "Trials",
             "BreakAfter",
             "AffectiveDir",
             "NeutralDir",
@@ -55,9 +56,11 @@ public class TestConfig {
             "PracticeDir",
             "PracticeFillColor",
             "PracticeRepeat",
-            "NoPracticeTrail",
+            "NoPracticeTrials",
             "ParticipantsFile",
-            "DataFile"
+            "DataFile",
+            "PullTag",
+            "PushTag"
 
     };
 

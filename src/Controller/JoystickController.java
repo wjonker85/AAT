@@ -38,12 +38,14 @@ import net.java.games.input.ControllerEnvironment;
 public class JoystickController extends Thread {
 
     private static final int DELAY = 5;  // ms  (polling interval)
-    private int stepSize;
+    private int stepSizeDisplay;
+    private int stepSizeData = 9;
     private AATModel model;
     private Component yAxis;
     private Component trigger;
     private Controller joyStick;
-    private boolean stopThread =false;
+    private boolean stopThread = false;
+    private float delta = 0.001f;
 
 
     public JoystickController(AATModel model) {
@@ -64,7 +66,7 @@ public class JoystickController extends Thread {
 
     //Start the thread
     public void run() {
-        stepSize = model.getStepRate();
+        stepSizeDisplay = model.getTest().getStepRate();
         pollController(joyStick);
     }
 
@@ -122,7 +124,7 @@ public class JoystickController extends Thread {
             if (pollIsValid) {
                 yAxisValue = yAxis.getPollData();
                 if (yAxisValue != prevYValue) {  // value has changed
-                    model.changeYaxis(convertValue2(yAxisValue));
+                    model.changeYaxis(convertValue2(yAxisValue,stepSizeData),convertValue2(yAxisValue,stepSizeDisplay));
                     prevYValue = yAxisValue;
                 }
                 if (trigger.getPollData() == 1 && prevTrigger != 1.0f) {   // only changes
@@ -139,11 +141,21 @@ public class JoystickController extends Thread {
     /*
     Converts the float value between -1 and 1 to an integer value.
      */
-    public int convertValue2(float value) {
-        int middlePos = (stepSize + 1) / 2;
-        int steps = stepSize - middlePos;
-        float increment = (float) 1 / steps;
-        int returnValue = (int) (value / increment);
+    public int convertValue2(float value,int NoSteps) {
+        int returnValue =0;
+        int middlePos = (NoSteps + 1) / 2;
+        float steps = NoSteps - middlePos;
+        float increment = (float) (1 / steps);
+        if(value>0) {                                           //Correct for small joystick error, otherwise it will not reach the end
+                                                                //with large stepsizes
+        returnValue = (int) ((value / increment)+delta);
+        }
+        if (value<0){
+            returnValue = (int) ((value / increment)-delta);
+        }
+        if (value==0) {
+            returnValue = (int) (value / increment);
+        }
         return middlePos + returnValue;
     }
 }
