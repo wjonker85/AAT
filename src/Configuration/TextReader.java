@@ -97,7 +97,7 @@ public class TextReader {
                 if (strLine.startsWith(("<"))) {
                     if (!strLine.startsWith("</")) {
                         if (strLine.startsWith("<Question>")) {     //Line indicates that there is a question.
-                            newQuestion = new QuestionObject();
+                            newQuestion = new QuestionObject("");
                         } else if (testText.containsKey(transform(strLine))) {
                             key = transform(strLine);
                             text = "";
@@ -107,7 +107,7 @@ public class TextReader {
                     } else {
                         if (strLine.startsWith("</Question")) {    //End of the question
                             extraQuestions.add(newQuestion);
-                            newQuestion = new QuestionObject();
+                            newQuestion = new QuestionObject("");
                         }
                     }
                 } else {

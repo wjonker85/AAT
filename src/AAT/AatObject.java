@@ -20,6 +20,7 @@ package AAT;
 
 import Configuration.TestConfig;
 import Configuration.TextReader;
+import Configuration.XMLReader;
 
 import java.awt.*;
 import java.io.File;
@@ -45,7 +46,9 @@ public abstract class AatObject {
 
     //Configuration readers
     public TestConfig testConfig;
-    private TextReader textReader;
+ //   private TextReader textReader;
+    private XMLReader textReader;
+    //TODO: renamen
 
     private String workingDir;
 
@@ -123,6 +126,7 @@ public abstract class AatObject {
             throw new FalseConfigException("No language file specified");
         }
         System.out.println("Language file = " + langFile);
+
         // id = getHighestID();
         String nDir = testConfig.getValue("NeutralDir");
         String aDir = testConfig.getValue("AffectiveDir");
@@ -137,7 +141,8 @@ public abstract class AatObject {
 
         System.out.println("Neutral directory = " + neutralDir);
         System.out.println("Affective directory = " + affectiveDir);
-        textReader = new TextReader(languageFile);
+    //    textReader = new TextReader(languageFile);
+       textReader = new XMLReader(languageFile);
         neutralImages = getImages(neutralDir);
 
         System.out.println("Neutral " + testConfig.getValue("NeutralDir") + " " + neutralDir);
@@ -406,7 +411,7 @@ public abstract class AatObject {
      * @return Break text to be shown on the screen
      */
     public String getBreakText() {
-        return textReader.getValue("Break");
+        return textReader.getValue("break");
     }
 
     /**
@@ -415,7 +420,7 @@ public abstract class AatObject {
      * @return The introduction text.
      */
     public String getIntroductionText() {
-        return textReader.getValue("Introduction");
+        return textReader.getValue("introduction");
     }
 
     /**
@@ -425,7 +430,7 @@ public abstract class AatObject {
      * @return
      */
     public String getTestStartText() {
-        return textReader.getValue("Start");
+        return textReader.getValue("start");
     }
 
     /**
@@ -434,7 +439,7 @@ public abstract class AatObject {
      * @return Finished text
      */
     public String getTestFinishedText() {
-        return textReader.getValue("Finished");
+        return textReader.getValue("finished");
     }
 
     /**
