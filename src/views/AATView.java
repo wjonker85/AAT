@@ -19,15 +19,16 @@ package views;
 
 import AAT.Util.ImageUtils;
 import Model.AATModel;
-//import processing.core.PApplet;
-//import processing.core.PConstants;
-//import processing.core.PImage;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.Observable;
 import java.util.Observer;
+
+//import processing.core.PApplet;
+//import processing.core.PConstants;
+//import processing.core.PImage;
 
 /**
  * Created by IntelliJ IDEA.
@@ -49,7 +50,7 @@ public class AATView extends JPanel implements Observer {
     private AATModel model;
     public int viewWidth, viewHeight, borderWidth, stepSize, imgBorderWidth, stepStart, inputY, xPos, yPos;
     private int imgWidth, imgHeight;
-    public float stepX, stepY, imgSizeX, imgSizeY, stepCount, imgRefactor, viewRatio, imgRatio;
+    public float stepCount;
 
     private BufferedImage img;
     private boolean blackScreen = true;
@@ -59,19 +60,22 @@ public class AATView extends JPanel implements Observer {
 
 
     /**
-     * @param model      bevat o.a. waarden uit configuratie bestand
-     * @param viewHeight is de hoogte van het scherm in pixxels
-     * @param viewWidth  is breedte van scherm in pixxels
+     * @param model bevat o.a. waarden uit configuratie bestand
      */
-    public AATView(AATModel model, int viewHeight, int viewWidth) {
-        this.setSize(viewWidth, viewHeight);
+    public AATView(AATModel model) {
+        Dimension screen = this.getToolkit().getScreenSize();
+        this.setLayout(null);
+        this.setSize(screen);
+        this.setPreferredSize(screen);
+        this.setMinimumSize(screen);
         this.model = model;
+
         this.stepSize = model.getTest().getStepRate();
         this.setBackground(Color.black);
         textPane = new JEditorPane();
         //   textPane.setContentType("text/html");
         this.add(textPane);
-        textPane.setBounds(100, 100, viewWidth - 100, viewHeight - 100);
+        textPane.setBounds(100, 100, screen.width - 100, screen.height - 100);
         this.setLayout(null);
         this.setVisible(true);
         stepStart = Math.round(stepSize / 2f);
@@ -124,10 +128,8 @@ public class AATView extends JPanel implements Observer {
         textPane.setBackground(new Color(0));
         textPane.setForeground(Color.white);
         textPane.setText(infoText);
+        textPane.setEditable(false);
     }
-
-
-
 
 
     /**
@@ -145,17 +147,17 @@ public class AATView extends JPanel implements Observer {
         imgWidth = img.getWidth();
         //  imgHeight = img.height;
         imgHeight = img.getHeight();
-        Dimension imageSize = ImageUtils.setupImage(viewHeight,viewWidth,imgHeight,imgWidth,stepSize,(int) stepCount,inputY);
+        Dimension imageSize = ImageUtils.setupImage(viewHeight, viewWidth, imgHeight, imgWidth, stepSize, (int) stepCount, inputY);
         /**
          * Wanneer in config file ColoredBorders True is, border weergeven, anders niet. De juiste waarden, zoals
          * breedte van border zijn al eerder met setupImage()
          *
-        **/      
+         **/
         //TODO in andere class zetten
-        if(inputY != stepStart) {    //  Only resize image when joystick moves
-        img = ImageUtils.resizeImageWithHint(img, (int) imageSize.getWidth(), (int) imageSize.getHeight(), img.getType());
+        if (inputY != stepStart) {    //  Only resize image when joystick moves
+            img = ImageUtils.resizeImageWithHint(img, (int) imageSize.getWidth(), (int) imageSize.getHeight(), img.getType());
         }
-            g.drawImage(img, getXpos(img), getYpos(img), this);
+        g.drawImage(img, getXpos(img), getYpos(img), this);
     }
 
 
@@ -214,7 +216,6 @@ public class AATView extends JPanel implements Observer {
          * Practice is geeindigd, getTestStartText() uit config file laden
          */
         if (o.toString().equals("Practice ended")) {
-            System.out.println("End of practice");
             displayText = model.getTest().getTestStartText();
             blackScreen = true;
             showInfo = true;

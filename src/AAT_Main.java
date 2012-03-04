@@ -73,9 +73,7 @@ public class AAT_Main extends JFrame implements Observer {
         mainPanel.setBackground(Color.black);
         mainPanel.setLayout(new GridBagLayout());
         model = new AATModel();
-        testFrame = new TestFrame(model);
         model.addObserver(this);
-        model.addObserver(testFrame);
         joystick = new JoystickController(model);
         this.setTitle("Approach avoidance Task");
         BufferedImage buttonIcon = null;
@@ -164,6 +162,12 @@ public class AAT_Main extends JFrame implements Observer {
             public void actionPerformed(ActionEvent actionEvent) {
                 joystick = new JoystickController(model);
                 joystick.start(); //Start joystick Thread
+
+                if(testFrame != null) {
+                model.deleteObserver(testFrame); //Remove old instance
+                }
+                testFrame = new TestFrame(model);
+                model.addObserver(testFrame);
                 model.startTest();
                 runButton.setEnabled(false);
             }

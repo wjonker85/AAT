@@ -57,13 +57,16 @@ public abstract class AatObject {
     private int breakAfter;
     public int practiceRepeat;
     private int dataSteps;
-
+    private String displayQuestions;
+    private boolean showBoxPlot;
+    
     //Test view variables
     private int borderWidth;
     private int stepSize;
     public String practiceFillColor;
     private boolean coloredBorders;
 
+    
     //progress variables
     private int id = 0;
     private int resize;
@@ -288,11 +291,22 @@ public abstract class AatObject {
 
 
         }
+        displayQuestions = testConfig.getValue("DisplayQuestions");
+        if(!displayQuestions.equals("Before") && !displayQuestions.equals("After") && !displayQuestions.equals("None")) {
+            throw new FalseConfigException("DisplayQuestions should be either Before, After or None");
+        }
+        String hasBoxplot = testConfig.getValue("ShowBoxPlot");
+        if(hasBoxplot.equals("True")) {
+            showBoxPlot = true;
+        }
+        else if (hasBoxplot.equals("False")) {
+            showBoxPlot = false;
+        }
+        else {
+            throw new FalseConfigException("ShowBoxPlot should be either True or False");
+        }
     }
 
-    public void loadConfig(File config) throws FalseConfigException {
-
-    }
 
     public ArrayList<String> getAllFileNames() {
         ArrayList<String> list = new ArrayList<String>();
@@ -491,6 +505,10 @@ public abstract class AatObject {
         return dataFile.length() > 0;
     }
 
+
+    public boolean hasBoxPlot() {
+        return showBoxPlot;
+    }
     /**
      * @return the number of extra questions
      */
@@ -518,6 +536,10 @@ public abstract class AatObject {
 
     public int getDataSteps() {
         return dataSteps;
+    }
+
+    public String getDisplayQuestions() {
+        return displayQuestions;
     }
 
     /**

@@ -35,12 +35,12 @@ public class CSVWriter {
 
     private TableModel tableModel;
 
-    public CSVWriter(TableModel tableModel) {
-        this.tableModel = tableModel;
-    }
+ //   public CSVWriter(TableModel tableModel) {
+ //       this.tableModel = tableModel;
+ //   }
 
     //Write data to file. Appends if there already is data in the file
-    public boolean writeData(File file, boolean append) {
+    public static boolean writeData(File file, boolean append, TableModel tableModel) {
         try {
             FileWriter writer = new FileWriter(file, append);
             BufferedWriter fbw = new BufferedWriter(writer);

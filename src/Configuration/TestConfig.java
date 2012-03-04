@@ -60,7 +60,9 @@ public class TestConfig {
             "ParticipantsFile",
             "DataFile",
             "PullTag",
-            "PushTag"
+            "PushTag",
+            "DisplayQuestions",
+            "ShowBoxPlot"
 
     };
 

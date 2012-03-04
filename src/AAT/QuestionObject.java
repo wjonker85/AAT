@@ -88,6 +88,10 @@ public class QuestionObject {
         return left;
     }
     
+    public String getRightText() {
+        return right;
+    }
+    
     public ArrayList<String> getOptions() {
         return options;
     }

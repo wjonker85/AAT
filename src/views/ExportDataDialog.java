@@ -17,8 +17,8 @@
 
 package views;
 
-import Model.AATModel;
 import IO.DataExporter;
+import Model.AATModel;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
@@ -157,7 +157,7 @@ public class ExportDataDialog extends JFrame {
         if (perc > 100) {
             throw new SubmitDataException("Error percentage can't be higher than 100%");
         }
-        exporter = new DataExporter(model, min, max, perc,this.transposed.isSelected());
+        exporter = new DataExporter(model, min, max, perc, this.transposed.isSelected());
     }
 
 

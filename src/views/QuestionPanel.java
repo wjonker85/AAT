@@ -25,6 +25,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -42,12 +43,24 @@ public class QuestionPanel extends JPanel {
 
     private JPanel questionsPanel;
     private Map<String, Component> questionsMap = new HashMap<String, Component>();
+    private JPanel mainPanel;
 
 
     public QuestionPanel(final AATModel model) {
+        //  super(new BoxLayout(this, BoxLayout.Y_AXIS));
+        mainPanel = new JPanel();
+        mainPanel.setBackground(Color.black);
+        mainPanel.setForeground(Color.white);
+        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+        System.out.println("Show questions");
+        Dimension screen = getToolkit().getScreenSize();
+        //  this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        this.setLayout(new GridBagLayout());
         this.setBackground(Color.black);
         this.setForeground(Color.white);
-        this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        this.setPreferredSize(new Dimension(screen.width / 2, screen.height));
+        this.setMaximumSize(new Dimension(screen.width / 2, screen.height));
+
         questionsPanel = new JPanel(new SpringLayout());
         JPanel submitPanel = new JPanel();
         submitPanel.setBackground(Color.BLACK);
@@ -58,8 +71,9 @@ public class QuestionPanel extends JPanel {
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
         scrollPane.setBackground(Color.black);
         scrollPane.setForeground(Color.white);
-        this.add(scrollPane);
+        mainPanel.add(scrollPane);
         JButton submitButton = new JButton("Submit");
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         submitButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent actionEvent) {
                 model.addExtraQuestions(getResults());
@@ -68,8 +82,12 @@ public class QuestionPanel extends JPanel {
 
             }
         });
-        submitPanel.add(submitButton);
-        this.add(submitPanel);
+        buttonPanel.setBackground(Color.black);
+        buttonPanel.setForeground(Color.white);
+        buttonPanel.add(submitButton);
+        mainPanel.add(buttonPanel);
+        this.add(mainPanel, new GridBagConstraints());
+        //   repaint();
     }
 
     /**
@@ -80,26 +98,43 @@ public class QuestionPanel extends JPanel {
      */
     public void displayQuestions(ArrayList<QuestionObject> questions) {
         for (QuestionObject questionObject : questions) {
+            System.out.println("Nog een vraag");
             JLabel question = new JLabel(questionObject.getQuestion(), JLabel.TRAILING);
             question.setBackground(Color.black);
             question.setForeground(Color.WHITE);
-            question.setFont(new Font("Roman", 30, 30));
+            question.setFont(new Font("Roman", Font.TRUETYPE_FONT, 16));
+            JComponent answer = null;
             questionsPanel.add(question);
-            if (questionObject.getOptions().size() > 1) {
+            if (questionObject.getType().equals("closed")) {
                 //      JComboBox<Object> answerOptions = new JComboBox<Object>(questionObject.getOptions().toArray());
                 JComboBox answerOptions = new JComboBox(questionObject.getOptions().toArray());
+                JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+                panel.add(answerOptions);
+                panel.setBackground(Color.BLACK);
+                panel.setForeground(Color.WHITE);
                 question.setLabelFor(answerOptions);
                 answerOptions.setBackground(Color.WHITE);
                 answerOptions.setForeground(Color.BLACK);
-                questionsPanel.add(answerOptions);
+                questionsPanel.add(panel);
                 questionsMap.put(questionObject.getKey(), answerOptions);
-            } else {
+            }
+            if (questionObject.getType().equals("open")) {
                 JTextField textInput = new JTextField(10);
+                JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+                panel.setBackground(Color.black);
+                panel.setForeground(Color.white);
+                panel.add(textInput);
                 question.setLabelFor(textInput);
                 textInput.setBackground(Color.WHITE);
                 textInput.setForeground(Color.BLACK);
-                questionsPanel.add(textInput);
+                questionsPanel.add(panel);
                 questionsMap.put(questionObject.getKey(), textInput);
+            }
+            if (questionObject.getType().equals("likert")) {
+                LikertPanel likertScale = new LikertPanel(questionObject.getSize(), questionObject.getLeftText(), questionObject.getRightText());
+                question.setLabelFor(likertScale);
+                questionsPanel.add(likertScale);
+                questionsMap.put(questionObject.getKey(), likertScale);
             }
             questionsPanel.setOpaque(true);
         }
@@ -107,7 +142,7 @@ public class QuestionPanel extends JPanel {
                 questions.size(), 2, //rows, cols
                 6, 6,        //initX, initY
                 6, 6);       //xPad, yPad
-
+        this.repaint();
     }
 
 
@@ -131,7 +166,64 @@ public class QuestionPanel extends JPanel {
                 JComboBox jc = (JComboBox) c;
                 results.put(key, jc.getSelectedItem().toString());
             }
+            if (c instanceof LikertPanel) {
+                LikertPanel l = (LikertPanel) c;
+                results.put(key, l.getValue());
+            }
         }
         return results;
     }
+
+    class LikertPanel extends JPanel {
+
+        private int size;
+        private String left, right;
+        private ButtonGroup likertScale;
+
+        public LikertPanel(int size, String left, String right) {
+            this.size = size;
+            this.left = left;
+            this.right = right;
+            //   this.setLayout(new SpringLayout());
+            this.setBackground(Color.black);
+            this.setForeground(Color.white);
+
+            JLabel leftLabel = new JLabel(left);
+            leftLabel.setForeground(Color.WHITE);
+            leftLabel.setBackground(Color.black);
+            this.add(leftLabel);
+            likertScale = new ButtonGroup();
+
+            for (int x = 0; x < size; x++) {
+                JRadioButton likertButton = new JRadioButton();
+                likertButton.setBackground(Color.black);
+                likertButton.setForeground(Color.white);
+                this.add(likertButton);
+                likertScale.add(likertButton);
+            }
+
+            JLabel rightLabel = new JLabel(right, JLabel.TRAILING);
+            rightLabel.setForeground(Color.white);
+            rightLabel.setBackground(Color.black);
+            this.add(rightLabel);
+            //  SpringUtilities.makeCompactGrid(questionsPanel,
+            //        1, 3, //rows, cols
+            //      6, 6,        //initX, initY
+            //    6, 6);       //xPad, yPad
+        }
+
+        public String getValue() {
+            int x = 1;
+            for (Enumeration e = likertScale.getElements(); e.hasMoreElements(); ) {
+                JRadioButton b = (JRadioButton) e.nextElement();
+                if (b.isSelected()) {
+
+                    return String.valueOf(x);
+                }
+                x++;
+            }
+            return "0";
+        }
+    }
+
 }

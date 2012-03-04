@@ -21,10 +21,11 @@ import Model.AATModel;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.Arrays;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+import java.awt.image.BufferedImage;
 import java.util.Observable;
 import java.util.Observer;
-import java.util.Set;
 
 /**
  * Created by IntelliJ IDEA.
@@ -32,25 +33,67 @@ import java.util.Set;
  * Date: 10/15/11
  * Time: 11:26 AM
  * JFrame that contains the test view. An extra frame is needed so that the Processing object can be displayed.
- * This frame lets the test be executed full screen.
+ * This frame lets the test be executed full screen.   TODO cardlayout gebruiker
  */
 public class TestFrame extends JFrame implements Observer {
 
-  //  private AATView aatView;
+    //  private AATView aatView;
     private AATModel model;
+    private CardLayout cl;
+    private JPanel displayPanel;
+    private BoxPlot boxPlot;
+    private AATView aatView;
+    private QuestionPanel questionsView;
+    private Cursor invisibleCursor;
 
     //Make it a fullscreen frame
     public TestFrame(AATModel model) {
         this.model = model;
+        cl = new CardLayout();
+        displayPanel = new JPanel(cl);
+        questionsView = new QuestionPanel(model);
+        aatView = new AATView(model);
+        boxPlot = new BoxPlot(model);
+        model.addObserver(aatView);
+        displayPanel.add(questionsView, "questions");
+        displayPanel.add(aatView, "aat");
+        displayPanel.add(boxPlot, "boxPlot");
+        //  resultsView = new BoxPlot()
+
         this.setLayout(new GridBagLayout());
         this.setBackground(Color.black);
         this.getContentPane().setBackground(Color.black);
+        //   this.getContentPane().add(qPanel, new GridBagConstraints());
+        //   this.getContentPane().setLayout(new GridBagLayout());
+        this.getContentPane().add(displayPanel, new GridBagConstraints());
         setExtendedState(Frame.MAXIMIZED_BOTH);
         setUndecorated(true);
         setEnabled(true);
-        setVisible(false);
+        setVisible(true);
+
+        //Create a transparant cursor
+        Toolkit toolkit = Toolkit.getDefaultToolkit();
+        Point hotSpot = new Point(0, 0);
+        BufferedImage cursorImage = new BufferedImage(1, 1, BufferedImage.TRANSLUCENT);
+        invisibleCursor = toolkit.createCustomCursor(cursorImage, hotSpot, "InvisibleCursor");
+
+        KeyStroke escapeKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0, false);
+        Action escapeAction = new AbstractAction() {
+            public void actionPerformed(ActionEvent e) {
+                closeWindow();
+            }
+        };
+        getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(escapeKeyStroke,
+                "ESCAPE");
+        getRootPane().getActionMap().put("ESCAPE", escapeAction);
+
     }
 
+    private void closeWindow() {
+        this.setVisible(false);
+        this.setEnabled(false);
+        model.clearAll();
+    }
 
     /*
        The model determines which screen needs to be active. The questions screen, the test screen of the results screen
@@ -60,76 +103,25 @@ public class TestFrame extends JFrame implements Observer {
 
         //AAT Test screen
         if (o.toString().equals("Start")) {
-            this.setVisible(true);
-            this.setLayout(null);
-            this.getContentPane().setBackground(new Color(0));
-            this.getContentPane().removeAll();
-            this.invalidate();
-            this.revalidate();
-            Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
-            int screenWidth = (int) dim.getWidth();
-            int screenHeight = (int) dim.getHeight();
-            AATView aatView = new AATView(model, screenHeight, screenWidth);
-            model.addObserver(aatView);
-            this.getContentPane().add(aatView);
-            setExtendedState(Frame.MAXIMIZED_BOTH);
-            aatView.setBounds(0,0,screenWidth,screenHeight);
-
-              aatView.repaint();
-          //    this.revalidate();
+            setCursor(invisibleCursor);
+            cl.show(displayPanel, "aat");
         }
-
 
         //Questions Screen
         if (o.toString().equals("Show questions")) {
-            QuestionPanel qPanel = new QuestionPanel(model);
-            this.setVisible(true);
-            this.setEnabled(true);
-            this.getContentPane().removeAll();
-            this.getContentPane().invalidate();
-            this.getContentPane().validate();
-            this.setLayout(new GridBagLayout());
-            this.getContentPane().add(qPanel, new GridBagConstraints());
-            qPanel.displayQuestions(model.getTest().getExtraQuestions());
-            setExtendedState(Frame.MAXIMIZED_BOTH);
-            requestFocus();
+            setCursor(Cursor.getDefaultCursor());
+            questionsView.displayQuestions(model.getTest().getExtraQuestions());
+            cl.show(displayPanel, "questions");
         }
 
         //Results Screen
         if (o.toString().equals("Display results")) {
-            this.setLayout(null);
-            this.getContentPane().setBackground(new Color(0));
-            this.getContentPane().removeAll();
-            this.invalidate();
-            this.validate();
-
-            Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
-            int screenWidth = (int) dim.getWidth();
-            int screenHeight = (int) dim.getHeight();
-            Set labels = model.getResultsPerCondition().keySet();        //Get results from the model
-            String[] labelsArray = Arrays.copyOf(labels.toArray(), labels.toArray().length, String[].class);    //Convert labels to array
-
-            float[] array1 = model.getResultsPerCondition().get(labelsArray[0]);    //Fill the 4 float arrays;
-            float[] array2 = model.getResultsPerCondition().get(labelsArray[1]);
-            float[] array3 = model.getResultsPerCondition().get(labelsArray[2]);
-            float[] array4 = model.getResultsPerCondition().get(labelsArray[3]);
-
-            BoxPlot showBoxPlot = new BoxPlot(array1, array2, array3, array4, labelsArray, screenWidth, screenHeight);
-
-            int width = (int) (500 * showBoxPlot.scaleFactor());
-            int diff = (screenWidth - width) / 2;
-            showBoxPlot.setBounds(diff, -20, screenWidth, screenHeight);   //Setbounds for correct position
-            showBoxPlot.init();
-            this.getContentPane().add(showBoxPlot);   //Show the results
-            repaint();
-            showBoxPlot.repaint();
+            boxPlot.init();
+            boxPlot.display(true);
+            cl.show(displayPanel, "boxPlot");
         }
 
         if (o.toString().equals("Finished")) {
-            this.getContentPane().removeAll();
-            this.getContentPane().invalidate();
-            this.getContentPane().validate();
-            //    this.getContentPane().revalidate();
             this.setVisible(false);
         }
     }

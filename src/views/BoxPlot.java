@@ -17,7 +17,12 @@
 
 package views;
 
+import Model.AATModel;
 import processing.core.PApplet;
+
+import java.awt.*;
+import java.util.Arrays;
+import java.util.Set;
 
 /**
  * Created by IntelliJ IDEA.
@@ -42,6 +47,8 @@ public class BoxPlot extends PApplet {
     float[] array1, array2, array3, array4;
     String[] labelsArray;
     int viewWidth, viewHeight;
+    private boolean show = false;
+    private AATModel model;
 
     /**
      * Aanmaken van de DescriptiveStats objecten, welke de gegevens bevatten op basis waarvan de 4 boxplotten getekend
@@ -54,23 +61,17 @@ public class BoxPlot extends PApplet {
 
 
     /**
-     * @param array1      BoxPlot 1
-     * @param array2      BoxPlot 2
-     * @param array3      BoxPlot 3
-     * @param array4      Boxplot 4
-     * @param labelsArray de labelels voor BoxPlot 1, 2 ,3 en 4
-     * @param viewWidth   Breedte van het scherm
-     * @param viewHeight  Hoogte van het scherm
+     * @param model AATModel
      */
-    BoxPlot(float[] array1, float[] array2, float[] array3, float[] array4, String[] labelsArray, int viewWidth, int viewHeight) {
-        this.labelsArray = labelsArray;
-        this.viewHeight = viewHeight;
-        this.viewWidth = viewWidth;
-        this.array1 = array1;
-        this.array2 =array2;
-        this.array3 = array3;
-        this.array4 = array4;
-
+    BoxPlot(AATModel model) {
+        this.model = model;
+        this.setLayout(null);
+        Dimension screen = this.getToolkit().getScreenSize();
+        Dimension resize = new Dimension(screen.width / 2, screen.height - 50);
+        //    this.setPreferredSize(resize);
+        //  this.setMinimumSize(resize);
+        this.viewHeight = screen.height;
+        this.viewWidth = screen.width;
     }
 
 
@@ -84,12 +85,30 @@ public class BoxPlot extends PApplet {
         background(0);
     }
 
+    public void display(Boolean show) {
+        if (show) {
+            System.out.println("Show boxplot");
+            Set labels = model.getResultsPerCondition().keySet();        //Get results from the model
+            labelsArray = Arrays.copyOf(labels.toArray(), labels.toArray().length, String[].class);    //Convert labels to array
+
+            array1 = model.getResultsPerCondition().get(labelsArray[0]);    //Fill the 4 float arrays;
+            array2 = model.getResultsPerCondition().get(labelsArray[1]);
+            array3 = model.getResultsPerCondition().get(labelsArray[2]);
+            array4 = model.getResultsPerCondition().get(labelsArray[3]);
+            this.show = true;
+        } else {
+            this.show = false;
+        }
+        repaint();
+    }
 
     /**
      * Standaard draw() functie uit processing.
      */
     public void draw() {
-        drawBoxPlot(0, 0, scaleFactor(), "Reaction Time (ms)", "Condition", labelsArray[0], labelsArray[1], labelsArray[2], labelsArray[3]);
+        if (show) {
+            drawBoxPlot(0, 0, scaleFactor(), "Reaction Time (ms)", "Condition", labelsArray[0], labelsArray[1], labelsArray[2], labelsArray[3]);
+        }
     }
 
 

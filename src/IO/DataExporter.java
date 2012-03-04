@@ -197,8 +197,8 @@ public class DataExporter {
             if(transposed) {
                 exportData = this.transposeData();
             }
-            CSVWriter writer = new CSVWriter(exportData);
-            writer.writeData(file, false);
+         //   CSVWriter writer = new CSVWriter(exportData);
+            CSVWriter.writeData(file, false,exportData);
         } else {
             throw new ExportDataException("There is no data to export");
         }

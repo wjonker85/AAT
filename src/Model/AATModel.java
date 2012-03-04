@@ -128,12 +128,15 @@ public class AATModel extends Observable {
         id++;          //new higher id
         newMeasure = new MeasureData(id);
 
-        if (newAAT.getNoOfQuestions() > 0) {   //When there are extra question, show them
+        //     if (newAAT.getNoOfQuestions() > 0) {   //When there are extra question, show them
+        if (newAAT.getDisplayQuestions().equals("Before")) {
             testStatus = AATModel.TEST_WAIT_FOR_QUESTIONS;
             this.setChanged();
             notifyObservers("Show questions");      //Notify the observer that a new test is started.
         } else {
+            if(newAAT.getDisplayQuestions().equals("None")) {
             this.addParticipantsData();
+            }
             this.setChanged();
             notifyObservers("Start");
             testStatus = AATModel.TEST_WAIT_FOR_TRIGGER;   //Start the test
@@ -256,8 +259,8 @@ public class AATModel extends Observable {
                 } else if (run == repeat) {   //No more runs left, Test has ended
                     testStatus = AATModel.TEST_SHOW_FINISHED;    //Notify observers about it
                     this.setChanged();
+                    CSVWriter.writeData(newAAT.getDataFile(),true, newMeasure.getAllResults());   //Writes the measurement to file.
                     notifyObservers("Show finished");   //First show black screen
-                    writeToFile(newMeasure);   //Writes the measurement to file.
                 } else {           //Continue with a new run
                     if (newAAT.hasColoredBorders()) {
                         testList = newAAT.createRandomListBorders(); //create a new Random list
@@ -276,13 +279,8 @@ public class AATModel extends Observable {
      * of the test
      */
     private void showNextImage() {
-        //   if (practice) {
-        //       current = practiceList.get(practiceCount);
-        //    practiceCount++;
-        //  } else {
         current = testList.get(count);    //change current to the next image
         count++;
-        //  }
         this.setChanged();
         notifyObservers("Show Image");      //Notify observers
         startMeasure(); //Start the measurement.
@@ -359,6 +357,7 @@ public class AATModel extends Observable {
             }
         }
         dynamic.add(results);
+        CSVWriter.writeData(newAAT.getParticipantsFile(),true,dynamic);
     }
 
     /**
@@ -366,18 +365,6 @@ public class AATModel extends Observable {
      */
     public void addParticipantsData() {
         addParticipantsData(null);
-    }
-
-    /*
-    *This methods writes data to 2 seperate files. One for the data from the participant and the other
-    *one are the results. Data is appended to an existing file if there is any.
-    */
-    public void writeToFile(MeasureData data) {
-        CSVWriter writer = new CSVWriter(data.getAllResults());
-        System.out.println("Rows participants "+dynamic.getRowCount());
-        CSVWriter writer2 = new CSVWriter(this.dynamic);
-        writer.writeData(newAAT.getDataFile(), true);
-        writer2.writeData(newAAT.getParticipantsFile(), true);
     }
 
 //------------------------------Get results from the test -------------------------------
@@ -442,6 +429,11 @@ public class AATModel extends Observable {
 
     }
 
+    //clear the test
+    public void clearAll() {
+        this.newAAT = null;
+        System.gc();
+    }
 
     /**
      * This method is called when a participant has pulled or pushed the image completely. It notifies the observers
@@ -463,14 +455,29 @@ public class AATModel extends Observable {
             case AATModel.TEST_SHOW_RESULTS:
                 testStatus = AATModel.TEST_STOPPED;
                 this.setChanged();
-                this.notifyObservers("Finished");
+                if (newAAT.getDisplayQuestions().equals("After")) {
+                    this.notifyObservers("Show questions");
+                } else {
+                    this.notifyObservers("Finished");
+                    clearAll();
+                }
                 break;
 
 
             case AATModel.TEST_SHOW_FINISHED:
-                testStatus = AATModel.TEST_SHOW_RESULTS;
                 this.setChanged();
-                this.notifyObservers("Display results");
+                if (newAAT.hasBoxPlot()) {
+                    testStatus = AATModel.TEST_SHOW_RESULTS;
+                    this.notifyObservers("Display results");
+                } else {
+                    testStatus = AATModel.TEST_STOPPED;
+                    if (newAAT.getDisplayQuestions().equals("After")) {
+                        this.notifyObservers("Show questions");
+                    } else {
+                        this.notifyObservers("Finished");
+                        clearAll();
+                    }
+                }
                 break;
 
             case AATModel.TEST_WAIT_FOR_TRIGGER:
@@ -495,7 +502,11 @@ public class AATModel extends Observable {
     public void addExtraQuestions(HashMap<String, String> extraQuestions) {
         this.addParticipantsData(extraQuestions);
         this.setChanged();
-        this.notifyObservers("Start");
-        testStatus = AATModel.TEST_WAIT_FOR_TRIGGER;   //Test status is wait for the user to press the trigger button.
+        if (newAAT.getDisplayQuestions().equals("After")) {
+            this.notifyObservers("Finished");
+        } else {
+            this.notifyObservers("Start");
+            testStatus = AATModel.TEST_WAIT_FOR_TRIGGER;   //Test status is wait for the user to press the trigger button.
+        }
     }
 }
