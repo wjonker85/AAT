@@ -98,7 +98,6 @@ public class QuestionPanel extends JPanel {
      */
     public void displayQuestions(ArrayList<QuestionObject> questions) {
         for (QuestionObject questionObject : questions) {
-            System.out.println("Nog een vraag");
             JLabel question = new JLabel(questionObject.getQuestion(), JLabel.TRAILING);
             question.setBackground(Color.black);
             question.setForeground(Color.WHITE);
