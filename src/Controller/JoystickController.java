@@ -22,6 +22,8 @@ import net.java.games.input.Component;
 import net.java.games.input.Controller;
 import net.java.games.input.ControllerEnvironment;
 
+import javax.swing.*;
+
 /**
  * Created by IntelliJ IDEA.
  * User: marcel
@@ -55,7 +57,10 @@ public class JoystickController extends Thread {
 
         Controller[] cs = ce.getControllers();      //Lijst met alle aangesloten controllers
         if (cs.length == 0) {           //foutmelding geven als er een joystick is gevonden.
-            System.out.println("No controllers found");
+            JOptionPane.showMessageDialog(null,
+                    "No joystick found, attach a joystick and run the program again.",
+                    "Joystick error",
+                    JOptionPane.ERROR_MESSAGE);
             System.exit(0);
         }
 

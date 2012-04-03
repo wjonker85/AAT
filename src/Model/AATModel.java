@@ -441,7 +441,7 @@ public class AATModel extends Observable {
 
     //clear the test
     public void clearAll() {
-        this.newAAT = null;
+        newAAT.clearLists();
         System.gc();
     }
 

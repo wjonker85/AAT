@@ -77,6 +77,7 @@ public abstract class AatObject {
     public ArrayList<File> neutralImages;
     public ArrayList<File> affectiveImages;
     private ArrayList<AATImage> testList; //Random list that contains the push or pull images.
+    private ArrayList<String> fileNameList;
 
     public File practiceDir;
 
@@ -87,7 +88,9 @@ public abstract class AatObject {
     private File participantsFile;
     private File dataFile;
 
-
+    private int neutralSize;
+    private int affectiveSize;
+    private int totalImageSize;
     //regex for extension filtering
     private Pattern pattern;
     private Pattern hexPattern;
@@ -305,10 +308,17 @@ public abstract class AatObject {
         else {
             throw new FalseConfigException("ShowBoxPlot should be either True or False");
         }
+
+        fileNameList = createFileNamesList();
+        totalImageSize = countTotalImages();
     }
 
 
     public ArrayList<String> getAllFileNames() {
+        return fileNameList;
+    }
+
+    public ArrayList<String> createFileNamesList() {
         ArrayList<String> list = new ArrayList<String>();
         int size = practiceRepeat * 2;
 
@@ -548,13 +558,24 @@ public abstract class AatObject {
      *
      * @return int total image count
      */
-    public int getTotalImageCount() {
+    public int getTotalImageCount() {  //TODO
+       return totalImageSize;
+    }
+
+    private int countTotalImages() {
         int affective = affectiveImages.size();
         int neutral = neutralImages.size();
         int runCount = Integer.parseInt(testConfig.getValue("Trials"));
         return 2 * (affective + neutral) * runCount;
     }
+    /**
+     * Clear the image lists when they are not necessary anymore
+     */
+    public void clearLists() {
+        this.testList = null;
+        System.gc();
 
+    }
     /**
      * @return A new randomised practice list
      */

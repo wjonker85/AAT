@@ -228,15 +228,15 @@ public class DataExporter {
         DynamicTableModel transposedData = new DynamicTableModel();
         ArrayList<Object> columnNames = new ArrayList<Object>();
         ArrayList<String> originalFileNames = model.getTest().getAllFileNames();
-        ArrayList<String> practiceNames = model.getTest().getPracticeNames();
+    //    ArrayList<String> practiceNames = model.getTest().getPracticeNames();     //Practice names are not necessary
         ArrayList<Integer> ids = new ArrayList<Integer>();
-        boolean hasPractice = model.getTest().hasPractice();
+    //    boolean hasPractice = model.getTest().hasPractice();
         int trials = model.getTest().getRepeat();
 
         columnNames.add("ID"); //Create the collumn names List. Header for the output file
-        for (String practice : practiceNames) {
-            columnNames.add(practice);
-        }
+     //   for (String practice : practiceNames) {
+       //     columnNames.add(practice);
+      //  }
         for (int i = 0; i < trials; i++) {
             for (String fileName : originalFileNames) {
                 columnNames.add(fileName+"_"+i);
@@ -245,8 +245,9 @@ public class DataExporter {
         transposedData.setColumnNames(columnNames);
 
         //Find all id's
-        for (int x = 0; x < resultsData.getRowCount(); x++) {
-            int currentID = Integer.parseInt(resultsData.getValueAt(x, 0).toString());
+
+        for (int x = 0; x < exportData.getRowCount(); x++) {
+            int currentID = Integer.parseInt(exportData.getValueAt(x, 0).toString());
             if (!ids.contains(currentID)) {
                 ids.add(currentID);
             }
@@ -257,10 +258,10 @@ public class DataExporter {
         for (int id : ids) {
             ArrayList<Object> data = new ArrayList<Object>();
             data.add(id);
-            if (model.getTest().hasPractice()) {
-                HashMap<String, Integer> results = getValuesForTrial(0, id);
-                addTransposedData(results, practiceNames, data, id);
-            }
+       //     if (model.getTest().hasPractice()) {           //No need for practice in the results
+         //       HashMap<String, Integer> results = getValuesForTrial(0, id);
+           //     addTransposedData(results, practiceNames, data, id);
+         //   }
             for (int x = 1; x < trials + 1; x++) {
 
                 HashMap<String, Integer> results = getValuesForTrial(x, id);
@@ -274,7 +275,7 @@ public class DataExporter {
 
     private void addTransposedData(HashMap<String, Integer> results, ArrayList<String> list, ArrayList<Object> data, int id) {
         for (String file : list) {
-            System.out.println("Find "+file);
+     //       System.out.println("Find "+file);
             if (results.containsKey(file)) {
                 data.add(results.get(file));
             } else {
@@ -314,9 +315,9 @@ public class DataExporter {
                 if (trial == 0) {//is practice
                     if (model.getTest().hasColoredBorders()) {    //Practice with colored border
                         if (model.getTest().practiceDir != null) {
-                            fileName = fileName+"_" + direction;
+                           fileName = fileName+"_" + direction;
                         } else {
-                            fileName = fileName + "_" + direction;
+                           fileName = fileName + "_" + direction;
                         }
                     } else {    //practice without colored borders
                         fileName = fileName +"_practice";

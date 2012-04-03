@@ -49,13 +49,13 @@ public class ExportDataDialog extends JFrame {
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 
         JPanel p = new JPanel(new SpringLayout());
-        JLabel minTime = new JLabel("Min Reaction Time");
+        JLabel minTime = new JLabel("Min Reaction Time (ms)");
         minRTime = new JTextField(10);
         minRTime.setText("100");         //Set Default value
         minTime.setLabelFor(minRTime);
         p.add(minTime);
         p.add(minRTime);
-        JLabel maxTime = new JLabel("Max Reaction Time");
+        JLabel maxTime = new JLabel("Max Reaction Time (ms)");
         maxRtime = new JTextField(10);
         maxRtime.setText("3000");
         maxTime.setLabelFor(maxRtime);
@@ -67,15 +67,15 @@ public class ExportDataDialog extends JFrame {
         ePercent.setLabelFor(errorPerc);
         p.add(ePercent);
         p.add(errorPerc);
-        transposed = new JCheckBox();
-        JLabel transposedLabel = new JLabel("Images as variable names");
-        transposedLabel.setLabelFor(this.transposed);
-        this.transposed.setToolTipText("When checked, the output file will have the images as variable names, otherwise the images are on the rows");
-        p.add(transposedLabel);
-        p.add(transposed);
+     //   transposed = new JCheckBox();
+      //  JLabel transposedLabel = new JLabel("Images as variable names");
+      //  transposedLabel.setLabelFor(this.transposed);
+      //  this.transposed.setToolTipText("When checked, the output file will have the images as variable names, otherwise the images are on the rows");
+     //   p.add(transposedLabel);
+     //   p.add(transposed);
         //Layout everything in a nice Form
         SpringUtilities.makeCompactGrid(p,
-                4, 2, //rows, cols
+                3, 2, //rows, cols
                 6, 6,        //initX, initY
                 6, 6);       //xPad, yPad
 
@@ -157,7 +157,8 @@ public class ExportDataDialog extends JFrame {
         if (perc > 100) {
             throw new SubmitDataException("Error percentage can't be higher than 100%");
         }
-        exporter = new DataExporter(model, min, max, perc, this.transposed.isSelected());
+      //  exporter = new DataExporter(model, min, max, perc, this.transposed.isSelected());    //transposing is enabled by default
+        exporter = new DataExporter(model, min, max, perc, true);
     }
 
 

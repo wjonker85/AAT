@@ -215,7 +215,6 @@ public class AATView extends JPanel implements Observer {
             repaint();
             if(model.getDirection() == AATImage.PULL) {
             try {
-                System.out.println("Even slapen");
                 Thread.sleep(100);
             } catch (InterruptedException e) {
                 e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
@@ -223,7 +222,6 @@ public class AATView extends JPanel implements Observer {
             }
             else {
                 try {
-                    System.out.println("Even slapen");
                     Thread.sleep(25);
                 } catch (InterruptedException e) {
                     e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
