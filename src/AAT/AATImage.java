@@ -145,6 +145,8 @@ public class AATImage {
         int stepStart = Math.round(stepSize / 2f);
         Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
         Dimension d = ImageUtils.setupImage((int) dim.getHeight(),(int) dim.getWidth(), bufImage.getHeight(), bufImage.getWidth(), stepStart);
+     //   Dimension d = ImageUtils.setupImage((int) dim.getHeight(),(int) dim.getHeight(), bufImage.getHeight(), bufImage.getWidth(), stepStart);
+
         bufImage = ImageUtils.resizeImageWithHint(bufImage, d.width, d.height, BufferedImage.TYPE_INT_ARGB);
         if (hasBorders) {
             bufImage = ImageUtils.drawBorder(bufImage, borderColor, borderWidth);

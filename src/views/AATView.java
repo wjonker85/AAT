@@ -17,6 +17,7 @@
 
 package views;
 
+import AAT.AATImage;
 import AAT.Util.ImageUtils;
 import Model.AATModel;
 
@@ -64,6 +65,8 @@ public class AATView extends JPanel implements Observer {
      */
     public AATView(AATModel model) {
         Dimension screen = this.getToolkit().getScreenSize();
+     // int displayHeight = this.getToolkit().getScreenSize().height;
+     //   Dimension screen = new Dimension(displayHeight,displayHeight);
         this.setLayout(null);
         this.setSize(screen);
         this.setPreferredSize(screen);
@@ -88,6 +91,7 @@ public class AATView extends JPanel implements Observer {
         //Grote van de AATView scherm.
         this.viewHeight = this.getHeight();
         this.viewWidth = this.getWidth();
+       // this.viewWidth = viewHeight; //make the display a square
         displayText = model.getTest().getIntroductionText(); //Test starts with an introduction tekst.
 
 
@@ -207,6 +211,24 @@ public class AATView extends JPanel implements Observer {
          * Plaatje is weggedrukt. Nu een zwart scherm laten zien.
          */
         if (o.toString().equals("Wait screen")) {
+            inputY = model.getLastSize();
+            repaint();
+            if(model.getDirection() == AATImage.PULL) {
+            try {
+                System.out.println("Even slapen");
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            }
+            }
+            else {
+                try {
+                    System.out.println("Even slapen");
+                    Thread.sleep(25);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                }
+            }
             blackScreen = true;
             showInfo = false;
             repaint();

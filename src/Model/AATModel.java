@@ -89,6 +89,8 @@ public class AATModel extends Observable {
 
     private int previousPos; //TTo keep track of the joystick position
 
+    private int lastSize;
+
     //Constructor.
     public AATModel() {
         //   testStatus = AATModel.TEST_STOPPED;
@@ -417,9 +419,13 @@ public class AATModel extends Observable {
             if (testStatus == AATModel.IMAGE_LOADED || testStatus == AATModel.PRACTICE_IMAGE_LOADED) { //Only listen when there is an image loaded
                 newMeasure.addResult(value, getMeasurement());     //add results to the other measurements
                 if (current.getDirection() == AATImage.PULL && value == newAAT.getDataSteps()) {   //check if the requested action has been performed
+                    lastSize = newAAT.getStepRate();
                     removeImage();
+                    return;
                 } else if (current.getDirection() == AATImage.PUSH && value == 1) {
+                    lastSize = 1;
                     removeImage();
+                    return;
                 }
             }
         }
@@ -427,6 +433,10 @@ public class AATModel extends Observable {
         this.setChanged();
         notifyObservers("Y-as");
 
+    }
+
+    public int getLastSize() {
+        return lastSize;
     }
 
     //clear the test
@@ -439,7 +449,10 @@ public class AATModel extends Observable {
      * This method is called when a participant has pulled or pushed the image completely. It notifies the observers
      * that the current image has to be removed from the view.
      */
+
+
     private void removeImage() {
+
         this.setChanged();
         notifyObservers("Wait screen");
         testStatus = AATModel.TEST_WAIT_FOR_TRIGGER;
