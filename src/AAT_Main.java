@@ -227,7 +227,7 @@ public class AAT_Main extends JFrame implements Observer {
 class LicenseDialog extends JDialog {
 
     public LicenseDialog(JFrame parent) {
-        super(parent, "About AAT", true);
+        super(parent, "License", true);
         JEditorPane textPane = new JEditorPane();
         textPane.setContentType("text/html");
         JScrollPane scrollPane = new JScrollPane(textPane);

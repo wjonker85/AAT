@@ -81,6 +81,9 @@ public abstract class AatObject {
 
     public File practiceDir;
 
+    private String pullTag,pushTag;
+    private String nDir,aDir;
+
     //Hashmaps containing color information and the optional questions
     private Hashtable<Integer, String> colorTable;    //Contains the border colors
     private ArrayList<QuestionObject> questionsList;
@@ -134,8 +137,8 @@ public abstract class AatObject {
         System.out.println("Language file = " + langFile);
 
         // id = getHighestID();
-        String nDir = testConfig.getValue("NeutralDir");
-        String aDir = testConfig.getValue("AffectiveDir");
+        nDir = testConfig.getValue("NeutralDir");
+        aDir = testConfig.getValue("AffectiveDir");
         File neutralDir = new File(workingDir + File.separator + nDir);
         File affectiveDir = new File(workingDir + File.separator + aDir);
         if (nDir.equals("") || !neutralDir.isDirectory()) {
@@ -194,8 +197,8 @@ public abstract class AatObject {
             System.out.println("Border pull color is: " + pullColor);
         } else {       //Check for pull and push tag
             System.out.println("Colored borders is set to False:");
-            String pullTag = testConfig.getValue("PullTag");
-            String pushTag = testConfig.getValue("PushTag");
+            pullTag = testConfig.getValue("PullTag");
+            pushTag = testConfig.getValue("PushTag");
             if (pullTag.length() == 0) {
                 throw new FalseConfigException("Pull tag is not set");
             }
@@ -567,6 +570,22 @@ public abstract class AatObject {
         int neutral = neutralImages.size();
         int runCount = Integer.parseInt(testConfig.getValue("Trials"));
         return 2 * (affective + neutral) * runCount;
+    }
+
+    public String getPullTag() {
+        return pullTag;
+    }
+
+    public String getPushTag() {
+        return pushTag;
+    }
+
+    public String getAffectiveDir() {
+        return aDir;
+    }
+
+    public String getNeutralDir() {
+        return nDir;
     }
     /**
      * Clear the image lists when they are not necessary anymore

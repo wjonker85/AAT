@@ -379,10 +379,14 @@ public class AATModel extends Observable {
      */
     public HashMap<String, float[]> getResultsPerCondition() {
         HashMap<String, float[]> results = new HashMap<String, float[]>();
-        results.put("Pull & Neutral", convertToArray(newMeasure.getMeasures(AATImage.PULL, AATImage.NEUTRAL)));
-        results.put("Pull & Affective", convertToArray(newMeasure.getMeasures(AATImage.PULL, AATImage.AFFECTIVE)));
-        results.put("Push & Neutral", convertToArray(newMeasure.getMeasures(AATImage.PUSH, AATImage.NEUTRAL)));
-        results.put("Push & Affective", convertToArray(newMeasure.getMeasures(AATImage.PUSH, AATImage.AFFECTIVE)));
+        String pull = newAAT.getPullTag();
+        String push = newAAT.getPushTag();
+        String nDir = newAAT.getNeutralDir();
+        String aDir = newAAT.getAffectiveDir();
+        results.put(pull+" & "+nDir, convertToArray(newMeasure.getMeasures(AATImage.PULL, AATImage.NEUTRAL)));
+        results.put(pull+" & "+aDir, convertToArray(newMeasure.getMeasures(AATImage.PULL, AATImage.AFFECTIVE)));
+        results.put(push+" & "+nDir, convertToArray(newMeasure.getMeasures(AATImage.PUSH, AATImage.NEUTRAL)));
+        results.put(push+" & "+aDir, convertToArray(newMeasure.getMeasures(AATImage.PUSH, AATImage.AFFECTIVE)));
         return results;
     }
 
