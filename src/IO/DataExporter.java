@@ -62,7 +62,7 @@ public class DataExporter {
         exportData = new DynamicTableModel();
         ArrayList<Object> columnNames = new ArrayList<Object>();
         columnNames.add("ID");
-        columnNames.add("Trail");
+        columnNames.add("Triall");
         columnNames.add("Image");
         columnNames.add("Direction");
         columnNames.add("Type");
@@ -239,6 +239,7 @@ public class DataExporter {
       //  }
         for (int i = 0; i < trials; i++) {
             for (String fileName : originalFileNames) {
+                System.out.println("orig "+fileName);
                 columnNames.add(fileName+"_"+i);
             }
         }
@@ -287,7 +288,7 @@ public class DataExporter {
 
     /**
      * Returns the list of images for a certain
-     *
+     * TODO: Exporteren van de demo gaat niet goed.
      * @param trial
      * @param id
      * @return

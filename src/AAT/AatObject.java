@@ -81,7 +81,7 @@ public abstract class AatObject {
 
     public File practiceDir;
 
-    private String pullTag,pushTag;
+    private String pullTag = "pull",pushTag = "push";
     private String nDir,aDir;
 
     //Hashmaps containing color information and the optional questions
