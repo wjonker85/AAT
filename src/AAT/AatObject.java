@@ -19,10 +19,8 @@ package AAT;
 
 
 import Configuration.TestConfig;
-import Configuration.TextReader;
 import Configuration.XMLReader;
 
-import java.awt.*;
 import java.io.File;
 import java.io.FileFilter;
 import java.util.ArrayList;
@@ -46,7 +44,7 @@ public abstract class AatObject {
 
     //Configuration readers
     public TestConfig testConfig;
- //   private TextReader textReader;
+    //   private TextReader textReader;
     private XMLReader textReader;
     //TODO: renamen
 
@@ -59,14 +57,14 @@ public abstract class AatObject {
     private int dataSteps;
     private String displayQuestions;
     private boolean showBoxPlot;
-    
+
     //Test view variables
     private int borderWidth;
     private int stepSize;
     public String practiceFillColor;
     private boolean coloredBorders;
 
-    
+
     //progress variables
     private int id = 0;
     private int resize;
@@ -81,8 +79,8 @@ public abstract class AatObject {
 
     public File practiceDir;
 
-    private String pullTag = "pull",pushTag = "push";
-    private String nDir,aDir;
+    private String pullTag = "pull", pushTag = "push";
+    private String nDir, aDir;
 
     //Hashmaps containing color information and the optional questions
     private Hashtable<Integer, String> colorTable;    //Contains the border colors
@@ -150,8 +148,8 @@ public abstract class AatObject {
 
         System.out.println("Neutral directory = " + neutralDir);
         System.out.println("Affective directory = " + affectiveDir);
-    //    textReader = new TextReader(languageFile);
-       textReader = new XMLReader(languageFile);
+        //    textReader = new TextReader(languageFile);
+        textReader = new XMLReader(languageFile);
         neutralImages = getImages(neutralDir);
 
         System.out.println("Neutral " + testConfig.getValue("NeutralDir") + " " + neutralDir);
@@ -234,7 +232,7 @@ public abstract class AatObject {
         } catch (Exception e) {
             throw new FalseConfigException("BreakAfter is not configured properly");
         }
-        System.out.println("There will be a break after "+ breakAfter +" trials");
+        System.out.println("There will be a break after " + breakAfter + " trials");
         try {
             stepSize = Integer.parseInt(testConfig.getValue("StepSize"));
         } catch (Exception e) {
@@ -298,17 +296,15 @@ public abstract class AatObject {
 
         }
         displayQuestions = testConfig.getValue("DisplayQuestions");
-        if(!displayQuestions.equals("Before") && !displayQuestions.equals("After") && !displayQuestions.equals("None")) {
+        if (!displayQuestions.equals("Before") && !displayQuestions.equals("After") && !displayQuestions.equals("None")) {
             throw new FalseConfigException("DisplayQuestions should be either Before, After or None");
         }
         String hasBoxplot = testConfig.getValue("ShowBoxPlot");
-        if(hasBoxplot.equals("True")) {
+        if (hasBoxplot.equals("True")) {
             showBoxPlot = true;
-        }
-        else if (hasBoxplot.equals("False")) {
+        } else if (hasBoxplot.equals("False")) {
             showBoxPlot = false;
-        }
-        else {
+        } else {
             throw new FalseConfigException("ShowBoxPlot should be either True or False");
         }
 
@@ -354,15 +350,15 @@ public abstract class AatObject {
             if (practiceDir != null) {  //image dir is set
                 // String practiceDir = testConfig.getValue("PracticeDir");
 
-                    for (int x = 0; x < practiceRepeat; x++) {
-                        for (File image : getImages(practiceDir)) {
-                            if (hasColoredBorders()) {
-                                list.add(image.getName() + "_" + x + "_pull");
-                                list.add(image.getName() + "_" + x + "_push");
-                            } else {
-                                list.add(image.getName() + "_" + x + "_practice");
-                            }
+                for (int x = 0; x < practiceRepeat; x++) {
+                    for (File image : getImages(practiceDir)) {
+                        if (hasColoredBorders()) {
+                            list.add(image.getName() + "_" + x + "_pull");
+                            list.add(image.getName() + "_" + x + "_push");
+                        } else {
+                            list.add(image.getName() + "_" + x + "_practice");
                         }
+                    }
 
                 }
             } else {             //Add self created images to the list
@@ -522,6 +518,7 @@ public abstract class AatObject {
     public boolean hasBoxPlot() {
         return showBoxPlot;
     }
+
     /**
      * @return the number of extra questions
      */
@@ -562,7 +559,7 @@ public abstract class AatObject {
      * @return int total image count
      */
     public int getTotalImageCount() {  //TODO
-       return totalImageSize;
+        return totalImageSize;
     }
 
     private int countTotalImages() {
@@ -587,6 +584,7 @@ public abstract class AatObject {
     public String getNeutralDir() {
         return nDir;
     }
+
     /**
      * Clear the image lists when they are not necessary anymore
      */
@@ -595,6 +593,17 @@ public abstract class AatObject {
         System.gc();
 
     }
+
+    public String getType(int i) {
+        if (i == AATImage.AFFECTIVE) {
+            return aDir;
+        } else if (i == AATImage.NEUTRAL) {
+            return nDir;
+        } else {
+            return "practice";
+        }
+    }
+
     /**
      * @return A new randomised practice list
      */

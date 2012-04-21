@@ -96,8 +96,8 @@ public class DynamicTableModel extends AbstractTableModel {
         }
     }
 
-  //  public void display() {
+    //  public void display() {
     //    System.out.println(data);
-  //  }
+    //  }
 
 }

@@ -20,17 +20,14 @@ package Model;
 import AAT.AATImage;
 import AAT.AatObject;
 import AAT.HighMemoryAAT;
-import AAT.MeasureData;
-import DataStructures.DynamicTableModel;
-import IO.CSVReader;
-import IO.CSVWriter;
+import DataStructures.ParticipantData;
+import DataStructures.TestData;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Observable;
-import java.util.StringTokenizer;
 
 
 /**
@@ -78,10 +75,11 @@ public class AATModel extends Observable {
     private boolean practice;
 
     //Measurement
-    private int resize;
-    private MeasureData newMeasure;
+
+    private TestData testData;
+    private ParticipantData newParticipant;
     private long startMeasure;
-    private DynamicTableModel dynamic;
+    private int resize;
 
     //Current image and current status of the test
     private AATImage current;
@@ -101,12 +99,11 @@ public class AATModel extends Observable {
     //Load a new AAT from file
     public void loadNewAAT(File configFile) throws AatObject.FalseConfigException {
         newAAT = new HighMemoryAAT(configFile);
-
+        testData = new TestData(newAAT);
     }
 
     //Starts a new instance of the AAT. With no. times it has to repeat and when there will be a break.
     public void startTest() {
-        dynamic = new DynamicTableModel();
         this.repeat = newAAT.getRepeat();
         this.breakAfter = newAAT.getBreakAfter();
         this.previousPos = (newAAT.getDataSteps() + 1) / 2; //Set the previous position to the center position
@@ -126,87 +123,21 @@ public class AATModel extends Observable {
         }
         count = 0;        //reset counters
         run = 0;
-        id = getHighestID(newAAT.getParticipantsFile());
+        id = testData.getHighestID();
         id++;          //new higher id
-        newMeasure = new MeasureData(id);
+        newParticipant = new ParticipantData(id);
 
         //     if (newAAT.getNoOfQuestions() > 0) {   //When there are extra question, show them
         if (newAAT.getDisplayQuestions().equals("Before")) {
             testStatus = AATModel.TEST_WAIT_FOR_QUESTIONS;
             this.setChanged();
             notifyObservers("Show questions");      //Notify the observer that a new test is started.
-        } else {
-            if(newAAT.getDisplayQuestions().equals("None")) {
-            this.addParticipantsData();
-            }
-            this.setChanged();
-            notifyObservers("Start");
-            testStatus = AATModel.TEST_WAIT_FOR_TRIGGER;   //Start the test
         }
+        this.setChanged();
+        notifyObservers("Start");
+        testStatus = AATModel.TEST_WAIT_FOR_TRIGGER;   //Start the test
+
     }
-
-    /**
-     * Reads the participants data file and gets the highest assigned id number
-     *
-     * @return Highest id number based on that file. If there is no file it will return 0
-     */
-    private int getHighestID(File participantsFile) {
-        StringTokenizer st;
-        if (participantsFile.exists()) {
-            CSVReader csvReader = new CSVReader(participantsFile);
-            int columns = csvReader.getColumnNames().size();
-            int dataSize = csvReader.getData().size();
-            return Integer.parseInt(csvReader.getData().get(dataSize - columns).toString());    //Return first element from the last row.
-        } else {
-            return 0;
-        }
-    }
-
-    /**
-     * Reads the last line from the participants data file.
-     *
-     * @param file The participants data file
-     * @return
-     */
-    private String readLastLine(File file) {
-        try {
-            //   java.io.File file = new java.io.File(fileName);
-            java.io.RandomAccessFile fileHandler = new java.io.RandomAccessFile(file, "r");
-            long fileLength = file.length() - 1;
-            StringBuilder sb = new StringBuilder();
-
-            for (long filePointer = fileLength; filePointer != -1; filePointer--) {
-                fileHandler.seek(filePointer);
-                int readByte = fileHandler.readByte();
-
-                if (readByte == 0xA) {
-                    if (filePointer == fileLength) {
-                        continue;
-                    } else {
-                        break;
-                    }
-                } else if (readByte == 0xD) {
-                    if (filePointer == fileLength - 1) {
-                        continue;
-                    } else {
-                        break;
-                    }
-                }
-
-                sb.append((char) readByte);
-            }
-
-            String lastLine = sb.reverse().toString();
-            return lastLine;
-        } catch (java.io.FileNotFoundException e) {
-            e.printStackTrace();
-            return null;
-        } catch (java.io.IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
 
     public AatObject getTest() {
         return newAAT;
@@ -261,7 +192,7 @@ public class AATModel extends Observable {
                 } else if (run == repeat) {   //No more runs left, Test has ended
                     testStatus = AATModel.TEST_SHOW_FINISHED;    //Notify observers about it
                     this.setChanged();
-                    CSVWriter.writeData(newAAT.getDataFile(),true, newMeasure.getAllResults());   //Writes the measurement to file.
+                    testData.addParticipant(newParticipant);
                     notifyObservers("Show finished");   //First show black screen
                 } else {           //Continue with a new run
                     if (newAAT.hasColoredBorders()) {
@@ -319,7 +250,7 @@ public class AATModel extends Observable {
      * Every time when a new image is shown on the screen a new measure is started.
      */
     public void startMeasure() {
-        newMeasure.newMeasure(run, current.toString(), current.getDirection(), current.getType()); //Begin met de metingen opslaan.
+        newParticipant.newMeasure(run, current.toString(), current.getDirection(), current.getType()); //Begin met de metingen opslaan.
         startMeasure = System.currentTimeMillis();  //Begintijd
     }
 
@@ -333,41 +264,6 @@ public class AATModel extends Observable {
         return System.currentTimeMillis() - startMeasure;
     }
 
-
-    /**
-     * This method adds data to the Participants Data table. This data consists of at least the ID number. Next to the the
-     * answers to the optional questions from the configuration files will be added to it.
-     *
-     * @param extraQuestions startup question list
-     */
-    public void addParticipantsData(HashMap<String, String> extraQuestions) {
-        ArrayList<Object> columnNames = new ArrayList<Object>();
-
-        columnNames.add("ID"); //The Participant always has an ID
-        if (extraQuestions != null) {
-            for (String key : extraQuestions.keySet()) {
-                columnNames.add(key);
-            }
-        }
-        dynamic.setColumnNames(columnNames);         //Set the column headers for the table Data
-        ArrayList<Object> results = new ArrayList<Object>();
-        results.add(id);
-
-        if (extraQuestions != null) {
-            for (String key : extraQuestions.keySet()) {
-                results.add(extraQuestions.get(key));
-            }
-        }
-        dynamic.add(results);
-        CSVWriter.writeData(newAAT.getParticipantsFile(),true,dynamic);
-    }
-
-    /**
-     * Only add id to the participants data.
-     */
-    public void addParticipantsData() {
-        addParticipantsData(null);
-    }
 
 //------------------------------Get results from the test -------------------------------
 
@@ -383,10 +279,10 @@ public class AATModel extends Observable {
         String push = newAAT.getPushTag();
         String nDir = newAAT.getNeutralDir();
         String aDir = newAAT.getAffectiveDir();
-        results.put(pull+" & "+nDir, convertToArray(newMeasure.getMeasures(AATImage.PULL, AATImage.NEUTRAL)));
-        results.put(pull+" & "+aDir, convertToArray(newMeasure.getMeasures(AATImage.PULL, AATImage.AFFECTIVE)));
-        results.put(push+" & "+nDir, convertToArray(newMeasure.getMeasures(AATImage.PUSH, AATImage.NEUTRAL)));
-        results.put(push+" & "+aDir, convertToArray(newMeasure.getMeasures(AATImage.PUSH, AATImage.AFFECTIVE)));
+        results.put(pull + " & " + nDir, convertToArray(newParticipant.getMeasures(AATImage.PULL, AATImage.NEUTRAL)));
+        results.put(pull + " & " + aDir, convertToArray(newParticipant.getMeasures(AATImage.PULL, AATImage.AFFECTIVE)));
+        results.put(push + " & " + nDir, convertToArray(newParticipant.getMeasures(AATImage.PUSH, AATImage.NEUTRAL)));
+        results.put(push + " & " + aDir, convertToArray(newParticipant.getMeasures(AATImage.PUSH, AATImage.AFFECTIVE)));
         return results;
     }
 
@@ -405,6 +301,7 @@ public class AATModel extends Observable {
         return array;
     }
 
+
     //--------------Input from the joystick controller-------------------------------------//
 
 
@@ -421,7 +318,7 @@ public class AATModel extends Observable {
             previousPos = value;
 
             if (testStatus == AATModel.IMAGE_LOADED || testStatus == AATModel.PRACTICE_IMAGE_LOADED) { //Only listen when there is an image loaded
-                newMeasure.addResult(value, getMeasurement());     //add results to the other measurements
+                newParticipant.addResult(value, getMeasurement());     //add results to the other measurements
                 if (current.getDirection() == AATImage.PULL && value == newAAT.getDataSteps()) {   //check if the requested action has been performed
                     lastSize = newAAT.getStepRate();
                     removeImage();
@@ -517,7 +414,7 @@ public class AATModel extends Observable {
      * @param extraQuestions The answers to the extra questions. The hashmap contains the key and the answer
      */
     public void addExtraQuestions(HashMap<String, String> extraQuestions) {
-        this.addParticipantsData(extraQuestions);
+        this.newParticipant.addQuestionData(extraQuestions);
         this.setChanged();
         if (newAAT.getDisplayQuestions().equals("After")) {
             this.notifyObservers("Finished");

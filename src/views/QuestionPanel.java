@@ -91,7 +91,7 @@ public class QuestionPanel extends JPanel {
     }
 
     /**
-     * Displays every question Object in the ArrayList<AAT.QuestionObject> A question can be open, have a textField on the screen
+     * Displays every question Object in the ArrayList<AAT.QuestionData> A question can be open, have a textField on the screen
      * or closed and have a combobox with answers
      *
      * @param questions The optional question received from the model

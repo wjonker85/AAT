@@ -28,13 +28,13 @@ import java.util.ArrayList;
  * to the screen. The key String is used as a column header for use in a table or CSV file.
  */
 
-public class QuestionObject {
+public class QuestionData {
 
     private String key;
     private String question;
     private ArrayList<String> options;
 
-    public QuestionObject() {
+    public QuestionData() {
         options = new ArrayList<String>();
     }
 
