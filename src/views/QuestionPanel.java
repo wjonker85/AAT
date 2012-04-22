@@ -17,7 +17,7 @@
 
 package views;
 
-import AAT.QuestionObject;
+import DataStructures.QuestionData;
 import Model.AATModel;
 
 import javax.swing.*;
@@ -43,16 +43,15 @@ public class QuestionPanel extends JPanel {
 
     private JPanel questionsPanel;
     private Map<String, Component> questionsMap = new HashMap<String, Component>();
-    private JPanel mainPanel;
 
 
     public QuestionPanel(final AATModel model) {
         //  super(new BoxLayout(this, BoxLayout.Y_AXIS));
-        mainPanel = new JPanel();
+        JPanel mainPanel = new JPanel();
         mainPanel.setBackground(Color.black);
         mainPanel.setForeground(Color.white);
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
-        System.out.println("Show questions");
+        System.out.println("Show questions " + model.getTest().getExtraQuestions().size());
         Dimension screen = getToolkit().getScreenSize();
         //  this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         this.setLayout(new GridBagLayout());
@@ -96,17 +95,17 @@ public class QuestionPanel extends JPanel {
      *
      * @param questions The optional question received from the model
      */
-    public void displayQuestions(ArrayList<QuestionObject> questions) {
-        for (QuestionObject questionObject : questions) {
+    public void displayQuestions(ArrayList<QuestionData> questions) {
+        for (QuestionData questionObject : questions) {
+            System.out.println(questionObject.getQuestion());
             JLabel question = new JLabel(questionObject.getQuestion(), JLabel.TRAILING);
             question.setBackground(Color.black);
             question.setForeground(Color.WHITE);
-            question.setFont(new Font("Roman", Font.TRUETYPE_FONT, 16));
-            JComponent answer = null;
+            question.setFont(new Font("Roman", Font.PLAIN, 16));
             questionsPanel.add(question);
             if (questionObject.getType().equals("closed")) {
                 //      JComboBox<Object> answerOptions = new JComboBox<Object>(questionObject.getOptions().toArray());
-                JComboBox answerOptions = new JComboBox(questionObject.getOptions().toArray());
+                JComboBox<Object> answerOptions = new JComboBox<Object>(questionObject.getOptions().toArray());
                 JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
                 panel.add(answerOptions);
                 panel.setBackground(Color.BLACK);
@@ -175,15 +174,11 @@ public class QuestionPanel extends JPanel {
 
     class LikertPanel extends JPanel {
 
-        private int size;
-        private String left, right;
+
         private ButtonGroup likertScale;
 
         public LikertPanel(int size, String left, String right) {
-            this.size = size;
-            this.left = left;
-            this.right = right;
-            //   this.setLayout(new SpringLayout());
+
             this.setBackground(Color.black);
             this.setForeground(Color.white);
 

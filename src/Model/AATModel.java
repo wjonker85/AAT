@@ -71,7 +71,6 @@ public class AATModel extends Observable {
 
     //progress variables
     private int run;
-    private int id = 0;
     private boolean practice;
 
     //Measurement
@@ -123,7 +122,7 @@ public class AATModel extends Observable {
         }
         count = 0;        //reset counters
         run = 0;
-        id = testData.getHighestID();
+        int id = testData.getHighestID();
         id++;          //new higher id
         newParticipant = new ParticipantData(id);
 
@@ -132,10 +131,11 @@ public class AATModel extends Observable {
             testStatus = AATModel.TEST_WAIT_FOR_QUESTIONS;
             this.setChanged();
             notifyObservers("Show questions");      //Notify the observer that a new test is started.
+        } else {     //When there are no questions te begin with, just start the test
+            this.setChanged();
+            notifyObservers("Start");
+            testStatus = AATModel.TEST_WAIT_FOR_TRIGGER;   //Start the test
         }
-        this.setChanged();
-        notifyObservers("Start");
-        testStatus = AATModel.TEST_WAIT_FOR_TRIGGER;   //Start the test
 
     }
 

@@ -36,7 +36,7 @@ import java.util.Observer;
  * User: wjonker85
  * Date: 10/4/11
  * Time: 3:25 PM
- * To change this template use File | Settings | File Templates.
+ *
  */
 
 /**
@@ -50,10 +50,8 @@ public class AATView extends JPanel implements Observer {
      */
     private AATModel model;
     public int viewWidth, viewHeight, borderWidth, stepSize, imgBorderWidth, stepStart, inputY, xPos, yPos;
-    private int imgWidth, imgHeight;
     public float stepCount;
 
-    private BufferedImage img;
     private boolean blackScreen = true;
     private boolean showInfo = true;
     private String displayText = "";
@@ -65,8 +63,8 @@ public class AATView extends JPanel implements Observer {
      */
     public AATView(AATModel model) {
         Dimension screen = this.getToolkit().getScreenSize();
-     // int displayHeight = this.getToolkit().getScreenSize().height;
-     //   Dimension screen = new Dimension(displayHeight,displayHeight);
+        // int displayHeight = this.getToolkit().getScreenSize().height;
+        //   Dimension screen = new Dimension(displayHeight,displayHeight);
         this.setLayout(null);
         this.setSize(screen);
         this.setPreferredSize(screen);
@@ -91,7 +89,7 @@ public class AATView extends JPanel implements Observer {
         //Grote van de AATView scherm.
         this.viewHeight = this.getHeight();
         this.viewWidth = this.getWidth();
-       // this.viewWidth = viewHeight; //make the display a square
+        // this.viewWidth = viewHeight; //make the display a square
         displayText = model.getTest().getIntroductionText(); //Test starts with an introduction tekst.
 
 
@@ -147,10 +145,10 @@ public class AATView extends JPanel implements Observer {
          * setupImage geeft de juiste waarde voor imgSizeX imageSizeY zodat plaatje juiste afmeting heeft. Image()
          * is verantwoordelijk voor het daadwerkelijk laten zien van het plaatje.
          */
-        img = model.getNextImage();
-        imgWidth = img.getWidth();
+        BufferedImage img = model.getNextImage();
+        int imgWidth = img.getWidth();
         //  imgHeight = img.height;
-        imgHeight = img.getHeight();
+        int imgHeight = img.getHeight();
         Dimension imageSize = ImageUtils.setupImage(viewHeight, viewWidth, imgHeight, imgWidth, stepSize, (int) stepCount, inputY);
         /**
          * Wanneer in config file ColoredBorders True is, border weergeven, anders niet. De juiste waarden, zoals
@@ -183,8 +181,8 @@ public class AATView extends JPanel implements Observer {
      * deze View moet doen. Plaatjes alleen laten zien wanneer dat toegestaan is. Deze plaatjes met een vaste factor
      * telkens laten vergroten of verkleinen afhankelijk van de stand van de joystick.
      *
-     * @param observable
-     * @param o
+     * @param observable Het model
+     * @param o          message
      */
     public void update(Observable observable, Object o) {
         /**
@@ -213,18 +211,17 @@ public class AATView extends JPanel implements Observer {
         if (o.toString().equals("Wait screen")) {
             inputY = model.getLastSize();
             repaint();
-            if(model.getDirection() == AATImage.PULL) {
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-            }
-            }
-            else {
+            if (model.getDirection() == AATImage.PULL) {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            } else {
                 try {
                     Thread.sleep(25);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                    e.printStackTrace();
                 }
             }
             blackScreen = true;

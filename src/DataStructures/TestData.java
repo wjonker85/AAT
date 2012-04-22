@@ -24,12 +24,14 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.*;
+import javax.xml.transform.Result;
+import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.util.HashMap;
 
 /**
@@ -65,11 +67,11 @@ public class TestData {
             DocumentBuilder docBuilder = dbfac.newDocumentBuilder();
             doc = docBuilder.parse(dataFile);
         } catch (ParserConfigurationException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
         } catch (SAXException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
         } catch (IOException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
         }
     }
 
@@ -144,7 +146,7 @@ public class TestData {
             Element trial = doc.createElement("trial");
             trial.setAttribute("no", String.valueOf(x));
             participant.appendChild(trial);
-            //  for (ImageMeasureData mDataImage : newParticipant.getMeasurements()) {
+
             for (ImageMeasureData imageData : newParticipant.getMeasurements(x)) {
                 Element image = doc.createElement("image");
                 Element imageName = doc.createElement("imageName");
@@ -176,38 +178,7 @@ public class TestData {
                 image.appendChild(firstPos);
 
                 trial.appendChild(image);
-                //  Element position = doc.createElement("position");
-                // Text joyPosition = doc.createTextNode(mDataImage.)
-
             }
-        }
-
-
-        //add a text element to the child
-        //  Text text = doc.createTextNode("Filler, ... I could have had a foo!");
-        //  child.appendChild(text);
-        //   }
-        /////////////////
-        //Output the XML
-
-        //set up a transformer
-        try {
-            TransformerFactory transfac = TransformerFactory.newInstance();
-            Transformer trans = transfac.newTransformer();
-            trans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-            trans.setOutputProperty(OutputKeys.INDENT, "yes");
-
-            //create string from xml tree
-            StringWriter sw = new StringWriter();
-            StreamResult result = new StreamResult(sw);
-            DOMSource source = new DOMSource(doc);
-            trans.transform(source, result);
-            String xmlString = sw.toString();
-
-            //print xml
-            System.out.println("Here's the xml:\n\n" + xmlString);
-        } catch (Exception e) {
-
         }
         writeDataToFile(dataFile);
     }
@@ -223,8 +194,8 @@ public class TestData {
             // Write the DOM document to the file
             Transformer xformer = TransformerFactory.newInstance().newTransformer();
             xformer.transform(source, result);
-        } catch (TransformerConfigurationException e) {
-        } catch (TransformerException e) {
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

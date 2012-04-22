@@ -47,7 +47,6 @@ public class AAT_Main extends JFrame implements Observer {
 
 
     private AATModel model;
-    private JPanel mainPanel;
     private JoystickController joystick;
     private TestFrame testFrame;
     final JMenuItem exportData;
@@ -56,7 +55,7 @@ public class AAT_Main extends JFrame implements Observer {
     /**
      * Start the main thread.
      *
-     * @param args
+     * @param args no arguments used
      */
     public static void main(String[] args) {
         java.awt.EventQueue.invokeLater(new Runnable() {
@@ -69,7 +68,7 @@ public class AAT_Main extends JFrame implements Observer {
 
     //Build the user interface
     public AAT_Main() {
-        mainPanel = new JPanel();
+        JPanel mainPanel = new JPanel();
         mainPanel.setBackground(Color.black);
         mainPanel.setLayout(new GridBagLayout());
         model = new AATModel();
@@ -148,7 +147,7 @@ public class AAT_Main extends JFrame implements Observer {
                                     e.getMessage(),
                                     "Configuration error",
                                     JOptionPane.ERROR_MESSAGE);
-                            System.out.println("Configuration error: "+e.getMessage());
+                            System.out.println("Configuration error: " + e.getMessage());
                         }
 
                     }
@@ -163,8 +162,8 @@ public class AAT_Main extends JFrame implements Observer {
                 joystick = new JoystickController(model);
                 joystick.start(); //Start joystick Thread
 
-                if(testFrame != null) {
-                model.deleteObserver(testFrame); //Remove old instance
+                if (testFrame != null) {
+                    model.deleteObserver(testFrame); //Remove old instance
                 }
                 testFrame = new TestFrame(model);
                 model.addObserver(testFrame);
@@ -217,7 +216,7 @@ public class AAT_Main extends JFrame implements Observer {
             joystick = null; //Remove instance when finished
             exportData.setEnabled(true);
             runButton.setEnabled(true);
-            
+
         }
     }
 }

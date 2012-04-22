@@ -67,12 +67,12 @@ public class ExportDataDialog extends JFrame {
         ePercent.setLabelFor(errorPerc);
         p.add(ePercent);
         p.add(errorPerc);
-     //   transposed = new JCheckBox();
-      //  JLabel transposedLabel = new JLabel("Images as variable names");
-      //  transposedLabel.setLabelFor(this.transposed);
-      //  this.transposed.setToolTipText("When checked, the output file will have the images as variable names, otherwise the images are on the rows");
-     //   p.add(transposedLabel);
-     //   p.add(transposed);
+        //   transposed = new JCheckBox();
+        //  JLabel transposedLabel = new JLabel("Images as variable names");
+        //  transposedLabel.setLabelFor(this.transposed);
+        //  this.transposed.setToolTipText("When checked, the output file will have the images as variable names, otherwise the images are on the rows");
+        //   p.add(transposedLabel);
+        //   p.add(transposed);
         //Layout everything in a nice Form
         SpringUtilities.makeCompactGrid(p,
                 3, 2, //rows, cols
@@ -96,7 +96,7 @@ public class ExportDataDialog extends JFrame {
                 try {
                     submitData();
                     File saveFile = fileSaveDialog();
-                    exporter.writeToFile(saveFile);
+                    //   exporter.writeToFile(saveFile);
                     setEnabled(false);
 
                 } catch (SubmitDataException e) {
@@ -104,14 +104,16 @@ public class ExportDataDialog extends JFrame {
                             e.getMessage(),
                             "Problem submitting input",
                             JOptionPane.ERROR_MESSAGE);
-                } catch (DataExporter.ExportDataException e) {
-                    JOptionPane.showMessageDialog(null,
-                            e.getMessage(),
-                            "Problem with exporting",
-                            JOptionPane.ERROR_MESSAGE);
                 }
-                dispose();
             }
+            //   } catch (DataExporter.ExportDataException e) {
+            //       JOptionPane.showMessageDialog(null,
+            //               e.getMessage(),
+            //               "Problem with exporting",
+            //               JOptionPane.ERROR_MESSAGE);
+            ////   }
+            //   dispose();
+            // }
         });
         controlPanel.add(cancelButton);
         controlPanel.add(submitButton);
@@ -157,8 +159,8 @@ public class ExportDataDialog extends JFrame {
         if (perc > 100) {
             throw new SubmitDataException("Error percentage can't be higher than 100%");
         }
-      //  exporter = new DataExporter(model, min, max, perc, this.transposed.isSelected());    //transposing is enabled by default
-        exporter = new DataExporter(model, min, max, perc, true);
+        //  exporter = new DataExporter(model, min, max, perc, this.transposed.isSelected());    //transposing is enabled by default
+        //     exporter = new DataExporter(model, min, max, perc, true);
     }
 
 

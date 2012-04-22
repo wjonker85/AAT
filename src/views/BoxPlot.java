@@ -29,7 +29,7 @@ import java.util.Set;
  * User: Wilfried
  * Date: 30-10-11
  * Time: 19:35
- * To change this template use File | Settings | File Templates.
+ *
  */
 
 /**
@@ -67,7 +67,7 @@ public class BoxPlot extends PApplet {
         this.model = model;
         this.setLayout(null);
         Dimension screen = this.getToolkit().getScreenSize();
-        Dimension resize = new Dimension(screen.width / 2, screen.height - 50);
+        //   Dimension resize = new Dimension(screen.width / 2, screen.height - 50);
         //    this.setPreferredSize(resize);
         //  this.setMinimumSize(resize);
         this.viewHeight = screen.height;

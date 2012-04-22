@@ -19,7 +19,8 @@ package AAT;
 
 
 import Configuration.TestConfig;
-import Configuration.XMLReader;
+import DataStructures.QuestionData;
+import IO.XMLReader;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -48,8 +49,6 @@ public abstract class AatObject {
     private XMLReader textReader;
     //TODO: renamen
 
-    private String workingDir;
-
     //Test variables
     private int repeat;
     private int breakAfter;
@@ -66,8 +65,6 @@ public abstract class AatObject {
 
 
     //progress variables
-    private int id = 0;
-    private int resize;
     private boolean practice;
 
 
@@ -75,7 +72,6 @@ public abstract class AatObject {
     public ArrayList<File> neutralImages;
     public ArrayList<File> affectiveImages;
     private ArrayList<AATImage> testList; //Random list that contains the push or pull images.
-    private ArrayList<String> fileNameList;
 
     public File practiceDir;
 
@@ -84,17 +80,13 @@ public abstract class AatObject {
 
     //Hashmaps containing color information and the optional questions
     private Hashtable<Integer, String> colorTable;    //Contains the border colors
-    private ArrayList<QuestionObject> questionsList;
+    private ArrayList<QuestionData> questionsList;
 
-    private File participantsFile;
     private File dataFile;
 
-    private int neutralSize;
-    private int affectiveSize;
-    private int totalImageSize;
+
     //regex for extension filtering
     private Pattern pattern;
-    private Pattern hexPattern;
 
     private static final String IMAGE_PATTERN =
             "([^\\s]+(\\.(?i)(jpg|png|gif|bmp))$)";
@@ -111,20 +103,17 @@ public abstract class AatObject {
      */
     public AatObject(File config) throws FalseConfigException {
         pattern = Pattern.compile(IMAGE_PATTERN); //create regex
-        hexPattern = Pattern.compile(HEX_PATTERN);
+        Pattern hexPattern = Pattern.compile(HEX_PATTERN);
         testConfig = new TestConfig(config);
-        workingDir = config.getParentFile().getAbsolutePath();
-        String partFile = testConfig.getValue("ParticipantsFile");
+        String workingDir = config.getParentFile().getAbsolutePath();
+
         System.out.println("Checking configuration");
-        if (partFile.equals("")) {
-            throw new FalseConfigException("Participants file is not set");
-        }
+
         String datFile = testConfig.getValue("DataFile");
         if (datFile.equals("")) {
             throw new FalseConfigException("Data file is not set");
         }
-        System.out.println("Participants file = " + partFile + " and data file = " + datFile);
-        participantsFile = new File(workingDir + File.separator + partFile);
+
         dataFile = new File(workingDir + File.separator + datFile);
 
         String langFile = testConfig.getValue("LanguageFile");
@@ -249,7 +238,7 @@ public abstract class AatObject {
         if (dataSteps % 2 == 0) {
             throw new FalseConfigException("DataSteps should be and odd number");
         }
-        resize = (dataSteps + 1) / 2;
+
 
         if (!testConfig.getValue("PracticeRepeat").equals("")) {  //When a value for practice repeat is set, check validity
             try {
@@ -307,72 +296,8 @@ public abstract class AatObject {
         } else {
             throw new FalseConfigException("ShowBoxPlot should be either True or False");
         }
-
-        fileNameList = createFileNamesList();
-        totalImageSize = countTotalImages();
     }
 
-
-    public ArrayList<String> getAllFileNames() {
-        return fileNameList;
-    }
-
-    public ArrayList<String> createFileNamesList() {
-        ArrayList<String> list = new ArrayList<String>();
-        int size = practiceRepeat * 2;
-
-        if (hasColoredBorders()) {
-            for (File image : neutralImages) {                //Load the neutral images
-                list.add(image.getName() + "_pull_neutral");
-                list.add(image.getName() + "_push_neutral");
-            }
-            for (File image : affectiveImages) {    //Load the affective images
-                list.add(image.getName() + "_pull_affective");
-                list.add(image.getName() + "_push_affective");
-            }
-        } else {
-            for (File image : neutralImages) {                //Load the neutral images
-                list.add(image.getName() + "_neutral");
-            }
-            for (File image : affectiveImages) {    //Load the affective images
-                list.add(image.getName() + "_affective");
-            }
-        }
-
-
-        return list;
-    }
-
-    public ArrayList<String> getPracticeNames() {
-        ArrayList<String> list = new ArrayList<String>();
-        int size = practiceRepeat * 2;
-        if (hasPractice()) {           //Add the practice images to the list
-            if (practiceDir != null) {  //image dir is set
-                // String practiceDir = testConfig.getValue("PracticeDir");
-
-                for (int x = 0; x < practiceRepeat; x++) {
-                    for (File image : getImages(practiceDir)) {
-                        if (hasColoredBorders()) {
-                            list.add(image.getName() + "_" + x + "_pull");
-                            list.add(image.getName() + "_" + x + "_push");
-                        } else {
-                            list.add(image.getName() + "_" + x + "_practice");
-                        }
-                    }
-
-                }
-            } else {             //Add self created images to the list
-                int i = 0;
-                for (int x = 0; x < size; x++) {
-                    list.add("practice_" + i + "_pull");
-                    i++;
-                    list.add("practice_" + i + "_push");
-                    i++;
-                }
-            }
-        }
-        return list;
-    }
 
     /**
      * False configuration exception
@@ -392,7 +317,6 @@ public abstract class AatObject {
      * @return ArrayList<File> with all image files in a directory
      */
     public ArrayList<File> getImages(File dir) {
-        File[] allFiles = dir.listFiles();
         File[] files = dir.listFiles(extensionFilter);
         return new ArrayList<File>(Arrays.asList(files));
     }
@@ -450,7 +374,7 @@ public abstract class AatObject {
      * This text is shown after the practice runs. Or when there are no practice runs, this text is the first text to
      * be shown.
      *
-     * @return
+     * @return The start text
      */
     public String getTestStartText() {
         return textReader.getValue("start");
@@ -488,15 +412,8 @@ public abstract class AatObject {
      *
      * @return ArrayList with questionObjects. These objects are passed to the questionsView that displays them
      */
-    public ArrayList<QuestionObject> getExtraQuestions() {
+    public ArrayList<QuestionData> getExtraQuestions() {
         return questionsList;
-    }
-
-    /**
-     * @return The file containing the participants data
-     */
-    public File getParticipantsFile() {
-        return participantsFile;
     }
 
     /**
@@ -519,12 +436,6 @@ public abstract class AatObject {
         return showBoxPlot;
     }
 
-    /**
-     * @return the number of extra questions
-     */
-    public int getNoOfQuestions() {
-        return questionsList.size();
-    }
 
     /**
      * @return How many times the test has to be repeated
@@ -550,23 +461,6 @@ public abstract class AatObject {
 
     public String getDisplayQuestions() {
         return displayQuestions;
-    }
-
-    /**
-     * Counts the total number of images shown to a participant. Is needed by the data exporter to
-     * calculate percentages
-     *
-     * @return int total image count
-     */
-    public int getTotalImageCount() {  //TODO
-        return totalImageSize;
-    }
-
-    private int countTotalImages() {
-        int affective = affectiveImages.size();
-        int neutral = neutralImages.size();
-        int runCount = Integer.parseInt(testConfig.getValue("Trials"));
-        return 2 * (affective + neutral) * runCount;
     }
 
     public String getPullTag() {

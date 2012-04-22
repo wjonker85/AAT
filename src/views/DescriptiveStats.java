@@ -24,7 +24,7 @@ import processing.core.PApplet;
  * User: Wilfried
  * Date: 30-10-11
  * Time: 19:23
- * To change this template use File | Settings | File Templates.
+ *
  */
 
 /**
@@ -37,19 +37,6 @@ public class DescriptiveStats extends PApplet {
         this.newArray = newArray;
     }
 
-
-    /**
-     * Weinig onduidelijk aan naam van deze functie, geeft gemiddelde van een array terug
-     *
-     * @return gemiddelde (float)
-     */
-    public float average() {
-        float tot = 0;
-        for (int n = 0; n < newArray.length; n++) {
-            tot += newArray[n];
-        }
-        return tot / newArray.length;
-    }
 
     /**
      * Mediaan wordt berekent op basis van methode Moore & McCabe. Discissue blijft of je bij oneven aantal

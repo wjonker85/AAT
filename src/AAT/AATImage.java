@@ -18,7 +18,6 @@
 package AAT;
 
 import AAT.Util.ImageUtils;
-import Configuration.TestConfig;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -55,10 +54,10 @@ public class AATImage {
         this.type = type;
         this.stepSize = aatObject.getStepRate();
         hasBorders = aatObject.hasColoredBorders();
-        if(hasBorders) {
-        int intValue = Integer.parseInt(aatObject.getBorderColor(direction) ,16);
-        borderColor =  new Color(intValue);
-        borderWidth = aatObject.getBorderWidth();
+        if (hasBorders) {
+            int intValue = Integer.parseInt(aatObject.getBorderColor(direction), 16);
+            borderColor = new Color(intValue);
+            borderWidth = aatObject.getBorderWidth();
         }
 
         name = imageFile.getName();
@@ -68,17 +67,17 @@ public class AATImage {
 
     }
 
-    public AATImage(File imageFile, int direction,AatObject aatObject, int repeat) {
+    public AATImage(File imageFile, int direction, AatObject aatObject, int repeat) {
         this.direction = direction;
         this.type = PRACTICE;
         this.stepSize = aatObject.getStepRate();
         hasBorders = aatObject.hasColoredBorders();
-        if(hasBorders) {
-            int intValue = Integer.parseInt(aatObject.getBorderColor(direction) ,16);
-            borderColor =  new Color(intValue);
+        if (hasBorders) {
+            int intValue = Integer.parseInt(aatObject.getBorderColor(direction), 16);
+            borderColor = new Color(intValue);
             borderWidth = aatObject.getBorderWidth();
         }
-            name = imageFile.getName()+"_"+repeat;
+        name = imageFile.getName() + "_" + repeat;
 
         this.image = loadImage(imageFile);
 
@@ -90,8 +89,8 @@ public class AATImage {
         this.direction = direction;
         this.stepSize = aatObject.getStepRate();
         hasBorders = aatObject.hasColoredBorders();
-        int intValue = Integer.parseInt(aatObject.getBorderColor(direction) ,16);
-        borderColor =  new Color(intValue);
+        int intValue = Integer.parseInt(aatObject.getBorderColor(direction), 16);
+        borderColor = new Color(intValue);
         borderWidth = aatObject.getBorderWidth();
         this.image = getPracticeImage(color);
         this.type = AATImage.PRACTICE;
@@ -114,7 +113,7 @@ public class AATImage {
         g.fillRect(0, 0, 433, 433);
         int stepStart = Math.round(stepSize / 2f);
         Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
-        Dimension d = ImageUtils.setupImage((int) dim.getHeight(),(int) dim.getWidth(), practiceImage.getHeight(), practiceImage.getWidth(), stepStart);
+        Dimension d = ImageUtils.setupImage((int) dim.getHeight(), (int) dim.getWidth(), practiceImage.getHeight(), practiceImage.getWidth(), stepStart);
         practiceImage = ImageUtils.resizeImageWithHint(practiceImage, d.width, d.height, BufferedImage.TYPE_INT_ARGB);
         practiceImage = ImageUtils.drawBorder(practiceImage, borderColor, borderWidth);
         return practiceImage;
@@ -140,12 +139,13 @@ public class AATImage {
         try {
             bufImage = ImageIO.read(imageFile);
         } catch (IOException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
         }
         int stepStart = Math.round(stepSize / 2f);
         Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
-        Dimension d = ImageUtils.setupImage((int) dim.getHeight(),(int) dim.getWidth(), bufImage.getHeight(), bufImage.getWidth(), stepStart);
-     //   Dimension d = ImageUtils.setupImage((int) dim.getHeight(),(int) dim.getHeight(), bufImage.getHeight(), bufImage.getWidth(), stepStart);
+        assert bufImage != null;
+        Dimension d = ImageUtils.setupImage((int) dim.getHeight(), (int) dim.getWidth(), bufImage.getHeight(), bufImage.getWidth(), stepStart);
+        //   Dimension d = ImageUtils.setupImage((int) dim.getHeight(),(int) dim.getHeight(), bufImage.getHeight(), bufImage.getWidth(), stepStart);
 
         bufImage = ImageUtils.resizeImageWithHint(bufImage, d.width, d.height, BufferedImage.TYPE_INT_ARGB);
         if (hasBorders) {

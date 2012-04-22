@@ -16,7 +16,6 @@
  */
 package DataStructures;
 
-import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -45,10 +44,6 @@ public class ParticipantData {
         allMeasures = new HashMap<Integer, ArrayList<ImageMeasureData>>();
     }
 
-    public ParticipantData(int id, HashMap<String, String> questionData) {
-        this.id = id;
-        this.questionData = questionData;
-    }
 
     public void addQuestionData(HashMap<String, String> questionData) {    //Add extra participant info, based on the questionnaire
         this.questionData = questionData;
@@ -79,6 +74,7 @@ public class ParticipantData {
     }
 
 
+    //TODO: Deze methode moet eigenlijk weg, maar is nog nodig voor de boxplot
     public ArrayList<Long> getMeasures(int direction, int type) {
         ArrayList<Long> results = new ArrayList<Long>();
         for (ImageMeasureData imageMeasure : allImageMeasures) {
@@ -87,31 +83,6 @@ public class ParticipantData {
             }
         }
         return results;
-    }
-
-    //Returns a tablemodel with all results.
-    public AbstractTableModel getAllResults() {
-        ResultsDataTableModel allResults = new ResultsDataTableModel();
-
-        for (ImageMeasureData mDataImage : allImageMeasures) {
-            //    System.out.println(mDataImage.getImageName()+" "+mDataImage.size());
-            for (int x = 0; x < mDataImage.size(); x++) {
-                ArrayList<Object> imageResults = new ArrayList<Object>();
-                imageResults.add(getId());
-                imageResults.add(mDataImage.getTrial());
-                imageResults.add(mDataImage.getImageName());
-                imageResults.add(mDataImage.getDirection());
-                imageResults.add(mDataImage.getType());
-                imageResults.add(mDataImage.getPosition(x));
-                imageResults.add(mDataImage.getTime(x));
-                allResults.add(imageResults);
-            }
-        }
-        return allResults;
-    }
-
-    public ArrayList<ImageMeasureData> getMeasurements() {
-        return allImageMeasures;
     }
 
     public ArrayList<ImageMeasureData> getMeasurements(int trial) {    //return the list for a trial

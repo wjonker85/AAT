@@ -33,31 +33,25 @@ import java.io.IOException;
 public class CSVWriter {
 
 
-    private TableModel tableModel;
-
- //   public CSVWriter(TableModel tableModel) {
- //       this.tableModel = tableModel;
- //   }
-
     //Write data to file. Appends if there already is data in the file
     public static boolean writeData(File file, boolean append, TableModel tableModel) {
         try {
             FileWriter writer = new FileWriter(file, append);
             BufferedWriter fbw = new BufferedWriter(writer);
             String columnNames = "";        //Create first line with column names
-            if (file.length()==0) {           //Add column headers only if file is empty
+            if (file.length() == 0) {           //Add column headers only if file is empty
 
                 for (int x = 0; x < tableModel.getColumnCount(); x++) {
                     if (x < tableModel.getColumnCount() - 1) {
                         columnNames += tableModel.getColumnName(x) + ",";
                     } else {
-                   //     columnNames += tableModel.getColumnName(x) + "\n";
-                    columnNames +=tableModel.getColumnName(x);
+                        //     columnNames += tableModel.getColumnName(x) + "\n";
+                        columnNames += tableModel.getColumnName(x);
                     }
 
                 }
-              //  writer.append(columnNames);    //First line of the file contains the column names, only when file is empty
-            fbw.write(columnNames);
+                //  writer.append(columnNames);    //First line of the file contains the column names, only when file is empty
+                fbw.write(columnNames);
                 fbw.newLine();
             }
             for (int itt = 0; itt < tableModel.getRowCount(); itt++) {
@@ -66,15 +60,15 @@ public class CSVWriter {
                     if (i < tableModel.getColumnCount() - 1) {
                         row += tableModel.getValueAt(itt, i) + ",";
                     } else {
-                     //   row += tableModel.getValueAt(itt, i) + "\n";
-                        row+=tableModel.getValueAt(itt,i);
+                        //   row += tableModel.getValueAt(itt, i) + "\n";
+                        row += tableModel.getValueAt(itt, i);
                     }
                 }
-            //    writer.append(row);          //Add a row of data to the CSV file
-              fbw.write(row);
+                //    writer.append(row);          //Add a row of data to the CSV file
+                fbw.write(row);
                 fbw.newLine();
             }
-         //   fbw.newLine();
+            //   fbw.newLine();
             fbw.close();
 
 

@@ -32,10 +32,16 @@ public class QuestionData {
 
     private String key;
     private String question;
+    private String type;
+    private int size;
+    private String left;
+    private String right;
+
     private ArrayList<String> options;
 
-    public QuestionData() {
+    public QuestionData(String type) {
         options = new ArrayList<String>();
+        this.type = type;
     }
 
     public void setKey(String key) {
@@ -50,12 +56,40 @@ public class QuestionData {
         options.add(option);
     }
 
+    public void setSize(int size) {
+        this.size = size;
+    }
+
     public String getKey() {
         return key;
     }
 
     public String getQuestion() {
         return question;
+    }
+
+    public void setLeftText(String left) {
+        this.left = left;
+    }
+
+    public void setRightText(String right) {
+        this.right = right;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public int getSize() {
+        return size;
+    }
+
+    public String getLeftText() {
+        return left;
+    }
+
+    public String getRightText() {
+        return right;
     }
 
     public ArrayList<String> getOptions() {
