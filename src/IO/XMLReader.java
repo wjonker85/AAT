@@ -90,7 +90,7 @@ public class XMLReader {
                 newQuestion.setKey(getValue("key", element));
                 if (type.equals("closed")) {
                     //    Element text = (Element) element.getElementsByTagName("text");
-                    System.out.println("Blaa " + getValue("text", element));
+
 
                     NodeList optionList = element.getElementsByTagName("option");
                     System.out.println("No options " + optionList.getLength());

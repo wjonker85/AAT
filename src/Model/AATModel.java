@@ -143,6 +143,9 @@ public class AATModel extends Observable {
         return newAAT;
     }
 
+    public TestData getTestData() {
+        return testData;
+    }
 
 //---------------------------Test Progress---------------------------------------------------------
 
@@ -330,6 +333,7 @@ public class AATModel extends Observable {
                 }
             }
         }
+
         resize = displayValue;
         this.setChanged();
         notifyObservers("Y-as");

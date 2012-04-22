@@ -37,12 +37,11 @@ import java.io.File;
 public class ExportDataDialog extends JFrame {
 
     private JTextField minRTime, maxRtime, errorPerc;
-    private JCheckBox transposed;
-    private AATModel model;
-    private DataExporter exporter;
+    private JCheckBox removeFalseCenter;
+    private int min, max, perc = 10;
 
-    public ExportDataDialog(AATModel model) {
-        this.model = model;
+    public ExportDataDialog(final AATModel model) {
+
         this.setName("Export Data");
         this.setTitle("Export Data - options");
         JPanel mainPanel = new JPanel();
@@ -61,21 +60,29 @@ public class ExportDataDialog extends JFrame {
         maxTime.setLabelFor(maxRtime);
         p.add(maxTime);
         p.add(maxRtime);
+        removeFalseCenter = new JCheckBox();
+        JLabel fcLabel = new JLabel("Remove wrong center positions");
+        this.removeFalseCenter.setToolTipText("Removes all the reaction times for images where the joystick was in the wrong start position \n " +
+                "(not in the centre)");
         JLabel ePercent = new JLabel("Max error percentage");
         errorPerc = new JTextField(10);
+        errorPerc.setToolTipText("Maximum percentage of errors allowed in the data. Total numbers of errors is:" +
+                " wrong startpositions + wrong first directions + > max & < min Reaction Time");
+        p.add(fcLabel);
+        p.add(removeFalseCenter);
         errorPerc.setText("25");
         ePercent.setLabelFor(errorPerc);
         p.add(ePercent);
         p.add(errorPerc);
-        //   transposed = new JCheckBox();
-        //  JLabel transposedLabel = new JLabel("Images as variable names");
-        //  transposedLabel.setLabelFor(this.transposed);
-        //  this.transposed.setToolTipText("When checked, the output file will have the images as variable names, otherwise the images are on the rows");
-        //   p.add(transposedLabel);
-        //   p.add(transposed);
+
+        JLabel practiceLabel = new JLabel("Include practice in output Data");
+        JCheckBox practiceCheck = new JCheckBox();
+        practiceCheck.setToolTipText("When checked the results from the practice images will be included in the exported data");
+        p.add(practiceLabel);
+        p.add(practiceCheck);
         //Layout everything in a nice Form
         SpringUtilities.makeCompactGrid(p,
-                3, 2, //rows, cols
+                5, 2, //rows, cols
                 6, 6,        //initX, initY
                 6, 6);       //xPad, yPad
 
@@ -83,21 +90,22 @@ public class ExportDataDialog extends JFrame {
         mainPanel.add(p);
         JPanel controlPanel = new JPanel();
         controlPanel.setLayout(new BoxLayout(controlPanel, BoxLayout.X_AXIS));
-        JButton submitButton = new JButton("Submit");
-        JButton cancelButton = new JButton("Cancel");
-        cancelButton.addActionListener(new ActionListener() {
+        JButton saveMeasures = new JButton("Export measurement data");
+        JButton saveParticipants = new JButton("Export questionnaire data");
+        JButton closeButton = new JButton("Close");
+        closeButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent actionEvent) {
                 dispose();
             }
         });
 
-        submitButton.addActionListener(new ActionListener() {
+        saveMeasures.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent actionEvent) {
                 try {
-                    submitData();
+                    validateInput();
                     File saveFile = fileSaveDialog();
-                    //   exporter.writeToFile(saveFile);
                     setEnabled(false);
+                    DataExporter.exportMeasurements(model, saveFile, min, max, perc);
 
                 } catch (SubmitDataException e) {
                     JOptionPane.showMessageDialog(null,
@@ -106,17 +114,32 @@ public class ExportDataDialog extends JFrame {
                             JOptionPane.ERROR_MESSAGE);
                 }
             }
-            //   } catch (DataExporter.ExportDataException e) {
-            //       JOptionPane.showMessageDialog(null,
-            //               e.getMessage(),
-            //               "Problem with exporting",
-            //               JOptionPane.ERROR_MESSAGE);
-            ////   }
-            //   dispose();
-            // }
         });
-        controlPanel.add(cancelButton);
-        controlPanel.add(submitButton);
+
+        saveParticipants.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                try {
+                    validateInput();
+                    File saveFile = fileSaveDialog();
+                    setEnabled(false);
+                    DataExporter.exportMeasurements(model, saveFile, min, max, perc);
+
+                } catch (SubmitDataException e) {
+                    JOptionPane.showMessageDialog(null,
+                            e.getMessage(),
+                            "Problem submitting input",
+                            JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+        //To change body of implemented methods use File | Settings | File Templates.
+
+        controlPanel.add(saveMeasures);
+        controlPanel.add(saveParticipants);
+        controlPanel.add(closeButton);
+
+
         mainPanel.add(controlPanel);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
@@ -129,8 +152,8 @@ public class ExportDataDialog extends JFrame {
     /*
     Submits the entered values to the data exporter
      */
-    private void submitData() throws SubmitDataException {
-        int min, max, perc = 10;
+    private void validateInput() throws SubmitDataException {
+
 
         try {
             min = Integer.parseInt(minRTime.getText());

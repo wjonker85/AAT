@@ -86,6 +86,7 @@ public class ParticipantData {
     }
 
     public ArrayList<ImageMeasureData> getMeasurements(int trial) {    //return the list for a trial
+        System.out.println("Measurements " + allMeasures.size() + " trial " + trial);
         return allMeasures.get(trial);
     }
 

@@ -459,6 +459,10 @@ public abstract class AatObject {
         return dataSteps;
     }
 
+    public int centerPos() {
+        return (dataSteps + 1) / 2;
+    }
+
     public String getDisplayQuestions() {
         return displayQuestions;
     }

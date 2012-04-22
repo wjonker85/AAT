@@ -24,10 +24,7 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.Result;
-import javax.xml.transform.Source;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.File;
@@ -52,6 +49,9 @@ public class TestData {
     public TestData(AatObject newAAT) {
         this.newAAT = newAAT;
         this.trials = newAAT.getRepeat();
+        if (newAAT.hasPractice()) {    //Add 1 tot the number of trials when there is a practice trial
+            trials++;
+        }
         this.dataFile = newAAT.getDataFile();
         if (dataFile.exists()) {
             loadFileData();
@@ -192,11 +192,19 @@ public class TestData {
             Result result = new StreamResult(file);
 
             // Write the DOM document to the file
-            Transformer xformer = TransformerFactory.newInstance().newTransformer();
-            xformer.transform(source, result);
+            TransformerFactory transformerFactory = TransformerFactory.newInstance();
+            transformerFactory.setAttribute("indent-number", 4);
+            Transformer transformer = transformerFactory.newTransformer();
+            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+
+            transformer.transform(source, result);
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public Document getDocument() {
+        return doc;
     }
 }
 
