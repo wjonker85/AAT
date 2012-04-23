@@ -25,9 +25,6 @@ import org.w3c.dom.NodeList;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.*;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -62,7 +59,6 @@ public class DataExporter {
         HashMap<String, Integer> errors = errorPercentages(doc, model, minRTime, maxRTime);
         doc = checkValues(doc, model, minRTime, maxRTime, removeCenter);
         doc = removeParticipants(doc, errors, errorPerc);
-        writeDataToFile(new File("testje.xml"), doc);
         writeMeasuresToCSV(doc, file);
     }
 
@@ -147,7 +143,6 @@ public class DataExporter {
             Node rTimeNode = rTimeList.item(0).getFirstChild();
             int rTime = Integer.parseInt(rTimeNode.getNodeValue());
             if (rTime > maxRtime || rTime < minRTime) {
-                System.out.println("Changed reaction time " + rTime);
                 rTimeNode.setNodeValue("N/A");
             }
             if (removeCenter) {
@@ -172,14 +167,13 @@ public class DataExporter {
      */
     private static Document removePractice(Document doc) {
         NodeList imageList = doc.getElementsByTagName("image");
-        System.out.println("Data has a total of " + imageList.getLength() + " images");
         for (int x = imageList.getLength() - 1; x >= 0; x--) {
             Element image = (Element) imageList.item(x);
             NodeList typeList = image.getElementsByTagName("type");
             Node typeNode = typeList.item(0).getFirstChild();
             String type = typeNode.getNodeValue();
             Element trial = (Element) image.getParentNode();
-            System.out.println("trial " + trial.getAttribute("no"));
+
             if (type.equalsIgnoreCase("practice")) {
 
                 // image.getParentNode().removeChild(image);
@@ -188,9 +182,6 @@ public class DataExporter {
                 //  return doc;
             }
         }
-
-        NodeList imageList2 = doc.getElementsByTagName("image");
-        System.out.println("Data has a total of " + imageList2.getLength() + " images");
         return doc;
     }
 
@@ -258,32 +249,11 @@ public class DataExporter {
         return (int) percentage;
     }
 
-    private static void writeDataToFile(File file, Document doc) {
-        try {
-            // Prepare the DOM document for writing
-            Source source = new DOMSource(doc);
-
-            // Prepare the output file
-            Result result = new StreamResult(file);
-
-            // Write the DOM document to the file
-            TransformerFactory transformerFactory = TransformerFactory.newInstance();
-            transformerFactory.setAttribute("indent-number", 4);
-            Transformer transformer = transformerFactory.newTransformer();
-            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-
-            transformer.transform(source, result);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     private static void writeQuestionsToCSV(Document doc, File file) {
         NodeList participantsList = doc.getElementsByTagName("participant");
         Element firstParticipant = (Element) participantsList.item(0);
         NodeList firstQuestions = firstParticipant.getElementsByTagName("question");
         int noQuestions = firstQuestions.getLength();
-        System.out.println("No questions = " + noQuestions + " no participants = " + participantsList.getLength());
         String[][] data = new String[participantsList.getLength() + 1][noQuestions + 1]; //Add extra row for header and extra column for id
         data[0][0] = "id";
         for (int n = 0; n < firstQuestions.getLength(); n++) {
@@ -302,7 +272,6 @@ public class DataExporter {
                 Element question = (Element) questionsList.item(i);
                 NodeList answerList = question.getElementsByTagName("answer");
                 String answer = answerList.item(0).getFirstChild().getNodeValue();
-                System.out.println("Answer " + answer);
                 data[x + 1][i + 1] = answer;
             }
         }
@@ -349,27 +318,14 @@ public class DataExporter {
                     NodeList rTimeList = image.getElementsByTagName("reactionTime");
                     Node rTimeNode = rTimeList.item(0).getFirstChild();
                     String reactionTime = rTimeNode.getNodeValue();
-                    System.out.println("New imageName " + imageName + "reactionTime " + reactionTime);
-                    if (!variableMap.containsKey(imageName)) {
-                        System.out.println("Staat niet in de lijst " + imageName);
-                    }
+
                     int pos = variableMap.get(imageName);
                     pos++; //Shift 1 to the right
                     tableData[x + 1][pos] = reactionTime;
-                    System.out.println("Position " + pos);
                 }
             }
         }
-        testData(tableData);
         return tableData;
-    }
-
-    private static void testData(String[][] data) {
-        for (int x = 0; x < data.length; x++) {
-            for (int i = 0; i < data[x].length; i++) {
-                System.out.println(x + " " + i + " " + data[x][i]);
-            }
-        }
     }
 
     private static HashMap<String, Integer> createVariableMap(Document doc) {
@@ -380,18 +336,14 @@ public class DataExporter {
         NodeList trialList = firstParticipant.getElementsByTagName("trial");
         for (int x = 0; x < trialList.getLength(); x++) {         //First collect the variable names
             Element trial = (Element) trialList.item(x);
-            System.out.println("Trial no " + trial.getAttribute("no"));
             NodeList imageList = trial.getElementsByTagName("image");
             for (int i = 0; i < imageList.getLength(); i++) {
                 Element image = (Element) imageList.item(i);
                 int count = i + (x * imageList.getLength());
                 String variableName = x + "_" + createVariableName(image);
                 outputData.put(variableName, count);
-                System.out.println(variableName + " " + count);
             }
         }
-        NodeList imageList = firstParticipant.getElementsByTagName("image");
-        System.out.println("First participant " + firstParticipant.getAttribute("id") + " has " + imageList.getLength() + " images");
         return outputData;
     }
 
@@ -405,10 +357,8 @@ public class DataExporter {
         String imageName = imageNameNode.getNodeValue();
         String dirValue = "_" + direction.getNodeValue();
         if (imageName.contains(direction.getNodeValue())) {
-            System.out.println("Vervangen " + imageName);
             dirValue = "";
         }
-        System.out.println("Direction " + direction.getNodeValue() + " type " + type.getNodeValue());
         return imageName + "_" + type.getNodeValue() + dirValue;
     }
 

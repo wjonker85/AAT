@@ -121,7 +121,7 @@ public class ExportDataDialog extends JFrame {
             public void actionPerformed(ActionEvent actionEvent) {
                 try {
                     validateInput();
-                    File saveFile = fileSaveDialog("participants.csv");
+                    File saveFile = fileSaveDialog("Questionnaire.csv");
                     setEnabled(false);
                     DataExporter.exportQuestionnaire(model, saveFile, min, max, perc, practiceCheck.isSelected());
 
