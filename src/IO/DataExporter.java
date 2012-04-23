@@ -18,10 +18,16 @@
 package IO;
 
 import Model.AATModel;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.*;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.util.HashMap;
 
@@ -35,21 +41,170 @@ import java.util.HashMap;
 public class DataExporter {
 
 
-    public static void exportQuestionnaire(AATModel model, File file, int minRTime, int maxRTime, int errorPerc) {
+    public static void exportQuestionnaire(AATModel model, File file, int minRTime, int maxRTime, int errorPerc, boolean includePractice) {
+        Document doc = createCopiedDocument(model.getTestData().getDocument());
+        if (!includePractice) {
+            doc = removePractice(doc);
+        }
+        HashMap<String, Integer> errors = errorPercentages(doc, model, minRTime, maxRTime);
 
     }
 
-    public static void exportMeasurements(AATModel model, File file, int minRTime, int maxRTime, int errorPerc) {
-        HashMap<String, Integer> errors = errorPercentages(model, minRTime, maxRTime);
+    public static void exportMeasurements(AATModel model, File file, int minRTime, int maxRTime, int errorPerc, boolean includePractice, boolean removeCenter) {
+        Document doc = createCopiedDocument(model.getTestData().getDocument());
+        if (!includePractice) {
+            doc = removePractice(doc);
+        }
+        HashMap<String, Integer> errors = errorPercentages(doc, model, minRTime, maxRTime);
+        doc = checkValues(doc, model, minRTime, maxRTime, removeCenter);
+        doc = removeParticipants(doc, errors, errorPerc);
+        writeDataToFile(new File("testje.xml"), doc);
     }
 
-    private static HashMap<String, Integer> errorPercentages(AATModel model, int minRTime, int maxRTime) {
+    /**
+     * Create a copy of the original Dom document. This way, the document can be changed without changing the original.
+     *
+     * @param originalDocument
+     * @return
+     */
+    private static Document createCopiedDocument(Document originalDocument) {
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        DocumentBuilder db = null;
+        Document copiedDocument = null;
+        try {
+            db = dbf.newDocumentBuilder();
+            Node originalRoot = originalDocument.getDocumentElement();
+            copiedDocument = db.newDocument();
+            Node copiedRoot = copiedDocument.importNode(originalRoot, true);
+            copiedDocument.appendChild(copiedRoot);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return copiedDocument;
+    }
+
+    /**
+     * Remove participants from the document when their error percentage is too high
+     *
+     * @param doc     The document
+     * @param errors  Hashmap containing the errorpercentages per participant
+     * @param maxPerc Maximum allowed error percentage
+     * @return the changed document
+     */
+    private static Document removeParticipants(Document doc, HashMap<String, Integer> errors, int maxPerc) {
+        for (String id : errors.keySet()) {
+            int ePerc = errors.get(id);
+            if (ePerc > maxPerc) {
+                doc = removeIDfromList(doc, id);
+            }
+        }
+        return doc;
+    }
+
+    /**
+     * Removes an participant with a certain id from the document
+     *
+     * @param doc The document
+     * @param id  id to be removed
+     * @return the changed document
+     */
+    private static Document removeIDfromList(Document doc, String id) {
+        NodeList participantsList = doc.getElementsByTagName("participant");
+        for (int x = 0; x < participantsList.getLength(); x++) {
+            Element participant = (Element) participantsList.item(x);
+            String idValue = participant.getAttribute("id");
+            if (idValue.equalsIgnoreCase(id)) {
+                System.out.println(participant.getAttribute("id") + " will be removed");
+                participant.getParentNode().removeChild(participant);
+                doc.normalize();
+                return doc;          //No need to go further
+            }
+        }
+        return doc;
+    }
+
+    /**
+     * Check all the values in the document
+     *
+     * @param doc          The document
+     * @param model        The model
+     * @param minRTime     minimum allowed reaction time
+     * @param maxRtime     maximum allowed reaction time
+     * @param removeCenter Does it need to check for wrong center positions
+     * @return the changed document
+     */
+    private static Document checkValues(Document doc, AATModel model, int minRTime, int maxRtime, boolean removeCenter) {
+        NodeList imageList = doc.getElementsByTagName("image");
+        for (int x = 0; x < imageList.getLength(); x++) {
+            Element image = (Element) imageList.item(x);
+            NodeList rTimeList = image.getElementsByTagName("reactionTime");   //Check reactionTime
+            Node rTimeNode = rTimeList.item(0).getFirstChild();
+            int rTime = Integer.parseInt(rTimeNode.getNodeValue());
+            if (rTime > maxRtime || rTime < minRTime) {
+                System.out.println("Changed reaction time " + rTime);
+                rTimeNode.setNodeValue("N/A");
+            }
+            if (removeCenter) {
+                int centerPos = model.getTest().centerPos();
+                NodeList firstPosList = image.getElementsByTagName("firstPos");
+                Node firstPos = firstPosList.item(0).getFirstChild();
+                int fPos = Integer.parseInt(firstPos.getNodeValue());
+
+                if (fPos < centerPos - 1 || fPos > centerPos + 1) {      //Only center +1 or -1 are correct values
+                    rTimeNode.setNodeValue("N/A");
+                }
+            }
+        }
+        return doc;
+    }
+
+    /**
+     * Removes all the practice trials from the document
+     *
+     * @param doc The current document
+     * @return The changed document
+     */
+    private static Document removePractice(Document doc) {
+        NodeList imageList = doc.getElementsByTagName("image");
+        System.out.println("Data has a total of " + imageList.getLength() + " images");
+        for (int x = imageList.getLength() - 1; x >= 0; x--) {
+            Element image = (Element) imageList.item(x);
+            NodeList typeList = image.getElementsByTagName("type");
+            Node typeNode = typeList.item(0).getFirstChild();
+            String type = typeNode.getNodeValue();
+            Element trial = (Element) image.getParentNode();
+            System.out.println("trial " + trial.getAttribute("no"));
+            if (type.equalsIgnoreCase("practice")) {
+
+                // image.getParentNode().removeChild(image);
+                trial.getParentNode().removeChild(trial);
+                doc.normalize();    //TODO kijken of dit nodig is.
+                //  return doc;
+            }
+        }
+
+        NodeList imageList2 = doc.getElementsByTagName("image");
+        System.out.println("Data has a total of " + imageList2.getLength() + " images");
+        return doc;
+    }
+
+    /**
+     * Create an hashmap to collect the error percentages for all the participants
+     *
+     * @param doc      The document
+     * @param model    Use the model to get some user set values, pushtag, pulltag and joystick center position
+     * @param minRTime minimum allowed reaction time
+     * @param maxRTime maximum allowed reaction time
+     * @return hashmap containing id's and error percentages
+     */
+    private static HashMap<String, Integer> errorPercentages(Document doc, AATModel model, int minRTime, int maxRTime) {
         HashMap<String, Integer> errors = new HashMap<String, Integer>();
-        NodeList participantsList = model.getTestData().getDocument().getElementsByTagName("participant");
+        NodeList participantsList = doc.getElementsByTagName("participant");
         for (int x = 0; x < participantsList.getLength(); x++) {
             Element element = (Element) participantsList.item(x);
             String id = element.getAttribute("id");
-            errors.put(id, errorPercentage(element, model, minRTime, maxRTime));
+            errors.put(id, calculateErrorPercentages(element, model, minRTime, maxRTime));
         }
         return errors;
     }
@@ -57,9 +212,9 @@ public class DataExporter {
     /**
      * @param element Contains the current participant
      * @param model   For the necessary test variables
-     * @return total error count for a given participant
+     * @return total error percentage for a given participant
      */
-    private static int errorPercentage(Element element, AATModel model, int minRTime, int maxRTime) {
+    private static int calculateErrorPercentages(Element element, AATModel model, int minRTime, int maxRTime) {
         int errors = 0;
         int centerPos = model.getTest().centerPos();
         NodeList imageList = element.getElementsByTagName("image");
@@ -96,5 +251,25 @@ public class DataExporter {
         float percentage = ((float) errors / (float) totalImages) * 100f;
         System.out.println("Total = " + totalImages + " Participant with id " + id + " has " + errors + " errors. Is " + percentage + " percent");
         return (int) percentage;
+    }
+
+    private static void writeDataToFile(File file, Document doc) {
+        try {
+            // Prepare the DOM document for writing
+            Source source = new DOMSource(doc);
+
+            // Prepare the output file
+            Result result = new StreamResult(file);
+
+            // Write the DOM document to the file
+            TransformerFactory transformerFactory = TransformerFactory.newInstance();
+            transformerFactory.setAttribute("indent-number", 4);
+            Transformer transformer = transformerFactory.newTransformer();
+            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+
+            transformer.transform(source, result);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

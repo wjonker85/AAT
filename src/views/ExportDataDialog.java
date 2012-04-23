@@ -31,13 +31,13 @@ import java.io.File;
  * User: marcel
  * Date: 10/31/11
  * Time: 4:33 PM
- * Simple form that gather information about how the filtering should take place for the data that is
+ * Simple form that gathers information about how the filtering should take place for the data that is
  * getting exported
  */
 public class ExportDataDialog extends JFrame {
 
     private JTextField minRTime, maxRtime, errorPerc;
-    private JCheckBox removeFalseCenter;
+    private JCheckBox removeFalseCenter, practiceCheck;
     private int min, max, perc = 10;
 
     public ExportDataDialog(final AATModel model) {
@@ -61,6 +61,7 @@ public class ExportDataDialog extends JFrame {
         p.add(maxTime);
         p.add(maxRtime);
         removeFalseCenter = new JCheckBox();
+        removeFalseCenter.setSelected(true);
         JLabel fcLabel = new JLabel("Remove wrong center positions");
         this.removeFalseCenter.setToolTipText("Removes all the reaction times for images where the joystick was in the wrong start position \n " +
                 "(not in the centre)");
@@ -76,7 +77,7 @@ public class ExportDataDialog extends JFrame {
         p.add(errorPerc);
 
         JLabel practiceLabel = new JLabel("Include practice in output Data");
-        JCheckBox practiceCheck = new JCheckBox();
+        practiceCheck = new JCheckBox();
         practiceCheck.setToolTipText("When checked the results from the practice images will be included in the exported data");
         p.add(practiceLabel);
         p.add(practiceCheck);
@@ -105,7 +106,7 @@ public class ExportDataDialog extends JFrame {
                     validateInput();
                     File saveFile = fileSaveDialog();
                     setEnabled(false);
-                    DataExporter.exportMeasurements(model, saveFile, min, max, perc);
+                    DataExporter.exportMeasurements(model, saveFile, min, max, perc, practiceCheck.isSelected(), removeFalseCenter.isSelected());
 
                 } catch (SubmitDataException e) {
                     JOptionPane.showMessageDialog(null,
@@ -117,13 +118,12 @@ public class ExportDataDialog extends JFrame {
         });
 
         saveParticipants.addActionListener(new ActionListener() {
-            @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 try {
                     validateInput();
                     File saveFile = fileSaveDialog();
                     setEnabled(false);
-                    DataExporter.exportMeasurements(model, saveFile, min, max, perc);
+                    DataExporter.exportQuestionnaire(model, saveFile, min, max, perc, practiceCheck.isSelected());
 
                 } catch (SubmitDataException e) {
                     JOptionPane.showMessageDialog(null,
@@ -133,7 +133,6 @@ public class ExportDataDialog extends JFrame {
                 }
             }
         });
-        //To change body of implemented methods use File | Settings | File Templates.
 
         controlPanel.add(saveMeasures);
         controlPanel.add(saveParticipants);
@@ -149,11 +148,10 @@ public class ExportDataDialog extends JFrame {
         pack();
     }
 
-    /*
-    Submits the entered values to the data exporter
+    /**
+     * Validates the data from the form
      */
     private void validateInput() throws SubmitDataException {
-
 
         try {
             min = Integer.parseInt(minRTime.getText());
@@ -182,8 +180,6 @@ public class ExportDataDialog extends JFrame {
         if (perc > 100) {
             throw new SubmitDataException("Error percentage can't be higher than 100%");
         }
-        //  exporter = new DataExporter(model, min, max, perc, this.transposed.isSelected());    //transposing is enabled by default
-        //     exporter = new DataExporter(model, min, max, perc, true);
     }
 
 
@@ -265,8 +261,7 @@ class ExtensionFileFilter extends FileFilter {
             return true;
         } else {
             String path = file.getAbsolutePath().toLowerCase();
-            for (int i = 0, n = extensions.length; i < n; i++) {
-                String extension = extensions[i];
+            for (String extension : extensions) {
                 if ((path.endsWith(extension) && (path.charAt(path.length() - extension.length() - 1)) == '.')) {
                     return true;
                 }
