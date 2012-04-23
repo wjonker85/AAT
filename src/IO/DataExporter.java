@@ -29,6 +29,9 @@ import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.HashMap;
 
 /**
@@ -47,7 +50,7 @@ public class DataExporter {
             doc = removePractice(doc);
         }
         HashMap<String, Integer> errors = errorPercentages(doc, model, minRTime, maxRTime);
-
+        doc = removeParticipants(doc, errors, errorPerc);
     }
 
     public static void exportMeasurements(AATModel model, File file, int minRTime, int maxRTime, int errorPerc, boolean includePractice, boolean removeCenter) {
@@ -59,6 +62,7 @@ public class DataExporter {
         doc = checkValues(doc, model, minRTime, maxRTime, removeCenter);
         doc = removeParticipants(doc, errors, errorPerc);
         writeDataToFile(new File("testje.xml"), doc);
+        writeMeasuresToCSV(doc, file);
     }
 
     /**
@@ -271,5 +275,124 @@ public class DataExporter {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private static void writeMeasuresToCSV(Document doc, File file) {
+        HashMap<String, Integer> variableMap = createVariableMap(doc); //create a map containing variable names and position
+        for (String key : variableMap.keySet()) {    //just for debugging
+            System.out.println(key + "on position " + variableMap.get(key));
+        }
+        try {
+            writeDataToCSVFile(createDataTable(doc, variableMap), file);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static String[][] createDataTable(Document doc, HashMap<String, Integer> variableMap) {
+        int columns = variableMap.size() + 1;
+        NodeList participantList = doc.getElementsByTagName("participant");
+        int rows = participantList.getLength() + 1;
+        String[][] tableData = new String[rows][columns];
+        //create header
+        tableData[0][0] = "id";
+        for (String key : variableMap.keySet()) {    //create first row
+            int pos = variableMap.get(key);
+            pos++; //shift 1 to the right for the id column;
+            tableData[0][pos] = key;
+        }
+
+        for (int x = 0; x < participantList.getLength(); x++) {
+            Element participant = (Element) participantList.item(x);
+            tableData[x + 1][0] = participant.getAttribute("id");
+            NodeList trialList = participant.getElementsByTagName("trial");
+            for (int n = 0; n < trialList.getLength(); n++) {
+                Element trial = (Element) trialList.item(n);
+                NodeList imageList = trial.getElementsByTagName("image");
+                for (int i = 0; i < imageList.getLength(); i++) {
+                    Element image = (Element) imageList.item(i);
+                    String imageName = n + "_" + createVariableName(image);
+                    NodeList rTimeList = image.getElementsByTagName("reactionTime");
+                    Node rTimeNode = rTimeList.item(0).getFirstChild();
+                    String reactionTime = rTimeNode.getNodeValue();
+                    System.out.println("New imageName " + imageName + "reactionTime " + reactionTime);
+                    if (!variableMap.containsKey(imageName)) {
+                        System.out.println("Staat niet in de lijst " + imageName);
+                    }
+                    int pos = variableMap.get(imageName);
+                    pos++; //Shift 1 to the right
+                    tableData[x + 1][pos] = reactionTime;
+                    System.out.println("Position " + pos);
+                }
+            }
+        }
+        testData(tableData);
+        return tableData;
+    }
+
+    private static void testData(String[][] data) {
+        for (int x = 0; x < data.length; x++) {
+            for (int i = 0; i < data[x].length; i++) {
+                System.out.println(x + " " + i + " " + data[x][i]);
+            }
+        }
+    }
+
+    private static HashMap<String, Integer> createVariableMap(Document doc) {
+        HashMap<String, Integer> outputData = new HashMap<String, Integer>();
+        NodeList participantsList = doc.getElementsByTagName("participant");
+        Element firstParticipant = (Element) participantsList.item(0);
+
+        NodeList trialList = firstParticipant.getElementsByTagName("trial");
+        for (int x = 0; x < trialList.getLength(); x++) {         //First collect the variable names
+            Element trial = (Element) trialList.item(x);
+            System.out.println("Trial no " + trial.getAttribute("no"));
+            NodeList imageList = trial.getElementsByTagName("image");
+            for (int i = 0; i < imageList.getLength(); i++) {
+                Element image = (Element) imageList.item(i);
+                int count = i + (x * imageList.getLength());
+                String variableName = x + "_" + createVariableName(image);
+                outputData.put(variableName, count);
+                System.out.println(variableName + " " + count);
+            }
+        }
+        NodeList imageList = firstParticipant.getElementsByTagName("image");
+        System.out.println("First participant " + firstParticipant.getAttribute("id") + " has " + imageList.getLength() + " images");
+        return outputData;
+    }
+
+    private static String createVariableName(Element image) {
+        NodeList directionList = image.getElementsByTagName("direction");
+        Node direction = directionList.item(0).getFirstChild();
+        NodeList typeList = image.getElementsByTagName("type");
+        Node type = typeList.item(0).getFirstChild();
+        NodeList nameList = image.getElementsByTagName("imageName");
+        Node imageNameNode = nameList.item(0).getFirstChild();
+        String imageName = imageNameNode.getNodeValue();
+        String dirValue = "_" + direction.getNodeValue();
+        if (imageName.contains(direction.getNodeValue())) {
+            System.out.println("Vervangen " + imageName);
+            dirValue = "";
+        }
+        System.out.println("Direction " + direction.getNodeValue() + " type " + type.getNodeValue());
+        String variableName = imageName + "_" + type.getNodeValue() + dirValue;
+        return variableName;
+    }
+
+    private static void writeDataToCSVFile(String[][] data, File file) throws IOException {
+        FileWriter fw = new FileWriter(file);
+        PrintWriter pw = new PrintWriter(fw);
+        for (int x = 0; x < data.length; x++) {
+            for (int i = 0; i < data[x].length; i++) {
+                pw.print(data[x][i]);
+                if (i != data[x].length - 1) {
+                    pw.print(",");
+                }
+            }
+            pw.println();
+        }
+        pw.flush();
+        pw.close();
+        fw.close();
     }
 }
