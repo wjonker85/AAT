@@ -104,7 +104,7 @@ public class ExportDataDialog extends JFrame {
             public void actionPerformed(ActionEvent actionEvent) {
                 try {
                     validateInput();
-                    File saveFile = fileSaveDialog();
+                    File saveFile = fileSaveDialog("Measures.csv");
                     setEnabled(false);
                     DataExporter.exportMeasurements(model, saveFile, min, max, perc, practiceCheck.isSelected(), removeFalseCenter.isSelected());
 
@@ -121,7 +121,7 @@ public class ExportDataDialog extends JFrame {
             public void actionPerformed(ActionEvent actionEvent) {
                 try {
                     validateInput();
-                    File saveFile = fileSaveDialog();
+                    File saveFile = fileSaveDialog("participants.csv");
                     setEnabled(false);
                     DataExporter.exportQuestionnaire(model, saveFile, min, max, perc, practiceCheck.isSelected());
 
@@ -188,8 +188,8 @@ public class ExportDataDialog extends JFrame {
    Has a file filter for csv files
     */
 
-    public File fileSaveDialog() {
-        File export = new File("export.csv");
+    public File fileSaveDialog(String file) {
+        File export = new File(file);
         JFileChooser fc = new JFileChooser() {
             @Override
             public void approveSelection() {

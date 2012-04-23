@@ -51,6 +51,7 @@ public class DataExporter {
         }
         HashMap<String, Integer> errors = errorPercentages(doc, model, minRTime, maxRTime);
         doc = removeParticipants(doc, errors, errorPerc);
+        writeQuestionsToCSV(doc, file);
     }
 
     public static void exportMeasurements(AATModel model, File file, int minRTime, int maxRTime, int errorPerc, boolean includePractice, boolean removeCenter) {
@@ -68,12 +69,12 @@ public class DataExporter {
     /**
      * Create a copy of the original Dom document. This way, the document can be changed without changing the original.
      *
-     * @param originalDocument
-     * @return
+     * @param originalDocument The original document which will be copied
+     * @return altered document
      */
     private static Document createCopiedDocument(Document originalDocument) {
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-        DocumentBuilder db = null;
+        DocumentBuilder db;
         Document copiedDocument = null;
         try {
             db = dbf.newDocumentBuilder();
@@ -277,11 +278,44 @@ public class DataExporter {
         }
     }
 
+    private static void writeQuestionsToCSV(Document doc, File file) {
+        NodeList participantsList = doc.getElementsByTagName("participant");
+        Element firstParticipant = (Element) participantsList.item(0);
+        NodeList firstQuestions = firstParticipant.getElementsByTagName("question");
+        int noQuestions = firstQuestions.getLength();
+        System.out.println("No questions = " + noQuestions + " no participants = " + participantsList.getLength());
+        String[][] data = new String[participantsList.getLength() + 1][noQuestions + 1]; //Add extra row for header and extra column for id
+        data[0][0] = "id";
+        for (int n = 0; n < firstQuestions.getLength(); n++) {
+            Element question = (Element) firstQuestions.item(n);
+            NodeList keyList = question.getElementsByTagName("key");
+            String key = keyList.item(0).getFirstChild().getNodeValue();
+            data[0][n + 1] = key;
+        }
+
+
+        for (int x = 0; x < participantsList.getLength(); x++) {
+            Element participant = (Element) participantsList.item(x);
+            NodeList questionsList = participant.getElementsByTagName("question");
+            data[x + 1][0] = participant.getAttribute("id");
+            for (int i = 0; i < questionsList.getLength(); i++) {
+                Element question = (Element) questionsList.item(i);
+                NodeList answerList = question.getElementsByTagName("answer");
+                String answer = answerList.item(0).getFirstChild().getNodeValue();
+                System.out.println("Answer " + answer);
+                data[x + 1][i + 1] = answer;
+            }
+        }
+        try {
+            writeDataToCSVFile(data, file);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
     private static void writeMeasuresToCSV(Document doc, File file) {
         HashMap<String, Integer> variableMap = createVariableMap(doc); //create a map containing variable names and position
-        for (String key : variableMap.keySet()) {    //just for debugging
-            System.out.println(key + "on position " + variableMap.get(key));
-        }
         try {
             writeDataToCSVFile(createDataTable(doc, variableMap), file);
         } catch (IOException e) {
@@ -375,14 +409,14 @@ public class DataExporter {
             dirValue = "";
         }
         System.out.println("Direction " + direction.getNodeValue() + " type " + type.getNodeValue());
-        String variableName = imageName + "_" + type.getNodeValue() + dirValue;
-        return variableName;
+        return imageName + "_" + type.getNodeValue() + dirValue;
     }
 
     private static void writeDataToCSVFile(String[][] data, File file) throws IOException {
         FileWriter fw = new FileWriter(file);
         PrintWriter pw = new PrintWriter(fw);
-        for (int x = 0; x < data.length; x++) {
+        int x;
+        for (x = 0; x < data.length; x++) {
             for (int i = 0; i < data[x].length; i++) {
                 pw.print(data[x][i]);
                 if (i != data[x].length - 1) {
