@@ -43,12 +43,17 @@ public class DataExporter {
 
     public static void exportQuestionnaire(AATModel model, File file, int minRTime, int maxRTime, int errorPerc, boolean includePractice) {
         Document doc = createCopiedDocument(model.getTestData().getDocument());
-        if (!includePractice) {
-            doc = removePractice(doc);
+        NodeList questionList = doc.getElementsByTagName("question");
+        if (questionList.getLength() > 0) {
+            if (!includePractice) {
+                doc = removePractice(doc);
+            }
+            HashMap<String, Integer> errors = errorPercentages(doc, model, minRTime, maxRTime);
+            doc = removeParticipants(doc, errors, errorPerc);
+            writeQuestionsToCSV(doc, file);
+        } else {
+            System.out.println("There are no questions");
         }
-        HashMap<String, Integer> errors = errorPercentages(doc, model, minRTime, maxRTime);
-        doc = removeParticipants(doc, errors, errorPerc);
-        writeQuestionsToCSV(doc, file);
     }
 
     public static void exportMeasurements(AATModel model, File file, int minRTime, int maxRTime, int errorPerc, boolean includePractice, boolean removeCenter) {

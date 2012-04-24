@@ -22,6 +22,9 @@ import AAT.Util.ImageUtils;
 import Model.AATModel;
 
 import javax.swing.*;
+import javax.swing.text.Document;
+import javax.swing.text.html.HTMLEditorKit;
+import javax.swing.text.html.StyleSheet;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.Observable;
@@ -74,9 +77,21 @@ public class AATView extends JPanel implements Observer {
         this.stepSize = model.getTest().getStepRate();
         this.setBackground(Color.black);
         textPane = new JEditorPane();
-        //   textPane.setContentType("text/html");
+
+        textPane.setContentType("text/html");
+        HTMLEditorKit kit = new HTMLEditorKit();
+        textPane.setEditorKit(kit);
+        StyleSheet styleSheet = kit.getStyleSheet();
+        styleSheet.addRule("body {color: white; font-family:times; margin: 0px; background-color: #000;font : 30px monaco;}");
+        styleSheet.addRule("p {color: white; font-family:times; margin: 0px; background-color: #000;font : 30px monaco;}");
+        styleSheet.addRule("h1 {color: blue;font : 30px roman;}");
+        styleSheet.addRule("h2 {color: #ff0000;}");
+        styleSheet.addRule("pre {font : 10px monaco; color : black; background-color : #fafafa; }");
+        Document doc = kit.createDefaultDocument();
+        textPane.setDocument(doc);
         this.add(textPane);
         textPane.setBounds(100, 100, screen.width - 100, screen.height - 100);
+        textPane.setEditable(false);
         this.setLayout(null);
         this.setVisible(true);
         stepStart = Math.round(stepSize / 2f);
@@ -94,7 +109,6 @@ public class AATView extends JPanel implements Observer {
 
 
     }
-
 
     /**
      * De draw functie, omdat framerate(24) is wordt deze functie 24x per seconden doorlopen tijdens AAT
@@ -125,10 +139,10 @@ public class AATView extends JPanel implements Observer {
         textPane.setVisible(true);
         this.setBackground(Color.black);   //Background to black
         this.setForeground(Color.white);    //ForeGround to white
-        Font font = new Font("Roman", Font.PLAIN, 30);
-        textPane.setFont(font);
+        //    Font font = new Font("Roman", Font.PLAIN, 30);
+        //    textPane.setFont(font);
         textPane.setBackground(new Color(0));
-        textPane.setForeground(Color.white);
+        //    textPane.setForeground(Color.white);
         textPane.setText(infoText);
         textPane.setEditable(false);
     }

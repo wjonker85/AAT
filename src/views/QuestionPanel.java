@@ -128,11 +128,34 @@ public class QuestionPanel extends JPanel {
                 questionsPanel.add(panel);
                 questionsMap.put(questionObject.getKey(), textInput);
             }
+
+            if (questionObject.getType().equals("textarea")) {
+                JTextArea textArea = new JTextArea(10, 40);
+                textArea.setLineWrap(true);
+                JScrollPane scrollPane = new JScrollPane(textArea);
+                scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+                JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+                panel.add(scrollPane);
+                panel.setBackground(Color.black);
+                panel.setForeground(Color.white);
+                textArea.setBackground(Color.WHITE);
+                textArea.setForeground(Color.BLACK);
+                question.setLabelFor(textArea);
+                questionsPanel.add(panel);
+                questionsMap.put(questionObject.getKey(), textArea);
+            }
             if (questionObject.getType().equals("likert")) {
                 LikertPanel likertScale = new LikertPanel(questionObject.getSize(), questionObject.getLeftText(), questionObject.getRightText());
                 question.setLabelFor(likertScale);
                 questionsPanel.add(likertScale);
                 questionsMap.put(questionObject.getKey(), likertScale);
+            }
+
+            if (questionObject.getType().equals("sem_diff")) {
+                SemDiffPanel semanticDifferential = new SemDiffPanel(questionObject.getSize(), questionObject.getLeftText(), questionObject.getRightText());
+                question.setLabelFor(semanticDifferential);
+                questionsPanel.add(semanticDifferential);
+                questionsMap.put(questionObject.getKey(), semanticDifferential);
             }
             questionsPanel.setOpaque(true);
         }
@@ -168,9 +191,74 @@ public class QuestionPanel extends JPanel {
                 LikertPanel l = (LikertPanel) c;
                 results.put(key, l.getValue());
             }
+            if (c instanceof SemDiffPanel) {
+                SemDiffPanel s = (SemDiffPanel) c;
+                results.put(key, s.getValue());
+            }
+            if (c instanceof JTextArea) {
+                JTextArea t = (JTextArea) c;
+                String input = t.getText();
+                input = input.replace(",", " ");
+                results.put(key, input);
+            }
         }
         return results;
     }
+
+
+    class SemDiffPanel extends JPanel {
+
+        private ButtonGroup semDiffScale;
+        private int size;
+
+        public SemDiffPanel(int size, String left, String right) {
+            this.size = size;
+            this.setBackground(Color.black);
+            this.setForeground(Color.white);
+
+            JLabel leftLabel = new JLabel(left);
+            leftLabel.setForeground(Color.WHITE);
+            leftLabel.setBackground(Color.black);
+            this.add(leftLabel);
+            semDiffScale = new ButtonGroup();
+
+            for (int x = 0; x < size; x++) {
+                JRadioButton likertButton = new JRadioButton();
+                likertButton.setBackground(Color.black);
+                likertButton.setForeground(Color.white);
+                int step = size / 2;
+                JLabel label = new JLabel(String.valueOf(x - step));
+                label.setForeground(Color.white);
+                this.add(label);
+                this.add(likertButton);
+                semDiffScale.add(likertButton);
+            }
+
+            JLabel rightLabel = new JLabel(right, JLabel.TRAILING);
+            rightLabel.setForeground(Color.white);
+            rightLabel.setBackground(Color.black);
+            this.add(rightLabel);
+            //  SpringUtilities.makeCompactGrid(questionsPanel,
+            //        1, 3, //rows, cols
+            //      6, 6,        //initX, initY
+            //    6, 6);       //xPad, yPad
+        }
+
+        public String getValue() {
+            int x = 0;
+            int step = size / 2;
+            for (Enumeration e = semDiffScale.getElements(); e.hasMoreElements(); ) {
+                JRadioButton b = (JRadioButton) e.nextElement();
+                if (b.isSelected()) {
+
+                    return String.valueOf(x - step);
+                }
+                x++;
+            }
+            return "0";
+        }
+    }
+
 
     class LikertPanel extends JPanel {
 
@@ -192,6 +280,9 @@ public class QuestionPanel extends JPanel {
                 JRadioButton likertButton = new JRadioButton();
                 likertButton.setBackground(Color.black);
                 likertButton.setForeground(Color.white);
+                JLabel label = new JLabel(String.valueOf(x + 1));
+                label.setForeground(Color.white);
+                this.add(label);
                 this.add(likertButton);
                 likertScale.add(likertButton);
             }

@@ -45,8 +45,8 @@ public abstract class AatObject {
 
     //Configuration readers
     public TestConfig testConfig;
-    //   private TextReader textReader;
-    private XMLReader textReader;
+    //   private TextReader xmlReader;
+    private XMLReader xmlReader;
     //TODO: renamen
 
     //Test variables
@@ -66,7 +66,7 @@ public abstract class AatObject {
 
     //progress variables
     private boolean practice;
-
+    private boolean hasQuestions = false;
 
     //Different lists, containing the files
     public ArrayList<File> neutralImages;
@@ -122,7 +122,17 @@ public abstract class AatObject {
             throw new FalseConfigException("No language file specified");
         }
         System.out.println("Language file = " + langFile);
+        xmlReader = new XMLReader(languageFile);
+        String qFile = testConfig.getValue("Questionnaire");
+        File questionFile = new File(workingDir + File.separator + qFile);
+        if (questionFile.exists()) {
+            hasQuestions = true;
+            xmlReader.addQuestionnaire(questionFile);
+        } else if (!questionFile.exists() && !(qFile.length() > 0)) {
+            throw new FalseConfigException("The specified questionnaire doesn't exist");
+        }
 
+        System.out.println("Language file = " + langFile);
         // id = getHighestID();
         nDir = testConfig.getValue("NeutralDir");
         aDir = testConfig.getValue("AffectiveDir");
@@ -137,8 +147,8 @@ public abstract class AatObject {
 
         System.out.println("Neutral directory = " + neutralDir);
         System.out.println("Affective directory = " + affectiveDir);
-        //    textReader = new TextReader(languageFile);
-        textReader = new XMLReader(languageFile);
+        //    xmlReader = new TextReader(languageFile);
+
         neutralImages = getImages(neutralDir);
 
         System.out.println("Neutral " + testConfig.getValue("NeutralDir") + " " + neutralDir);
@@ -149,8 +159,9 @@ public abstract class AatObject {
         if (affectiveImages.size() == 0) {
             throw new FalseConfigException("Affective images directory contains no images");
         }
-        questionsList = textReader.getExtraQuestions();
-
+        if (hasQuestions) {
+            questionsList = xmlReader.getExtraQuestions();
+        }
         String doBorders = testConfig.getValue("ColoredBorders");
         if (!doBorders.equals("True") && !doBorders.equals("False")) {
             throw new FalseConfigException("ColoredBorders has a false value, must be True or False");
@@ -358,7 +369,7 @@ public abstract class AatObject {
      * @return Break text to be shown on the screen
      */
     public String getBreakText() {
-        return textReader.getValue("break");
+        return xmlReader.getValue("break");
     }
 
     /**
@@ -367,7 +378,7 @@ public abstract class AatObject {
      * @return The introduction text.
      */
     public String getIntroductionText() {
-        return textReader.getValue("introduction");
+        return xmlReader.getValue("introduction");
     }
 
     /**
@@ -377,7 +388,7 @@ public abstract class AatObject {
      * @return The start text
      */
     public String getTestStartText() {
-        return textReader.getValue("start");
+        return xmlReader.getValue("start");
     }
 
     /**
@@ -386,7 +397,7 @@ public abstract class AatObject {
      * @return Finished text
      */
     public String getTestFinishedText() {
-        return textReader.getValue("finished");
+        return xmlReader.getValue("finished");
     }
 
     /**

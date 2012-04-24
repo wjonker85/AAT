@@ -41,6 +41,7 @@ public class XMLReader {
     private Map<String, String> testText = new HashMap<String, String>();
     private ArrayList<QuestionData> extraQuestions;
     private Document doc;
+    private Document questionnaire;
 
     String[] options = {              //Keys defining the different texts
             "introduction",
@@ -62,6 +63,18 @@ public class XMLReader {
             e.printStackTrace();
         }
         readText();
+    }
+
+    public void addQuestionnaire(File questionFile) {
+        try {
+            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            DocumentBuilder db = dbf.newDocumentBuilder();
+            questionnaire = db.parse(questionFile);
+            questionnaire.getDocumentElement().normalize();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         readQuestions();
     }
 
@@ -72,7 +85,7 @@ public class XMLReader {
     }
 
     private void readQuestions() {
-        NodeList questions = doc.getElementsByTagName("extra_questions");
+        NodeList questions = questionnaire.getElementsByTagName("questionnaire");
         Element allQuestions = (Element) questions.item(0);
         NodeList questionList = allQuestions.getElementsByTagName("question");
         QuestionData newQuestion = null;
@@ -105,13 +118,14 @@ public class XMLReader {
                 if (type.equals("open")) {
                     //
                 }
-                if (type.equals("likert")) {
+                if (type.equals("likert") || type.equals("sem_diff")) {
                     newQuestion.setLeftText(getValue("left", element));
                     newQuestion.setRightText(getValue("right", element));
                     String size = getValue("size", element);
                     newQuestion.setSize(Integer.parseInt(size));
                     System.out.println("Left text " + newQuestion.getLeftText());
                 }
+
 
                 System.out.println(newQuestion.getKey() + " " + newQuestion.getQuestion());
                 //   System.out.println(element.getAttribute("type"));

@@ -114,6 +114,7 @@ public class ExportDataDialog extends JFrame {
                             "Problem submitting input",
                             JOptionPane.ERROR_MESSAGE);
                 }
+                setEnabled(true);
             }
         });
 
@@ -125,12 +126,14 @@ public class ExportDataDialog extends JFrame {
                     setEnabled(false);
                     DataExporter.exportQuestionnaire(model, saveFile, min, max, perc, practiceCheck.isSelected());
 
+
                 } catch (SubmitDataException e) {
                     JOptionPane.showMessageDialog(null,
                             e.getMessage(),
                             "Problem submitting input",
                             JOptionPane.ERROR_MESSAGE);
                 }
+                setEnabled(true);
             }
         });
 

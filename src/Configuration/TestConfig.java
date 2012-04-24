@@ -62,7 +62,8 @@ public class TestConfig {
             "PullTag",
             "PushTag",
             "DisplayQuestions",
-            "ShowBoxPlot"
+            "ShowBoxPlot",
+            "Questionnaire"
 
     };
 
