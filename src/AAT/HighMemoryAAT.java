@@ -58,8 +58,8 @@ public class HighMemoryAAT extends AatObject {
 
                 for (int x = 0; x < size; x++) {
                     for (File image : getImages(practiceDir)) {
-                        AATImage pull = new AATImage(image, AATImage.PULL, this,x); //Add push and pull version
-                        AATImage push = new AATImage(image, AATImage.PUSH, this,x);
+                        AATImage pull = new AATImage(image, AATImage.PULL, this, x); //Add push and pull version
+                        AATImage push = new AATImage(image, AATImage.PUSH, this, x);
                         list.add(pull);
                         list.add(push);
                     }
@@ -70,11 +70,11 @@ public class HighMemoryAAT extends AatObject {
                 for (int x = 0; x < practiceRepeat; x++) {
                     for (File image : getImages(practiceDir)) {
                         if (image.getName().contains(testConfig.getValue("PullTag"))) {
-                            AATImage pull = new AATImage(image, AATImage.PULL, this,x); //Two instances for every image
+                            AATImage pull = new AATImage(image, AATImage.PULL, this, x); //Two instances for every image
                             list.add(pull);
                         }
                         if (image.getName().contains(testConfig.getValue("PushTag"))) {
-                            AATImage push = new AATImage(image, AATImage.PUSH, this,x);
+                            AATImage push = new AATImage(image, AATImage.PUSH, this, x);
                             list.add(push);      //Load the neutral images
                         }
                     }
@@ -110,28 +110,61 @@ public class HighMemoryAAT extends AatObject {
      */
     public ArrayList<AATImage> createRandomListBorders() {
         ArrayList<AATImage> randomList = new ArrayList<AATImage>();
-        for (File image : neutralImages) {                //Load the neutral images
-            AATImage pull = new AATImage(image, AATImage.PULL, AATImage.NEUTRAL, this); //Two instances for every image
-            randomList.add(pull);
-            AATImage push = new AATImage(image, AATImage.PUSH, AATImage.NEUTRAL, this);
-            randomList.add(push);
-        }
-        for (File image : affectiveImages) {    //Load the affective images
-            AATImage pull = new AATImage(image, AATImage.PULL, AATImage.AFFECTIVE, this); //Two instances for every image
-            randomList.add(pull);
-            AATImage push = new AATImage(image, AATImage.PUSH, AATImage.AFFECTIVE, this);
-            randomList.add(push);
-        }
+        // for (File image : neutralImages) {                //Load the neutral images
+        //    AATImage pull = new AATImage(image, AATImage.PULL, AATImage.NEUTRAL, this); //Two instances for every image
+        //    randomList.add(pull);
+        //    AATImage push = new AATImage(image, AATImage.PUSH, AATImage.NEUTRAL, this);
+        //    randomList.add(push);
+        // }
+        // for (File image : affectiveImages) {    //Load the affective images
+        //    AATImage pull = new AATImage(image, AATImage.PULL, AATImage.AFFECTIVE, this); //Two instances for every image
+        //    randomList.add(pull);
+        //    AATImage push = new AATImage(image, AATImage.PUSH, AATImage.AFFECTIVE, this);
+        //    randomList.add(push);
+        // }
+
+        int affectSize = (affectPerc * trialSize) / 100;
+        int neutralSize = trialSize - affectSize;
+        randomList.addAll(createList(neutralSize, n_pushPerc, neutralImages));
+        randomList.addAll(createList(affectSize, a_pushPerc, affectiveImages));
         Collections.shuffle(randomList);    //Randomise the list
         Runtime runtime = Runtime.getRuntime();
         System.out.println("Free memory : " + runtime.freeMemory());
         return randomList;
     }
 
+    /**
+     * Create a list with different push/pull percentages
+     *
+     * @param n
+     * @param pushPerc
+     * @param fileList
+     * @return
+     */
+    public ArrayList<AATImage> createList(int n, int pushPerc, ArrayList<File> fileList) {
+        if (n == 0) {
+            n = fileList.size() * 2;
+        }
+        Collections.shuffle(fileList);
+        ArrayList<AATImage> returnList = new ArrayList<AATImage>();
+        int nPush = (pushPerc * n) / 100;
+        for (int x = 0; x < n; x++) {
+            File image = fileList.get(x % fileList.size());
+            if (x < nPush) {
+                AATImage push = new AATImage(image, AATImage.PUSH, AATImage.NEUTRAL, this);
+                returnList.add(push);
+            } else {
+                AATImage pull = new AATImage(image, AATImage.PULL, AATImage.NEUTRAL, this); //Two instances for every image
+                returnList.add(pull);
+            }
+        }
+        return returnList;
+    }
+
     public ArrayList<AATImage> createRandomListNoBorders() {
         ArrayList<AATImage> randomList = new ArrayList<AATImage>();
         for (File image : neutralImages) {
-           // System.out.println(image.getName());
+            // System.out.println(image.getName());
             if (image.getName().contains(testConfig.getValue("PullTag"))) {
                 AATImage pull = new AATImage(image, AATImage.PULL, AATImage.NEUTRAL, this); //Two instances for every image
                 randomList.add(pull);

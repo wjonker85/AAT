@@ -53,13 +53,18 @@ public abstract class AatObject {
     private int repeat;
     private int breakAfter;
     public int practiceRepeat;
-    private int dataSteps;
+    public int n_pushPerc = 50;
+    public int a_pushPerc = 50;
+    public int trialSize = 0;
+    public int affectPerc = 50;
+    private int dataSteps = 9; //Default value 9
+    private int stepSize = 31;
     private String displayQuestions;
     private boolean showBoxPlot;
 
     //Test view variables
     private int borderWidth;
-    private int stepSize;
+
     public String practiceFillColor;
     private boolean coloredBorders;
 
@@ -111,7 +116,7 @@ public abstract class AatObject {
 
         String datFile = testConfig.getValue("DataFile");
         if (datFile.equals("")) {
-            throw new FalseConfigException("Data file is not set");
+            datFile = "Data.xml"; //Set to default.
         }
 
         dataFile = new File(workingDir + File.separator + datFile);
@@ -233,23 +238,26 @@ public abstract class AatObject {
             throw new FalseConfigException("BreakAfter is not configured properly");
         }
         System.out.println("There will be a break after " + breakAfter + " trials");
-        try {
-            stepSize = Integer.parseInt(testConfig.getValue("StepSize"));
-        } catch (Exception e) {
-            throw new FalseConfigException("StepSize is not configured properly");
+        if (!testConfig.getValue("StepSize").equals("")) {
+            try {
+                stepSize = Integer.parseInt(testConfig.getValue("StepSize"));
+            } catch (Exception e) {
+                throw new FalseConfigException("StepSize is not configured properly");
+            }
+            if (stepSize % 2 == 0) {
+                throw new FalseConfigException("Stepsize should be and odd number");
+            }
         }
-        if (stepSize % 2 == 0) {
-            throw new FalseConfigException("Stepsize should be and odd number");
+        if (!testConfig.getValue("DataSteps").equals("")) {
+            try {
+                dataSteps = Integer.parseInt(testConfig.getValue("DataSteps"));
+            } catch (Exception e) {
+                throw new FalseConfigException("DataSteps is not configured properly");
+            }
+            if (dataSteps % 2 == 0) {
+                throw new FalseConfigException("DataSteps should be and odd number");
+            }
         }
-        try {
-            dataSteps = Integer.parseInt(testConfig.getValue("DataSteps"));
-        } catch (Exception e) {
-            throw new FalseConfigException("DataSteps is not configured properly");
-        }
-        if (dataSteps % 2 == 0) {
-            throw new FalseConfigException("DataSteps should be and odd number");
-        }
-
 
         if (!testConfig.getValue("PracticeRepeat").equals("")) {  //When a value for practice repeat is set, check validity
             try {
@@ -307,6 +315,22 @@ public abstract class AatObject {
         } else {
             throw new FalseConfigException("ShowBoxPlot should be either True or False");
         }
+        if (!testConfig.getValue("AffectRatio").equals("")) {         //TODO ratios veranderen
+            a_pushPerc = getPercentage(testConfig.getValue("AffectRatio"), "AffectRatio");
+        }
+        if (!testConfig.getValue("NeutralRatio").equals("")) {
+            n_pushPerc = getPercentage(testConfig.getValue("NeutralRatio"), "NeutralRatio");
+        }
+        if (!testConfig.getValue("TestRatio").equals("")) {
+            affectPerc = getPercentage(testConfig.getValue("TestRatio"), "TestRatio");
+        }
+        if (!testConfig.getValue("TrialSize").equals("")) {
+            try {
+                trialSize = Integer.parseInt(testConfig.getValue("TrialSize"));
+            } catch (Exception e) {
+                throw new FalseConfigException("TrialSize is not set to a correct number");
+            }
+        }
     }
 
 
@@ -318,6 +342,34 @@ public abstract class AatObject {
         public FalseConfigException(String error) {
             super(error);
         }
+
+    }
+
+
+    private int getPercentage(String ratio, String s) throws FalseConfigException {
+        if (!ratio.contains(":")) {
+            System.out.println("eerste");
+            throw new FalseConfigException(s + " is not a correct ratio");
+        }
+
+        String[] str = ratio.split(":");
+        if (str.length != 2) {
+            System.out.println("tweede" + "lengte " + str.length);
+            throw new FalseConfigException(s + " is not a correct ratio");
+        }
+        float first, second;
+        try {
+            first = Integer.parseInt(str[0]);
+            second = Integer.parseInt(str[1]);
+        } catch (Exception e) {
+            throw new FalseConfigException(s + " is not a correct ratio");
+        }
+        if (first == 0) {
+            return 0;
+        }
+        int total = (int) (first + second);
+        System.out.println("Total " + total);
+        return (int) ((first / total) * 100f);
 
     }
 

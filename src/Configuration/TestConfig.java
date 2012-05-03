@@ -63,7 +63,11 @@ public class TestConfig {
             "PushTag",
             "DisplayQuestions",
             "ShowBoxPlot",
-            "Questionnaire"
+            "Questionnaire",
+            "AffectRatio",
+            "NeutralRatio",
+            "TestRatio",
+            "TrialSize"
 
     };
 

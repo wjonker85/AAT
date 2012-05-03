@@ -105,7 +105,7 @@ public class QuestionPanel extends JPanel {
             questionsPanel.add(question);
             if (questionObject.getType().equals("closed")) {
                 //      JComboBox<Object> answerOptions = new JComboBox<Object>(questionObject.getOptions().toArray());
-                JComboBox<Object> answerOptions = new JComboBox<Object>(questionObject.getOptions().toArray());
+                JComboBox answerOptions = new JComboBox(questionObject.getOptions().toArray());
                 JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
                 panel.add(answerOptions);
                 panel.setBackground(Color.BLACK);
