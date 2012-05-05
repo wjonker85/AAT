@@ -20,7 +20,7 @@ package AAT;
 
 import Configuration.TestConfig;
 import DataStructures.AATImage;
-import DataStructures.QuestionData;
+import DataStructures.Questionnaire;
 import IO.XMLReader;
 
 import java.io.File;
@@ -62,6 +62,7 @@ public abstract class AatObject {
     private int stepSize = 31;
     private String displayQuestions;
     private boolean showBoxPlot;
+    private Questionnaire questionnaire;
 
     //Test view variables
     private int borderWidth;
@@ -86,7 +87,7 @@ public abstract class AatObject {
 
     //Hashmaps containing color information and the optional questions
     private Hashtable<Integer, String> colorTable;    //Contains the border colors
-    private ArrayList<QuestionData> questionsList;
+//    private ArrayList<QuestionData> questionsList;
 
     private File dataFile;
 
@@ -166,7 +167,7 @@ public abstract class AatObject {
             throw new FalseConfigException("Affective images directory contains no images");
         }
         if (hasQuestions) {
-            questionsList = xmlReader.getExtraQuestions();
+            questionnaire = new Questionnaire(xmlReader.getExtraQuestions(), xmlReader.getQuestionnaireIntro());
         }
         String doBorders = testConfig.getValue("ColoredBorders");
         if (!doBorders.equals("True") && !doBorders.equals("False")) {
@@ -471,16 +472,6 @@ public abstract class AatObject {
     }
 
     /**
-     * In the language file it is possible to add extra questions that are asked to the participant before the
-     * real test is started.
-     *
-     * @return ArrayList with questionObjects. These objects are passed to the questionsView that displays them
-     */
-    public ArrayList<QuestionData> getExtraQuestions() {
-        return questionsList;
-    }
-
-    /**
      * @return The file containing the data file
      */
     public File getDataFile() {
@@ -564,6 +555,10 @@ public abstract class AatObject {
         } else {
             return "practice";
         }
+    }
+
+    public Questionnaire getQuestionnaire() {
+        return questionnaire;
     }
 
     /**

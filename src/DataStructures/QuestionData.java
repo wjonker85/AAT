@@ -36,6 +36,7 @@ public class QuestionData {
     private int size;
     private String left;
     private String right;
+    private boolean required = true; //Questions are standard required
 
     private ArrayList<String> options;
 
@@ -94,6 +95,14 @@ public class QuestionData {
 
     public ArrayList<String> getOptions() {
         return options;
+    }
+
+    public boolean isRequired() {
+        return required;
+    }
+
+    public void setRequired(boolean required) {
+        this.required = required;
     }
 }
 

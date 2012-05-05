@@ -111,7 +111,7 @@ public class TestFrame extends JFrame implements Observer {
         if (o.toString().equals("Show questions")) {
             setCursor(Cursor.getDefaultCursor());
             System.out.println("Vragen laten zien");
-            questionsView.displayQuestions(model.getTest().getExtraQuestions());
+            questionsView.displayQuestions(model.getTest().getQuestionnaire());
             cl.show(displayPanel, "questions");
         }
 

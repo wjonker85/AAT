@@ -40,6 +40,7 @@ public class XMLReader {
 
     private Map<String, String> testText = new HashMap<String, String>();
     private ArrayList<QuestionData> extraQuestions;
+    private String introduction = ""; //introduction for the questionnaire;
     private Document doc;
     private Document questionnaire;
 
@@ -84,9 +85,14 @@ public class XMLReader {
         }
     }
 
+
     private void readQuestions() {
         NodeList questions = questionnaire.getElementsByTagName("questionnaire");
         Element allQuestions = (Element) questions.item(0);
+        NodeList introductionList = allQuestions.getElementsByTagName("introduction");
+        Node introductionNode = introductionList.item(0);
+        Node introductionText = introductionNode.getFirstChild();
+        introduction = introductionText.getNodeValue();
         NodeList questionList = allQuestions.getElementsByTagName("question");
         QuestionData newQuestion = null;
 
@@ -97,8 +103,13 @@ public class XMLReader {
             if (fstNode.getNodeType() == Node.ELEMENT_NODE) {
                 Element element = (Element) fstNode;
                 String type = element.getAttribute("type");
+                String required = element.getAttribute("required");
+
                 System.out.println("Type " + type);
                 newQuestion = new QuestionData(type);
+                if (required.equalsIgnoreCase("false")) {
+                    newQuestion.setRequired(false);
+                }
                 newQuestion.setQuestion(getValue("text", element));
                 newQuestion.setKey(getValue("key", element));
                 if (type.equals("closed")) {
@@ -145,6 +156,9 @@ public class XMLReader {
         return testText.get(key);
     }
 
+    public String getQuestionnaireIntro() {
+        return introduction;
+    }
 
     public ArrayList<QuestionData> getExtraQuestions() {
         return extraQuestions;
