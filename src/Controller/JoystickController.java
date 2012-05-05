@@ -129,7 +129,7 @@ public class JoystickController extends Thread {
             if (pollIsValid) {
                 yAxisValue = yAxis.getPollData();
                 if (yAxisValue != prevYValue) {  // value has changed
-                    model.changeYaxis(convertValue2(yAxisValue,stepSizeData),convertValue2(yAxisValue,stepSizeDisplay));
+                    model.changeYaxis(convertValue2(yAxisValue, stepSizeData), convertValue2(yAxisValue, stepSizeDisplay));
                     prevYValue = yAxisValue;
                 }
                 if (trigger.getPollData() == 1 && prevTrigger != 1.0f) {   // only changes
@@ -146,19 +146,19 @@ public class JoystickController extends Thread {
     /*
     Converts the float value between -1 and 1 to an integer value.
      */
-    public int convertValue2(float value,int NoSteps) {
-        int returnValue =0;
+    public int convertValue2(float value, int NoSteps) {
+        int returnValue = 0;
         int middlePos = (NoSteps + 1) / 2;
         float steps = NoSteps - middlePos;
         float increment = (float) (1 / steps);
-        if(value>0) {                                           //Correct for small joystick error, otherwise it will not reach the end
-                                                                //with large stepsizes
-        returnValue = (int) ((value / increment)+delta);
+        if (value > 0) {                                           //Correct for small joystick error, otherwise it will not reach the end
+            //with large stepsizes
+            returnValue = (int) ((value / increment) + delta);
         }
-        if (value<0){
-            returnValue = (int) ((value / increment)-delta);
+        if (value < 0) {
+            returnValue = (int) ((value / increment) - delta);
         }
-        if (value==0) {
+        if (value == 0) {
             returnValue = (int) (value / increment);
         }
         return middlePos + returnValue;

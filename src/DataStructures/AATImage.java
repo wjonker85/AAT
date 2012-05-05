@@ -17,6 +17,9 @@
 
 package DataStructures;
 
+import AAT.AatObject;
+import AAT.Util.ImageUtils;
+
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -29,6 +32,7 @@ import java.io.IOException;
  * Date: 10/13/11
  * This class contains an image together with the required information belonging to that image
  * Whether the image needs to be pushed or pulled and if it's a affective or neutral image (Needed for data analysis).
+ * It also prepares the image before it has to be shown. This way no more operations are required on the images before showing them on screen.
  */
 public class AATImage {
 
@@ -41,21 +45,57 @@ public class AATImage {
     public static int NEUTRAL = 0;
     public static int AFFECTIVE = 1;
     public static int PRACTICE = 2;
+    private int stepSize;
+    private boolean hasBorders;
+    private Color borderColor;
+    private int borderWidth;
 
-    public AATImage(File imageFile, int direction, int type) {
+    public AATImage(File imageFile, int direction, int type, AatObject aatObject) {
         this.direction = direction;
         this.type = type;
+        this.stepSize = aatObject.getStepRate();
+        hasBorders = aatObject.hasColoredBorders();
+        if (hasBorders) {
+            int intValue = Integer.parseInt(aatObject.getBorderColor(direction), 16);
+            borderColor = new Color(intValue);
+            borderWidth = aatObject.getBorderWidth();
+        }
+
         name = imageFile.getName();
+
         this.image = loadImage(imageFile);
+
+
+    }
+
+    public AATImage(File imageFile, int direction, AatObject aatObject, int repeat) {
+        this.direction = direction;
+        this.type = PRACTICE;
+        this.stepSize = aatObject.getStepRate();
+        hasBorders = aatObject.hasColoredBorders();
+        if (hasBorders) {
+            int intValue = Integer.parseInt(aatObject.getBorderColor(direction), 16);
+            borderColor = new Color(intValue);
+            borderWidth = aatObject.getBorderWidth();
+        }
+        name = imageFile.getName() + "_" + repeat;
+
+        this.image = loadImage(imageFile);
+
 
     }
 
     //Create a generated AAT Image. This creates an image that is just a square with the given color.
-    public AATImage(int direction, Color color, int nr) {
+    public AATImage(int direction, Color color, int nr, AatObject aatObject) {
         this.direction = direction;
+        this.stepSize = aatObject.getStepRate();
+        hasBorders = aatObject.hasColoredBorders();
+        int intValue = Integer.parseInt(aatObject.getBorderColor(direction), 16);
+        borderColor = new Color(intValue);
+        borderWidth = aatObject.getBorderWidth();
         this.image = getPracticeImage(color);
         this.type = AATImage.PRACTICE;
-        this.name = "Practice_" + nr;
+        this.name = "practice_" + nr;
     }
 
 
@@ -64,13 +104,20 @@ public class AATImage {
         return direction;
     }
 
+    //Create a practice image. This is just a rect with a single fill color. Ik also resizes the image dependent of the screenSize
+    //And the number of steps needed to resize the image
     private BufferedImage getPracticeImage(Color color) {
-        BufferedImage PracticeImage = new BufferedImage(433, 433, BufferedImage.TYPE_INT_RGB);
-        Graphics2D g = PracticeImage.createGraphics();
+        BufferedImage practiceImage = new BufferedImage(433, 433, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g = practiceImage.createGraphics();
         g.setBackground(color);
         g.setColor(color);
         g.fillRect(0, 0, 433, 433);
-        return PracticeImage;
+        int stepStart = Math.round(stepSize / 2f);
+        Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+        Dimension d = ImageUtils.setupImage((int) dim.getHeight(), (int) dim.getWidth(), practiceImage.getHeight(), practiceImage.getWidth(), stepStart);
+        practiceImage = ImageUtils.resizeImageWithHint(practiceImage, d.width, d.height, BufferedImage.TYPE_INT_ARGB);
+        practiceImage = ImageUtils.drawBorder(practiceImage, borderColor, borderWidth);
+        return practiceImage;
     }
 
     //Returns whether it's a neutral or affective image
@@ -87,13 +134,23 @@ public class AATImage {
         return image;
     }
 
-    //Loads the requested image
-    public BufferedImage loadImage(File imageFile) {
+    //Loads the requested image and resizes it to the screenSize
+    private BufferedImage loadImage(File imageFile) {
         BufferedImage bufImage = null;
         try {
             bufImage = ImageIO.read(imageFile);
         } catch (IOException e) {
             e.printStackTrace();
+        }
+        int stepStart = Math.round(stepSize / 2f);
+        Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+        assert bufImage != null;
+        Dimension d = ImageUtils.setupImage((int) dim.getHeight(), (int) dim.getWidth(), bufImage.getHeight(), bufImage.getWidth(), stepStart);
+        //   Dimension d = ImageUtils.setupImage((int) dim.getHeight(),(int) dim.getHeight(), bufImage.getHeight(), bufImage.getWidth(), stepStart);
+
+        bufImage = ImageUtils.resizeImageWithHint(bufImage, d.width, d.height, BufferedImage.TYPE_INT_ARGB);
+        if (hasBorders) {
+            bufImage = ImageUtils.drawBorder(bufImage, borderColor, borderWidth);
         }
         return bufImage;
     }

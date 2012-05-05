@@ -17,9 +17,9 @@
 
 package Model;
 
-import AAT.AATImage;
 import AAT.AatObject;
 import AAT.HighMemoryAAT;
+import DataStructures.AATImage;
 import DataStructures.ParticipantData;
 import DataStructures.TestData;
 
@@ -282,26 +282,11 @@ public class AATModel extends Observable {
         String push = newAAT.getPushTag();
         String nDir = newAAT.getNeutralDir();
         String aDir = newAAT.getAffectiveDir();
-        results.put(pull + " & " + nDir, convertToArray(newParticipant.getMeasures(AATImage.PULL, AATImage.NEUTRAL)));
-        results.put(pull + " & " + aDir, convertToArray(newParticipant.getMeasures(AATImage.PULL, AATImage.AFFECTIVE)));
-        results.put(push + " & " + nDir, convertToArray(newParticipant.getMeasures(AATImage.PUSH, AATImage.NEUTRAL)));
-        results.put(push + " & " + aDir, convertToArray(newParticipant.getMeasures(AATImage.PUSH, AATImage.AFFECTIVE)));
+        results.put(pull + " & " + nDir, newParticipant.getMeasures(AATImage.PULL, AATImage.NEUTRAL));
+        results.put(pull + " & " + aDir, newParticipant.getMeasures(AATImage.PULL, AATImage.AFFECTIVE));
+        results.put(push + " & " + nDir, newParticipant.getMeasures(AATImage.PUSH, AATImage.NEUTRAL));
+        results.put(push + " & " + aDir, newParticipant.getMeasures(AATImage.PUSH, AATImage.AFFECTIVE));
         return results;
-    }
-
-    /**
-     * Converts The measurement data to an array. The boxplots needs float arrays as input.
-     *
-     * @param input ArrayList containing longs.
-     * @return Array containing floats
-     */
-    private float[] convertToArray(ArrayList<Long> input) {
-        float[] array = new float[input.size()]; //Create a new array
-        for (int x = 0; x < input.size(); x++) {
-            long l = input.get(x);
-            array[x] = (float) l;
-        }
-        return array;
     }
 
 

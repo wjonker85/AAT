@@ -36,7 +36,7 @@ public class ImageUtils {
         Graphics2D g = bi.createGraphics();
         g.setColor(borderColor);
         g.drawImage(originalImage, borderWidth, borderWidth, null);
-        BasicStroke stroke = new BasicStroke(borderWidth*2);
+        BasicStroke stroke = new BasicStroke(borderWidth * 2);
         g.setStroke(stroke);
 
         g.drawRect(0, 0, bi.getWidth(), bi.getHeight());
@@ -98,15 +98,15 @@ public class ImageUtils {
         /**
          * De daadwerkelijke breedt, hoogte en boorderwidth in variabelen stoppen.
          */
-    //    float imgBorderWidth = (borderWidth * inputY);
+        //    float imgBorderWidth = (borderWidth * inputY);
         imgSizeX = (imgRefactor * size * stepX);
         imgSizeY = (imgRefactor * size * stepY);
-        Dimension d = new Dimension((int) imgSizeX,(int) imgSizeY);
+        Dimension d = new Dimension((int) imgSizeX, (int) imgSizeY);
         return d;
     }
 
     public static Dimension setupImage(int viewHeight, int viewWidth, int imgHeight, int imgWidth, int stepSize) {
         int stepStart = Math.round(stepSize / 2f);
-        return setupImage(viewHeight,viewWidth,imgHeight,imgWidth,stepSize,stepStart,stepStart);
+        return setupImage(viewHeight, viewWidth, imgHeight, imgWidth, stepSize, stepStart, stepStart);
     }
 }

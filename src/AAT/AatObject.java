@@ -19,6 +19,7 @@ package AAT;
 
 
 import Configuration.TestConfig;
+import DataStructures.AATImage;
 import DataStructures.QuestionData;
 import IO.XMLReader;
 

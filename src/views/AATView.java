@@ -17,8 +17,8 @@
 
 package views;
 
-import AAT.AATImage;
 import AAT.Util.ImageUtils;
+import DataStructures.AATImage;
 import Model.AATModel;
 
 import javax.swing.*;

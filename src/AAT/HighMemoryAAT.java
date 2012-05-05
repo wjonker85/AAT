@@ -17,6 +17,8 @@
 
 package AAT;
 
+import DataStructures.AATImage;
+
 import java.awt.*;
 import java.io.File;
 import java.util.ArrayList;
@@ -124,9 +126,11 @@ public class HighMemoryAAT extends AatObject {
         // }
 
         int affectSize = (affectPerc * trialSize) / 100;
+        System.out.println("Affect size " + affectSize);
         int neutralSize = trialSize - affectSize;
-        randomList.addAll(createList(neutralSize, n_pushPerc, neutralImages));
-        randomList.addAll(createList(affectSize, a_pushPerc, affectiveImages));
+        System.out.println("Neutral size " + neutralSize);
+        randomList.addAll(createList(neutralSize, n_pushPerc, neutralImages, AATImage.NEUTRAL));
+        randomList.addAll(createList(affectSize, a_pushPerc, affectiveImages, AATImage.AFFECTIVE));
         Collections.shuffle(randomList);    //Randomise the list
         Runtime runtime = Runtime.getRuntime();
         System.out.println("Free memory : " + runtime.freeMemory());
@@ -141,7 +145,7 @@ public class HighMemoryAAT extends AatObject {
      * @param fileList
      * @return
      */
-    public ArrayList<AATImage> createList(int n, int pushPerc, ArrayList<File> fileList) {
+    public ArrayList<AATImage> createList(int n, int pushPerc, ArrayList<File> fileList, int type) {
         if (n == 0) {
             n = fileList.size() * 2;
         }
@@ -151,13 +155,14 @@ public class HighMemoryAAT extends AatObject {
         for (int x = 0; x < n; x++) {
             File image = fileList.get(x % fileList.size());
             if (x < nPush) {
-                AATImage push = new AATImage(image, AATImage.PUSH, AATImage.NEUTRAL, this);
+                AATImage push = new AATImage(image, AATImage.PUSH, type, this);
                 returnList.add(push);
             } else {
-                AATImage pull = new AATImage(image, AATImage.PULL, AATImage.NEUTRAL, this); //Two instances for every image
+                AATImage pull = new AATImage(image, AATImage.PULL, type, this); //Two instances for every image
                 returnList.add(pull);
             }
         }
+        System.out.println("No images: " + returnList.size());
         return returnList;
     }
 
