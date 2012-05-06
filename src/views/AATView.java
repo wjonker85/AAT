@@ -55,11 +55,12 @@ public class AATView extends JPanel implements Observer {
     public int viewWidth, viewHeight, borderWidth, stepSize, imgBorderWidth, stepStart, inputY, xPos, yPos;
     public float stepCount;
 
+
     private boolean blackScreen = true;
     private boolean showInfo = true;
     private String displayText = "";
     private JEditorPane textPane;
-
+    private Document doc;
 
     /**
      * @param model bevat o.a. waarden uit configuratie bestand
@@ -82,12 +83,9 @@ public class AATView extends JPanel implements Observer {
         HTMLEditorKit kit = new HTMLEditorKit();
         textPane.setEditorKit(kit);
         StyleSheet styleSheet = kit.getStyleSheet();
-        styleSheet.addRule("body {color: white; font-family:times; margin: 0px; background-color: #000;font : 30px monaco;}");
-        styleSheet.addRule("p {color: white; font-family:times; margin: 0px; background-color: #000;font : 30px monaco;}");
-        styleSheet.addRule("h1 {color: blue;font : 30px roman;}");
-        styleSheet.addRule("h2 {color: #ff0000;}");
-        styleSheet.addRule("pre {font : 10px monaco; color : black; background-color : #fafafa; }");
-        Document doc = kit.createDefaultDocument();
+        styleSheet.addRule("body {color: white; font-family:times; margin: 0px; background-color: black;font : 30px monaco;}");
+        doc = kit.createDefaultDocument();
+
         textPane.setDocument(doc);
         this.add(textPane);
         textPane.setBounds(100, 100, screen.width - 100, screen.height - 100);
@@ -143,7 +141,9 @@ public class AATView extends JPanel implements Observer {
         //    textPane.setFont(font);
         textPane.setBackground(new Color(0));
         //    textPane.setForeground(Color.white);
-        textPane.setText(infoText);
+        infoText = infoText.replaceAll("(\r\n|\r|\n|\n\r)", "<br>");
+        textPane.setText("<body>" + infoText + "</body>");
+
         textPane.setEditable(false);
     }
 

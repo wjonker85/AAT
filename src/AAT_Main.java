@@ -23,6 +23,10 @@ import views.TestFrame;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
+import javax.swing.text.html.HTMLEditorKit;
+import javax.swing.text.html.StyleSheet;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -30,6 +34,8 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -105,14 +111,15 @@ public class AAT_Main extends JFrame implements Observer {
         aboutMenu.add(license);
         menuBar.add(aboutMenu);
 
+
         //Show the about dialog
         about.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent actionEvent) {
                 String text = "<center><h1>Approach avoidance task</h1></center>";
                 text += "<center>Created By</center>";
-                text += "<center><h3>Marcel Zuur</h3></center>";
+                text += "<center><h3>Marcel Zuur <a href=\"mailto:marcelzuur@gmail.com\">Email</a></h3></center>";
                 text += "<center>&</center>";
-                text += "<center><h3>Wilfried Jonker</h3></center>";
+                text += "<center><h3>Wilfried Jonker <a href=\"mailto:wilfried@wjonker.nl\">Email</a></h3></center>";
                 AboutDialog aboutDialog = new AboutDialog(null, text);
                 aboutDialog.setVisible(true);
             }
@@ -267,6 +274,30 @@ class AboutDialog extends JDialog {
     public AboutDialog(JFrame parent, String text) {
         super(parent, "About AAT", true);
         JEditorPane textPane = new JEditorPane();
+        textPane.setEditable(false);
+        textPane.addHyperlinkListener(new HyperlinkListener() {
+            @Override
+            public void hyperlinkUpdate(HyperlinkEvent hyperlinkEvent) {
+                HyperlinkEvent.EventType type = hyperlinkEvent.getEventType();
+                if (type == HyperlinkEvent.EventType.ACTIVATED) {
+                    final URL url = hyperlinkEvent.getURL();
+                    try {
+                        URI uri = new URI(url.toString());
+                        Desktop.getDesktop().mail(uri);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+        HTMLEditorKit kit = new HTMLEditorKit();
+        textPane.setEditorKit(kit);
+        StyleSheet styleSheet = kit.getStyleSheet();
+        styleSheet.addRule("body {color: black; font-family:times; margin: 0px; background-color: white;font : 16px monaco;}");
+        styleSheet.addRule("p {color: white; font-family:times; margin: 0px; background-color: #000;font : 30px monaco;}");
+        styleSheet.addRule("h1 {color: blue;font : 24px roman;}");
+        styleSheet.addRule("h2 {color: #ff0000;}");
+        styleSheet.addRule("pre {font : 10px monaco; color : black; background-color : #fafafa; }");
         textPane.setContentType("text/html");
         textPane.setText(text);
         JScrollPane scrollPane = new JScrollPane(textPane);
