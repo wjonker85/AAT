@@ -237,6 +237,15 @@ class LicenseDialog extends JDialog {
         JEditorPane textPane = new JEditorPane();
         textPane.setContentType("text/html");
         textPane.setEditable(false);
+        HTMLEditorKit kit = new HTMLEditorKit();
+        textPane.setEditorKit(kit);
+        StyleSheet styleSheet = kit.getStyleSheet();
+        styleSheet.addRule("body {color: black; font-family:times; margin: 0px; background-color: white;font : 10px monaco;}");
+        styleSheet.addRule("p {color: black; font-family:times; margin: 0px; background-color: white;font : 10px monaco;}");
+        styleSheet.addRule("h1 {color: blue;font : 24px roman;}");
+        styleSheet.addRule("h2 {color: #ff0000;}");
+        styleSheet.addRule("pre {font : 10px monaco; color : black; background-color : #fafafa; }");
+        textPane.setContentType("text/html");
         textPane.addHyperlinkListener(new HyperlinkListener() {
             @Override
             public void hyperlinkUpdate(HyperlinkEvent hyperlinkEvent) {

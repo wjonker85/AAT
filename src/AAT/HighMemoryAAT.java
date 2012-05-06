@@ -112,9 +112,15 @@ public class HighMemoryAAT extends AatObject {
      */
     public ArrayList<AATImage> createRandomListBorders() {
         ArrayList<AATImage> randomList = new ArrayList<AATImage>();
-        int affectSize = (affectPerc * trialSize) / 100;
+        if (trialSize == 0) {  //not set in the config
+            trialSize = (neutralImages.size() + affectiveImages.size()) * 2;
+        }
+        float aSize = (affectPerc * trialSize) / 100f;
+        System.out.println("aSize " + aSize);
+        int affectSize = Math.round(aSize);
+        System.out.println("Affect size " + affectSize);
         int neutralSize = trialSize - affectSize;
-
+        System.out.println("Neutral size " + neutralSize);
         randomList.addAll(createList(neutralSize, n_pushPerc, neutralImages, AATImage.NEUTRAL));
         randomList.addAll(createList(affectSize, a_pushPerc, affectiveImages, AATImage.AFFECTIVE));
         Collections.shuffle(randomList);    //Randomise the list

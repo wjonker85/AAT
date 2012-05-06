@@ -116,6 +116,7 @@ public class TestFrame extends JFrame implements Observer {
 
         //Results Screen
         if (o.toString().equals("Display results")) {
+
             boxPlot.init();
             boxPlot.display(true);
             cl.show(displayPanel, "boxPlot");

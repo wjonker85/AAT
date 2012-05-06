@@ -19,6 +19,8 @@ package views;
 
 import processing.core.PApplet;
 
+import javax.swing.*;
+
 /**
  * Created by IntelliJ IDEA.
  * User: Wilfried
@@ -81,22 +83,32 @@ public class DescriptiveStats extends PApplet {
      * @return minValue (float)
      */
     public float minValue() {
-        newArray = sort(newArray);
-        int posQ1 = ceil((newArray.length) * .25f) - 1;
-        int posQ3 = ceil((newArray.length) * .75f) - 1;
+        int n = 0;
+        try {
+            newArray = sort(newArray);
+            int posQ1 = ceil((newArray.length) * .25f) - 1;
+            int posQ3 = ceil((newArray.length) * .75f) - 1;
 
-        float ika = newArray[posQ3] - newArray[posQ1];
-        float minValue = newArray[posQ1] - (1.5f * ika);
+            float ika = newArray[posQ3] - newArray[posQ1];
+            float minValue = newArray[posQ1] - (1.5f * ika);
 
-        if (minValue <= newArray[0]) {
-            return newArray[0];
-        } else {
-            int n = 0;
-            while (newArray[n] < minValue) {
-                n++;
+            if (minValue <= newArray[0]) {
+                return newArray[0];
+            } else {
+                while (newArray[n] < minValue) {
+                    n++;
+                }
+
             }
-            return newArray[n];
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null,
+                    "Problem displaying boxplot: \n" +
+                            "Not enough measurements in every category to calculate all the values the boxplot needs,\n" +
+                            "Click on ok, then press the joystick button to finish the test.",
+                    "Boxplot error",
+                    JOptionPane.ERROR_MESSAGE);
         }
+        return newArray[n];
     }
 
     /**
