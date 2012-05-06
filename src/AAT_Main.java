@@ -237,6 +237,22 @@ class LicenseDialog extends JDialog {
         JEditorPane textPane = new JEditorPane();
         textPane.setContentType("text/html");
         textPane.setEditable(false);
+        textPane.addHyperlinkListener(new HyperlinkListener() {
+            @Override
+            public void hyperlinkUpdate(HyperlinkEvent hyperlinkEvent) {
+                HyperlinkEvent.EventType type = hyperlinkEvent.getEventType();
+                if (type == HyperlinkEvent.EventType.ACTIVATED) {
+                    final URL url = hyperlinkEvent.getURL();
+                    try {
+                        URI uri = new URI(url.toString());
+                        Desktop.getDesktop().browse(uri);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+
         JScrollPane scrollPane = new JScrollPane(textPane);
         File f = new File("License" + File.separatorChar + "gpl.html");
         java.net.URL fileURL = null;
