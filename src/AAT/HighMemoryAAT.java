@@ -112,19 +112,6 @@ public class HighMemoryAAT extends AatObject {
      */
     public ArrayList<AATImage> createRandomListBorders() {
         ArrayList<AATImage> randomList = new ArrayList<AATImage>();
-        // for (File image : neutralImages) {                //Load the neutral images
-        //    AATImage pull = new AATImage(image, AATImage.PULL, AATImage.NEUTRAL, this); //Two instances for every image
-        //    randomList.add(pull);
-        //    AATImage push = new AATImage(image, AATImage.PUSH, AATImage.NEUTRAL, this);
-        //    randomList.add(push);
-        // }
-        // for (File image : affectiveImages) {    //Load the affective images
-        //    AATImage pull = new AATImage(image, AATImage.PULL, AATImage.AFFECTIVE, this); //Two instances for every image
-        //    randomList.add(pull);
-        //    AATImage push = new AATImage(image, AATImage.PUSH, AATImage.AFFECTIVE, this);
-        //    randomList.add(push);
-        // }
-
         int affectSize = (affectPerc * trialSize) / 100;
         int neutralSize = trialSize - affectSize;
 
