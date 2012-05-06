@@ -17,6 +17,7 @@
 
 package views;
 
+import AAT.Util.SpringUtilities;
 import DataStructures.QuestionData;
 import DataStructures.Questionnaire;
 import Model.AATModel;
@@ -43,6 +44,7 @@ public class QuestionPanel extends JPanel {
 
     private JPanel questionsPanel;
     private Map<String, DisplayQuestion> questionsMap = new HashMap<String, DisplayQuestion>();
+    private int maxLabelSize = 0;
 
 
     public QuestionPanel(final AATModel model) {
@@ -111,7 +113,6 @@ public class QuestionPanel extends JPanel {
         for (String key : questionsMap.keySet()) {
             DisplayQuestion q = questionsMap.get(key);
             if (q.getValue().equals("") && q.isRequired) {
-                System.out.println("Nog niet beantwoord");
                 q.changeAsteriskColor(Color.red);
                 count++;
             } else {
@@ -177,16 +178,21 @@ public class QuestionPanel extends JPanel {
                 questionnaire.getExtraQuestions().size(), 2, //rows, cols
                 6, 6,        //initX, initY
                 6, 6);       //xPad, yPad
+        for (String key : questionsMap.keySet()) {
+            DisplayQuestion q = questionsMap.get(key);
+            q.changeLabelSize(maxLabelSize);
+        }
         this.repaint();
     }
 
-    private int calculateLabelWidth(JLabel label) {
+    private void calculateLabelWidth(JLabel label) {
         Font labelFont = label.getFont();
         String labelText = label.getText();
 
         int stringWidth = label.getFontMetrics(labelFont).stringWidth(labelText);
-        System.out.println(stringWidth);
-        return stringWidth;
+        if (stringWidth > maxLabelSize) {
+            maxLabelSize = stringWidth;
+        }
     }
 
     /*
@@ -211,34 +217,50 @@ public class QuestionPanel extends JPanel {
 
         private ButtonGroup semDiffScale;
         private int size;
+        private JLabel leftLabel;
 
         public SemDiffPanel(int size, String left, String right, boolean isRequired) {
             super();
             this.isRequired = isRequired;
             this.size = size;
+            this.setLayout(new FlowLayout(FlowLayout.LEFT));
             this.setBackground(Color.black);
             this.setForeground(Color.white);
-
-            JLabel leftLabel = new JLabel(left);
+            JPanel buttonPanel = new JPanel();
+            buttonPanel.setLayout(new GridLayout(2, size, 20, 0));
+            buttonPanel.setForeground(Color.white);
+            buttonPanel.setBackground(Color.black);
+            leftLabel = new JLabel(left, JLabel.RIGHT);
             leftLabel.setForeground(Color.WHITE);
             leftLabel.setBackground(Color.black);
-            this.add(Box.createHorizontalStrut(300));
+            //   leftLabel.setPreferredSize(new Dimension(150,30));
+
+
             this.add(leftLabel);
+            calculateLabelWidth(leftLabel);
+            this.add(Box.createHorizontalStrut(20));//20px margin
             semDiffScale = new ButtonGroup();
+
+            for (int x = 0; x < size; x++) {
+                int step = size / 2;
+                JLabel label = new JLabel(String.valueOf(x - step), JLabel.CENTER);
+                label.setForeground(Color.white);
+                buttonPanel.add(label);
+
+            }
 
             for (int x = 0; x < size; x++) {
                 JRadioButton likertButton = new JRadioButton();
                 likertButton.setBackground(Color.black);
                 likertButton.setForeground(Color.white);
-                int step = size / 2;
-                JLabel label = new JLabel(String.valueOf(x - step));
-                label.setForeground(Color.white);
-                this.add(label);
-                this.add(likertButton);
+                buttonPanel.add(likertButton);
                 semDiffScale.add(likertButton);
             }
 
-            JLabel rightLabel = new JLabel(right, JLabel.TRAILING);
+
+            this.add(buttonPanel);
+            this.add(Box.createHorizontalStrut(20));//20px margin
+            JLabel rightLabel = new JLabel(right, JLabel.LEFT);
             rightLabel.setForeground(Color.white);
             rightLabel.setBackground(Color.black);
             this.add(rightLabel);
@@ -269,6 +291,11 @@ public class QuestionPanel extends JPanel {
         public String getType() {
             return "sem_diff";
         }
+
+        public void changeLabelSize(int width) {
+            leftLabel.setPreferredSize(new Dimension(width, 20));
+            repaint();
+        }
     }
 
     class TextAreaPanel extends DisplayQuestion {
@@ -283,6 +310,7 @@ public class QuestionPanel extends JPanel {
             JScrollPane scrollPane = new JScrollPane(textArea);
             scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
             //  JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+            this.setLayout(new FlowLayout(FlowLayout.LEFT));
             add(scrollPane);
             setBackground(Color.black);
             setForeground(Color.white);
@@ -302,6 +330,11 @@ public class QuestionPanel extends JPanel {
         @Override
         public String getType() {
             return "textArea";
+        }
+
+        @Override
+        public void changeLabelSize(int width) {
+
         }
 
 
@@ -335,6 +368,11 @@ public class QuestionPanel extends JPanel {
         @Override
         public String getType() {
             return "open";
+        }
+
+        @Override
+        public void changeLabelSize(int width) {
+            //To change body of implemented methods use File | Settings | File Templates.
         }
 
 
@@ -376,12 +414,18 @@ public class QuestionPanel extends JPanel {
             return "closed";
         }
 
+        @Override
+        public void changeLabelSize(int width) {
+
+        }
+
     }
 
     class LikertPanel extends DisplayQuestion {
 
 
         private ButtonGroup likertScale;
+        private JLabel leftLabel;
 
         public LikertPanel(int size, String left, String right, boolean isRequired) {
             super();
@@ -390,24 +434,34 @@ public class QuestionPanel extends JPanel {
             this.setBackground(Color.black);
             this.setForeground(Color.white);
 
-            JLabel leftLabel = new JLabel(left);
+            leftLabel = new JLabel(left, JLabel.RIGHT);
             leftLabel.setForeground(Color.WHITE);
             leftLabel.setBackground(Color.black);
             this.add(leftLabel);
+            this.add(Box.createHorizontalStrut(20));//20px margin
+            calculateLabelWidth(leftLabel);
             likertScale = new ButtonGroup();
-            System.out.println(leftLabel.getSize());
+            JPanel buttonPanel = new JPanel(new GridLayout(2, size, 20, 0));
+            buttonPanel.setForeground(Color.white);
+            buttonPanel.setBackground(Color.black);
+            for (int x = 0; x < size; x++) {
+                JLabel label = new JLabel(String.valueOf(x + 1), JLabel.CENTER);
+                label.setForeground(Color.white);
+                buttonPanel.add(label);
+            }
+
             for (int x = 0; x < size; x++) {
                 JRadioButton likertButton = new JRadioButton();
                 likertButton.setBackground(Color.black);
                 likertButton.setForeground(Color.white);
-                JLabel label = new JLabel(String.valueOf(x + 1));
-                label.setForeground(Color.white);
-                this.add(label);
-                this.add(likertButton);
+
+                buttonPanel.add(likertButton);
                 likertScale.add(likertButton);
             }
-
-            JLabel rightLabel = new JLabel(right, JLabel.TRAILING);
+            this.add(buttonPanel);
+            this.add(Box.createHorizontalStrut(20));//20px margin
+            JLabel rightLabel = new JLabel(right, JLabel.LEFT);
+            //    rightLabel.setPreferredSize(new Dimension(200,30));
             rightLabel.setForeground(Color.white);
             rightLabel.setBackground(Color.black);
             this.add(rightLabel);
@@ -418,6 +472,11 @@ public class QuestionPanel extends JPanel {
             if (isRequired) {
                 add(asterisks);
             }
+        }
+
+        public void changeLabelSize(int width) {
+            leftLabel.setPreferredSize(new Dimension(width, 20));
+            repaint();
         }
 
         public String getValue() {
@@ -455,6 +514,8 @@ abstract class DisplayQuestion extends JPanel {
     public abstract String getValue();
 
     public abstract String getType();
+
+    public abstract void changeLabelSize(int width);
 
     public void setRequired(Boolean isRequired) {
         this.isRequired = isRequired;

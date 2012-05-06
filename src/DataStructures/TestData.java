@@ -81,7 +81,6 @@ public class TestData {
         if (participantsList.getLength() > 0) {
             Element lastParticipant = (Element) participantsList.item(participantsList.getLength() - 1);
             // Node id = lastParticipant.getAttributes().getNamedItem("id");
-            System.out.println("Highest id = " + lastParticipant.getAttribute("id"));
             return Integer.parseInt(lastParticipant.getAttribute("id"));
         } else {       //No data present, so start with 0
             return 0;

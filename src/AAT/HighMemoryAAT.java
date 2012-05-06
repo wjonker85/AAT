@@ -126,9 +126,8 @@ public class HighMemoryAAT extends AatObject {
         // }
 
         int affectSize = (affectPerc * trialSize) / 100;
-        System.out.println("Affect size " + affectSize);
         int neutralSize = trialSize - affectSize;
-        System.out.println("Neutral size " + neutralSize);
+
         randomList.addAll(createList(neutralSize, n_pushPerc, neutralImages, AATImage.NEUTRAL));
         randomList.addAll(createList(affectSize, a_pushPerc, affectiveImages, AATImage.AFFECTIVE));
         Collections.shuffle(randomList);    //Randomise the list
@@ -162,7 +161,6 @@ public class HighMemoryAAT extends AatObject {
                 returnList.add(pull);
             }
         }
-        System.out.println("No images: " + returnList.size());
         return returnList;
     }
 

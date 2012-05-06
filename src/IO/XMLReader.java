@@ -96,7 +96,6 @@ public class XMLReader {
         NodeList questionList = allQuestions.getElementsByTagName("question");
         QuestionData newQuestion = null;
 
-        System.out.println("No questions " + questionList.getLength());
         for (int x = 0; x < questionList.getLength(); x++) {
             Node fstNode = questionList.item(x);
 
@@ -105,7 +104,6 @@ public class XMLReader {
                 String type = element.getAttribute("type");
                 String required = element.getAttribute("required");
 
-                System.out.println("Type " + type);
                 newQuestion = new QuestionData(type);
                 if (required.equalsIgnoreCase("false")) {
                     newQuestion.setRequired(false);
@@ -113,11 +111,8 @@ public class XMLReader {
                 newQuestion.setQuestion(getValue("text", element));
                 newQuestion.setKey(getValue("key", element));
                 if (type.equals("closed")) {
-                    //    Element text = (Element) element.getElementsByTagName("text");
-
-
                     NodeList optionList = element.getElementsByTagName("option");
-                    System.out.println("No options " + optionList.getLength());
+
                     for (int i = 0; i < optionList.getLength(); i++) {
                         Node oNode = optionList.item(i);
                         if (oNode.getNodeType() == Node.ELEMENT_NODE) {
@@ -134,12 +129,7 @@ public class XMLReader {
                     newQuestion.setRightText(getValue("right", element));
                     String size = getValue("size", element);
                     newQuestion.setSize(Integer.parseInt(size));
-                    System.out.println("Left text " + newQuestion.getLeftText());
                 }
-
-
-                System.out.println(newQuestion.getKey() + " " + newQuestion.getQuestion());
-                //   System.out.println(element.getAttribute("type"));
             }
             extraQuestions.add(newQuestion);
         }

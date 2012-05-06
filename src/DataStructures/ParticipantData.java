@@ -90,12 +90,10 @@ public class ParticipantData {
                 }
             }
         }
-        System.out.println("Direction " + direction + " type " + type + "has " + results.size());
         return convertToArray(results);
     }
 
     public ArrayList<ImageMeasureData> getMeasurements(int trial) {    //return the list for a trial
-        System.out.println("Measurements " + allMeasures.size() + " trial " + trial);
         return allMeasures.get(trial);
     }
 
@@ -115,7 +113,6 @@ public class ParticipantData {
             long l = input.get(x);
             array[x] = (float) l;
         }
-        System.out.println("ArrayList");
         return array;
     }
 }

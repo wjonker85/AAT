@@ -84,7 +84,7 @@ public class DescriptiveStats extends PApplet {
         newArray = sort(newArray);
         int posQ1 = ceil((newArray.length) * .25f) - 1;
         int posQ3 = ceil((newArray.length) * .75f) - 1;
-        System.out.println("Array Length" + newArray.length);
+
         float ika = newArray[posQ3] - newArray[posQ1];
         float minValue = newArray[posQ1] - (1.5f * ika);
 

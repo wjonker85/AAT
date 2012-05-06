@@ -17,6 +17,7 @@
 
 package views;
 
+import AAT.Util.SpringUtilities;
 import IO.DataExporter;
 import Model.AATModel;
 
@@ -175,7 +176,7 @@ public class ExportDataDialog extends JFrame {
         try {
             perc = Integer.parseInt(errorPerc.getText());
         } catch (Exception e) {
-            System.out.println("Error percentage is not a number");
+            throw new SubmitDataException("Error percentage is not a number");
         }
         if (perc < 0) {
             throw new SubmitDataException("Error percentage can't be smaller than 0%");

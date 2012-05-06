@@ -350,13 +350,11 @@ public abstract class AatObject {
 
     private int getPercentage(String ratio, String s) throws FalseConfigException {
         if (!ratio.contains(":")) {
-            System.out.println("eerste");
             throw new FalseConfigException(s + " is not a correct ratio");
         }
 
         String[] str = ratio.split(":");
         if (str.length != 2) {
-            System.out.println("tweede" + "lengte " + str.length);
             throw new FalseConfigException(s + " is not a correct ratio");
         }
         float first, second;
@@ -370,7 +368,6 @@ public abstract class AatObject {
             return 0;
         }
         int total = (int) (first + second);
-        System.out.println("Total " + total);
         return (int) ((first / total) * 100f);
 
     }
