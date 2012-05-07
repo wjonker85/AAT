@@ -79,14 +79,6 @@ public class AATView extends JPanel implements Observer {
         this.setBackground(Color.black);
         textPane = new JEditorPane();
 
-        textPane.setContentType("text/html");
-        HTMLEditorKit kit = new HTMLEditorKit();
-        textPane.setEditorKit(kit);
-        StyleSheet styleSheet = kit.getStyleSheet();
-        styleSheet.addRule("body {color: white; font-family:times; margin: 0px; background-color: black;font : 30px monaco;}");
-        doc = kit.createDefaultDocument();
-
-        textPane.setDocument(doc);
         this.add(textPane);
         textPane.setBounds(100, 100, screen.width - 100, screen.height - 100);
         textPane.setEditable(false);
@@ -119,6 +111,14 @@ public class AATView extends JPanel implements Observer {
             textPane.setVisible(false);
             imageShow(g);                                    // Geef AAT weer
         } else if (showInfo) {
+            textPane.setContentType("text/html");
+            HTMLEditorKit kit = new HTMLEditorKit();
+            textPane.setEditorKit(kit);
+
+            StyleSheet styleSheet = kit.getStyleSheet();
+            styleSheet.addRule("body {color: white; font-family:times; margin: 0px; background-color: black;font : 30px monaco;}");
+            doc = kit.createDefaultDocument();
+            textPane.setDocument(doc);
             infoShow(displayText);                          // Geef instructie tekst weer
         } else {
             textPane.setVisible(false);

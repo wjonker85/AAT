@@ -23,6 +23,9 @@ import DataStructures.Questionnaire;
 import Model.AATModel;
 
 import javax.swing.*;
+import javax.swing.text.Document;
+import javax.swing.text.html.HTMLEditorKit;
+import javax.swing.text.html.StyleSheet;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -50,9 +53,13 @@ public class QuestionPanel extends JPanel {
     public QuestionPanel(final AATModel model) {
         //  super(new BoxLayout(this, BoxLayout.Y_AXIS));
         JPanel mainPanel = new JPanel();
+        JPanel contentPanel = new JPanel();
+        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
+        contentPanel.setBackground(Color.black);
+        contentPanel.setForeground(Color.white);
         mainPanel.setBackground(Color.black);
         mainPanel.setForeground(Color.white);
-        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+        mainPanel.setLayout(new FlowLayout(FlowLayout.CENTER));    //TODO even naar kijken
         Dimension screen = getToolkit().getScreenSize();
         //  this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         this.setLayout(new GridBagLayout());
@@ -78,11 +85,9 @@ public class QuestionPanel extends JPanel {
         introductionPane.setText(model.getTest().getQuestionnaire().getIntroduction() + "\n\n");
         questionnairePanel.add(introductionPane);
         questionnairePanel.add(questionsPanel);
-        JScrollPane scrollPane = new JScrollPane(questionnairePanel);
-        scrollPane.setBorder(BorderFactory.createEmptyBorder());
-        scrollPane.setBackground(Color.black);
-        scrollPane.setForeground(Color.white);
-        mainPanel.add(scrollPane);
+        contentPanel.add(questionnairePanel);
+
+        // mainPanel.add(scrollPane);
         //   questionsPanel.add(introductionPane);
 
         JButton submitButton = new JButton("Submit");
@@ -102,9 +107,21 @@ public class QuestionPanel extends JPanel {
         buttonPanel.setBackground(Color.black);
         buttonPanel.setForeground(Color.white);
         buttonPanel.add(submitButton);
-        mainPanel.add(buttonPanel);
+        contentPanel.add(buttonPanel);
+        //    mainPanel.add(contentPanel);
+        JScrollPane scrollPane = new JScrollPane(contentPanel);
+        scrollPane.setPreferredSize(new Dimension((int) (0.8 * screen.width), (int) (0.8 * screen.height)));
+        scrollPane.setMinimumSize(new Dimension((int) (0.8 * screen.width), (int) (0.8 * screen.height)));
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        scrollPane.setBackground(Color.black);
+        scrollPane.setForeground(Color.white);
+        JScrollBar vertical = scrollPane.getVerticalScrollBar();
+        InputMap im = vertical.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+        im.put(KeyStroke.getKeyStroke("DOWN"), "positiveUnitIncrement");
+        im.put(KeyStroke.getKeyStroke("UP"), "negativeUnitIncrement");
+        mainPanel.add(scrollPane);
         this.add(mainPanel, new GridBagConstraints());
-        //   repaint();
+        repaint();
     }
 
 
@@ -135,40 +152,63 @@ public class QuestionPanel extends JPanel {
     public void displayQuestions(Questionnaire questionnaire) {
         for (QuestionData questionObject : questionnaire.getExtraQuestions()) {
 
-            JLabel question = new JLabel(questionObject.getQuestion(), JLabel.TRAILING);
+            //   JLabel question = new JLabel(questionObject.getQuestion(), JLabel.TRAILING);
+            Dimension screen = getToolkit().getScreenSize();
+            JEditorPane question = new JEditorPane();
+            question.setEditable(false);
+            question.setMaximumSize(new Dimension(screen.width / 3, screen.height));
+            question.setMinimumSize(new Dimension(screen.width / 3, 20));
+            question.setPreferredSize(new Dimension(screen.width / 3, 20));
+            question.setContentType("text/html");
+
+            //   question.setPreferredSize(new Dimension(screen.width/3,screen.height));
+            HTMLEditorKit kit = new HTMLEditorKit();
+            question.setEditorKit(kit);
+            StyleSheet styleSheet = kit.getStyleSheet();
+            styleSheet.addRule("body {color: white; font-family:times; margin: 0px; background-color: black;font : 11px monaco;}");
+            Document doc = kit.createDefaultDocument();
+
+            question.setDocument(doc);
+            question.setText("<body>" + questionObject.getQuestion() + "</body>");
             question.setBackground(Color.black);
             question.setForeground(Color.WHITE);
-            question.setFont(new Font("Roman", Font.PLAIN, 16));
+            //    question.setFont(new Font("Roman", Font.PLAIN, 16));
             questionsPanel.add(question);
-            if (questionObject.getType().equals("closed")) {
-                ClosedQuestionPanel answerOptions = new ClosedQuestionPanel(questionObject.getOptions().toArray(), questionObject.isRequired());
-                question.setLabelFor(answerOptions);
+            if (questionObject.getType().equals("closed_combo")) {
+                ClosedComboPanel answerOptions = new ClosedComboPanel(questionObject.getOptions().toArray(), questionObject.isRequired());
+                //   question.setLabelFor(answerOptions);
                 questionsPanel.add(answerOptions);
                 questionsMap.put(questionObject.getKey(), answerOptions);
             }
+            if (questionObject.getType().equals("closed_buttons")) {
+                ClosedButtonsPanel closedButtons = new ClosedButtonsPanel(questionObject.getOptions().toArray(), questionObject.isRequired());
+                //   question.setLabelFor(closedButtons);
+                questionsPanel.add(closedButtons);
+                questionsMap.put(questionObject.getKey(), closedButtons);
+            }
             if (questionObject.getType().equals("open")) {
                 OpenQuestionPanel textInput = new OpenQuestionPanel(questionObject.isRequired());
-                question.setLabelFor(textInput);
+                //    question.setLabelFor(textInput);
                 questionsPanel.add(textInput);
                 questionsMap.put(questionObject.getKey(), textInput);
             }
 
             if (questionObject.getType().equals("textarea")) {
                 TextAreaPanel textArea = new TextAreaPanel(questionObject.isRequired());
-                question.setLabelFor(textArea);
+                //    question.setLabelFor(textArea);
                 questionsPanel.add(textArea);
                 questionsMap.put(questionObject.getKey(), textArea);
             }
             if (questionObject.getType().equals("likert")) {
                 LikertPanel likertScale = new LikertPanel(questionObject.getSize(), questionObject.getLeftText(), questionObject.getRightText(), questionObject.isRequired());
-                question.setLabelFor(likertScale);
+                //    question.setLabelFor(likertScale);
                 questionsPanel.add(likertScale);
                 questionsMap.put(questionObject.getKey(), likertScale);
             }
 
             if (questionObject.getType().equals("sem_diff")) {
                 SemDiffPanel semanticDifferential = new SemDiffPanel(questionObject.getSize(), questionObject.getLeftText(), questionObject.getRightText(), questionObject.isRequired());
-                question.setLabelFor(semanticDifferential);
+                //   question.setLabelFor(semanticDifferential);
                 questionsPanel.add(semanticDifferential);
                 questionsMap.put(questionObject.getKey(), semanticDifferential);
             }
@@ -340,6 +380,67 @@ public class QuestionPanel extends JPanel {
 
     }
 
+    class ClosedButtonsPanel extends DisplayQuestion {
+
+        private ButtonGroup closedButtons;
+
+        public ClosedButtonsPanel(Object[] options, boolean isRequired) {
+            super();
+            this.isRequired = isRequired;
+            closedButtons = new ButtonGroup();
+            JPanel answerPanel = new JPanel(new SpringLayout());
+            answerPanel.setBackground(Color.black);
+            answerPanel.setForeground(Color.white);
+            setLayout(new FlowLayout(FlowLayout.LEFT));
+            setBackground(Color.black);
+            setForeground(Color.white);
+            for (int x = 0; x < options.length; x++) {
+                JRadioButton button = new JRadioButton();
+                button.setBackground(Color.black);
+                button.setForeground(Color.white);
+                closedButtons.add(button);
+                JLabel answerOption = new JLabel(options[x].toString(), JLabel.LEFT);
+                answerOption.setBackground(Color.black);
+                answerOption.setForeground(Color.white);
+                answerOption.setLabelFor(button);
+                answerPanel.add(button);
+                answerPanel.add(answerOption);
+            }
+            this.add(answerPanel);
+            SpringUtilities.makeCompactGrid(answerPanel,
+                    options.length, 2, //rows, cols
+                    6, 6,        //initX, initY
+                    6, 6);       //xPad, yPad
+            if (isRequired) {
+                add(asterisks);
+            }
+        }
+
+        @Override
+        public String getValue() {
+            int x = 1;
+            for (Enumeration e = closedButtons.getElements(); e.hasMoreElements(); ) {
+                JRadioButton b = (JRadioButton) e.nextElement();
+                if (b.isSelected()) {
+                    return String.valueOf(x);
+                }
+                x++;
+
+            }
+            return "";
+        }
+
+        @Override
+        public String getType() {
+            return "closed_button";
+        }
+
+        @Override
+        public void changeLabelSize(int width) {
+
+        }
+    }
+
     class OpenQuestionPanel extends DisplayQuestion {
 
         JTextField textInput;
@@ -349,7 +450,7 @@ public class QuestionPanel extends JPanel {
             this.isRequired = isRequired;
             textInput = new JTextField(10);
             setLayout(new FlowLayout(FlowLayout.LEFT));
-            //  JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+            // JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
             setBackground(Color.black);
             setForeground(Color.white);
             add(textInput);
@@ -379,11 +480,11 @@ public class QuestionPanel extends JPanel {
     }
 
 
-    class ClosedQuestionPanel extends DisplayQuestion {
+    class ClosedComboPanel extends DisplayQuestion {
 
         JComboBox answerOptions;
 
-        public ClosedQuestionPanel(Object[] options, boolean isRequired) {
+        public ClosedComboPanel(Object[] options, boolean isRequired) {
             super();
             this.isRequired = isRequired;
             Object[] newOptions = new Object[options.length + 1];
@@ -406,7 +507,14 @@ public class QuestionPanel extends JPanel {
 
         @Override
         public String getValue() {
-            return answerOptions.getSelectedItem().toString();
+            for (int x = 1; x < answerOptions.getItemCount(); x++) {
+                Object option = answerOptions.getItemAt(x);
+                if (option.equals(answerOptions.getSelectedItem())) {
+                    System.out.println(x + " is geselecteerd");
+                    return String.valueOf(x);
+                }
+            }
+            return "";
         }
 
         @Override

@@ -359,6 +359,7 @@ public class AATModel extends Observable {
                 testStatus = AATModel.TEST_STOPPED;
                 this.setChanged();
                 if (newAAT.getDisplayQuestions().equals("After")) {
+                    System.out.println("Zou vragen moeten laten zien");
                     this.notifyObservers("Show questions");
                 } else {
                     this.notifyObservers("Finished");

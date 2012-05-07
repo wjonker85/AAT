@@ -110,7 +110,7 @@ public class XMLReader {
                 }
                 newQuestion.setQuestion(getValue("text", element));
                 newQuestion.setKey(getValue("key", element));
-                if (type.equals("closed")) {
+                if (type.equals("closed_combo") || type.equals("closed_buttons")) {
                     NodeList optionList = element.getElementsByTagName("option");
 
                     for (int i = 0; i < optionList.getLength(); i++) {
