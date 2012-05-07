@@ -535,7 +535,6 @@ public class QuestionPanel extends JPanel {
             for (int x = 1; x < answerOptions.getItemCount(); x++) {
                 Object option = answerOptions.getItemAt(x);
                 if (option.equals(answerOptions.getSelectedItem())) {
-                    System.out.println(x + " is geselecteerd");
                     return String.valueOf(x);
                 }
             }

@@ -194,8 +194,10 @@ public class AATModel extends Observable {
 
                 } else if (run == repeat) {   //No more runs left, Test has ended
                     testStatus = AATModel.TEST_SHOW_FINISHED;    //Notify observers about it
+                    if (!newAAT.getDisplayQuestions().equals("After")) {  //questionnaire has to be added at the end
+                        testData.addParticipant(newParticipant);
+                    }
                     this.setChanged();
-                    testData.addParticipant(newParticipant);
                     notifyObservers("Show finished");   //First show black screen
                 } else {           //Continue with a new run
                     if (newAAT.hasColoredBorders()) {
@@ -359,7 +361,6 @@ public class AATModel extends Observable {
                 testStatus = AATModel.TEST_STOPPED;
                 this.setChanged();
                 if (newAAT.getDisplayQuestions().equals("After")) {
-                    System.out.println("Zou vragen moeten laten zien");
                     this.notifyObservers("Show questions");
                 } else {
                     this.notifyObservers("Finished");
@@ -407,6 +408,7 @@ public class AATModel extends Observable {
         this.newParticipant.addQuestionData(extraQuestions);
         this.setChanged();
         if (newAAT.getDisplayQuestions().equals("After")) {
+            testData.addParticipant(newParticipant);
             this.notifyObservers("Finished");
         } else {
             this.notifyObservers("Start");
