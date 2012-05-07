@@ -48,7 +48,8 @@ public class QuestionPanel extends JPanel {
     private JPanel questionsPanel;
     private Map<String, DisplayQuestion> questionsMap = new HashMap<String, DisplayQuestion>();
     private int maxLabelSize = 0;
-
+    private JScrollPane scrollPane;
+    private JTextArea introductionPane;
 
     public QuestionPanel(final AATModel model) {
         //  super(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -77,13 +78,22 @@ public class QuestionPanel extends JPanel {
         questionsPanel.setForeground(Color.WHITE);
         JPanel questionnairePanel = new JPanel();
         questionnairePanel.setLayout(new BoxLayout(questionnairePanel, BoxLayout.Y_AXIS));
-        JTextPane introductionPane = new JTextPane();
+        questionnairePanel.setBackground(Color.black);
+        questionnairePanel.setForeground(Color.white);
+        introductionPane = new JTextArea();
+        //   introductionPane.setColumns(80);
+        introductionPane.setLineWrap(true);
+        introductionPane.setWrapStyleWord(true);
         introductionPane.setForeground(Color.white);
         introductionPane.setBackground(Color.black);
         introductionPane.setEditable(false);
+
         introductionPane.setFont(new Font("Roman", Font.PLAIN, 24));
-        introductionPane.setText(model.getTest().getQuestionnaire().getIntroduction() + "\n\n");
+        introductionPane.setText(model.getTest().getQuestionnaire().getIntroduction());
+        //  introductionPane.setMaximumSize(new Dimension((int) (0.75 * screen.width), screen.height));
+        //  introductionPane.setMinimumSize(new Dimension((int) (0.75* screen.width), 50));
         questionnairePanel.add(introductionPane);
+        questionnairePanel.add(Box.createVerticalStrut(20)); //small margin
         questionnairePanel.add(questionsPanel);
         contentPanel.add(questionnairePanel);
 
@@ -109,9 +119,15 @@ public class QuestionPanel extends JPanel {
         buttonPanel.add(submitButton);
         contentPanel.add(buttonPanel);
         //    mainPanel.add(contentPanel);
-        JScrollPane scrollPane = new JScrollPane(contentPanel);
-        scrollPane.setPreferredSize(new Dimension((int) (0.8 * screen.width), (int) (0.8 * screen.height)));
-        scrollPane.setMinimumSize(new Dimension((int) (0.8 * screen.width), (int) (0.8 * screen.height)));
+        //   JScrollPane scrollPane = new JScrollPane(contentPanel,
+        //         JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+        //        JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane = new JScrollPane(contentPanel);
+        scrollPane.setPreferredSize(new Dimension((int) (0.8 * screen.width), (int) (0.75 * screen.height)));
+        scrollPane.setMinimumSize(new Dimension((int) (0.8 * screen.width), (int) (0.75 * screen.height)));
+        scrollPane.setMaximumSize(new Dimension((int) (0.8 * screen.width), (int) (0.75 * screen.height)));
+
+
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
         scrollPane.setBackground(Color.black);
         scrollPane.setForeground(Color.white);
@@ -222,7 +238,14 @@ public class QuestionPanel extends JPanel {
             DisplayQuestion q = questionsMap.get(key);
             q.changeLabelSize(maxLabelSize);
         }
-        this.repaint();
+        scrollPane.getVerticalScrollBar().setValue(0);
+
+        scrollPane.getViewport().setViewPosition(new Point(0, 0));
+        scrollPane.repaint();
+        introductionPane.setSelectionStart(0);
+        introductionPane.setSelectionEnd(0);
+        //   jv.setViewPosition(new Point(0,0));
+        //  this.repaint();
     }
 
     private void calculateLabelWidth(JLabel label) {
@@ -347,6 +370,7 @@ public class QuestionPanel extends JPanel {
             this.isRequired = isRequired;
             textArea = new JTextArea(10, 40);
             textArea.setLineWrap(true);
+            textArea.setWrapStyleWord(true);
             JScrollPane scrollPane = new JScrollPane(textArea);
             scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
             //  JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));

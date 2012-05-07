@@ -333,6 +333,9 @@ public abstract class AatObject {
                 throw new FalseConfigException("TrialSize is not set to a correct number");
             }
         }
+        if (breakAfter == repeat) {
+            throw new FalseConfigException("Number of trials and Break After values cannot be the same");
+        }
     }
 
 
