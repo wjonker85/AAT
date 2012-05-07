@@ -81,6 +81,7 @@ public class QuestionPanel extends JPanel {
         questionnairePanel.setBackground(Color.black);
         questionnairePanel.setForeground(Color.white);
         introductionPane = new JTextArea();
+        introductionPane.setBorder(BorderFactory.createLineBorder(Color.black, 10));
         //   introductionPane.setColumns(80);
         introductionPane.setLineWrap(true);
         introductionPane.setWrapStyleWord(true);
@@ -119,14 +120,14 @@ public class QuestionPanel extends JPanel {
         buttonPanel.add(submitButton);
         contentPanel.add(buttonPanel);
         //    mainPanel.add(contentPanel);
-        //   JScrollPane scrollPane = new JScrollPane(contentPanel,
-        //         JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-        //        JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        scrollPane = new JScrollPane(contentPanel);
+        scrollPane = new JScrollPane(contentPanel,
+                JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+                JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        //   scrollPane = new JScrollPane(contentPanel);
         scrollPane.setPreferredSize(new Dimension((int) (0.8 * screen.width), (int) (0.75 * screen.height)));
         scrollPane.setMinimumSize(new Dimension((int) (0.8 * screen.width), (int) (0.75 * screen.height)));
         scrollPane.setMaximumSize(new Dimension((int) (0.8 * screen.width), (int) (0.75 * screen.height)));
-
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
 
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
         scrollPane.setBackground(Color.black);
@@ -137,7 +138,7 @@ public class QuestionPanel extends JPanel {
         im.put(KeyStroke.getKeyStroke("UP"), "negativeUnitIncrement");
         mainPanel.add(scrollPane);
         this.add(mainPanel, new GridBagConstraints());
-        repaint();
+        // repaint();
     }
 
 
@@ -238,10 +239,10 @@ public class QuestionPanel extends JPanel {
             DisplayQuestion q = questionsMap.get(key);
             q.changeLabelSize(maxLabelSize);
         }
-        scrollPane.getVerticalScrollBar().setValue(0);
+//        scrollPane.getVerticalScrollBar().setValue(0);
 
-        scrollPane.getViewport().setViewPosition(new Point(0, 0));
-        scrollPane.repaint();
+//        scrollPane.getViewport().setViewPosition(new Point(0, 0));
+        //  scrollPane.repaint();
         introductionPane.setSelectionStart(0);
         introductionPane.setSelectionEnd(0);
         //   jv.setViewPosition(new Point(0,0));
@@ -371,11 +372,11 @@ public class QuestionPanel extends JPanel {
             textArea = new JTextArea(10, 40);
             textArea.setLineWrap(true);
             textArea.setWrapStyleWord(true);
-            JScrollPane scrollPane = new JScrollPane(textArea);
-            scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+            JScrollPane scrollPane2 = new JScrollPane(textArea);
+            scrollPane2.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
             //  JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
             this.setLayout(new FlowLayout(FlowLayout.LEFT));
-            add(scrollPane);
+            add(scrollPane2);
             setBackground(Color.black);
             setForeground(Color.white);
             textArea.setBackground(Color.WHITE);
