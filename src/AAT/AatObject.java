@@ -350,6 +350,9 @@ public abstract class AatObject {
 
     }
 
+    public void setTempDataFile(File file) {
+        dataFile = file;
+    }
 
     private int getPercentage(String ratio, String s) throws FalseConfigException {
         if (!ratio.contains(":")) {

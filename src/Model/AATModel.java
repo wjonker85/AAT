@@ -101,6 +101,10 @@ public class AATModel extends Observable {
         testData = new TestData(newAAT);
     }
 
+    public void setTempData(File file) {
+        newAAT.setTempDataFile(file);
+    }
+
     //Starts a new instance of the AAT. With no. times it has to repeat and when there will be a break.
     public void startTest() {
         this.repeat = newAAT.getRepeat();
