@@ -101,7 +101,6 @@ public class CreateConfig extends JPanel implements Observer {
                     File testFile = new File(workingDir.toString() + File.separator + "AATConfig.temp");
                     model = new AATModel();
                     model.addObserver(getInstance());
-                    System.out.println(testFile.toString());
                     writeToFile(testFile);
                     model.loadNewAAT(testFile);     //Only start when config is valid
                     joystick = new JoystickController(model);
@@ -182,7 +181,6 @@ public class CreateConfig extends JPanel implements Observer {
                 if (file != null) {
                     inputAffDir.setText(file.getName());
                     workingDir = file.getParentFile();
-                    System.out.println(workingDir.toString());
                 } else {
                     inputAffDir.setText("");
                 }
@@ -198,7 +196,7 @@ public class CreateConfig extends JPanel implements Observer {
                 if (file != null) {
                     inputNeutralDir.setText(file.getName());
                     workingDir = file.getParentFile();
-                    System.out.println(workingDir.toString());
+
                 } else {
                     inputNeutralDir.setText("");
                 }
@@ -222,7 +220,6 @@ public class CreateConfig extends JPanel implements Observer {
                 if (file != null) {
                     inputLangFile.setText(file.getName());
                     workingDir = file.getParentFile();
-                    System.out.println(workingDir.toString());
                 } else {
                     inputLangFile.setText("");
                 }
@@ -333,7 +330,6 @@ public class CreateConfig extends JPanel implements Observer {
                 if (file != null) {
                     inputPrDir.setText(file.getName());
                     workingDir = file.getParentFile();
-                    System.out.println(workingDir.toString());
                     inputPracticeFill.setEnabled(false);
                     inputPracticeFill.setBackground(Color.lightGray);
                 } else {
@@ -514,7 +510,6 @@ public class CreateConfig extends JPanel implements Observer {
                 if (file != null) {
                     inputQuestion.setText(file.getName());
                     workingDir = file.getParentFile();
-                    System.out.println(workingDir.toString());
                 } else {
                     inputQuestion.setText("");
                 }
@@ -632,11 +627,6 @@ public class CreateConfig extends JPanel implements Observer {
                 6, 6);       //xPad, yPad
         //   return scrollPane;
         return panel;
-    }
-
-    private void setPracticeRepeatValue() {
-        practRepeatValue = inputPractRepeat.getText();
-        System.out.println(practRepeatValue);
     }
 
     private void disablePracticeAction() {
@@ -1074,7 +1064,6 @@ public class CreateConfig extends JPanel implements Observer {
     @Override
     public void update(Observable observable, Object o) {
         if (o.toString().equals("Finished")) {
-            System.out.println("finished");
             model.clearAll();
             model.deleteObservers();
             joystick.exit();
@@ -1153,11 +1142,9 @@ public class CreateConfig extends JPanel implements Observer {
 
         practRepeatValue = config.getValue("PracticeRepeat");
         if (practRepeatValue.equals("") || practRepeatValue.equals("0")) {
-            System.out.println("No practice");
             hasPractice = false;
             practRepeatValue = "0";
         } else {
-            System.out.println("Has practice");
             hasPractice = true;
         }
         if (inputStepSize.getText().equals("")) {

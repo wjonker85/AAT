@@ -137,11 +137,6 @@ public class HighMemoryAAT extends AatObject {
      * @return
      */
     public ArrayList<AATImage> createList(int n, int pushPerc, ArrayList<File> fileList, int type) {
-        System.out.println("N = " + n);
-        //   if (n == 0) {
-        //      n = fileList.size() * 2;
-        //   }
-
         Collections.shuffle(fileList);
         ArrayList<AATImage> returnList = new ArrayList<AATImage>();
         int nPush = (pushPerc * n) / 100;

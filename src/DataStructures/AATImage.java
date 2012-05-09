@@ -136,6 +136,7 @@ public class AATImage {
 
     //Loads the requested image and resizes it to the screenSize
     private BufferedImage loadImage(File imageFile) {
+        Dimension d;
         BufferedImage bufImage = null;
         try {
             bufImage = ImageIO.read(imageFile);
@@ -143,14 +144,21 @@ public class AATImage {
             e.printStackTrace();
         }
         int stepStart = Math.round(stepSize / 2f);
+        //  bufImage = ImageUtils.createRectImage(bufImage,bufImage.getWidth(),bufImage.getHeight(),BufferedImage.TYPE_INT_ARGB);
         Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
         assert bufImage != null;
-        Dimension d = ImageUtils.setupImage((int) dim.getHeight(), (int) dim.getWidth(), bufImage.getHeight(), bufImage.getWidth(), stepStart);
-        //   Dimension d = ImageUtils.setupImage((int) dim.getHeight(),(int) dim.getHeight(), bufImage.getHeight(), bufImage.getWidth(), stepStart);
+        if (bufImage.getHeight() >= bufImage.getWidth()) {
+            d = ImageUtils.setupImage((int) dim.getHeight(), (int) dim.getWidth(), bufImage.getHeight(), bufImage.getWidth(), stepStart);
+        } else {
+            d = ImageUtils.setupImage((int) dim.getHeight(), (int) dim.getWidth(), bufImage.getHeight(), bufImage.getWidth(), stepStart);
+        }
 
+        //   Dimension d = ImageUtils.setupImage((int) dim.getHeight(),(int) dim.getHeight(), bufImage.getHeight(), bufImage.getWidth(), stepStart);
         bufImage = ImageUtils.resizeImageWithHint(bufImage, d.width, d.height, BufferedImage.TYPE_INT_ARGB);
         if (hasBorders) {
             bufImage = ImageUtils.drawBorder(bufImage, borderColor, borderWidth);
+        } else {
+
         }
         return bufImage;
     }

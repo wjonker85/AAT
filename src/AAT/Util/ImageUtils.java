@@ -64,9 +64,45 @@ public class ImageUtils {
         return resizedImage;
     }
 
+    /*
+   Probeersel om een image te resizen
+    */
+    public static BufferedImage createRectImage(BufferedImage originalImage, int imageWidth, int imageHeight, int type) {
+        BufferedImage resizedImage;
+        Graphics2D g;
+        if (imageHeight >= imageWidth) {
+            resizedImage = new BufferedImage(imageHeight, imageHeight, type);
+            g = resizedImage.createGraphics();
+            g.setBackground(Color.black);
+            g.setColor(Color.black);
+            g.fillRect(0, 0, imageHeight, imageHeight);
+            g.drawImage(originalImage, (imageHeight / 2) - (imageWidth / 2), 0, imageWidth, imageHeight, null);
+
+        } else {
+            resizedImage = new BufferedImage(imageWidth, imageWidth, type);
+            g = resizedImage.createGraphics();
+            g.setBackground(Color.black);
+            g.setColor(Color.black);
+            g.fillRect(0, 0, imageWidth, imageWidth);
+            g.drawImage(originalImage, 0, (imageWidth / 2) - (imageHeight / 2), imageWidth, imageHeight, null);
+        }
+
+        g.dispose();
+        g.setComposite(AlphaComposite.Src);
+
+        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+                RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        g.setRenderingHint(RenderingHints.KEY_RENDERING,
+                RenderingHints.VALUE_RENDER_QUALITY);
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                RenderingHints.VALUE_ANTIALIAS_ON);
+
+        return resizedImage;
+    }
+
     /**
      * Geeft de waarden imgBorderWidth, imgSizeX & imgSizeY welke door imageShow() gebruikt worden.
-     */
+     */    //TODO dit veranderen
     public static Dimension setupImage(int viewHeight, int viewWidth, int imgHeight, int imgWidth, int stepSize, int stepCount, int size) {
         /**
          * Ratio scherm en plaatje, nodig bij bepalen vergroot /verklein factor.
@@ -89,11 +125,11 @@ public class ImageUtils {
         /**
          * Vergroot / verklein factor van plaatje bepalen, zodat plaatje nooit groter kan worden dan het max hoogte of breedte van scherm
          */
-        if (viewRatio > imgRatio) {
-            imgRefactor = (float) viewWidth / (float) imgWidth;
-        } else {
-            imgRefactor = (float) viewHeight / (float) imgHeight;
-        }
+        //   if (viewRatio > imgRatio) {
+        //       imgRefactor = (float) viewWidth / (float) imgWidth;
+        //   } else {
+        imgRefactor = (float) viewHeight / (float) imgHeight;
+        //   }
 
         /**
          * De daadwerkelijke breedt, hoogte en boorderwidth in variabelen stoppen.
