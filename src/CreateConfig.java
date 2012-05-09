@@ -1,6 +1,5 @@
-package AAT.Util;
-
 import AAT.AatObject;
+import AAT.Util.SpringUtilities;
 import Configuration.TestConfig;
 import Controller.JoystickController;
 import Model.AATModel;
@@ -17,6 +16,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.NumberFormat;
+import java.util.Observable;
+import java.util.Observer;
 
 /**
  * Created with IntelliJ IDEA.
@@ -25,7 +26,7 @@ import java.text.NumberFormat;
  * Time: 4:37 PM
  * To change this template use File | Settings | File Templates.
  */
-public class CreateConfig extends JPanel {
+public class CreateConfig extends JPanel implements Observer {
 
     private JTextField inputPushTag, inputPullTag, inputAffDir, inputNeutralDir, inputLangFile, inputPrDir, inputQuestion, inputPractRepeat;
     private JTextField inputTrials, inputBreak;
@@ -45,7 +46,6 @@ public class CreateConfig extends JPanel {
 
     public CreateConfig() {
         super(new SpringLayout());
-        model = new AATModel();
         //  super(new FlowLayout(FlowLayout.CENTER));
 
 
@@ -76,9 +76,11 @@ public class CreateConfig extends JPanel {
         tryButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                try {
+                try {    //TODO verbeteren
                     File testFile = new File(workingDir.toString() + File.separator + "AATConfig.temp");
                     File tempDataFile = new File(workingDir.toString() + File.separator + "Data.xml.temp");
+                    model = new AATModel();
+                    model.addObserver(getInstance());
                     System.out.println(testFile.toString());
                     writeToFile(testFile);
                     model.loadNewAAT(testFile);     //Only start when config is valid
@@ -86,14 +88,15 @@ public class CreateConfig extends JPanel {
                     joystick = new JoystickController(model);
                     joystick.start(); //Start joystick Thread
 
-                    if (testFrame != null) {
-                        model.deleteObserver(testFrame); //Remove old instance
-                    }
+                    //      if (testFrame != null) {
+                    //          model.deleteObserver(testFrame); //Remove old instance
+                    //       }
                     testFrame = new TestFrame(model);
                     model.addObserver(testFrame);
 
                     model.startTest();
-                    testFile.delete();
+                    //    testFile.delete();
+
                     if (tempDataFile.exists()) {
                         tempDataFile.delete();
                     }
@@ -139,6 +142,11 @@ public class CreateConfig extends JPanel {
                 2, 1, //rows, cols
                 6, 6,        //initX, initY
                 6, 6);       //xPad, yPad
+    }
+
+    private Observer getInstance() {
+
+        return this;
     }
 
     JScrollPane createMainPanel() {
@@ -986,6 +994,19 @@ public class CreateConfig extends JPanel {
             export = fc.getSelectedFile();
         }
         return export;
+    }
+
+    @Override
+    public void update(Observable observable, Object o) {
+        if (o.toString().equals("Finished")) {
+            System.out.println("finished");
+            model.clearAll();
+            model.deleteObservers();
+            joystick.exit();
+            joystick = null; //Remove instance when finished
+            System.gc();
+
+        }
     }
 
     //filter voor de file extensions. Komt ook van het internet. Wordt nu gebruik om .input en csv bestanden te filteren.

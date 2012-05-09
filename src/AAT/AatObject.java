@@ -122,24 +122,35 @@ public abstract class AatObject {
         }
 
         dataFile = new File(workingDir + File.separator + datFile);
-
         String langFile = testConfig.getValue("LanguageFile");
         File languageFile = new File(workingDir + File.separator + langFile);
-        if (langFile.equals("") || !languageFile.exists()) {
+        if (langFile.equals("") || !languageFile.exists() || languageFile.isDirectory()) {
             throw new FalseConfigException("No language file specified");
         }
         System.out.println("Language file = " + langFile);
         xmlReader = new XMLReader(languageFile);
-        String qFile = testConfig.getValue("Questionnaire");
-        File questionFile = new File(workingDir + File.separator + qFile);
-        if (questionFile.exists()) {
-            hasQuestions = true;
-            xmlReader.addQuestionnaire(questionFile);
-        } else if (!questionFile.exists() && !(qFile.length() > 0)) {
-            throw new FalseConfigException("The specified questionnaire doesn't exist");
-        }
-
         System.out.println("Language file = " + langFile);
+
+        //TODO
+        displayQuestions = testConfig.getValue("DisplayQuestions");
+        if (!displayQuestions.equals("Before") && !displayQuestions.equals("After") && !displayQuestions.equals("None")) {
+            throw new FalseConfigException("DisplayQuestions should be either Before, After or None");
+        }
+        if (!displayQuestions.equals("None")) {   //Test has a questionnaire
+            System.out.println("Test has a questionnaire");
+            hasQuestions = true;
+            String qFile = testConfig.getValue("Questionnaire");
+            System.out.println("Questionnaire is set to " + qFile);
+            File questionFile = new File(workingDir + File.separator + qFile);
+            if (questionFile.exists() && !questionFile.isDirectory()) {
+                hasQuestions = true;
+                xmlReader.addQuestionnaire(questionFile);
+            } else if (!questionFile.exists() && !(qFile.length() > 0)) {
+                throw new FalseConfigException("The specified questionnaire doesn't exist");
+            }
+        } else {
+            hasQuestions = false;
+        }
         // id = getHighestID();
         nDir = testConfig.getValue("NeutralDir");
         aDir = testConfig.getValue("AffectiveDir");
@@ -305,10 +316,7 @@ public abstract class AatObject {
 
 
         }
-        displayQuestions = testConfig.getValue("DisplayQuestions");
-        if (!displayQuestions.equals("Before") && !displayQuestions.equals("After") && !displayQuestions.equals("None")) {
-            throw new FalseConfigException("DisplayQuestions should be either Before, After or None");
-        }
+
         String hasBoxplot = testConfig.getValue("ShowBoxPlot");
         if (hasBoxplot.equals("True")) {
             showBoxPlot = true;
@@ -317,7 +325,7 @@ public abstract class AatObject {
         } else {
             throw new FalseConfigException("ShowBoxPlot should be either True or False");
         }
-        if (!testConfig.getValue("AffectRatio").equals("")) {         //TODO ratios veranderen
+        if (!testConfig.getValue("AffectRatio").equals("")) {
             a_pushPerc = getPercentage(testConfig.getValue("AffectRatio"), "AffectRatio");
         }
         if (!testConfig.getValue("NeutralRatio").equals("")) {

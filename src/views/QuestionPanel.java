@@ -90,7 +90,6 @@ public class QuestionPanel extends JPanel {
         introductionPane.setEditable(false);
 
         introductionPane.setFont(new Font("Roman", Font.PLAIN, 24));
-        introductionPane.setText(model.getTest().getQuestionnaire().getIntroduction());
         //  introductionPane.setMaximumSize(new Dimension((int) (0.75 * screen.width), screen.height));
         //  introductionPane.setMinimumSize(new Dimension((int) (0.75* screen.width), 50));
         questionnairePanel.add(introductionPane);
@@ -167,6 +166,7 @@ public class QuestionPanel extends JPanel {
      * @param questionnaire The optional questionnaire received from the model
      */
     public void displayQuestions(Questionnaire questionnaire) {
+        introductionPane.setText(questionnaire.getIntroduction());
         for (QuestionData questionObject : questionnaire.getExtraQuestions()) {
 
             //   JLabel question = new JLabel(questionObject.getQuestion(), JLabel.TRAILING);

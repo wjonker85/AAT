@@ -77,9 +77,6 @@ public class AAT_Main extends JFrame implements Observer {
         JPanel mainPanel = new JPanel();
         mainPanel.setBackground(Color.black);
         mainPanel.setLayout(new GridBagLayout());
-        model = new AATModel();
-        model.addObserver(this);
-        joystick = new JoystickController(model);
         this.setTitle("Approach avoidance Task");
         BufferedImage buttonIcon = null;
         try {
@@ -142,6 +139,8 @@ public class AAT_Main extends JFrame implements Observer {
                 if (configFile != null) {
                     if (configFile.exists()) {
                         try {
+                            model = new AATModel();
+                            model.addObserver(getInstance());
                             model.loadNewAAT(configFile);     //Only start when config is valid
                             runButton.setEnabled(true);
                             if (model.getTest().hasData()) {
@@ -175,7 +174,7 @@ public class AAT_Main extends JFrame implements Observer {
                 testFrame = new TestFrame(model);
                 model.addObserver(testFrame);
                 model.startTest();
-                runButton.setEnabled(false);
+                //   runButton.setEnabled(false);
             }
         });
 
@@ -219,12 +218,18 @@ public class AAT_Main extends JFrame implements Observer {
 
     public void update(Observable observable, Object o) {
         if (o.toString().equals("Finished")) {
+            model.clearAll();
+            model.deleteObservers();
             joystick.exit();
             joystick = null; //Remove instance when finished
             exportData.setEnabled(true);
             runButton.setEnabled(true);
-
+            System.gc();
         }
+    }
+
+    private Observer getInstance() {
+        return this;
     }
 }
 
