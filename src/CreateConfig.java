@@ -1,3 +1,20 @@
+/** This file is part of Approach Avoidance Task.
+ *
+ * Approach Avoidance Task is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Approach Avoidance Task is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Approach Avoidance Task.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+
 import AAT.AatObject;
 import AAT.Util.SpringUtilities;
 import AAT.Util.TitledSeparator;
@@ -43,8 +60,9 @@ public class CreateConfig extends JPanel implements Observer {
     private AATModel model;
     private JoystickController joystick;
     private TestFrame testFrame;
-    private JLabel pullColorL, pushColorL, borderSizeL, pushTagL, pullTagL, askBuiltinPractL, practFillL, prDirL;
+    private JLabel pullColorL, pushColorL, borderSizeL, pushTagL, pullTagL, askBuiltinPractL, practFillL, prDirL, practL;
     private JButton prDirButton;
+    private String practRepeatValue = "3";
 
 
     public CreateConfig() {
@@ -91,7 +109,7 @@ public class CreateConfig extends JPanel implements Observer {
                     testFrame = new TestFrame(model);
                     model.addObserver(testFrame);
                     model.startTest(false); //start test without saving data
-                    testFile.delete();    //Delete the test config file
+                    //  testFile.delete();    //Delete the test config file
 
 
                 } catch (AatObject.FalseConfigException e) {
@@ -110,34 +128,13 @@ public class CreateConfig extends JPanel implements Observer {
         toolbar.add(tryButton);
         this.add(toolbar);
         JTabbedPane tabbedPane = new JTabbedPane();
-        //  tabbedPane.setPreferredSize(new Dimension(500, 500));
         ImageIcon icon = null;
-
-        //  JPanel configPanel = new JPanel();
-        //  configPanel.setLayout(new BoxLayout(configPanel,BoxLayout.Y_AXIS));
-        // configPanel.add(createMainPanel());
-        // configPanel.add(createRatiosPanel());
-        // configPanel.add(createPerformancePanel());
         JScrollPane scrollPane = new JScrollPane(createMainPanel());
-        //   JComponent panel1 = createMainPanel();
         tabbedPane.addTab("AAT configuration", icon, scrollPane,
                 "Sets the main configuration of the test");
         tabbedPane.setMnemonicAt(0, KeyEvent.VK_1);
-
-        //      JComponent panel2 = createRatiosPanel();
-        //      tabbedPane.addTab("Ratio's", icon, panel2,
-        //              "Change the ratio's of the test");
-        //      tabbedPane.setMnemonicAt(1, KeyEvent.VK_2);
-
-        //     JComponent panel3 = createPerformancePanel();
-        //     tabbedPane.addTab("Performance", icon, panel3,
-        //             "Options for performace of the test");
-        //     tabbedPane.setMnemonicAt(2, KeyEvent.VK_3);
-        //Add the tabbed pane to this panel.
         add(tabbedPane);
 
-        //The following line enables to use scrolling tabs.
-        // tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
         SpringUtilities.makeCompactGrid(this,
                 2, 1, //rows, cols
                 6, 6,        //initX, initY
@@ -150,11 +147,7 @@ public class CreateConfig extends JPanel implements Observer {
     }
 
     private JPanel createMainPanel() {
-
         JPanel panel = new JPanel(new SpringLayout());
-        //    JScrollPane scrollPane = new JScrollPane(panel);
-        //       panel.setPreferredSize(new Dimension(600,600));
-        // panel.setMaximumSize(new Dimension(400,400));
         panel.add(Box.createVerticalStrut(10));
         panel.add(Box.createVerticalStrut(10));
         panel.add(new TitledSeparator("Main options", 0));
@@ -171,10 +164,10 @@ public class CreateConfig extends JPanel implements Observer {
         JLabel affDirL = new JLabel("Choose the directory that contains the affective images");
         JLabel neutrDirL = new JLabel("Choose the directory that contains the neutral images");
 
-        inputAffDir = new JTextField("Affective");
+        inputAffDir = new JTextField();
         inputAffDir.setEditable(false);
         inputAffDir.setPreferredSize(new Dimension(200, 20));
-        inputNeutralDir = new JTextField("Neutral");
+        inputNeutralDir = new JTextField();
         inputNeutralDir.setEditable(false);
         inputNeutralDir.setPreferredSize(new Dimension(200, 20));
         inputPrDir = new JTextField("");
@@ -251,7 +244,6 @@ public class CreateConfig extends JPanel implements Observer {
         trialP.add(Box.createHorizontalBox());
         panel.add(trialP);
 
-
         JPanel breakP = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JLabel breakL = new JLabel("When will there be a break? Set to 0 when you don't want a break");
         inputBreak = new JFormattedTextField(NumberFormat.getInstance());
@@ -271,7 +263,7 @@ public class CreateConfig extends JPanel implements Observer {
         panel.add(Box.createVerticalStrut(5));
         prFillColor = Integer.parseInt("FFDEDE", 16);
         prDirL = new JLabel("Select the directory containing the practice images");
-        final JLabel practL = new JLabel("How many times should the practice images be repeated?");
+        practL = new JLabel("How many times should the practice images be repeated?");
         practFillL = new JLabel("Set the fill color for the generated practice images");
         JLabel askPractL = new JLabel("Do you want to start the test with a practice?");
         JPanel askPractP = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -281,35 +273,9 @@ public class CreateConfig extends JPanel implements Observer {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 if (!inputHasPractice.isSelected()) {
-                    inputBuiltinPractice.setEnabled(false);
-                    askBuiltinPractL.setEnabled(false);
-                    inputPractRepeat.setText("0");
-                    inputPractRepeat.setEnabled(false);
-                    inputPracticeFill.setEnabled(false);
-                    inputPracticeFill.setBackground(Color.lightGray);
-                    practFillL.setEnabled(false);
-                    inputPrDir.setText("");
-                    inputPrDir.setEnabled(false);
-                    prDirL.setEnabled(false);
-                    prDirButton.setEnabled(false);
-                    practL.setEnabled(false);
+                    disablePracticeAction();
                 } else {
-                    inputBuiltinPractice.setEnabled(true);
-                    askBuiltinPractL.setEnabled(true);
-                    //  inputPracticeFill.setEnabled(true);
-
-                    inputPractRepeat.setText("0");
-                    inputPractRepeat.setEnabled(true);
-                    inputPrDir.setText("");
-                    inputPrDir.setEnabled(true);
-                    prDirButton.setEnabled(true);
-                    practL.setEnabled(true);
-                    prDirL.setEnabled(true);
-                    if (inputBuiltinPractice.isSelected()) {
-                        enableBuiltinPracticeAction();
-                    } else {
-                        disableBuiltinPracticeAction();
-                    }
+                    enablePracticeAction();
                 }
             }
         });
@@ -319,7 +285,7 @@ public class CreateConfig extends JPanel implements Observer {
         panel.add(askPractP);
 
         askBuiltinPractL = new JLabel("<html>Do you want the test to self-generate practice images? <br>" +
-                "Needs colored borders to be enabled");
+                "Needs colored borders to be enabled</html>");
         JPanel askBuitltinPractP = new JPanel(new FlowLayout(FlowLayout.LEFT));
         inputBuiltinPractice = new JCheckBox();
         inputBuiltinPractice.setSelected(true);
@@ -383,7 +349,7 @@ public class CreateConfig extends JPanel implements Observer {
         //  final JLabel practL = new JLabel("How many times should the practice images be repeated?");
         JPanel practP = new JPanel(new FlowLayout(FlowLayout.LEFT));
         inputPractRepeat = new JFormattedTextField(NumberFormat.getInstance());
-        inputPractRepeat.setText("4");
+        inputPractRepeat.setText(practRepeatValue);
         inputPractRepeat.setPreferredSize(new Dimension(50, 20));
         panel.add(practL);
         practP.add(inputPractRepeat);
@@ -482,14 +448,14 @@ public class CreateConfig extends JPanel implements Observer {
         inputPullTag = new JTextField("pull");
         inputPullTag.setPreferredSize(new Dimension(100, 20));
         inputPullTag.setEnabled(false);
-        panel.add(pushTagL);
-        pushTP.add(inputPushTag);
-        pushTP.add(Box.createHorizontalBox());
-        panel.add(pushTP);
         panel.add(pullTagL);
         pullTP.add(inputPullTag);
         pullTP.add(Box.createHorizontalBox());
         panel.add(pullTP);
+        panel.add(pushTagL);
+        pushTP.add(inputPushTag);
+        pushTP.add(Box.createHorizontalBox());
+        panel.add(pushTP);
 
         inputColoredBorder.addActionListener(new ActionListener() {
             @Override
@@ -537,7 +503,7 @@ public class CreateConfig extends JPanel implements Observer {
         inputQuestion.setPreferredSize(new Dimension(200, 20));
         inputQuestion.setEditable(false);
         inputQuestion.setEnabled(false);
-        selectQButton = new JButton("Select File");
+        selectQButton = new JButton("Choose questionnaire file");
         selectQButton.setEnabled(false);
         selectQPanel.add(inputQuestion);
         selectQPanel.add(selectQButton);
@@ -668,12 +634,53 @@ public class CreateConfig extends JPanel implements Observer {
         return panel;
     }
 
+    private void setPracticeRepeatValue() {
+        practRepeatValue = inputPractRepeat.getText();
+        System.out.println(practRepeatValue);
+    }
+
+    private void disablePracticeAction() {
+        inputBuiltinPractice.setEnabled(false);
+        inputBuiltinPractice.setForeground(Color.RED);
+        askBuiltinPractL.setEnabled(false);
+        practRepeatValue = inputPractRepeat.getText();
+        inputPractRepeat.setText("0");
+        inputPractRepeat.setEnabled(false);
+        inputPracticeFill.setEnabled(false);
+        inputPracticeFill.setBackground(Color.lightGray);
+        practFillL.setEnabled(false);
+        inputPrDir.setText("");
+        inputPrDir.setEnabled(false);
+        prDirL.setEnabled(false);
+        prDirButton.setEnabled(false);
+        practL.setEnabled(false);
+    }
+
+    private void enablePracticeAction() {
+        inputBuiltinPractice.setEnabled(true);
+        askBuiltinPractL.setEnabled(true);
+        //  inputPracticeFill.setEnabled(true);
+
+        inputPractRepeat.setText(practRepeatValue);
+        inputPractRepeat.setEnabled(true);
+        inputPrDir.setText("");
+        inputPrDir.setEnabled(true);
+        prDirButton.setEnabled(true);
+        practL.setEnabled(true);
+        prDirL.setEnabled(true);
+        if (inputBuiltinPractice.isSelected()) {
+            enableBuiltinPracticeAction();
+        } else {
+            disableBuiltinPracticeAction();
+        }
+    }
+
     private void enableBuiltinPracticeAction() {
         inputPracticeFill.setEnabled(true);
         inputPracticeFill.setBackground(new Color(prFillColor));
         inputColoredBorder.setSelected(true);
         enableColoredBorderAction();
-        inputPractRepeat.setText("0");
+        inputPractRepeat.setText(practRepeatValue);
         inputPractRepeat.setEnabled(true);
         inputPrDir.setText("");
         inputPrDir.setEnabled(false);
@@ -874,13 +881,13 @@ public class CreateConfig extends JPanel implements Observer {
                 "#\t     the error rate. (Defaults to 9 when not set)\n";
         pw.write(firstheader);
         pw.println();
-        pw.write("Trials " + inputTrials.getText());
+        pw.write("Trials " + checkForValue(inputTrials.getText()));
         pw.println();
-        pw.write("BreakAfter " + inputBreak.getText());
+        pw.write("BreakAfter " + checkForValue(inputBreak.getText()));
         pw.println();
-        pw.write("PracticeRepeat " + inputPractRepeat.getText());
+        pw.write("PracticeRepeat " + checkForValue(inputPractRepeat.getText()));
         pw.println();
-        pw.write("DisplayQuestions " + inputQuestions.getSelectedItem().toString());
+        pw.write("DisplayQuestions " + checkForValue(inputQuestions.getSelectedItem().toString()));
         pw.println();
         String boxPlot = "False";
         if (inputBoxplot.isSelected()) {
@@ -892,15 +899,15 @@ public class CreateConfig extends JPanel implements Observer {
         pw.write(ratioHeader);
         pw.println();
         pw.println();
-        pw.write("AffectRatio " + inputAffectRatioPush.getText() + ":" + inputAffectRatioPull.getText());
+        pw.write("AffectRatio " + checkForValue(inputAffectRatioPush.getText()) + ":" + checkForValue(inputAffectRatioPull.getText()));
         pw.println();
-        pw.write("NeutralRatio " + inputNeutralRatioPush.getText() + ":" + inputNeutralRatioPull.getText());
+        pw.write("NeutralRatio " + checkForValue(inputNeutralRatioPush.getText()) + ":" + checkForValue(inputNeutralRatioPull.getText()));
         pw.println();
         pw.println();
         pw.write(testRatioHeader);
         pw.println();
         pw.println();
-        pw.write("TestRatio " + inputTestRatioA.getText() + ":" + inputTestRatioN.getText());
+        pw.write("TestRatio " + checkForValue(inputTestRatioA.getText()) + ":" + checkForValue(inputTestRatioN.getText()));
         pw.println();
         pw.println();
         pw.write(NoImagesHeader);
@@ -931,7 +938,7 @@ public class CreateConfig extends JPanel implements Observer {
             pw.println();
             pw.write("BorderColorPull " + pushHex.toUpperCase());
             pw.println();
-            pw.write("BorderWidth " + inputBorderSize.getText());
+            pw.write("BorderWidth " + checkForValue(inputBorderSize.getText()));
             pw.println();
         } else {
             pw.write("# BorderColorPush F5FE02");
@@ -958,21 +965,29 @@ public class CreateConfig extends JPanel implements Observer {
             pw.write("# PushTag push");
             pw.println();
         } else {
-            pw.write("PullTag " + inputPullTag.getText());
+            if (inputPullTag.getText().length() > 0) {
+                pw.write("PullTag " + inputPullTag.getText());
+            } else {
+                pw.write("#PullTag");
+            }
             pw.println();
-            pw.write("PushTag " + inputPushTag.getText());
+            if (inputPushTag.getText().length() > 0) {
+                pw.write("PushTag " + inputPushTag.getText());
+            } else {
+                pw.write("#PushTag");
+            }
             pw.println();
         }
         pw.println();
         pw.write(dirHeader);
         pw.println();
         pw.println();
-        pw.write("AffectiveDir " + inputAffDir.getText());
+        pw.write("AffectiveDir " + checkForValue(inputAffDir.getText()));
         pw.println();
-        pw.write("NeutralDir " + inputNeutralDir.getText());
+        pw.write("NeutralDir " + checkForValue(inputNeutralDir.getText()));
         pw.println();
         if (inputPrDir.getText().length() > 0) {
-            pw.write("PracticeDir " + inputPrDir.getText());
+            pw.write("PracticeDir " + checkForValue(inputPrDir.getText()));
             pw.println();
         } else {
             pw.write("# PracticeDir practice");
@@ -987,7 +1002,7 @@ public class CreateConfig extends JPanel implements Observer {
         pw.write(languageHeader);
         pw.println();
         pw.println();
-        pw.write("LanguageFile " + inputLangFile.getText());
+        pw.write("LanguageFile " + checkForValue(inputLangFile.getText()));
         pw.println();
         pw.println();
         pw.write(questionHeader);
@@ -997,15 +1012,19 @@ public class CreateConfig extends JPanel implements Observer {
             pw.write("# Questionnaire questionnaire.xml");
             pw.println();
         } else {
-            pw.write("Questionnaire " + inputQuestion.getText());
+            if (inputQuestion.getText().length() > 0) {
+                pw.write("Questionnaire " + inputQuestion.getText());
+            } else {
+                pw.write("#Questionnaire ");
+            }
             pw.println();
         }
         pw.println();
         pw.print(performanceHeader);
         pw.println();
         pw.println();
-        pw.println("StepSize " + inputStepSize.getText());
-        pw.println("DataSteps " + inputDataStepSize.getText());
+        pw.println("StepSize " + checkForValue(inputStepSize.getText()));
+        pw.println("DataSteps " + checkForValue(inputDataStepSize.getText()));
         pw.flush();
         pw.close();
         try {
@@ -1065,6 +1084,14 @@ public class CreateConfig extends JPanel implements Observer {
         }
     }
 
+    private String checkForValue(String input) {
+        if (input.equals("")) {
+            return "NA";
+        } else {
+            return input;
+        }
+    }
+
     //filter voor de file extensions. Komt ook van het internet. Wordt nu gebruik om .input en csv bestanden te filteren.
     class ExtensionFileFilter extends FileFilter {
         String description;
@@ -1107,6 +1134,7 @@ public class CreateConfig extends JPanel implements Observer {
     }
 
     private void LoadConfig(File file) {
+        boolean hasPractice = true, builtinPractice = true, hasColoredBorders = true;
         TestConfig config = new TestConfig(file);
         inputBorderSize.setText(config.getValue("BorderWidth"));
         inputAffDir.setText(config.getValue("AffectiveDir"));
@@ -1122,9 +1150,15 @@ public class CreateConfig extends JPanel implements Observer {
         inputPushTag.setText(config.getValue("PushTag"));
         inputQuestion.setText(config.getValue("Questionnaire"));
         inputStepSize.setText(config.getValue("StepSize"));
-        inputPractRepeat.setText(config.getValue("PracticeRepeat"));
-        if (inputPractRepeat.getText().equals("")) {
-            inputPractRepeat.setText("0");
+
+        practRepeatValue = config.getValue("PracticeRepeat");
+        if (practRepeatValue.equals("") || practRepeatValue.equals("0")) {
+            System.out.println("No practice");
+            hasPractice = false;
+            practRepeatValue = "0";
+        } else {
+            System.out.println("Has practice");
+            hasPractice = true;
         }
         if (inputStepSize.getText().equals("")) {
             inputStepSize.setText("31");
@@ -1171,20 +1205,39 @@ public class CreateConfig extends JPanel implements Observer {
         }
         if (config.getValue("PracticeFillColor").length() == 6) {
             inputPracticeFill.setBackground(getColor(config.getValue("PracticeFillColor")));
+            inputPracticeFill.setEnabled(true);
+//TODO nog  even kijken of dit werkt
+            builtinPractice = true;
+        } else {
+            builtinPractice = false;
         }
         String coloredBorder = config.getValue("ColoredBorders");
         if (coloredBorder.equals("True")) {
+            hasColoredBorders = true;
+        } else {
+            hasColoredBorders = false;
+        }
+
+        if (builtinPractice) {
+            inputBuiltinPractice.setSelected(true);
+            enableBuiltinPracticeAction();
+        } else {
+            inputBuiltinPractice.setSelected(false);
+            disableBuiltinPracticeAction();
+        }
+        if (hasColoredBorders) {
             inputColoredBorder.setSelected(true);
-            inputPullTag.setEnabled(false);
-            inputPushTag.setEnabled(false);
+            enableColoredBorderAction();
         } else {
             inputColoredBorder.setSelected(false);
-            inputPullTag.setEnabled(true);
-            inputPushTag.setEnabled(true);
-            inputPullColor.setEnabled(false);
-            inputPullColor.setBackground(Color.lightGray);
-            inputPushColor.setEnabled(false);
-            inputPushColor.setBackground(Color.lightGray);
+            disableColoredBorderAction();
+        }
+        if (hasPractice) {
+            inputHasPractice.setSelected(true);
+            enablePracticeAction();
+        } else {
+            inputHasPractice.setSelected(false);
+            disablePracticeAction();
         }
     }
 

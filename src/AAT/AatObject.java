@@ -142,6 +142,9 @@ public abstract class AatObject {
             String qFile = testConfig.getValue("Questionnaire");
             System.out.println("Questionnaire is set to " + qFile);
             File questionFile = new File(workingDir + File.separator + qFile);
+            if (qFile.length() == 0) {
+                throw new FalseConfigException("The specified questionnaire doesn't exist");
+            }
             if (questionFile.exists() && !questionFile.isDirectory()) {
                 hasQuestions = true;
                 xmlReader.addQuestionnaire(questionFile);
@@ -224,6 +227,7 @@ public abstract class AatObject {
             System.out.println("Pull tag is set to " + pullTag);
             System.out.println("Push tag is set to " + pushTag);
             if (practiceRepeat > 0) {
+                System.out.println("Practice repeat >0");
                 practice = true;
                 String practDir = testConfig.getValue("PracticeDir");
                 if (practDir.equals("")) {
@@ -293,10 +297,12 @@ public abstract class AatObject {
                         hexPattern.matcher(practiceFillColor);
                         matcher = hexPattern.matcher(practiceFillColor);
                         if (!(practiceFillColor.length() == 6) || !matcher.matches()) {
-                            throw new FalseConfigException("The color specified for the practice image fill color is not a valid 6 character hex value");
+                            throw new FalseConfigException("The color specified for the practice image fill color is not a valid 6 character hex value\n" +
+                                    "Or you forgot to set the directory containing the practice images");
                         }
                     } else {
-                        throw new FalseConfigException("When practiceDir isn't set, ColoredBorder has to be set to True");
+                        throw new FalseConfigException("When practiceDir isn't set, ColoredBorder has to be set to True \n" +
+                                "Or you forgot to set the directory containing the practice images");
                     }
                 } else {
                     System.out.println("Practice without colored borders");
