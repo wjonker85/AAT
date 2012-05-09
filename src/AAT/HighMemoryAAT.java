@@ -115,8 +115,10 @@ public class HighMemoryAAT extends AatObject {
         if (trialSize == 0) {  //not set in the config
             trialSize = (neutralImages.size() + affectiveImages.size()) * 2;
         }
+        System.out.println("Trial Size = " + trialSize);
         float aSize = (affectPerc * trialSize) / 100f;
         int affectSize = Math.round(aSize);
+        System.out.println("Affect size " + affectSize);
         int neutralSize = trialSize - affectSize;
         randomList.addAll(createList(neutralSize, n_pushPerc, neutralImages, AATImage.NEUTRAL));
         randomList.addAll(createList(affectSize, a_pushPerc, affectiveImages, AATImage.AFFECTIVE));
@@ -135,9 +137,11 @@ public class HighMemoryAAT extends AatObject {
      * @return
      */
     public ArrayList<AATImage> createList(int n, int pushPerc, ArrayList<File> fileList, int type) {
-        if (n == 0) {
-            n = fileList.size() * 2;
-        }
+        System.out.println("N = " + n);
+        //   if (n == 0) {
+        //      n = fileList.size() * 2;
+        //   }
+
         Collections.shuffle(fileList);
         ArrayList<AATImage> returnList = new ArrayList<AATImage>();
         int nPush = (pushPerc * n) / 100;

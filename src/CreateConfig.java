@@ -1,5 +1,6 @@
 import AAT.AatObject;
 import AAT.Util.SpringUtilities;
+import AAT.Util.TitledSeparator;
 import Configuration.TestConfig;
 import Controller.JoystickController;
 import Model.AATModel;
@@ -36,12 +37,14 @@ public class CreateConfig extends JPanel implements Observer {
     private JPanel selectQPanel;
     private JTextField inputStepSize, inputDataStepSize;
     private JComboBox inputQuestions;
-    private JCheckBox inputBoxplot, inputColoredBorder;
+    private JCheckBox inputBoxplot, inputColoredBorder, inputHasPractice, inputBuiltinPractice;
     private int pullColor, pushColor, prFillColor;
     private File workingDir = new File("");
     private AATModel model;
     private JoystickController joystick;
     private TestFrame testFrame;
+    private JLabel pullColorL, pushColorL, borderSizeL, pushTagL, pullTagL, askBuiltinPractL, practFillL, prDirL;
+    private JButton prDirButton;
 
 
     public CreateConfig() {
@@ -76,30 +79,21 @@ public class CreateConfig extends JPanel implements Observer {
         tryButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                try {    //TODO verbeteren
+                try {
                     File testFile = new File(workingDir.toString() + File.separator + "AATConfig.temp");
-                    File tempDataFile = new File(workingDir.toString() + File.separator + "Data.xml.temp");
                     model = new AATModel();
                     model.addObserver(getInstance());
                     System.out.println(testFile.toString());
                     writeToFile(testFile);
                     model.loadNewAAT(testFile);     //Only start when config is valid
-                    model.setTempData(tempDataFile);
                     joystick = new JoystickController(model);
                     joystick.start(); //Start joystick Thread
-
-                    //      if (testFrame != null) {
-                    //          model.deleteObserver(testFrame); //Remove old instance
-                    //       }
                     testFrame = new TestFrame(model);
                     model.addObserver(testFrame);
+                    model.startTest(false); //start test without saving data
+                    testFile.delete();    //Delete the test config file
 
-                    model.startTest();
-                    //    testFile.delete();
 
-                    if (tempDataFile.exists()) {
-                        tempDataFile.delete();
-                    }
                 } catch (AatObject.FalseConfigException e) {
                     JOptionPane.showMessageDialog(null,
                             e.getMessage(),
@@ -119,8 +113,14 @@ public class CreateConfig extends JPanel implements Observer {
         //  tabbedPane.setPreferredSize(new Dimension(500, 500));
         ImageIcon icon = null;
 
-        JComponent panel1 = createMainPanel();
-        tabbedPane.addTab("Main configuration", icon, panel1,
+        //  JPanel configPanel = new JPanel();
+        //  configPanel.setLayout(new BoxLayout(configPanel,BoxLayout.Y_AXIS));
+        // configPanel.add(createMainPanel());
+        // configPanel.add(createRatiosPanel());
+        // configPanel.add(createPerformancePanel());
+        JScrollPane scrollPane = new JScrollPane(createMainPanel());
+        //   JComponent panel1 = createMainPanel();
+        tabbedPane.addTab("AAT configuration", icon, scrollPane,
                 "Sets the main configuration of the test");
         tabbedPane.setMnemonicAt(0, KeyEvent.VK_1);
 
@@ -149,22 +149,28 @@ public class CreateConfig extends JPanel implements Observer {
         return this;
     }
 
-    JScrollPane createMainPanel() {
+    private JPanel createMainPanel() {
 
         JPanel panel = new JPanel(new SpringLayout());
-        JScrollPane scrollPane = new JScrollPane(panel);
+        //    JScrollPane scrollPane = new JScrollPane(panel);
         //       panel.setPreferredSize(new Dimension(600,600));
         // panel.setMaximumSize(new Dimension(400,400));
+        panel.add(Box.createVerticalStrut(10));
+        panel.add(Box.createVerticalStrut(10));
+        panel.add(new TitledSeparator("Main options", 0));
+        panel.add(new TitledSeparator("", -1));
+        panel.add(Box.createVerticalStrut(5));
+        panel.add(Box.createVerticalStrut(5));
         JPanel affDirPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
         JPanel neutrDirPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JPanel prDirPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JButton affDirButton = new JButton("Choose Affect Directory");
         JButton neutrDirButton = new JButton("Choose Neutral Directory");
-        JButton prDirButton = new JButton("Choose Practice Directory");
+        prDirButton = new JButton("Choose Practice Directory");
         JLabel affDirL = new JLabel("Choose the directory that contains the affective images");
         JLabel neutrDirL = new JLabel("Choose the directory that contains the neutral images");
-        JLabel prDirL = new JLabel("When you have a seperate directory containing practice images, set is here");
+
         inputAffDir = new JTextField("Affective");
         inputAffDir.setEditable(false);
         inputAffDir.setPreferredSize(new Dimension(200, 20));
@@ -172,7 +178,7 @@ public class CreateConfig extends JPanel implements Observer {
         inputNeutralDir.setEditable(false);
         inputNeutralDir.setPreferredSize(new Dimension(200, 20));
         inputPrDir = new JTextField("");
-        inputPrDir.setEditable(true);
+        inputPrDir.setEditable(false);
         inputPrDir.setPreferredSize(new Dimension(200, 20));
         affDirPanel.add(inputAffDir);
         affDirPanel.add(affDirButton);
@@ -206,31 +212,10 @@ public class CreateConfig extends JPanel implements Observer {
             }
         });
 
-        prDirPanel.add(inputPrDir);
-        prDirPanel.add(prDirButton);
-        prDirButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                File file = getDirectory();
-                if (file != null) {
-                    inputPrDir.setText(file.getName());
-                    workingDir = file.getParentFile();
-                    System.out.println(workingDir.toString());
-                    inputPracticeFill.setEnabled(false);
-                    inputPracticeFill.setBackground(Color.lightGray);
-                } else {
-                    inputNeutralDir.setText("");
-                    inputPracticeFill.setEnabled(true);
-                    inputPracticeFill.setBackground(new Color(prFillColor));
-                }
-            }
-        });
         panel.add(affDirL);
         panel.add(affDirPanel);
         panel.add(neutrDirL);
         panel.add(neutrDirPanel);
-        panel.add(prDirL);
-        panel.add(prDirPanel);
 
         JLabel langFL = new JLabel("Select the language xml file");
         inputLangFile = new JTextField();
@@ -266,15 +251,7 @@ public class CreateConfig extends JPanel implements Observer {
         trialP.add(Box.createHorizontalBox());
         panel.add(trialP);
 
-        JLabel practL = new JLabel("How many times should the practice images be repeated? 0 = no practice");
-        JPanel practP = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        inputPractRepeat = new JFormattedTextField(NumberFormat.getInstance());
-        inputPractRepeat.setText("4");
-        inputPractRepeat.setPreferredSize(new Dimension(50, 20));
-        panel.add(practL);
-        practP.add(inputPractRepeat);
-        practP.add(Box.createVerticalBox());
-        panel.add(practP);
+
         JPanel breakP = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JLabel breakL = new JLabel("When will there be a break? Set to 0 when you don't want a break");
         inputBreak = new JFormattedTextField(NumberFormat.getInstance());
@@ -284,6 +261,253 @@ public class CreateConfig extends JPanel implements Observer {
         breakP.add(inputBreak);
         breakP.add(Box.createHorizontalBox());
         panel.add(breakP);
+        //TODO
+
+        panel.add(Box.createVerticalStrut(10));
+        panel.add(Box.createVerticalStrut(10));
+        panel.add(new TitledSeparator("Practice options", 0));
+        panel.add(new TitledSeparator("", -1));
+        panel.add(Box.createVerticalStrut(5));
+        panel.add(Box.createVerticalStrut(5));
+        prFillColor = Integer.parseInt("FFDEDE", 16);
+        prDirL = new JLabel("Select the directory containing the practice images");
+        final JLabel practL = new JLabel("How many times should the practice images be repeated?");
+        practFillL = new JLabel("Set the fill color for the generated practice images");
+        JLabel askPractL = new JLabel("Do you want to start the test with a practice?");
+        JPanel askPractP = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        inputHasPractice = new JCheckBox();
+        inputHasPractice.setSelected(true);
+        inputHasPractice.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                if (!inputHasPractice.isSelected()) {
+                    inputBuiltinPractice.setEnabled(false);
+                    askBuiltinPractL.setEnabled(false);
+                    inputPractRepeat.setText("0");
+                    inputPractRepeat.setEnabled(false);
+                    inputPracticeFill.setEnabled(false);
+                    inputPracticeFill.setBackground(Color.lightGray);
+                    practFillL.setEnabled(false);
+                    inputPrDir.setText("");
+                    inputPrDir.setEnabled(false);
+                    prDirL.setEnabled(false);
+                    prDirButton.setEnabled(false);
+                    practL.setEnabled(false);
+                } else {
+                    inputBuiltinPractice.setEnabled(true);
+                    askBuiltinPractL.setEnabled(true);
+                    //  inputPracticeFill.setEnabled(true);
+
+                    inputPractRepeat.setText("0");
+                    inputPractRepeat.setEnabled(true);
+                    inputPrDir.setText("");
+                    inputPrDir.setEnabled(true);
+                    prDirButton.setEnabled(true);
+                    practL.setEnabled(true);
+                    prDirL.setEnabled(true);
+                    if (inputBuiltinPractice.isSelected()) {
+                        enableBuiltinPracticeAction();
+                    } else {
+                        disableBuiltinPracticeAction();
+                    }
+                }
+            }
+        });
+        panel.add(askPractL);
+        askPractP.add(inputHasPractice);
+        askPractP.add(Box.createVerticalBox());
+        panel.add(askPractP);
+
+        askBuiltinPractL = new JLabel("<html>Do you want the test to self-generate practice images? <br>" +
+                "Needs colored borders to be enabled");
+        JPanel askBuitltinPractP = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        inputBuiltinPractice = new JCheckBox();
+        inputBuiltinPractice.setSelected(true);
+        inputBuiltinPractice.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                if (!inputBuiltinPractice.isSelected()) {
+                    disableBuiltinPracticeAction();
+                } else {
+                    enableBuiltinPracticeAction();
+                }
+            }
+        });
+        panel.add(askBuiltinPractL);
+        askBuitltinPractP.add(inputBuiltinPractice);
+        askBuitltinPractP.add(Box.createVerticalBox());
+        panel.add(askBuitltinPractP);
+
+        JPanel practFillP = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        inputPracticeFill = new JButton();
+        inputPracticeFill.setBackground(new Color(prFillColor));
+        inputPracticeFill.setPreferredSize(new Dimension(100, 20));
+        inputPracticeFill.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                Color c = JColorChooser.showDialog(
+                        null, "Choose a color...", getBackground());
+                if (c != null) {
+                    inputPracticeFill.setBackground(c);
+                    prFillColor = c.getRGB();
+                }
+            }
+        });
+        panel.add(practFillL);
+        practFillP.add(inputPracticeFill);
+        practFillP.add(Box.createHorizontalBox());
+        panel.add(practFillP);
+
+        prDirPanel.add(inputPrDir);
+        prDirPanel.add(prDirButton);
+        prDirButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                File file = getDirectory();
+                if (file != null) {
+                    inputPrDir.setText(file.getName());
+                    workingDir = file.getParentFile();
+                    System.out.println(workingDir.toString());
+                    inputPracticeFill.setEnabled(false);
+                    inputPracticeFill.setBackground(Color.lightGray);
+                } else {
+                    inputNeutralDir.setText("");
+                    inputPracticeFill.setEnabled(true);
+                    inputPracticeFill.setBackground(new Color(prFillColor));
+                }
+            }
+        });
+        panel.add(prDirL);
+        panel.add(prDirPanel);
+
+        //  final JLabel practL = new JLabel("How many times should the practice images be repeated?");
+        JPanel practP = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        inputPractRepeat = new JFormattedTextField(NumberFormat.getInstance());
+        inputPractRepeat.setText("4");
+        inputPractRepeat.setPreferredSize(new Dimension(50, 20));
+        panel.add(practL);
+        practP.add(inputPractRepeat);
+        practP.add(Box.createVerticalBox());
+        panel.add(practP);
+
+
+        panel.add(Box.createVerticalStrut(10));
+        panel.add(Box.createVerticalStrut(10));
+        panel.add(new TitledSeparator("Border & Color options", 0));
+        panel.add(new TitledSeparator("", -1));
+        panel.add(Box.createVerticalStrut(5));
+        panel.add(Box.createVerticalStrut(5));
+        JLabel coloredBorderL = new JLabel("Do you want to automatically create a colored border around the images?");
+        inputColoredBorder = new JCheckBox();
+        inputColoredBorder.setPreferredSize(new Dimension(20, 20));
+        inputColoredBorder.setSelected(true);
+
+        panel.add(coloredBorderL);
+        panel.add(inputColoredBorder);
+
+        pushColorL = new JLabel("Set the border color for the push images");
+        pullColorL = new JLabel("Set the border color for the pull images");
+
+        //    inputPushColor = new JTextField("F5FE02");
+        //   inputPullColor = new JTextField("00A4E7");
+        pushColor = Integer.parseInt("F5FE02", 16);
+        pullColor = Integer.parseInt("00A4E7", 16);
+
+        JPanel pushColorP = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        inputPushColor = new JButton();
+        inputPushColor.setBackground(new Color(pushColor));
+        inputPushColor.setPreferredSize(new Dimension(100, 20));
+        inputPushColor.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                Color c = JColorChooser.showDialog(
+                        null, "Choose a color...", getBackground());
+                if (c != null) {
+                    inputPushColor.setBackground(c);
+                    pushColor = c.getRGB();
+                }
+
+            }
+        });
+        JPanel pullColorP = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        inputPullColor = new JButton();
+        inputPullColor.setBackground(new Color(pullColor));
+        inputPullColor.setPreferredSize(new Dimension(100, 20));
+        inputPullColor.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                Color c = JColorChooser.showDialog(
+                        null, "Choose a color...", getBackground());
+                if (c != null) {
+                    inputPullColor.setBackground(c);
+                    pullColor = c.getRGB();
+                }
+            }
+        });
+        borderSizeL = new JLabel("Set the size of the border");
+        JPanel borderSizeP = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        inputBorderSize = new JFormattedTextField(NumberFormat.getInstance());
+        inputBorderSize.setPreferredSize(new Dimension(50, 20));
+        inputBorderSize.setText("20");
+        panel.add(borderSizeL);
+        borderSizeP.add(inputBorderSize);
+        borderSizeP.add(Box.createHorizontalBox());
+        panel.add(borderSizeP);
+
+
+        panel.add(pushColorL);
+        pushColorP.add(inputPushColor);
+        pushColorP.add(Box.createHorizontalBox());
+        panel.add(pushColorP);
+        panel.add(pullColorL);
+        pullColorP.add(inputPullColor);
+        pullColorP.add(Box.createHorizontalBox());
+        panel.add(pullColorP);
+
+        panel.add(Box.createVerticalStrut(10));
+        panel.add(Box.createVerticalStrut(10));
+        panel.add(new TitledSeparator("Image filename tags (Only when Colored Borders isn't selected)", 0));
+        panel.add(new TitledSeparator("", -1));
+        panel.add(Box.createVerticalStrut(5));
+        panel.add(Box.createVerticalStrut(5));
+        pushTagL = new JLabel("<html>Select the tag by which the test can know which image is a push image<br>" +
+                "The image filename needs to contain this tag</html>");
+        pullTagL = new JLabel("<html>Select the tag by which the test can know which image is a pull image<br>" +
+                "The image filename needs to contain this tag</html>");
+        JPanel pushTP = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JPanel pullTP = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        inputPushTag = new JTextField("push");
+        inputPushTag.setPreferredSize(new Dimension(100, 20));
+        inputPushTag.setEnabled(false);
+        inputPullTag = new JTextField("pull");
+        inputPullTag.setPreferredSize(new Dimension(100, 20));
+        inputPullTag.setEnabled(false);
+        panel.add(pushTagL);
+        pushTP.add(inputPushTag);
+        pushTP.add(Box.createHorizontalBox());
+        panel.add(pushTP);
+        panel.add(pullTagL);
+        pullTP.add(inputPullTag);
+        pullTP.add(Box.createHorizontalBox());
+        panel.add(pullTP);
+
+        inputColoredBorder.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                if (inputColoredBorder.isSelected()) {
+                    enableColoredBorderAction();
+                } else {
+                    disableColoredBorderAction();
+                }
+            }
+        });
+
+        panel.add(Box.createVerticalStrut(10));
+        panel.add(Box.createVerticalStrut(10));
+        panel.add(new TitledSeparator("Boxplot & Questionnaire", 0));
+        panel.add(new TitledSeparator("", -1));
+        panel.add(Box.createVerticalStrut(5));
+        panel.add(Box.createVerticalStrut(5));
 
         JPanel comboP = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JLabel displayQL = new JLabel("When do you want to display a questionnaire?");
@@ -340,137 +564,10 @@ public class CreateConfig extends JPanel implements Observer {
         panel.add(boxPlotL);
         panel.add(inputBoxplot);
 
-        JLabel coloredBorderL = new JLabel("Do you want to automatically create a colored border around the images?");
-        inputColoredBorder = new JCheckBox();
-        inputColoredBorder.setPreferredSize(new Dimension(20, 20));
-        inputColoredBorder.setSelected(true);
-
-        panel.add(coloredBorderL);
-        panel.add(inputColoredBorder);
-
-        JLabel pushColorL = new JLabel("Set the border color for the push images");
-        JLabel pullColorL = new JLabel("Set the border color for the pull images");
-        JLabel practFillL = new JLabel("Set the fill color for the generated practice images");
-        //    inputPushColor = new JTextField("F5FE02");
-        //   inputPullColor = new JTextField("00A4E7");
-        pushColor = Integer.parseInt("F5FE02", 16);
-        pullColor = Integer.parseInt("00A4E7", 16);
-        prFillColor = Integer.parseInt("FFDEDE", 16);
-        JPanel pushColorP = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        inputPushColor = new JButton();
-        inputPushColor.setBackground(new Color(pushColor));
-        inputPushColor.setPreferredSize(new Dimension(100, 20));
-        inputPushColor.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                Color c = JColorChooser.showDialog(
-                        null, "Choose a color...", getBackground());
-                if (c != null) {
-                    inputPushColor.setBackground(c);
-                    pushColor = c.getRGB();
-                }
-
-            }
-        });
-        JPanel pullColorP = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        inputPullColor = new JButton();
-        inputPullColor.setBackground(new Color(pullColor));
-        inputPullColor.setPreferredSize(new Dimension(100, 20));
-        inputPullColor.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                Color c = JColorChooser.showDialog(
-                        null, "Choose a color...", getBackground());
-                if (c != null) {
-                    inputPullColor.setBackground(c);
-                    pullColor = c.getRGB();
-                }
-            }
-        });
-        JLabel borderSizeL = new JLabel("Set the size of the border");
-        JPanel borderSizeP = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        inputBorderSize = new JFormattedTextField(NumberFormat.getInstance());
-        inputBorderSize.setPreferredSize(new Dimension(50, 20));
-        inputBorderSize.setText("20");
-        panel.add(borderSizeL);
-        borderSizeP.add(inputBorderSize);
-        borderSizeP.add(Box.createHorizontalBox());
-        panel.add(borderSizeP);
-
-        JPanel practFillP = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        inputPracticeFill = new JButton();
-        inputPracticeFill.setBackground(new Color(prFillColor));
-        inputPracticeFill.setPreferredSize(new Dimension(100, 20));
-        inputPracticeFill.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                Color c = JColorChooser.showDialog(
-                        null, "Choose a color...", getBackground());
-                if (c != null) {
-                    inputPracticeFill.setBackground(c);
-                    prFillColor = c.getRGB();
-                }
-            }
-        });
-        panel.add(pushColorL);
-        pushColorP.add(inputPushColor);
-        pushColorP.add(Box.createHorizontalBox());
-        panel.add(pushColorP);
-        panel.add(pullColorL);
-        pullColorP.add(inputPullColor);
-        pullColorP.add(Box.createHorizontalBox());
-        panel.add(pullColorP);
-        panel.add(practFillL);
-        practFillP.add(inputPracticeFill);
-        practFillP.add(Box.createHorizontalBox());
-        panel.add(practFillP);
-        JLabel pushTagL = new JLabel("<html>Set the tag by which the test can know which image is a push image.<br>" +
-                "The image filename needs to contain this tag</html>");
-        JLabel pullTagL = new JLabel("<html>Set the tag by which the test can know which image is a pull image.<br>" +
-                "The image filename needs to contain this tag</html>");
-        JPanel pushTP = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JPanel pullTP = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        inputPushTag = new JTextField("push");
-        inputPushTag.setPreferredSize(new Dimension(100, 20));
-        inputPushTag.setEnabled(false);
-        inputPullTag = new JTextField("pull");
-        inputPullTag.setPreferredSize(new Dimension(100, 20));
-        inputPullTag.setEnabled(false);
-        panel.add(pushTagL);
-        pushTP.add(inputPushTag);
-        pushTP.add(Box.createHorizontalBox());
-        panel.add(pushTP);
-        panel.add(pullTagL);
-        pullTP.add(inputPullTag);
-        pullTP.add(Box.createHorizontalBox());
-        panel.add(pullTP);
-
-        inputColoredBorder.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                if (inputColoredBorder.isSelected()) {
-                    inputPushColor.setEnabled(true);
-                    inputPullColor.setEnabled(true);
-                    inputBorderSize.setEnabled(true);
-                    inputPullColor.setBackground(new Color(pullColor));
-                    inputPushColor.setBackground(new Color(pushColor));
-
-                    inputPushTag.setEnabled(false);
-                    inputPullTag.setEnabled(false);
-                } else {
-                    inputPullColor.setEnabled(false);
-                    inputPushColor.setEnabled(false);
-                    inputBorderSize.setEnabled(false);
-                    inputPushColor.setBackground(Color.lightGray);
-                    inputPullColor.setBackground(Color.lightGray);
-                    inputPushTag.setEnabled(true);
-                    inputPullTag.setEnabled(true);
-                }
-            }
-        });
-
-        panel.add(new JSeparator(JSeparator.HORIZONTAL));
-        panel.add(new JSeparator(JSeparator.HORIZONTAL));
+        panel.add(Box.createVerticalStrut(10));
+        panel.add(Box.createVerticalStrut(10));
+        panel.add(new TitledSeparator("Ratio options (Only change when needed)", 0));
+        panel.add(new TitledSeparator("", -1));
         JPanel affectRatioP = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JPanel neutralRatioP = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JPanel testRatioPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -527,8 +624,12 @@ public class CreateConfig extends JPanel implements Observer {
         panel.add(trialSizeL);
         panel.add(trialsizeP);
 
-        panel.add(new JSeparator(JSeparator.HORIZONTAL));
-        panel.add(new JSeparator(JSeparator.HORIZONTAL));
+        panel.add(Box.createVerticalStrut(10));
+        panel.add(Box.createVerticalStrut(10));
+        panel.add(new TitledSeparator("Performance options (Only change when needed)", 0));
+        panel.add(new TitledSeparator("", -1));
+        panel.add(Box.createVerticalStrut(5));
+        panel.add(Box.createVerticalStrut(5));
         inputStepSize = new JFormattedTextField(NumberFormat.getInstance());
         inputStepSize.setText("31");
         inputStepSize.setPreferredSize(new Dimension(50, 15));
@@ -537,7 +638,9 @@ public class CreateConfig extends JPanel implements Observer {
         inputDataStepSize.setPreferredSize(new Dimension(50, 15));
         JPanel stepSizeP = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JPanel dataStepP = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JLabel stepL = new JLabel("Change in how many steps the image will be resized, has to be an odd number", JLabel.LEFT);
+        JLabel stepL = new JLabel("<html>Change in how many steps the image will be resized, has to be an odd number" +
+                "<br>A higher value means the image will be resized more smoothly<br>" +
+                "Warning: When set too high, resizing may get too slow</html", JLabel.LEFT);
         JLabel dataStepL = new JLabel("<html>Change the accuracy of the joystick, When set to a larger number, errors are faster detected. <br>" +
                 "This also needs to be an odd number. <br>" +
                 "Warning: When set too high even very small movements of the joystick are recorded as error</html>", JLabel.LEFT);
@@ -548,125 +651,78 @@ public class CreateConfig extends JPanel implements Observer {
         stepSizeP.add(Box.createHorizontalBox());
         panel.add(stepSizeP);
         panel.add(dataStepL);
-        panel.setMaximumSize(new Dimension(500, 20));
+        //     panel.setMaximumSize(new Dimension(500, 20));
         dataStepP.add(inputDataStepSize);
         dataStepP.add(Box.createHorizontalBox());
         panel.add(dataStepP);
 
+        enableBuiltinPracticeAction(); //Enable this by default
+        //   scrollPane.add(this.createRatiosPanel());
+        //   scrollPane.add(this.createPerformancePanel());
 
         SpringUtilities.makeCompactGrid(panel,
-                25, 2, //rows, cols
+                45, 2, //rows, cols
                 6, 6,        //initX, initY
                 6, 6);       //xPad, yPad
-        return scrollPane;
+        //   return scrollPane;
+        return panel;
     }
 
-    private JPanel createPerformancePanel() {
-        //     JPanel panel = new JPanel(new GridLayout(2,2));
-        JPanel p = new JPanel(new SpringLayout());
-
-        p.setLayout(new BoxLayout(p, BoxLayout.X_AXIS));
-        p.setMaximumSize(new Dimension(500, 50));
-
-        //   contentPanel.setMaximumSize(new Dimension(500, 100));
-        inputStepSize = new JFormattedTextField(NumberFormat.getInstance());
-        inputStepSize.setText("31");
-        inputStepSize.setPreferredSize(new Dimension(50, 15));
-        inputDataStepSize = new JFormattedTextField(NumberFormat.getInstance());
-        inputDataStepSize.setText("9");
-        inputDataStepSize.setPreferredSize(new Dimension(50, 15));
-        JPanel stepSizeP = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JPanel dataStepP = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JLabel stepL = new JLabel("Change in how many steps the image will be resized, has to be an odd number", JLabel.LEFT);
-        JLabel dataStepL = new JLabel("<html>Change the accuracy of the joystick, When set to a larger number, errors are faster detected. <br>" +
-                "This also needs to be an odd number. <br>" +
-                "Warning: When set too high even very small movements of the joystick are recorded as error</html>", JLabel.LEFT);
-
-
-        p.add(stepL);
-        stepSizeP.add(inputStepSize);
-        stepSizeP.add(Box.createHorizontalBox());
-        p.add(stepSizeP);
-        p.add(dataStepL);
-        p.setMaximumSize(new Dimension(500, 20));
-        dataStepP.add(inputDataStepSize);
-        dataStepP.add(Box.createHorizontalBox());
-        p.add(dataStepP);
-
-        SpringUtilities.makeCompactGrid(p,
-                3, 2, //rows, cols
-                6, 6,        //initX, initY
-                6, 6);       //xPad, yPad
-        //   panel.repaint();
-        return p;
+    private void enableBuiltinPracticeAction() {
+        inputPracticeFill.setEnabled(true);
+        inputPracticeFill.setBackground(new Color(prFillColor));
+        inputColoredBorder.setSelected(true);
+        enableColoredBorderAction();
+        inputPractRepeat.setText("0");
+        inputPractRepeat.setEnabled(true);
+        inputPrDir.setText("");
+        inputPrDir.setEnabled(false);
+        prDirButton.setEnabled(false);
+        practFillL.setEnabled(true);
+        prDirL.setEnabled(false);
     }
 
-    private JScrollPane createRatiosPanel() {
+    private void disableBuiltinPracticeAction() {
+        inputPracticeFill.setEnabled(false);
+        inputPracticeFill.setBackground(Color.lightGray);
+        inputPrDir.setText("");
+        inputPrDir.setEnabled(true);
+        prDirL.setEnabled(true);
+        prDirButton.setEnabled(true);
+        practFillL.setEnabled(false);
+    }
 
-        JPanel panel = new JPanel(new SpringLayout());
-        panel.setLayout(new SpringLayout());
-        JScrollPane scrollPane = new JScrollPane(panel);
-        JPanel affectRatioP = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JPanel neutralRatioP = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JPanel testRatioPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JLabel testRatioL = new JLabel("Set the ratio affect : neutral images");
-        JLabel affectiveRatioL = new JLabel("Set the pull:push ratio for the affect images");
-        JLabel neutralRatioL = new JLabel("Set the pull:push ratio for the neutral images");
-        JLabel trialSizeL = new JLabel("Set the number of images in a trial to a custom value");
+    private void enableColoredBorderAction() {
+        pullColorL.setEnabled(true);
+        pushColorL.setEnabled(true);
+        borderSizeL.setEnabled(true);
+        inputPushColor.setEnabled(true);
+        inputPullColor.setEnabled(true);
+        inputBorderSize.setEnabled(true);
+        inputPullColor.setBackground(new Color(pullColor));
+        inputPushColor.setBackground(new Color(pushColor));
 
-        inputTestRatioA = new JFormattedTextField(NumberFormat.getInstance());
-        inputTestRatioA.setText("1");
-        inputTestRatioA.setPreferredSize(new Dimension(20, 20));
-        inputTestRatioN = new JFormattedTextField(NumberFormat.getInstance());
-        inputTestRatioN.setText("1");
-        inputTestRatioN.setPreferredSize(new Dimension(20, 20));
-        testRatioPanel.add(inputTestRatioA);
-        testRatioPanel.add(new JLabel(":"));
-        testRatioPanel.add(inputTestRatioN);
-        testRatioPanel.add(Box.createHorizontalBox());
+        pushTagL.setEnabled(false);
+        pullTagL.setEnabled(false);
+        inputPushTag.setEnabled(false);
+        inputPullTag.setEnabled(false);
+    }
 
-        inputAffectRatioPull = new JFormattedTextField(NumberFormat.getInstance());
-        inputAffectRatioPull.setText("1");
-        inputAffectRatioPull.setPreferredSize(new Dimension(20, 20));
-        inputAffectRatioPush = new JFormattedTextField(NumberFormat.getInstance());
-        inputAffectRatioPush.setText("1");
-        inputAffectRatioPush.setPreferredSize(new Dimension(20, 20));
-        affectRatioP.add(inputAffectRatioPull);
-        affectRatioP.add(new JLabel(":"));
-        affectRatioP.add(inputAffectRatioPush);
-        affectRatioP.add(Box.createHorizontalBox());
-
-        inputNeutralRatioPull = new JFormattedTextField(NumberFormat.getInstance());
-        inputNeutralRatioPull.setText("1");
-        inputNeutralRatioPull.setPreferredSize(new Dimension(20, 20));
-        inputNeutralRatioPush = new JFormattedTextField(NumberFormat.getInstance());
-        inputNeutralRatioPush.setText("1");
-        inputNeutralRatioPush.setPreferredSize(new Dimension(20, 20));
-        neutralRatioP.add(inputNeutralRatioPull);
-        neutralRatioP.add(new JLabel(":"));
-        neutralRatioP.add(inputNeutralRatioPush);
-        neutralRatioP.add(Box.createHorizontalBox());
-
-        JPanel trialsizeP = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        inputTrialSize = new JFormattedTextField(NumberFormat.getInstance());
-
-        inputTrialSize.setPreferredSize(new Dimension(50, 20));
-        trialsizeP.add(inputTrialSize);
-        trialsizeP.add(Box.createHorizontalBox());
-        panel.add(testRatioL);
-        panel.add(testRatioPanel);
-        panel.add(affectiveRatioL);
-        panel.add(affectRatioP);
-        panel.add(neutralRatioL);
-        panel.add(neutralRatioP);
-        panel.add(trialSizeL);
-        panel.add(trialsizeP);
-
-        SpringUtilities.makeCompactGrid(panel,
-                4, 2, //rows, cols
-                6, 6,        //initX, initY
-                6, 6);       //xPad, yPad
-        return scrollPane;
+    private void disableColoredBorderAction() {
+        pullColorL.setEnabled(false);
+        pushColorL.setEnabled(false);
+        borderSizeL.setEnabled(false);
+        inputPullColor.setEnabled(false);
+        inputPushColor.setEnabled(false);
+        inputBorderSize.setEnabled(false);
+        inputPushColor.setBackground(Color.lightGray);
+        inputPullColor.setBackground(Color.lightGray);
+        pushTagL.setEnabled(true);
+        pullTagL.setEnabled(true);
+        inputPushTag.setEnabled(true);
+        inputPullTag.setEnabled(true);
+        inputBuiltinPractice.setSelected(false);
+        disableBuiltinPracticeAction();
     }
 
     //File dialog to select a file to be opened

@@ -87,6 +87,7 @@ public class AATModel extends Observable {
     private int previousPos; //TTo keep track of the joystick position
 
     private int lastSize;
+    private boolean saveData;
 
     //Constructor.
     public AATModel() {
@@ -101,12 +102,9 @@ public class AATModel extends Observable {
         testData = new TestData(newAAT);
     }
 
-    public void setTempData(File file) {
-        newAAT.setTempDataFile(file);
-    }
-
     //Starts a new instance of the AAT. With no. times it has to repeat and when there will be a break.
-    public void startTest() {
+    public void startTest(boolean saveData) {
+        this.saveData = saveData; //Don't save the data when testing configuration
         this.repeat = newAAT.getRepeat();
         this.breakAfter = newAAT.getBreakAfter();
         this.previousPos = (newAAT.getDataSteps() + 1) / 2; //Set the previous position to the center position
@@ -199,7 +197,9 @@ public class AATModel extends Observable {
                 } else if (run == repeat) {   //No more runs left, Test has ended
                     testStatus = AATModel.TEST_SHOW_FINISHED;    //Notify observers about it
                     if (!newAAT.getDisplayQuestions().equals("After")) {  //questionnaire has to be added at the end
-                        testData.addParticipant(newParticipant);
+                        if (saveData) {
+                            testData.addParticipant(newParticipant);
+                        }
                     }
                     this.setChanged();
                     notifyObservers("Show finished");   //First show black screen
@@ -412,7 +412,9 @@ public class AATModel extends Observable {
         this.newParticipant.addQuestionData(extraQuestions);
         this.setChanged();
         if (newAAT.getDisplayQuestions().equals("After")) {
-            testData.addParticipant(newParticipant);
+            if (saveData) {
+                testData.addParticipant(newParticipant);
+            }
             this.notifyObservers("Finished");
         } else {
             this.notifyObservers("Start");

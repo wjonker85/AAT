@@ -116,13 +116,16 @@ public class TestFrame extends JFrame implements Observer {
 
         //Results Screen
         if (o.toString().equals("Display results")) {
-
+            System.out.println("Display results");
             boxPlot.init();
             boxPlot.display(true);
             cl.show(displayPanel, "boxPlot");
         }
 
         if (o.toString().equals("Finished")) {
+            boxPlot = null;
+            System.gc();
+            boxPlot = new BoxPlot(model);
             this.setVisible(false);
         }
     }

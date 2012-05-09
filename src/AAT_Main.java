@@ -173,7 +173,7 @@ public class AAT_Main extends JFrame implements Observer {
                 }
                 testFrame = new TestFrame(model);
                 model.addObserver(testFrame);
-                model.startTest();
+                model.startTest(true);
                 //   runButton.setEnabled(false);
             }
         });
