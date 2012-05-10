@@ -58,6 +58,8 @@ public abstract class AatObject {
     public int a_pushPerc = 50;
     public int trialSize = 0;
     public int affectPerc = 50;
+    private int imageSizePerc = 50;
+    private int maxSizePerc = 100;
     private int dataSteps = 9; //Default value 9
     private int stepSize = 31;
     private String displayQuestions;
@@ -347,6 +349,27 @@ public abstract class AatObject {
                 throw new FalseConfigException("TrialSize is not set to a correct number");
             }
         }
+
+        if (!testConfig.getValue("MaxSizePerc").equals("")) {
+            try {
+                maxSizePerc = Integer.parseInt(testConfig.getValue("MaxSizePerc"));
+            } catch (Exception e) {
+                throw new FalseConfigException("Maximum image size is not a number");
+            }
+            if (maxSizePerc <= 0) {
+                throw new FalseConfigException("Maximum image size should be larger than 0");
+            }
+        }
+        if (!testConfig.getValue("ImageSizePerc").equals("")) {
+            try {
+                imageSizePerc = Integer.parseInt(testConfig.getValue("ImageSizePerc"));
+            } catch (Exception e) {
+                throw new FalseConfigException("Image start size percentage is not a number");
+            }
+            if (imageSizePerc <= 0) {
+                throw new FalseConfigException("Image start size percentage should be larger than 0");
+            }
+        }
         if (breakAfter == repeat) {
             throw new FalseConfigException("Number of trials and Break After values cannot be the same");
         }
@@ -362,10 +385,6 @@ public abstract class AatObject {
             super(error);
         }
 
-    }
-
-    public void setTempDataFile(File file) {
-        dataFile = file;
     }
 
     private int getPercentage(String ratio, String s) throws FalseConfigException {
@@ -572,6 +591,14 @@ public abstract class AatObject {
         } else {
             return "practice";
         }
+    }
+
+    public int getMaxSizePerc() {
+        return maxSizePerc;
+    }
+
+    public int getImageSizePerc() {
+        return imageSizePerc;
     }
 
     public Questionnaire getQuestionnaire() {

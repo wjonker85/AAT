@@ -25,20 +25,18 @@ import java.awt.image.BufferedImage;
  * User: marcel
  * Date: 2/22/12
  * Time: 8:26 PM
- * To change this template use File | Settings | File Templates.
+ * Static helper class for the images. For resizing, creating borders
  */
 public class ImageUtils {
 
 
     public static BufferedImage drawBorder(BufferedImage originalImage, Color borderColor, int borderWidth) {
         BufferedImage bi = new BufferedImage(originalImage.getWidth() + (2 * borderWidth), originalImage.getHeight() + (2 * borderWidth), BufferedImage.TYPE_INT_ARGB);
-
         Graphics2D g = bi.createGraphics();
         g.setColor(borderColor);
         g.drawImage(originalImage, borderWidth, borderWidth, null);
         BasicStroke stroke = new BasicStroke(borderWidth * 2);
         g.setStroke(stroke);
-
         g.drawRect(0, 0, bi.getWidth(), bi.getHeight());
         g.dispose();
         return bi;
@@ -48,45 +46,16 @@ public class ImageUtils {
    Probeersel om een image te resizen
     */
     public static BufferedImage resizeImageWithHint(BufferedImage originalImage, int imageWidth, int imageHeight, int type) {
+        if (imageWidth <= 0) {
+            imageWidth = 1;
+        }
+        if (imageHeight <= 0) {
+            imageHeight = 1;
+        }
         BufferedImage resizedImage = new BufferedImage(imageWidth, imageHeight, type);
         Graphics2D g = resizedImage.createGraphics();
+
         g.drawImage(originalImage, 0, 0, imageWidth, imageHeight, null);
-        g.dispose();
-        g.setComposite(AlphaComposite.Src);
-
-        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
-                RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-        g.setRenderingHint(RenderingHints.KEY_RENDERING,
-                RenderingHints.VALUE_RENDER_QUALITY);
-        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                RenderingHints.VALUE_ANTIALIAS_ON);
-
-        return resizedImage;
-    }
-
-    /*
-   Probeersel om een image te resizen
-    */
-    public static BufferedImage createRectImage(BufferedImage originalImage, int imageWidth, int imageHeight, int type) {
-        BufferedImage resizedImage;
-        Graphics2D g;
-        if (imageHeight >= imageWidth) {
-            resizedImage = new BufferedImage(imageHeight, imageHeight, type);
-            g = resizedImage.createGraphics();
-            g.setBackground(Color.black);
-            g.setColor(Color.black);
-            g.fillRect(0, 0, imageHeight, imageHeight);
-            g.drawImage(originalImage, (imageHeight / 2) - (imageWidth / 2), 0, imageWidth, imageHeight, null);
-
-        } else {
-            resizedImage = new BufferedImage(imageWidth, imageWidth, type);
-            g = resizedImage.createGraphics();
-            g.setBackground(Color.black);
-            g.setColor(Color.black);
-            g.fillRect(0, 0, imageWidth, imageWidth);
-            g.drawImage(originalImage, 0, (imageWidth / 2) - (imageHeight / 2), imageWidth, imageHeight, null);
-        }
-
         g.dispose();
         g.setComposite(AlphaComposite.Src);
 
@@ -103,46 +72,24 @@ public class ImageUtils {
     /**
      * Geeft de waarden imgBorderWidth, imgSizeX & imgSizeY welke door imageShow() gebruikt worden.
      */    //TODO dit veranderen
-    public static Dimension setupImage(int viewHeight, int viewWidth, int imgHeight, int imgWidth, int stepSize, int stepCount, int size) {
-        /**
-         * Ratio scherm en plaatje, nodig bij bepalen vergroot /verklein factor.
-         */
-        float imgRefactor;
-        float viewRatio = (float) viewHeight / (float) viewWidth;
-        float imgRatio = (float) imgHeight / (float) imgWidth;
+    public static Dimension setupImage(BufferedImage image, int centerPos, int size, int maxSizePercentage) {
+        Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
+        int newWidth, newHeight;
+        int resize = size - centerPos;
+        double resizeFactor;
+        int maxscreenSize = (int) (screen.getHeight() * maxSizePercentage) / 100;
 
-        /**
-         * Stapgroote bepale waarmee plaatjes verklijnt of vergoor moeten worden.
-         */
-        float stepX = (float) imgWidth / (float) stepSize;
-        float stepY = (float) imgHeight / (float) stepSize;
-
-        /**
-         * image size initialiseren wanneer deze voor het eerst op het scherm verschijnt.
-         */
-        float imgSizeX = stepCount * stepX;
-        float imgSizeY = stepCount * stepY;
-        /**
-         * Vergroot / verklein factor van plaatje bepalen, zodat plaatje nooit groter kan worden dan het max hoogte of breedte van scherm
-         */
-        //   if (viewRatio > imgRatio) {
-        //       imgRefactor = (float) viewWidth / (float) imgWidth;
-        //   } else {
-        imgRefactor = (float) viewHeight / (float) imgHeight;
-        //   }
-
-        /**
-         * De daadwerkelijke breedt, hoogte en boorderwidth in variabelen stoppen.
-         */
-        //    float imgBorderWidth = (borderWidth * inputY);
-        imgSizeX = (imgRefactor * size * stepX);
-        imgSizeY = (imgRefactor * size * stepY);
-        Dimension d = new Dimension((int) imgSizeX, (int) imgSizeY);
-        return d;
-    }
-
-    public static Dimension setupImage(int viewHeight, int viewWidth, int imgHeight, int imgWidth, int stepSize) {
-        int stepStart = Math.round(stepSize / 2f);
-        return setupImage(viewHeight, viewWidth, imgHeight, imgWidth, stepSize, stepStart, stepStart);
+        if (image.getWidth() >= image.getHeight()) {//Landscape
+            resizeFactor = (maxscreenSize - image.getWidth()) / centerPos;
+            newWidth = (int) (image.getWidth() + resize * resizeFactor);
+            float f = (float) newWidth / (float) image.getWidth();
+            newHeight = (int) (image.getHeight() * f);
+        } else {
+            resizeFactor = (maxscreenSize - image.getHeight()) / centerPos;
+            newHeight = (int) (image.getHeight() + resize * resizeFactor);
+            float f = (float) newHeight / (float) image.getHeight();
+            newWidth = (int) (image.getWidth() * f);
+        }
+        return new Dimension(newWidth, newHeight);
     }
 }

@@ -63,6 +63,7 @@ public class CreateConfig extends JPanel implements Observer {
     private JLabel pullColorL, pushColorL, borderSizeL, pushTagL, pullTagL, askBuiltinPractL, practFillL, prDirL, practL;
     private JButton prDirButton;
     private String practRepeatValue = "3";
+    private JTextField inputMaxSizeP, inputImageSizeP;
 
 
     public CreateConfig() {
@@ -617,12 +618,34 @@ public class CreateConfig extends JPanel implements Observer {
         dataStepP.add(Box.createHorizontalBox());
         panel.add(dataStepP);
 
+        JLabel imgSizeL = new JLabel("<html>Set the size the image will have when first shown on the screen<br>" +
+                "Value is percentage of the height of your screen</html>");
+        JPanel imgSizeP = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        inputImageSizeP = new JFormattedTextField(NumberFormat.getIntegerInstance());
+        inputImageSizeP.setText("50");
+        inputImageSizeP.setPreferredSize(new Dimension(50, 20));
+        panel.add(imgSizeL);
+        imgSizeP.add(inputImageSizeP);
+        imgSizeP.add(Box.createHorizontalBox());
+        panel.add(imgSizeP);
+
+        JLabel maxSizeL = new JLabel("<html>Set the maximum size the image can be. Value is percentage of the height of your screen.<br>" +
+                "This value can be set higher than 100%, the image will then be resized larger than your screen height</html>");
+        JPanel maxSizeP = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        inputMaxSizeP = new JFormattedTextField(NumberFormat.getIntegerInstance());
+        inputMaxSizeP.setText("100");
+        inputMaxSizeP.setPreferredSize(new Dimension(50, 20));
+        maxSizeP.add(inputMaxSizeP);
+        maxSizeP.add(Box.createHorizontalBox());
+        panel.add(maxSizeL);
+        panel.add(maxSizeP);
+
         enableBuiltinPracticeAction(); //Enable this by default
         //   scrollPane.add(this.createRatiosPanel());
         //   scrollPane.add(this.createPerformancePanel());
 
         SpringUtilities.makeCompactGrid(panel,
-                45, 2, //rows, cols
+                47, 2, //rows, cols
                 6, 6,        //initX, initY
                 6, 6);       //xPad, yPad
         //   return scrollPane;
@@ -864,11 +887,14 @@ public class CreateConfig extends JPanel implements Observer {
                 "#different language.";
         String dataFileHeader = "#The next option specifies in which file the data will be saved. When not set it will default to Data.xml";
         String questionHeader = "#When a questionnaire is added to the AAT, the next option specifies which file contains those questions. ";
-        String performanceHeader = "#Next two options are for test performance\n" +
+        String performanceHeader = "#Next options are for test performance\n" +
                 "# StepSize - Determines in how many steps the image is resized. This has to be an odd number. A higher number is smoother, but setting this  \n" +
                 "#\t     too high can be bad for performance. (Defaults to 31 when not set)\n" +
                 "# DataSteps - Determines the accuracy for data recording. Higher value means smaller movements are recorded, but this also increases\n" +
-                "#\t     the error rate. (Defaults to 9 when not set)\n";
+                "#\t     the error rate. (Defaults to 9 when not set)\n" +
+                "# MaxSizePerc - Determines how large the image can be. Value is percentage of the screen height. Can be >100% (Default 100%)\n" +
+                "# ImageSizePerc - Determines how large the image will be when first shown on the screen. Value is percentage of the screen height. Can be >100%\n" +
+                "#\t\t  (Default 50%)";
         pw.write(firstheader);
         pw.println();
         pw.write("Trials " + checkForValue(inputTrials.getText()));
@@ -1015,6 +1041,8 @@ public class CreateConfig extends JPanel implements Observer {
         pw.println();
         pw.println("StepSize " + checkForValue(inputStepSize.getText()));
         pw.println("DataSteps " + checkForValue(inputDataStepSize.getText()));
+        pw.println("MaxSizePerc " + checkForValue(inputMaxSizeP.getText()));
+        pw.println("ImageSizePerc " + checkForValue(inputImageSizeP.getText()));
         pw.flush();
         pw.close();
         try {
@@ -1139,6 +1167,17 @@ public class CreateConfig extends JPanel implements Observer {
         inputPushTag.setText(config.getValue("PushTag"));
         inputQuestion.setText(config.getValue("Questionnaire"));
         inputStepSize.setText(config.getValue("StepSize"));
+
+        if (config.getValue("MaxSizePerc").equals("")) {
+            inputMaxSizeP.setText("100");
+        } else {
+            inputMaxSizeP.setText(config.getValue("MaxSizePerc"));
+        }
+        if (config.getValue("ImageSizePerc").equals("")) {
+            inputImageSizeP.setText("50");
+        } else {
+            inputImageSizeP.setText(config.getValue("ImageSizePerc"));
+        }
 
         practRepeatValue = config.getValue("PracticeRepeat");
         if (practRepeatValue.equals("") || practRepeatValue.equals("0")) {

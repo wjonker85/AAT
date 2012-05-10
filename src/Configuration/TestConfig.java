@@ -67,7 +67,9 @@ public class TestConfig {
             "AffectRatio",
             "NeutralRatio",
             "TestRatio",
-            "TrialSize"
+            "TrialSize",
+            "MaxSizePerc",
+            "ImageSizePerc"
 
     };
 

@@ -45,7 +45,6 @@ public class AATImage {
     public static int NEUTRAL = 0;
     public static int AFFECTIVE = 1;
     public static int PRACTICE = 2;
-    private int stepSize;
     private boolean hasBorders;
     private Color borderColor;
     private int borderWidth;
@@ -53,7 +52,6 @@ public class AATImage {
     public AATImage(File imageFile, int direction, int type, AatObject aatObject) {
         this.direction = direction;
         this.type = type;
-        this.stepSize = aatObject.getStepRate();
         hasBorders = aatObject.hasColoredBorders();
         if (hasBorders) {
             int intValue = Integer.parseInt(aatObject.getBorderColor(direction), 16);
@@ -63,7 +61,7 @@ public class AATImage {
 
         name = imageFile.getName();
 
-        this.image = loadImage(imageFile);
+        this.image = loadImage(imageFile, aatObject.getImageSizePerc());
 
 
     }
@@ -71,7 +69,6 @@ public class AATImage {
     public AATImage(File imageFile, int direction, AatObject aatObject, int repeat) {
         this.direction = direction;
         this.type = PRACTICE;
-        this.stepSize = aatObject.getStepRate();
         hasBorders = aatObject.hasColoredBorders();
         if (hasBorders) {
             int intValue = Integer.parseInt(aatObject.getBorderColor(direction), 16);
@@ -80,7 +77,7 @@ public class AATImage {
         }
         name = imageFile.getName() + "_" + repeat;
 
-        this.image = loadImage(imageFile);
+        this.image = loadImage(imageFile, aatObject.getImageSizePerc());
 
 
     }
@@ -88,12 +85,11 @@ public class AATImage {
     //Create a generated AAT Image. This creates an image that is just a square with the given color.
     public AATImage(int direction, Color color, int nr, AatObject aatObject) {
         this.direction = direction;
-        this.stepSize = aatObject.getStepRate();
         hasBorders = aatObject.hasColoredBorders();
         int intValue = Integer.parseInt(aatObject.getBorderColor(direction), 16);
         borderColor = new Color(intValue);
         borderWidth = aatObject.getBorderWidth();
-        this.image = getPracticeImage(color);
+        this.image = getPracticeImage(color, aatObject.getImageSizePerc());
         this.type = AATImage.PRACTICE;
         this.name = "practice_" + nr;
     }
@@ -106,16 +102,15 @@ public class AATImage {
 
     //Create a practice image. This is just a rect with a single fill color. Ik also resizes the image dependent of the screenSize
     //And the number of steps needed to resize the image
-    private BufferedImage getPracticeImage(Color color) {
+    private BufferedImage getPracticeImage(Color color, int startPerc) {
+        float startSize = (float) startPerc / 100f;
         BufferedImage practiceImage = new BufferedImage(433, 433, BufferedImage.TYPE_INT_RGB);
         Graphics2D g = practiceImage.createGraphics();
         g.setBackground(color);
         g.setColor(color);
         g.fillRect(0, 0, 433, 433);
-        int stepStart = Math.round(stepSize / 2f);
         Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
-        Dimension d = ImageUtils.setupImage((int) dim.getHeight(), (int) dim.getWidth(), practiceImage.getHeight(), practiceImage.getWidth(), stepStart);
-        practiceImage = ImageUtils.resizeImageWithHint(practiceImage, d.width, d.height, BufferedImage.TYPE_INT_ARGB);
+        practiceImage = ImageUtils.resizeImageWithHint(practiceImage, (int) ((startSize * dim.getHeight()) - (borderWidth * 2)), (int) ((startSize * dim.getHeight()) - borderWidth), BufferedImage.TYPE_INT_ARGB);
         practiceImage = ImageUtils.drawBorder(practiceImage, borderColor, borderWidth);
         return practiceImage;
     }
@@ -135,30 +130,33 @@ public class AATImage {
     }
 
     //Loads the requested image and resizes it to the screenSize
-    private BufferedImage loadImage(File imageFile) {
-        Dimension d;
+    private BufferedImage loadImage(File imageFile, int startPerc) {
+        float startSize = (float) startPerc / 100f;
         BufferedImage bufImage = null;
         try {
             bufImage = ImageIO.read(imageFile);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        int stepStart = Math.round(stepSize / 2f);
-        //  bufImage = ImageUtils.createRectImage(bufImage,bufImage.getWidth(),bufImage.getHeight(),BufferedImage.TYPE_INT_ARGB);
         Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
         assert bufImage != null;
-        if (bufImage.getHeight() >= bufImage.getWidth()) {
-            d = ImageUtils.setupImage((int) dim.getHeight(), (int) dim.getWidth(), bufImage.getHeight(), bufImage.getWidth(), stepStart);
-        } else {
-            d = ImageUtils.setupImage((int) dim.getHeight(), (int) dim.getWidth(), bufImage.getHeight(), bufImage.getWidth(), stepStart);
+        int bWidth = 0;
+        if (hasBorders) {
+            bWidth = borderWidth * 2;
         }
 
-        //   Dimension d = ImageUtils.setupImage((int) dim.getHeight(),(int) dim.getHeight(), bufImage.getHeight(), bufImage.getWidth(), stepStart);
-        bufImage = ImageUtils.resizeImageWithHint(bufImage, d.width, d.height, BufferedImage.TYPE_INT_ARGB);
+        //Resize naar juiste schermgrootte
+        if (bufImage.getWidth() > bufImage.getHeight()) {
+            double resizeFactor = (startSize * dim.getHeight()) / bufImage.getWidth();
+            int newHeight = (int) (bufImage.getHeight() * resizeFactor) - bWidth;
+            bufImage = ImageUtils.resizeImageWithHint(bufImage, (int) (startSize * dim.getHeight()) - bWidth, newHeight, BufferedImage.TYPE_INT_ARGB);
+        } else {
+            double resizeFactor = startSize * (dim.getHeight()) / bufImage.getHeight();
+            int newWidth = (int) (bufImage.getWidth() * resizeFactor) - bWidth;
+            bufImage = ImageUtils.resizeImageWithHint(bufImage, newWidth, (int) (startSize * dim.getHeight()) - bWidth, BufferedImage.TYPE_INT_ARGB);
+        }
         if (hasBorders) {
             bufImage = ImageUtils.drawBorder(bufImage, borderColor, borderWidth);
-        } else {
-
         }
         return bufImage;
     }

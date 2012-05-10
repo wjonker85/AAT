@@ -30,10 +30,6 @@ import java.awt.image.BufferedImage;
 import java.util.Observable;
 import java.util.Observer;
 
-//import processing.core.PApplet;
-//import processing.core.PConstants;
-//import processing.core.PImage;
-
 /**
  * Created by IntelliJ IDEA.
  * User: wjonker85
@@ -46,58 +42,39 @@ import java.util.Observer;
  * AATView is verantwoordelijk voor het tonen van test (Dat zijn de plaatjes, en instructie tekst). De resultaten
  * weergegeven door BoxPlot.java.
  */
-//public class AATView extends PApplet implements Observer {
 public class AATView extends JPanel implements Observer {
     /**
      * Variabelen en object aanmaken welke nodig zijn voor juiste werking AATView.java
      */
     private AATModel model;
-    public int viewWidth, viewHeight, borderWidth, stepSize, imgBorderWidth, stepStart, inputY, xPos, yPos;
-    public float stepCount;
+
+    private int inputY;
+    private int centerPoint;
 
 
     private boolean blackScreen = true;
     private boolean showInfo = true;
     private String displayText = "";
     private JEditorPane textPane;
-    private Document doc;
+    private Dimension screen;
 
     /**
      * @param model bevat o.a. waarden uit configuratie bestand
      */
     public AATView(AATModel model) {
-        Dimension screen = this.getToolkit().getScreenSize();
-        // int displayHeight = this.getToolkit().getScreenSize().height;
-        //   Dimension screen = new Dimension(displayHeight,displayHeight);
+        screen = this.getToolkit().getScreenSize();
         this.setLayout(null);
-        this.setSize(screen);
         this.setPreferredSize(screen);
         this.setMinimumSize(screen);
         this.model = model;
-
-        this.stepSize = model.getTest().getStepRate();
         this.setBackground(Color.black);
         textPane = new JEditorPane();
-
         this.add(textPane);
         textPane.setBounds(100, 100, screen.width - 100, screen.height - 100);
         textPane.setEditable(false);
-        this.setLayout(null);
-        this.setVisible(true);
-        stepStart = Math.round(stepSize / 2f);
-        inputY = stepStart;                                 //Eerste plaatje begint op stepStart.
-        stepCount = stepStart;                              //eerst stepCount begint op stepStart.
-        borderWidth = model.getTest().getBorderWidth();               //Breedte border om img
-        imgBorderWidth = borderWidth;                       //imgBorderWidth start met waarde borderWidth
-        xPos = viewWidth / 2;
-        yPos = viewHeight / 2;
-        //Grote van de AATView scherm.
-        this.viewHeight = this.getHeight();
-        this.viewWidth = this.getWidth();
-        // this.viewWidth = viewHeight; //make the display a square
+        centerPoint = Math.round(model.getTest().getStepRate() / 2);      //eerst centerPoint begint op stepStart.
+        inputY = centerPoint; //Start in the center
         displayText = model.getTest().getIntroductionText(); //Test starts with an introduction tekst.
-
-
     }
 
     /**
@@ -114,10 +91,9 @@ public class AATView extends JPanel implements Observer {
             textPane.setContentType("text/html");
             HTMLEditorKit kit = new HTMLEditorKit();
             textPane.setEditorKit(kit);
-
             StyleSheet styleSheet = kit.getStyleSheet();
             styleSheet.addRule("body {color: white; font-family:times; margin: 0px; background-color: black;font : 30px monaco;}");
-            doc = kit.createDefaultDocument();
+            Document doc = kit.createDefaultDocument();
             textPane.setDocument(doc);
             infoShow(displayText);                          // Geef instructie tekst weer
         } else {
@@ -137,13 +113,9 @@ public class AATView extends JPanel implements Observer {
         textPane.setVisible(true);
         this.setBackground(Color.black);   //Background to black
         this.setForeground(Color.white);    //ForeGround to white
-        //    Font font = new Font("Roman", Font.PLAIN, 30);
-        //    textPane.setFont(font);
         textPane.setBackground(new Color(0));
-        //    textPane.setForeground(Color.white);
         infoText = infoText.replaceAll("(\r\n|\r|\n|\n\r)", "<br>");
         textPane.setText("<body>" + infoText + "</body>");
-
         textPane.setEditable(false);
     }
 
@@ -155,22 +127,9 @@ public class AATView extends JPanel implements Observer {
      */
     public void imageShow(Graphics g) {
         this.setBackground(new Color(0));
-        /**
-         * setupImage geeft de juiste waarde voor imgSizeX imageSizeY zodat plaatje juiste afmeting heeft. Image()
-         * is verantwoordelijk voor het daadwerkelijk laten zien van het plaatje.
-         */
         BufferedImage img = model.getNextImage();
-        int imgWidth = img.getWidth();
-        //  imgHeight = img.height;
-        int imgHeight = img.getHeight();
-        Dimension imageSize = ImageUtils.setupImage(viewHeight, viewWidth, imgHeight, imgWidth, stepSize, (int) stepCount, inputY);
-        /**
-         * Wanneer in config file ColoredBorders True is, border weergeven, anders niet. De juiste waarden, zoals
-         * breedte van border zijn al eerder met setupImage()
-         *
-         **/
-        //TODO in andere class zetten
-        if (inputY != stepStart) {    //  Only resize image when joystick moves
+        Dimension imageSize = ImageUtils.setupImage(img, centerPoint, inputY, model.getTest().getMaxSizePerc());
+        if (inputY != centerPoint) {    //  Only resize image when joystick moves
             img = ImageUtils.resizeImageWithHint(img, (int) imageSize.getWidth(), (int) imageSize.getHeight(), img.getType());
         }
         g.drawImage(img, getXpos(img), getYpos(img), this);
@@ -178,14 +137,13 @@ public class AATView extends JPanel implements Observer {
 
 
     private int getXpos(BufferedImage image) {
-        int XScreen = getWidth() / 2;
+        int XScreen = screen.width / 2;
         int imageWidth = image.getWidth();
         return XScreen - imageWidth / 2;
-
     }
 
     private int getYpos(BufferedImage image) {
-        int YScreen = getHeight() / 2;
+        int YScreen = screen.height / 2;
         int imageHeight = image.getHeight();
         return YScreen - (imageHeight / 2);
     }
@@ -224,10 +182,13 @@ public class AATView extends JPanel implements Observer {
          */
         if (o.toString().equals("Wait screen")) {
             inputY = model.getLastSize();
+            if (model.getDirection() == AATImage.PULL) {
+                inputY--;
+            }
             repaint();
             if (model.getDirection() == AATImage.PULL) {
                 try {
-                    Thread.sleep(100);
+                    Thread.sleep(80);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -265,7 +226,6 @@ public class AATView extends JPanel implements Observer {
         /**
          * Einde van de test. Mogelijkheid tot het tonen van een bericht of mogelijk de optie om resultaten te laten zien.
          * Nu eerst alleen het scherm onzichtbaar maken.
-         * TODO: Scherm moet nog niet direct verdwijnen, eerst nog de tekst laten zien.
          */
         if (o.toString().equals("Show finished")) {
             displayText = model.getTest().getTestFinishedText();
@@ -273,7 +233,6 @@ public class AATView extends JPanel implements Observer {
             showInfo = true;
             repaint();
         }
-
     }
 }
 
