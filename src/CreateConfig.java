@@ -51,7 +51,6 @@ public class CreateConfig extends JPanel implements Observer {
     private JTextField inputAffectRatioPush, inputAffectRatioPull, inputNeutralRatioPush, inputNeutralRatioPull, inputTestRatioA, inputTestRatioN, inputTrialSize;
     private JButton inputPushColor, inputPullColor, inputPracticeFill, selectQButton;
     private JTextField inputBorderSize;
-    private JPanel selectQPanel;
     private JTextField inputStepSize, inputDataStepSize;
     private JComboBox inputQuestions;
     private JCheckBox inputBoxplot, inputColoredBorder, inputHasPractice, inputBuiltinPractice;
@@ -60,7 +59,7 @@ public class CreateConfig extends JPanel implements Observer {
     private AATModel model;
     private JoystickController joystick;
     private TestFrame testFrame;
-    private JLabel pullColorL, pushColorL, borderSizeL, pushTagL, pullTagL, askBuiltinPractL, practFillL, prDirL, practL;
+    private JLabel pullColorL, pushColorL, borderSizeL, pushTagL, pullTagL, askBuiltinPractL, practFillL, prDirL, practL, selectQL;
     private JButton prDirButton;
     private String practRepeatValue = "3";
     private JTextField inputMaxSizeP, inputImageSizeP;
@@ -109,7 +108,7 @@ public class CreateConfig extends JPanel implements Observer {
                     testFrame = new TestFrame(model);
                     model.addObserver(testFrame);
                     model.startTest(false); //start test without saving data
-                    //  testFile.delete();    //Delete the test config file
+                    testFile.delete();    //Delete the test config file
 
 
                 } catch (AatObject.FalseConfigException e) {
@@ -482,8 +481,10 @@ public class CreateConfig extends JPanel implements Observer {
                 if (inputQuestions.getSelectedItem().equals("None")) {
                     inputQuestion.setEnabled(false);
                     selectQButton.setEnabled(false);
+                    selectQL.setEnabled(false);
 
                 } else {
+                    selectQL.setEnabled(true);
                     inputQuestion.setEnabled(true);
                     selectQButton.setEnabled(true);
                 }
@@ -494,8 +495,9 @@ public class CreateConfig extends JPanel implements Observer {
         comboP.add(Box.createHorizontalBox());
         panel.add(comboP);
 
-        JLabel selectQL = new JLabel("Select the xml file that contains the questionnaire");
-        selectQPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        selectQL = new JLabel("Select the xml file that contains the questionnaire");
+        selectQL.setEnabled(false);
+        JPanel selectQPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         inputQuestion = new JTextField();
         inputQuestion.setPreferredSize(new Dimension(200, 20));
         inputQuestion.setEditable(false);
@@ -654,8 +656,9 @@ public class CreateConfig extends JPanel implements Observer {
 
     private void disablePracticeAction() {
         inputBuiltinPractice.setEnabled(false);
-        inputBuiltinPractice.setForeground(Color.RED);
+        //  inputBuiltinPractice.setForeground(Color.RED);
         askBuiltinPractL.setEnabled(false);
+        askBuiltinPractL.setForeground(UIManager.getColor("Label.disabledForeground"));
         practRepeatValue = inputPractRepeat.getText();
         inputPractRepeat.setText("0");
         inputPractRepeat.setEnabled(false);
@@ -672,6 +675,7 @@ public class CreateConfig extends JPanel implements Observer {
     private void enablePracticeAction() {
         inputBuiltinPractice.setEnabled(true);
         askBuiltinPractL.setEnabled(true);
+        askBuiltinPractL.setForeground(Color.black);
         //  inputPracticeFill.setEnabled(true);
 
         inputPractRepeat.setText(practRepeatValue);
@@ -723,7 +727,9 @@ public class CreateConfig extends JPanel implements Observer {
         inputPushColor.setBackground(new Color(pushColor));
 
         pushTagL.setEnabled(false);
+        pushTagL.setForeground(UIManager.getColor("Label.disabledForeground"));
         pullTagL.setEnabled(false);
+        pullTagL.setForeground(UIManager.getColor("Label.disabledForeground"));
         inputPushTag.setEnabled(false);
         inputPullTag.setEnabled(false);
     }
@@ -738,7 +744,9 @@ public class CreateConfig extends JPanel implements Observer {
         inputPushColor.setBackground(Color.lightGray);
         inputPullColor.setBackground(Color.lightGray);
         pushTagL.setEnabled(true);
+        pushTagL.setForeground(Color.black);
         pullTagL.setEnabled(true);
+        pullTagL.setForeground(Color.black);
         inputPushTag.setEnabled(true);
         inputPullTag.setEnabled(true);
         inputBuiltinPractice.setSelected(false);
@@ -813,7 +821,7 @@ public class CreateConfig extends JPanel implements Observer {
     private static void createAndShowGUI() {
         //Create and set up the window.
         JFrame frame = new JFrame("AAT Config generator");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
         //Add content to the window.
         frame.add(new CreateConfig(), BorderLayout.CENTER);
@@ -851,7 +859,7 @@ public class CreateConfig extends JPanel implements Observer {
         try {
             fw = new FileWriter(file);
         } catch (IOException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
         }
         PrintWriter pw = new PrintWriter(fw);
         String firstheader = "# Configuration file for the AAT.\n" +
@@ -1046,9 +1054,11 @@ public class CreateConfig extends JPanel implements Observer {
         pw.flush();
         pw.close();
         try {
-            fw.close();
-        } catch (IOException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            if (fw != null) {
+                fw.close();
+            }
+        } catch (IOException ignored) {
+            ignored.printStackTrace();
         }
     }
 
@@ -1195,6 +1205,10 @@ public class CreateConfig extends JPanel implements Observer {
         if (config.getValue("DisplayQuestions").equals("None")) {
             inputQuestion.setText("");
             inputQuestion.setEnabled(false);
+            selectQL.setEnabled(false);
+
+        } else {
+            selectQL.setEnabled(true);
         }
         String showBoxPlot = config.getValue("ShowBoxPlot");
         if (showBoxPlot.equals("True")) {
@@ -1238,11 +1252,7 @@ public class CreateConfig extends JPanel implements Observer {
             builtinPractice = false;
         }
         String coloredBorder = config.getValue("ColoredBorders");
-        if (coloredBorder.equals("True")) {
-            hasColoredBorders = true;
-        } else {
-            hasColoredBorders = false;
-        }
+        hasColoredBorders = coloredBorder.equals("True");
 
         if (builtinPractice) {
             inputBuiltinPractice.setSelected(true);
