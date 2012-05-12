@@ -1102,7 +1102,6 @@ public class CreateConfig extends JPanel implements Observer {
     @Override
     public void update(Observable observable, Object o) {
         if (o.toString().equals("Finished")) {
-            model.clearAll();
             model.deleteObservers();
             joystick.exit();
             joystick = null; //Remove instance when finished

@@ -23,6 +23,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import javax.swing.*;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
@@ -255,35 +256,41 @@ public class DataExporter {
     }
 
     private static void writeQuestionsToCSV(Document doc, File file) {
-        NodeList participantsList = doc.getElementsByTagName("participant");
-        Element firstParticipant = (Element) participantsList.item(0);
-        NodeList firstQuestions = firstParticipant.getElementsByTagName("question");
-        int noQuestions = firstQuestions.getLength();
-        String[][] data = new String[participantsList.getLength() + 1][noQuestions + 1]; //Add extra row for header and extra column for id
-        data[0][0] = "id";
-        for (int n = 0; n < firstQuestions.getLength(); n++) {
-            Element question = (Element) firstQuestions.item(n);
-            NodeList keyList = question.getElementsByTagName("key");
-            String key = keyList.item(0).getFirstChild().getNodeValue();
-            data[0][n + 1] = key;
-        }
-
-
-        for (int x = 0; x < participantsList.getLength(); x++) {
-            Element participant = (Element) participantsList.item(x);
-            NodeList questionsList = participant.getElementsByTagName("question");
-            data[x + 1][0] = participant.getAttribute("id");
-            for (int i = 0; i < questionsList.getLength(); i++) {
-                Element question = (Element) questionsList.item(i);
-                NodeList answerList = question.getElementsByTagName("answer");
-                String answer = answerList.item(0).getFirstChild().getNodeValue();
-                data[x + 1][i + 1] = answer;
-            }
-        }
         try {
+            NodeList participantsList = doc.getElementsByTagName("participant");
+            Element firstParticipant = (Element) participantsList.item(0);
+            NodeList firstQuestions = firstParticipant.getElementsByTagName("question");
+            int noQuestions = firstQuestions.getLength();
+            String[][] data = new String[participantsList.getLength() + 1][noQuestions + 1]; //Add extra row for header and extra column for id
+            data[0][0] = "id";
+            for (int n = 0; n < firstQuestions.getLength(); n++) {
+                Element question = (Element) firstQuestions.item(n);
+                NodeList keyList = question.getElementsByTagName("key");
+                String key = keyList.item(0).getFirstChild().getNodeValue();
+                data[0][n + 1] = key;
+            }
+
+
+            for (int x = 0; x < participantsList.getLength(); x++) {
+                Element participant = (Element) participantsList.item(x);
+                NodeList questionsList = participant.getElementsByTagName("question");
+                data[x + 1][0] = participant.getAttribute("id");
+                for (int i = 0; i < questionsList.getLength(); i++) {
+                    Element question = (Element) questionsList.item(i);
+                    NodeList answerList = question.getElementsByTagName("answer");
+                    String answer = answerList.item(0).getFirstChild().getNodeValue();
+                    data[x + 1][i + 1] = answer;
+                }
+            }
+
+
             writeDataToCSVFile(data, file);
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null,
+                    "Problem exporting measures, possible that all the measures contain too much mistakes",
+                    "Configuration error",
+                    JOptionPane.ERROR_MESSAGE);
+            System.out.println("Problem exporting measures, possible that all the measures contain too much mistakes");
         }
     }
 
@@ -335,19 +342,27 @@ public class DataExporter {
 
     private static HashMap<String, Integer> createVariableMap(Document doc) {
         HashMap<String, Integer> outputData = new HashMap<String, Integer>();
-        NodeList participantsList = doc.getElementsByTagName("participant");
-        Element firstParticipant = (Element) participantsList.item(0);
+        try {
+            NodeList participantsList = doc.getElementsByTagName("participant");
+            Element firstParticipant = (Element) participantsList.item(0);
 
-        NodeList trialList = firstParticipant.getElementsByTagName("trial");
-        for (int x = 0; x < trialList.getLength(); x++) {         //First collect the variable names
-            Element trial = (Element) trialList.item(x);
-            NodeList imageList = trial.getElementsByTagName("image");
-            for (int i = 0; i < imageList.getLength(); i++) {
-                Element image = (Element) imageList.item(i);
-                int count = i + (x * imageList.getLength());
-                String variableName = x + "_" + createVariableName(image);
-                outputData.put(variableName, count);
+            NodeList trialList = firstParticipant.getElementsByTagName("trial");
+            for (int x = 0; x < trialList.getLength(); x++) {         //First collect the variable names
+                Element trial = (Element) trialList.item(x);
+                NodeList imageList = trial.getElementsByTagName("image");
+                for (int i = 0; i < imageList.getLength(); i++) {
+                    Element image = (Element) imageList.item(i);
+                    int count = i + (x * imageList.getLength());
+                    String variableName = x + "_" + createVariableName(image);
+                    outputData.put(variableName, count);
+                }
             }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null,
+                    "Problem exporting measures, possible that all the measures contain too much mistakes",
+                    "Configuration error",
+                    JOptionPane.ERROR_MESSAGE);
+            System.out.println("Problem exporting measures, possible that all the measures contain too much mistakes");
         }
         return outputData;
     }

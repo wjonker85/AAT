@@ -84,21 +84,26 @@ public class AATView extends JPanel implements Observer {
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);    // paints background
+        System.out.println("Show info is " + showInfo);
         if (!blackScreen) {
             textPane.setVisible(false);
             imageShow(g);                                    // Geef AAT weer
-        } else if (showInfo) {
-            textPane.setContentType("text/html");
-            HTMLEditorKit kit = new HTMLEditorKit();
-            textPane.setEditorKit(kit);
-            StyleSheet styleSheet = kit.getStyleSheet();
-            styleSheet.addRule("body {color: white; font-family:times; margin: 0px; background-color: black;font : 30px monaco;}");
-            Document doc = kit.createDefaultDocument();
-            textPane.setDocument(doc);
-            infoShow(displayText);                          // Geef instructie tekst weer
         } else {
-            textPane.setVisible(false);
-            this.setBackground(new Color(0));
+            if (showInfo) {
+                System.out.println("Show info");
+                textPane.setContentType("text/html");
+                HTMLEditorKit kit = new HTMLEditorKit();
+                textPane.setEditorKit(kit);
+                StyleSheet styleSheet = kit.getStyleSheet();
+                styleSheet.addRule("body {color: white; font-family:times; margin: 0px; background-color: black;font : 30px monaco;}");
+                Document doc = kit.createDefaultDocument();
+                textPane.setDocument(doc);
+                System.out.println(displayText);
+                infoShow(displayText);                          // Geef instructie tekst weer
+            } else {
+                textPane.setVisible(false);
+                this.setBackground(new Color(0));
+            }
         }
     }
 
@@ -157,12 +162,14 @@ public class AATView extends JPanel implements Observer {
      * @param o          message
      */
     public void update(Observable observable, Object o) {
+        System.out.println("Message " + o.toString());
         /**
          * Informatie van de Y-as van de joystick. Om de grootte van het getoonde plaatje op aan te passen.
          */
         if (o.toString().equals("Y-as")) {
             inputY = model.getPictureSize();
             repaint();
+            return;
         }
 
         /**
@@ -175,6 +182,7 @@ public class AATView extends JPanel implements Observer {
             showInfo = true;
             System.out.println("Test is on break");
             repaint();
+            return;
         }
 
         /**
@@ -182,10 +190,11 @@ public class AATView extends JPanel implements Observer {
          */
         if (o.toString().equals("Wait screen")) {
             inputY = model.getLastSize();
-            if (model.getDirection() == AATImage.PULL) {
-                inputY--;
-            }
-            repaint();
+            System.out.println("Wait screen");
+            //   if (model.getDirection() == AATImage.PULL) {
+            //       inputY--;
+            //   }
+            //   repaint();
             if (model.getDirection() == AATImage.PULL) {
                 try {
                     Thread.sleep(80);
@@ -200,27 +209,36 @@ public class AATView extends JPanel implements Observer {
                 }
             }
             blackScreen = true;
+            System.out.println("Show info op false gezet");
             showInfo = false;
             repaint();
+            return;
         }
 
         /**
          * Practice is geeindigd, getTestStartText() uit config file laden
          */
         if (o.toString().equals("Practice ended")) {
+            System.out.println("Practice ended");
             displayText = model.getTest().getTestStartText();
+            System.out.println(displayText);
             blackScreen = true;
+            System.out.println("Show info op true gezet");
             showInfo = true;
             repaint();
+            return;
         }
 
         /**
          * Bericht uit het model dat het volgende plaatje getoond mag worden.
          */
         if (o.toString().equals("Show Image")) {
+            System.out.println("Show image");
+            inputY = centerPoint;
             blackScreen = false;         //Plaatjes weer laten zien.
             showInfo = false;
             repaint();
+            return;
         }
 
         /**
@@ -232,6 +250,7 @@ public class AATView extends JPanel implements Observer {
             blackScreen = true;
             showInfo = true;
             repaint();
+            return;
         }
     }
 }

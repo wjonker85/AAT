@@ -85,6 +85,7 @@ public class AATModel extends Observable {
     private int testStatus;
 
     private int previousPos; //TTo keep track of the joystick position
+    private int previousDataPos;
 
     private int lastSize;
     private boolean saveData;
@@ -107,8 +108,8 @@ public class AATModel extends Observable {
         this.saveData = saveData; //Don't save the data when testing configuration
         this.repeat = newAAT.getRepeat();
         this.breakAfter = newAAT.getBreakAfter();
-        this.previousPos = (newAAT.getDataSteps() + 1) / 2; //Set the previous position to the center position
-
+        this.previousDataPos = (newAAT.getDataSteps() + 1) / 2; //Set the previous position to the center Data position
+        this.previousPos = (newAAT.getStepRate() + 1) / 2;  //Set the previous position to the center display position
         if (newAAT.hasPractice()) {        //If set in the config, first do a practice.
             practice = true; //Set the test to practice mode
             repeat++;     //Make these one higher, because of the practice
@@ -116,6 +117,7 @@ public class AATModel extends Observable {
             count = 0; //reset the counter
             testList = newAAT.createRandomPracticeList();
         } else {   //Test has no practice so create random list of images
+            practice = false;
             if (newAAT.hasColoredBorders()) {
                 testList = newAAT.createRandomListBorders(); //create a new Random list
             } else {
@@ -141,11 +143,11 @@ public class AATModel extends Observable {
 
     }
 
-    public AatObject getTest() {
+    public final AatObject getTest() {
         return newAAT;
     }
 
-    public TestData getTestData() {
+    public final TestData getTestData() {
         return testData;
     }
 
@@ -158,16 +160,15 @@ public class AATModel extends Observable {
      * if that's necessary. And watches when the test is finished. Together with the joystick inputs this method
      * determines the progress of the AAT.
      */
-    private void NextStep() {
+    private synchronized void NextStep() {
 
         if (testStatus == AATModel.PRACTICE_IMAGE_LOADED) {
             if (count < testList.size()) {
+                System.out.println("Laad practice");
                 showNextImage();
+                return;
             } else {
-                run++;
-                practice = false; //Practice has ended
-                testStatus = AATModel.TEST_WAIT_FOR_TRIGGER;
-                count = 0; //reset the counter
+                System.out.println("Practice is geeindigd");
                 if (newAAT.hasColoredBorders()) {
                     testList = newAAT.createRandomListBorders(); //create a new Random list
                 } else {
@@ -175,9 +176,16 @@ public class AATModel extends Observable {
                 }
                 this.setChanged();
                 this.notifyObservers("Practice ended");
+                testStatus = AATModel.TEST_WAIT_FOR_TRIGGER;
+                run++;
+                practice = false; //Practice has ended
 
+                count = 0; //reset the counter
+                return;
             }
-        } else {
+        }
+        if (testStatus == AATModel.IMAGE_LOADED) {
+            System.out.println("Nu verder met de test na de practice");
             if (count < testList.size()) {     //Just show the next image
                 showNextImage();
             } else {          //No more images in the list
@@ -193,6 +201,7 @@ public class AATModel extends Observable {
                     testStatus = AATModel.TEST_WAIT_FOR_TRIGGER;
                     this.setChanged();
                     notifyObservers("Break");      //Notify observer that there is a break.
+                    return;
 
                 } else if (run == repeat) {   //No more runs left, Test has ended
                     testStatus = AATModel.TEST_SHOW_FINISHED;    //Notify observers about it
@@ -203,7 +212,9 @@ public class AATModel extends Observable {
                     }
                     this.setChanged();
                     notifyObservers("Show finished");   //First show black screen
+                    return;
                 } else {           //Continue with a new run
+                    testStatus = AATModel.TEST_WAIT_FOR_TRIGGER; //TODO kijken of dit klopt
                     if (newAAT.hasColoredBorders()) {
                         testList = newAAT.createRandomListBorders(); //create a new Random list
                     } else {
@@ -211,6 +222,7 @@ public class AATModel extends Observable {
                     }
                     count = 0;
                     showNextImage();
+                    return;
                 }
             }
         }
@@ -258,7 +270,7 @@ public class AATModel extends Observable {
     /**
      * Every time when a new image is shown on the screen a new measure is started.
      */
-    public void startMeasure() {
+    private void startMeasure() {
         newParticipant.newMeasure(run, current.toString(), current.getDirection(), current.getType()); //Begin met de metingen opslaan.
         startMeasure = System.currentTimeMillis();  //Begintijd
     }
@@ -269,7 +281,7 @@ public class AATModel extends Observable {
      *
      * @return ReactionTime in ms.
      */
-    public long getMeasurement() {
+    private long getMeasurement() {
         return System.currentTimeMillis() - startMeasure;
     }
 
@@ -282,7 +294,7 @@ public class AATModel extends Observable {
      *
      * @return Hashmap with results for the boxplot
      */
-    public HashMap<String, float[]> getResultsPerCondition() {
+    public synchronized HashMap<String, float[]> getResultsPerCondition() {
         HashMap<String, float[]> results = new HashMap<String, float[]>();
         String pull = newAAT.getPullTag();
         String push = newAAT.getPushTag();
@@ -304,42 +316,42 @@ public class AATModel extends Observable {
      * Test status has to be changed when the joystick reaches the maximum distance. It depends on the direction that belongs to
      * the current image. When the user performs the requested action, when finished the test status has to go to wait for trigger.
      *
-     * @param value This value represents the position of the joystick. This information comes from the joystick controller
+     * @param displayValue This value represents the position of the joystick. This information comes from the joystick controller
      */
-    public void changeYaxis(int value, int displayValue) {
-
-        if (value != previousPos) {
-            previousPos = value;
-
-            if (testStatus == AATModel.IMAGE_LOADED || testStatus == AATModel.PRACTICE_IMAGE_LOADED) { //Only listen when there is an image loaded
-                newParticipant.addResult(value, getMeasurement());     //add results to the other measurements
-                if (current.getDirection() == AATImage.PULL && value == newAAT.getDataSteps()) {   //check if the requested action has been performed
-                    lastSize = newAAT.getStepRate();
-                    removeImage();
-                    return;
-                } else if (current.getDirection() == AATImage.PUSH && value == 1) {
-                    lastSize = 1;
-                    removeImage();
-                    return;
+    public synchronized void changeYaxis(int value, int displayValue) {
+        if (testStatus == AATModel.IMAGE_LOADED || testStatus == AATModel.PRACTICE_IMAGE_LOADED) { //Only listen when there is an image loaded
+            if (displayValue != previousPos) {
+                previousPos = displayValue;
+                if (value != previousDataPos) {
+                    newParticipant.addResult(value, getMeasurement());     //add results to the other measurements
+                    previousDataPos = value;
                 }
+                resize = displayValue;
+                this.setChanged();
+                notifyObservers("Y-as");
             }
         }
+    }
 
-        resize = displayValue;
-        this.setChanged();
-        notifyObservers("Y-as");
-
+    public synchronized void maxPullorPush(int value) {
+        if (testStatus == AATModel.IMAGE_LOADED || testStatus == AATModel.PRACTICE_IMAGE_LOADED) { //Only listen when there is an image loaded
+            newParticipant.addResult(value, getMeasurement());     //adds last results to the other measurements
+            if (current.getDirection() == AATImage.PULL && value == newAAT.getDataSteps()) {   //check if the requested action has been performed
+                testStatus = AATModel.TEST_WAIT_FOR_TRIGGER;
+                lastSize = newAAT.getStepRate();
+                removeImage();
+            } else if (current.getDirection() == AATImage.PUSH && value == 1) {
+                testStatus = AATModel.TEST_WAIT_FOR_TRIGGER;
+                lastSize = 1;
+                removeImage();
+            }
+        }
     }
 
     public int getLastSize() {
         return lastSize;
     }
 
-    //clear the test
-    public void clearAll() {
-        newAAT.clearLists();
-        System.gc();
-    }
 
     /**
      * This method is called when a participant has pulled or pushed the image completely. It notifies the observers
@@ -348,10 +360,10 @@ public class AATModel extends Observable {
 
 
     private void removeImage() {
-
         this.setChanged();
         notifyObservers("Wait screen");
-        testStatus = AATModel.TEST_WAIT_FOR_TRIGGER;
+        previousPos = resize;
+        previousDataPos = (newAAT.getDataSteps() + 1) / 2;
     }
 
     /**
@@ -368,34 +380,37 @@ public class AATModel extends Observable {
                     this.notifyObservers("Show questions");
                 } else {
                     this.notifyObservers("Finished");
-                    clearAll();
                 }
                 break;
 
 
             case AATModel.TEST_SHOW_FINISHED:
-                this.setChanged();
+
                 if (newAAT.hasBoxPlot()) {
                     testStatus = AATModel.TEST_SHOW_RESULTS;
+                    this.setChanged();
                     this.notifyObservers("Display results");
                 } else {
                     testStatus = AATModel.TEST_STOPPED;
                     if (newAAT.getDisplayQuestions().equals("After")) {
+                        this.setChanged();
                         this.notifyObservers("Show questions");
                     } else {
+                        this.setChanged();
                         this.notifyObservers("Finished");
-                        clearAll();
                     }
                 }
                 break;
 
             case AATModel.TEST_WAIT_FOR_TRIGGER:
+                System.out.println("Test wacht op trigger");
+                resize = (newAAT.getStepRate() + 1) / 2; //Set back to center
                 if (practice) {
                     testStatus = AATModel.PRACTICE_IMAGE_LOADED;
                 } else {
                     testStatus = AATModel.IMAGE_LOADED;
                 }
-                NextStep();    //Determine next step in the test.
+                NextStep();    //Determine next step in the test
                 break;
         }
     }

@@ -90,9 +90,17 @@ public class TestFrame extends JFrame implements Observer {
     }
 
     private void closeWindow() {
+        model.deleteObservers();
+        aatView = null;
+        boxPlot = null;
+        questionsView = null;
+        System.gc();
         this.setVisible(false);
         this.setEnabled(false);
-        model.clearAll();
+        this.dispose();
+        //   this.setVisible(false);
+        //  this.setEnabled(false);
+        //  model.clearAll();
     }
 
     /*

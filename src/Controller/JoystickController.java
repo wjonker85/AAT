@@ -129,11 +129,17 @@ public class JoystickController extends Thread {
             if (pollIsValid) {
                 yAxisValue = yAxis.getPollData();
                 if (yAxisValue != prevYValue) {  // value has changed
-                    model.changeYaxis(convertValue2(yAxisValue, stepSizeData), convertValue2(yAxisValue, stepSizeDisplay));
-                    prevYValue = yAxisValue;
+                    if (yAxisValue == 1 || yAxisValue == -1) {
+                        model.maxPullorPush((int) convertValue2(yAxisValue, stepSizeData));
+                    } else {
+                        model.changeYaxis(convertValue2(yAxisValue, stepSizeData), convertValue2(yAxisValue, stepSizeDisplay));
+
+                        prevYValue = yAxisValue;
+                    }
                 }
                 if (trigger.getPollData() == 1 && prevTrigger != 1.0f) {   // only changes
                     model.triggerPressed(); //Notify model that the trigger button is pressed.
+                    System.out.println("Trigger pressed");
                     prevTrigger = 1.0f;
                 } else if (trigger.getPollData() == 0) {   // reset prevTrigger
                     prevTrigger = 0f;

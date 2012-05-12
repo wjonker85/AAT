@@ -146,6 +146,8 @@ public class AAT_Main extends JFrame implements Observer {
                             if (model.getTest().hasData()) {
                                 exportData.setEnabled(true);
                             }
+                            joystick = new JoystickController(model);
+                            joystick.start(); //Start joystick Thread
                         } catch (AatObject.FalseConfigException e) {
                             runButton.setEnabled(false);
                             exportData.setEnabled(false);
@@ -165,16 +167,10 @@ public class AAT_Main extends JFrame implements Observer {
         //Start a new test
         runButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent actionEvent) {
-                joystick = new JoystickController(model);
-                joystick.start(); //Start joystick Thread
-
-                if (testFrame != null) {
-                    model.deleteObserver(testFrame); //Remove old instance
-                }
+                model.deleteObservers();
                 testFrame = new TestFrame(model);
                 model.addObserver(testFrame);
                 model.startTest(true);
-                //   runButton.setEnabled(false);
             }
         });
 
@@ -218,10 +214,8 @@ public class AAT_Main extends JFrame implements Observer {
 
     public void update(Observable observable, Object o) {
         if (o.toString().equals("Finished")) {
-            model.clearAll();
+            testFrame = null;
             model.deleteObservers();
-            joystick.exit();
-            joystick = null; //Remove instance when finished
             exportData.setEnabled(true);
             runButton.setEnabled(true);
             System.gc();

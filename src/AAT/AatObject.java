@@ -574,15 +574,6 @@ public abstract class AatObject {
         return nDir;
     }
 
-    /**
-     * Clear the image lists when they are not necessary anymore
-     */
-    public void clearLists() {
-        this.testList = null;
-        System.gc();
-
-    }
-
     public String getType(int i) {
         if (i == AATImage.AFFECTIVE) {
             return aDir;
