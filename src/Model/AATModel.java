@@ -72,7 +72,6 @@ public class AATModel extends Observable {
     //progress variables
     private int run;
     private boolean practice;
-
     //Measurement
 
     private TestData testData;
@@ -164,19 +163,19 @@ public class AATModel extends Observable {
 
         if (testStatus == AATModel.PRACTICE_IMAGE_LOADED) {
             if (count < testList.size()) {
-                System.out.println("Laad practice");
                 showNextImage();
                 return;
             } else {
-                System.out.println("Practice is geeindigd");
+                testStatus = AATModel.TEST_WAIT_FOR_TRIGGER;
+
                 if (newAAT.hasColoredBorders()) {
                     testList = newAAT.createRandomListBorders(); //create a new Random list
                 } else {
                     testList = newAAT.createRandomListNoBorders();
                 }
+
                 this.setChanged();
                 this.notifyObservers("Practice ended");
-                testStatus = AATModel.TEST_WAIT_FOR_TRIGGER;
                 run++;
                 practice = false; //Practice has ended
 
@@ -185,10 +184,11 @@ public class AATModel extends Observable {
             }
         }
         if (testStatus == AATModel.IMAGE_LOADED) {
-            System.out.println("Nu verder met de test na de practice");
             if (count < testList.size()) {     //Just show the next image
                 showNextImage();
             } else {          //No more images in the list
+                testStatus = AATModel.TEST_WAIT_FOR_TRIGGER;
+                this.setChanged();
                 run++;
                 count = 0;
                 if (run == breakAfter) {    //Test needs a break
@@ -198,10 +198,7 @@ public class AATModel extends Observable {
                         testList = newAAT.createRandomListNoBorders();
                     }
                     current = testList.get(0);
-                    testStatus = AATModel.TEST_WAIT_FOR_TRIGGER;
-                    this.setChanged();
                     notifyObservers("Break");      //Notify observer that there is a break.
-                    return;
 
                 } else if (run == repeat) {   //No more runs left, Test has ended
                     testStatus = AATModel.TEST_SHOW_FINISHED;    //Notify observers about it
@@ -210,19 +207,20 @@ public class AATModel extends Observable {
                             testData.addParticipant(newParticipant);
                         }
                     }
+
                     this.setChanged();
                     notifyObservers("Show finished");   //First show black screen
-                    return;
+
                 } else {           //Continue with a new run
-                    testStatus = AATModel.TEST_WAIT_FOR_TRIGGER; //TODO kijken of dit klopt
+
                     if (newAAT.hasColoredBorders()) {
                         testList = newAAT.createRandomListBorders(); //create a new Random list
                     } else {
                         testList = newAAT.createRandomListNoBorders();
                     }
+                    testStatus = AATModel.IMAGE_LOADED;
                     count = 0;
                     showNextImage();
-                    return;
                 }
             }
         }
@@ -232,7 +230,7 @@ public class AATModel extends Observable {
      * Displays the next image. Will display from the practicelist or the normal testlist, depending on the status
      * of the test
      */
-    private void showNextImage() {
+    private synchronized void showNextImage() {
         current = testList.get(count);    //change current to the next image
         count++;
         this.setChanged();
@@ -241,7 +239,7 @@ public class AATModel extends Observable {
     }
 
     //Returns the next Image
-    public BufferedImage getNextImage() {
+    public synchronized BufferedImage getNextImage() {
         return current.getImage();
     }
 
@@ -359,7 +357,7 @@ public class AATModel extends Observable {
      */
 
 
-    private void removeImage() {
+    private synchronized void removeImage() {
         this.setChanged();
         notifyObservers("Wait screen");
         previousPos = resize;
@@ -370,7 +368,7 @@ public class AATModel extends Observable {
      * When the test is waiting for the trigger, check if the trigger is pressed and then change the test status
      * to image loaded. then call nextstep so the model can determine the appropriate next action to take
      */
-    public void triggerPressed() {
+    public synchronized void triggerPressed() {
 
         switch (testStatus) {
             case AATModel.TEST_SHOW_RESULTS:
@@ -403,7 +401,6 @@ public class AATModel extends Observable {
                 break;
 
             case AATModel.TEST_WAIT_FOR_TRIGGER:
-                System.out.println("Test wacht op trigger");
                 resize = (newAAT.getStepRate() + 1) / 2; //Set back to center
                 if (practice) {
                     testStatus = AATModel.PRACTICE_IMAGE_LOADED;

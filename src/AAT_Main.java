@@ -148,6 +148,7 @@ public class AAT_Main extends JFrame implements Observer {
                             }
                             joystick = new JoystickController(model);
                             joystick.start(); //Start joystick Thread
+                            model.addObserver(joystick);
                         } catch (AatObject.FalseConfigException e) {
                             runButton.setEnabled(false);
                             exportData.setEnabled(false);
@@ -170,6 +171,8 @@ public class AAT_Main extends JFrame implements Observer {
                 model.deleteObservers();
                 testFrame = new TestFrame(model);
                 model.addObserver(testFrame);
+                model.addObserver(joystick);
+                joystick.enableTrigger(); //set flag to trigger
                 model.startTest(true);
             }
         });

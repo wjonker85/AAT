@@ -107,6 +107,7 @@ public class CreateConfig extends JPanel implements Observer {
                     joystick.start(); //Start joystick Thread
                     testFrame = new TestFrame(model);
                     model.addObserver(testFrame);
+                    model.addObserver(joystick);
                     model.startTest(false); //start test without saving data
                     testFile.delete();    //Delete the test config file
 
@@ -958,9 +959,9 @@ public class CreateConfig extends JPanel implements Observer {
             String pushHex = Integer.toHexString(inputPushColor.getBackground().getRGB());
             pullHex = pullHex.substring(2, pullHex.length());
             pushHex = pushHex.substring(2, pushHex.length());
-            pw.write("BorderColorPush " + pullHex.toUpperCase());
+            pw.write("BorderColorPush " + pushHex.toUpperCase());
             pw.println();
-            pw.write("BorderColorPull " + pushHex.toUpperCase());
+            pw.write("BorderColorPull " + pullHex.toUpperCase());
             pw.println();
             pw.write("BorderWidth " + checkForValue(inputBorderSize.getText()));
             pw.println();

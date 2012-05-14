@@ -23,6 +23,8 @@ import net.java.games.input.Controller;
 import net.java.games.input.ControllerEnvironment;
 
 import javax.swing.*;
+import java.util.Observable;
+import java.util.Observer;
 
 /**
  * Created by IntelliJ IDEA.
@@ -37,9 +39,9 @@ import javax.swing.*;
  * When a participant moves the joystick it will return an integer value depending on how far the joystick is moved from its center.
  * The accuracy of this is based on the stipsize and error margin values in the config
  */
-public class JoystickController extends Thread {
+public class JoystickController extends Thread implements Observer {
 
-    private static final int DELAY = 5;  // ms  (polling interval)
+    private static final int DELAY = 10;  // ms  (polling interval)
     private int stepSizeDisplay;
     private int stepSizeData = 9;
     private AATModel model;
@@ -48,6 +50,7 @@ public class JoystickController extends Thread {
     private Controller joyStick;
     private boolean stopThread = false;
     private float delta = 0.001f;
+    private boolean doTrigger = true;
 
 
     public JoystickController(AATModel model) {
@@ -108,6 +111,13 @@ public class JoystickController extends Thread {
         return null;
     }
 
+    public void enableTrigger() {
+        doTrigger = true;
+    }
+
+    private void disableTrigger() {
+        doTrigger = false;
+    }
 
     /* Will be run in a seperate Thread. Will poll the joystick with a given delay. Will poll the y-axis and the trigger button
     Will call methods in the model when there is a change.
@@ -127,22 +137,27 @@ public class JoystickController extends Thread {
 
             pollIsValid = c.poll(); // update the controller's components
             if (pollIsValid) {
-                yAxisValue = yAxis.getPollData();
-                if (yAxisValue != prevYValue) {  // value has changed
-                    if (yAxisValue == 1 || yAxisValue == -1) {
-                        model.maxPullorPush((int) convertValue2(yAxisValue, stepSizeData));
-                    } else {
-                        model.changeYaxis(convertValue2(yAxisValue, stepSizeData), convertValue2(yAxisValue, stepSizeDisplay));
-
-                        prevYValue = yAxisValue;
+                if (doTrigger) {
+                    if (trigger.getPollData() == 0 && prevTrigger != 0f) {
+                        prevTrigger = 0f;
                     }
-                }
-                if (trigger.getPollData() == 1 && prevTrigger != 1.0f) {   // only changes
-                    model.triggerPressed(); //Notify model that the trigger button is pressed.
-                    System.out.println("Trigger pressed");
-                    prevTrigger = 1.0f;
-                } else if (trigger.getPollData() == 0) {   // reset prevTrigger
-                    prevTrigger = 0f;
+                    if (trigger.getPollData() == 1 && prevTrigger != 1.0f) {   // only changes
+                        model.triggerPressed(); //Notify model that the trigger button is pressed.
+                        prevTrigger = 1.0f;
+                        //   } else if (trigger.getPollData() == 0) {   // reset prevTrigger
+                        //       prevTrigger = 0f;
+                    }
+                } else {
+                    yAxisValue = yAxis.getPollData();
+                    if (yAxisValue != prevYValue) {  // value has changed
+                        System.out.println("Change y axis " + yAxisValue);
+                        if (yAxisValue == 1 || yAxisValue == -1) {
+                            model.maxPullorPush((int) convertValue2(yAxisValue, stepSizeData));
+                        } else {
+                            model.changeYaxis(convertValue2(yAxisValue, stepSizeData), convertValue2(yAxisValue, stepSizeDisplay));
+                            prevYValue = yAxisValue;
+                        }
+                    }
                 }
             } else
                 System.out.println("Controller no longer valid");
@@ -169,4 +184,48 @@ public class JoystickController extends Thread {
         }
         return middlePos + returnValue;
     }
+
+    @Override
+    public void update(Observable observable, Object o) {
+        /**
+         * Test heeft even een pauze. Mogelijkheid om een bericht te laten zien dat het pauze is. Nu eerst alleen een
+         * zwart scherm
+         */
+        if (o.toString().equals("Break")) {
+            enableTrigger();
+        }
+
+        /**
+         * Plaatje is weggedrukt. Nu een zwart scherm laten zien.
+         */
+        if (o.toString().equals("Wait screen")) {
+            enableTrigger();
+        }
+
+        /**
+         * Practice is geeindigd, getTestStartText() uit config file laden
+         */
+        if (o.toString().equals("Practice ended")) {
+            enableTrigger();
+        }
+
+        /**
+         * Bericht uit het model dat het volgende plaatje getoond mag worden.
+         */
+        if (o.toString().equals("Show Image")) {
+            disableTrigger();
+        }
+
+        /**
+         * Einde van de test. Mogelijkheid tot het tonen van een bericht of mogelijk de optie om resultaten te laten zien.
+         * Nu eerst alleen het scherm onzichtbaar maken.
+         */
+        if (o.toString().equals("Show finished")) {
+            enableTrigger();
+        }
+    }
 }
+
+
+
+
