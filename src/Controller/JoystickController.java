@@ -150,7 +150,6 @@ public class JoystickController extends Thread implements Observer {
                 } else {
                     yAxisValue = yAxis.getPollData();
                     if (yAxisValue != prevYValue) {  // value has changed
-                        System.out.println("Change y axis " + yAxisValue);
                         if (yAxisValue == 1 || yAxisValue == -1) {
                             model.maxPullorPush((int) convertValue2(yAxisValue, stepSizeData));
                         } else {
