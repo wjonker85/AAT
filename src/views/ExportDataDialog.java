@@ -107,6 +107,7 @@ public class ExportDataDialog extends JFrame {
                     validateInput();
                     File saveFile = fileSaveDialog("Measures.csv");
                     setEnabled(false);
+                    //  DataExporter.exportMeasurementsAnova(model, saveFile, min, max, perc, practiceCheck.isSelected(), removeFalseCenter.isSelected());
                     DataExporter.exportMeasurements(model, saveFile, min, max, perc, practiceCheck.isSelected(), removeFalseCenter.isSelected());
 
                 } catch (SubmitDataException e) {

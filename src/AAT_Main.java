@@ -168,12 +168,16 @@ public class AAT_Main extends JFrame implements Observer {
         //Start a new test
         runButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent actionEvent) {
-                model.deleteObservers();
-                testFrame = new TestFrame(model);
-                model.addObserver(testFrame);
-                model.addObserver(joystick);
-                joystick.enableTrigger(); //set flag to trigger
-                model.startTest(true);
+                try {
+                    model.deleteObservers();
+                    testFrame = new TestFrame(model);
+                    model.addObserver(testFrame);
+                    model.addObserver(joystick);
+                    joystick.enableTrigger(); //set flag to trigger
+                    model.startTest(true);
+                } catch (Exception e) {
+                    runButton.setEnabled(false);
+                }
             }
         });
 

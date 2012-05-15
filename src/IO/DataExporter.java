@@ -24,12 +24,19 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import javax.swing.*;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.URI;
+import java.net.URL;
 import java.util.HashMap;
 
 /**
@@ -46,12 +53,14 @@ public class DataExporter {
         Document doc = createCopiedDocument(model.getTestData().getDocument());
         NodeList questionList = doc.getElementsByTagName("question");
         if (questionList.getLength() > 0) {
+
             if (!includePractice) {
                 doc = removePractice(doc);
             }
             HashMap<String, Integer> errors = errorPercentages(doc, model, minRTime, maxRTime);
             doc = removeParticipants(doc, errors, errorPerc);
             writeQuestionsToCSV(doc, file);
+            MessageDialog.getInstance().showMessage();
         } else {
             System.out.println("There are no questions");
         }
@@ -66,6 +75,19 @@ public class DataExporter {
         doc = checkValues(doc, model, minRTime, maxRTime, removeCenter);
         doc = removeParticipants(doc, errors, errorPerc);
         writeMeasuresToCSV(doc, file);
+        MessageDialog.getInstance().showMessage();
+    }
+
+    public static void exportMeasurementsAnova(AATModel model, File file, int minRTime, int maxRTime, int errorPerc, boolean includePractice, boolean removeCenter) {
+        Document doc = createCopiedDocument(model.getTestData().getDocument());
+        if (!includePractice) {
+            doc = removePractice(doc);
+        }
+        HashMap<String, Integer> errors = errorPercentages(doc, model, minRTime, maxRTime);
+        doc = checkValues(doc, model, minRTime, maxRTime, removeCenter);
+        doc = removeParticipants(doc, errors, errorPerc);
+        writeMeasuresAnovaToCSV(doc, file);
+        MessageDialog.getInstance().showMessage();
     }
 
     /**
@@ -122,7 +144,8 @@ public class DataExporter {
             Element participant = (Element) participantsList.item(x);
             String idValue = participant.getAttribute("id");
             if (idValue.equalsIgnoreCase(id)) {
-                System.out.println(participant.getAttribute("id") + " will be removed");
+                System.out.println("Id " + participant.getAttribute("id") + " will be removed");
+                MessageDialog.getInstance().addLine("Id " + participant.getAttribute("id") + " will be removed");
                 participant.getParentNode().removeChild(participant);
                 doc.normalize();
                 return doc;          //No need to go further
@@ -149,7 +172,7 @@ public class DataExporter {
             Node rTimeNode = rTimeList.item(0).getFirstChild();
             int rTime = Integer.parseInt(rTimeNode.getNodeValue());
             if (rTime > maxRtime || rTime < minRTime) {
-                rTimeNode.setNodeValue("N/A");
+                rTimeNode.setNodeValue("");
             }
             if (removeCenter) {
                 int centerPos = model.getTest().centerPos();
@@ -158,7 +181,7 @@ public class DataExporter {
                 int fPos = Integer.parseInt(firstPos.getNodeValue());
 
                 if (fPos < centerPos - 1 || fPos > centerPos + 1) {      //Only center +1 or -1 are correct values
-                    rTimeNode.setNodeValue("N/A");
+                    rTimeNode.setNodeValue("");
                 }
             }
         }
@@ -252,6 +275,7 @@ public class DataExporter {
         int totalImages = imageList.getLength();
         float percentage = ((float) errors / (float) totalImages) * 100f;
         System.out.println("Total = " + totalImages + " Participant with id " + id + " has " + errors + " errors. Is " + percentage + " percent");
+        MessageDialog.getInstance().addLine("Total = " + totalImages + " Participant with id " + id + " has " + errors + " errors. Is " + percentage + " percent");
         return (int) percentage;
     }
 
@@ -304,6 +328,62 @@ public class DataExporter {
         }
     }
 
+    private static void writeMeasuresAnovaToCSV(Document doc, File file) {
+        HashMap<String, Integer> variableMap = createVariableMapAnova(doc); //create a map containing variable names and position
+        System.out.println("Variablemap " + variableMap.size());
+        try {
+            writeDataToCSVFile(createDataTableAnova(doc, variableMap), file);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static String[][] createDataTableAnova(Document doc, HashMap<String, Integer> variableMap) {
+        int columns = variableMap.size() + 3; //data +3 extra variables
+        NodeList participantList = doc.getElementsByTagName("participant");
+        int rows = participantList.getLength() + 1;  //Total rows + header
+        String[][] tableData = new String[rows][columns];
+        tableData[0][0] = "id";
+        tableData[0][columns - 2] = "Type";
+        tableData[0][columns - 1] = "Direction";
+
+        for (String key : variableMap.keySet()) {    //create first row
+            int pos = variableMap.get(key);
+            pos++; //shift 1 to the right for the id column;
+            System.out.println(key + " " + pos);
+            tableData[0][pos] = key;
+        }
+        for (int x = 0; x < participantList.getLength(); x++) {
+            Element participant = (Element) participantList.item(x);
+            tableData[x + 1][0] = participant.getAttribute("id");
+            NodeList trialList = participant.getElementsByTagName("trial");
+            for (int n = 0; n < trialList.getLength(); n++) {
+                Element trial = (Element) trialList.item(n);
+                NodeList imageList = trial.getElementsByTagName("image");
+                for (int i = 0; i < imageList.getLength(); i++) {
+                    Element image = (Element) imageList.item(i);
+                    NodeList nameList = image.getElementsByTagName("imageName");
+                    Node imageNameNode = nameList.item(0).getFirstChild();
+                    String imageName = imageNameNode.getNodeValue();
+                    String variableName = n + "_" + imageName; //Trial nr + imageName
+                    NodeList rTimeList = image.getElementsByTagName("reactionTime");
+                    Node rTimeNode = rTimeList.item(0).getFirstChild();
+                    String reactionTime = rTimeNode.getNodeValue();
+                    int pos = variableMap.get(variableName);
+                    pos++; //Shift 1 to the right
+                    tableData[x + 1][pos] = reactionTime;
+                    NodeList typeList = image.getElementsByTagName("type");
+                    Node type = typeList.item(0).getFirstChild();
+                    NodeList directionList = image.getElementsByTagName("direction");
+                    Node direction = directionList.item(0).getFirstChild();
+                    tableData[x + 1][columns - 2] = type.getNodeValue();
+                    tableData[x + 1][columns - 1] = direction.getNodeValue();
+                }
+            }
+        }
+        return tableData;
+    }
+
     private static String[][] createDataTable(Document doc, HashMap<String, Integer> variableMap) {
         int columns = variableMap.size() + 1;
         NodeList participantList = doc.getElementsByTagName("participant");
@@ -340,6 +420,47 @@ public class DataExporter {
         return tableData;
     }
 
+    /**
+     * Create a differen variableMap, this one only contains the image names
+     *
+     * @param doc
+     * @return
+     */
+    private static HashMap<String, Integer> createVariableMapAnova(Document doc) {
+        HashMap<String, Integer> outputData = new HashMap<String, Integer>();
+        try {
+            NodeList participantsList = doc.getElementsByTagName("participant");
+            Element firstParticipant = (Element) participantsList.item(0);
+            NodeList trialList = firstParticipant.getElementsByTagName("trial");
+            for (int x = 0; x < trialList.getLength(); x++) {
+                Element trial = (Element) trialList.item(x);
+                NodeList imageList = trial.getElementsByTagName("image");
+
+                for (int i = 0; i < imageList.getLength(); i++) {
+                    Element image = (Element) imageList.item(i);
+                    int count = i + (x * (imageList.getLength() / 2)); //Half the size push and pull not counted
+
+                    NodeList nameList = image.getElementsByTagName("imageName");
+                    Node imageNameNode = nameList.item(0).getFirstChild();
+                    String imageName = imageNameNode.getNodeValue();
+                    String variableName = x + "_" + imageName; //Trial nr + imageName
+                    if (!outputData.containsKey(variableName)) {
+                        outputData.put(variableName, count);
+                    }
+
+                }
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null,
+                    "Problem exporting measures, possible that all the measures contain too much mistakes",
+                    "Configuration error",
+                    JOptionPane.ERROR_MESSAGE);
+            System.out.println("Problem exporting measures, possible that all the measures contain too much mistakes");
+        }
+        return correctValues(outputData);
+
+    }
+
     private static HashMap<String, Integer> createVariableMap(Document doc) {
         HashMap<String, Integer> outputData = new HashMap<String, Integer>();
         try {
@@ -347,6 +468,15 @@ public class DataExporter {
             Element firstParticipant = (Element) participantsList.item(0);
 
             NodeList trialList = firstParticipant.getElementsByTagName("trial");
+            //     Element firstTrial = (Element) trialList.item(0);
+            //    NodeList imageList = firstTrial.getElementsByTagName("image");
+            //    Element firstImage = (Element) imageList.item(0);
+            //    NodeList typeList = firstImage.getElementsByTagName("type");
+            //   Node type = typeList.item(0).getFirstChild();
+            //   if(type.getNodeValue().equalsIgnoreCase("practice"))    { //use next trial in list
+            //       firstTrial = (Element) trialList.item(1);
+            //       imageList = firstTrial.getElementsByTagName("image");
+            //   }
             for (int x = 0; x < trialList.getLength(); x++) {         //First collect the variable names
                 Element trial = (Element) trialList.item(x);
                 NodeList imageList = trial.getElementsByTagName("image");
@@ -365,6 +495,16 @@ public class DataExporter {
             System.out.println("Problem exporting measures, possible that all the measures contain too much mistakes");
         }
         return outputData;
+    }
+
+    private static HashMap<String, Integer> correctValues(HashMap<String, Integer> map) {
+        HashMap<String, Integer> newMap = new HashMap<String, Integer>();
+        int x = 0;
+        for (String key : map.keySet()) {
+            newMap.put(key, x);
+            x++;
+        }
+        return newMap;
     }
 
     private static String createVariableName(Element image) {
@@ -400,3 +540,71 @@ public class DataExporter {
         fw.close();
     }
 }
+
+//About dialog
+class MessageDialog extends JDialog {
+
+    private String text = "";
+    private static MessageDialog instance = null;
+    private JEditorPane textPane;
+
+    public MessageDialog(JFrame parent) {
+        super(parent, "Export output", true);
+        System.out.println("Show dialog");
+        System.out.println(text);
+        textPane = new JEditorPane();
+        textPane.setEditable(false);
+        textPane.addHyperlinkListener(new HyperlinkListener() {
+            @Override
+            public void hyperlinkUpdate(HyperlinkEvent hyperlinkEvent) {
+                HyperlinkEvent.EventType type = hyperlinkEvent.getEventType();
+                if (type == HyperlinkEvent.EventType.ACTIVATED) {
+                    final URL url = hyperlinkEvent.getURL();
+                    try {
+                        URI uri = new URI(url.toString());
+                        Desktop.getDesktop().mail(uri);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+        //     textPane.setText(text);
+        JScrollPane scrollPane = new JScrollPane(textPane);
+        Box b = Box.createVerticalBox();
+        b.add(Box.createGlue());
+        b.add(scrollPane);
+        getContentPane().add(b, "Center");
+
+        JPanel p2 = new JPanel();
+        JButton ok = new JButton("Ok");
+        p2.add(ok);
+        getContentPane().add(p2, "South");
+
+        ok.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
+                setVisible(false);
+            }
+        });
+        setPreferredSize(new Dimension(500, 400));
+        setMinimumSize(new Dimension(500, 400));
+    }
+
+    public void addLine(String line) {
+        text = text + line + "\n";
+    }
+
+    public void showMessage() {
+        textPane.setText(text);
+        this.setVisible(true);
+    }
+
+    public static MessageDialog getInstance() {
+        if (instance == null) {
+            instance = new MessageDialog(null);
+        }
+        return instance;
+    }
+}
+
+
