@@ -22,7 +22,13 @@ import Configuration.TestConfig;
 import DataStructures.AATImage;
 import DataStructures.Questionnaire;
 import IO.XMLReader;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
 import java.io.FileFilter;
 import java.util.ArrayList;
@@ -49,6 +55,8 @@ public abstract class AatObject {
     //   private TextReader xmlReader;
     private XMLReader xmlReader;
     //TODO: renamen
+
+    private String id;
 
     //Test variables
     private int repeat;
@@ -98,10 +106,31 @@ public abstract class AatObject {
     private Pattern pattern;
 
     private static final String IMAGE_PATTERN =
-            "([^\\s]+(\\.(?i)(jpg|png|gif|bmp))$)";
+            "([^\\s]+(\\.(?i)(jpeg|jpg|png|gif|bmp))$)";
 
     private static final String HEX_PATTERN = "(^[0-9A-F]+$)";
 
+    public static String removeExtention(String filePath) {
+        // These first few lines the same as Justin's
+        File f = new File(filePath);
+
+        // if it's a directory, don't remove the extention
+        if (f.isDirectory()) return filePath;
+
+        String name = f.getName();
+
+        // Now we know it's a file - don't need to do any special hidden
+        // checking or contains() checking because of:
+        final int lastPeriodPos = name.lastIndexOf('.');
+        if (lastPeriodPos <= 0) {
+            // No period after first character - return name as it was passed in
+            return filePath;
+        } else {
+            // Remove the last period and everything after it
+            File renamed = new File(f.getParent(), name.substring(0, lastPeriodPos));
+            return renamed.getPath();
+        }
+    }
 
     /**
      * Constructor Loads all the configuration data from the config file and the language file specified in that config
@@ -117,11 +146,17 @@ public abstract class AatObject {
         String workingDir = config.getParentFile().getAbsolutePath();
 
         System.out.println("Checking configuration");
-
+        id = testConfig.getValue("ID");
         String datFile = testConfig.getValue("DataFile");
+        //TODO uitzoeken wat de teststatus is. Indien nodig moet de datafile verandert worden en de oudere gebackuped worden.
         if (datFile.equals("")) {
-            datFile = "Data.xml"; //Set to default.
+            datFile = "Data" + id + ".xml"; //Set to default.
         }
+
+        if (!datFile.contains(id)) {
+            datFile = removeExtention(datFile) + id + ".xml";
+        }
+
 
         dataFile = new File(workingDir + File.separator + datFile);
         String langFile = testConfig.getValue("LanguageFile");
@@ -159,26 +194,32 @@ public abstract class AatObject {
         // id = getHighestID();
         nDir = testConfig.getValue("NeutralDir");
         aDir = testConfig.getValue("AffectiveDir");
-        File neutralDir = new File(workingDir + File.separator + nDir);
-        File affectiveDir = new File(workingDir + File.separator + aDir);
+        File neutralDir = new File(workingDir + File.separator +"images"+File.separator+ nDir);
+        System.out.println(neutralDir);
+        File affectiveDir = new File(workingDir + File.separator +"images"+File.separator+ aDir);
         if (nDir.equals("") || !neutralDir.isDirectory()) {
             throw new FalseConfigException("Directory for the neutral images is not set properly");
         }
         if (aDir.equals("") || !affectiveDir.isDirectory()) {
             throw new FalseConfigException("Directory for the affective images is not set properly");
         }
-
+        if (!imageComplete(neutralDir,affectiveDir)) {
+            throw new FalseConfigException("Some of the configured images are not present");
+        }
         System.out.println("Neutral directory = " + neutralDir);
         System.out.println("Affective directory = " + affectiveDir);
         //    xmlReader = new TextReader(languageFile);
 
-        neutralImages = getImages(neutralDir);
+       // neutralImages = getImages(neutralDir);
+
+        neutralImages = xmlReader.getIncludedFilesF(neutralDir);
 
         System.out.println("Neutral " + testConfig.getValue("NeutralDir") + " " + neutralDir);
         if (neutralImages.size() == 0) {
             throw new FalseConfigException("Neutral images directory contains no images");
         }
-        affectiveImages = getImages(affectiveDir);
+    //    affectiveImages = getImages(affectiveDir);
+        affectiveImages = xmlReader.getIncludedFilesF(affectiveDir);
         if (affectiveImages.size() == 0) {
             throw new FalseConfigException("Affective images directory contains no images");
         }
@@ -573,6 +614,37 @@ public abstract class AatObject {
     public String getNeutralDir() {
         return nDir;
     }
+
+    public boolean imageComplete(File neutral, File affective) {
+        int aCount = 0;
+        int nCount = 0;
+        ArrayList<File> aDisk = getImages(affective);
+        ArrayList<File> nDisk = getImages(neutral);
+        ArrayList<String> aFiles = xmlReader.getIncludedFiles(affective);
+        ArrayList<String> nFiles = xmlReader.getIncludedFiles(neutral);
+        for(File f : aDisk) {
+            System.out.println("Looking for "+f.getName());
+            if(aFiles.contains(f.getName()))  {
+                aCount++;
+            }
+
+        }
+        for(File f : nDisk) {
+            System.out.println("Looking for "+f.getName());
+            if(nFiles.contains(f.getName()))  {
+                nCount++;
+            }
+
+        System.out.println("Counted A "+aCount+" disk "+aFiles.size()+"Counted N "+nCount+" disk "+nFiles.size());
+        }
+        if(nCount == nFiles.size() && aCount == aFiles.size())  {
+            return true;
+        }
+
+        return false;
+    }
+
+
 
     public String getType(int i) {
         if (i == AATImage.AFFECTIVE) {

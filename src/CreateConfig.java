@@ -20,11 +20,25 @@ import AAT.Util.SpringUtilities;
 import AAT.Util.TitledSeparator;
 import Configuration.TestConfig;
 import Controller.JoystickController;
+import IO.XMLReader;
 import Model.AATModel;
+import org.w3c.dom.Attr;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import views.TestFrame;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableModel;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -34,8 +48,12 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created with IntelliJ IDEA.
@@ -56,6 +74,7 @@ public class CreateConfig extends JPanel implements Observer {
     private JCheckBox inputBoxplot, inputColoredBorder, inputHasPractice, inputBuiltinPractice;
     private int pullColor, pushColor, prFillColor;
     private File workingDir = new File("");
+    private File nDir, aDir;
     private AATModel model;
     private JoystickController joystick;
     private TestFrame testFrame;
@@ -63,12 +82,28 @@ public class CreateConfig extends JPanel implements Observer {
     private JButton prDirButton;
     private String practRepeatValue = "3";
     private JTextField inputMaxSizeP, inputImageSizeP;
+    private JTable tableA, tableN;
+    private Boolean newTest;
+    private XMLReader reader;
+
+
+    //regex for extension filtering
+    private Pattern pattern;
+
+    private static final String IMAGE_PATTERN =
+            "([^\\s]+(\\.(?i)(jpeg|jpg|png|gif|bmp))$)";
+
+    private static final String HEX_PATTERN = "(^[0-9A-F]+$)";
 
 
     public CreateConfig() {
         super(new SpringLayout());
         //  super(new FlowLayout(FlowLayout.CENTER));
-
+        pattern = Pattern.compile(IMAGE_PATTERN); //create regex
+        nDir = new File("");
+        aDir = new File("");
+        newTest = true;
+        reader = new XMLReader();
 
         JToolBar toolbar = new JToolBar("Toolbar", JToolBar.HORIZONTAL);
         JButton openButton = new JButton(new ImageIcon("document-open.png"));
@@ -135,6 +170,10 @@ public class CreateConfig extends JPanel implements Observer {
         tabbedPane.setMnemonicAt(0, KeyEvent.VK_1);
         add(tabbedPane);
 
+        JPanel images = createImageListTable(getImages(aDir), getImages(nDir));
+        //   JPanel images = createImageListTable(getImages(new File("/home/marcel/AAT/AAT/images/Affective/")),getImages(new File("/home/marcel/AAT/AAT/images/Neutral/")));
+
+        tabbedPane.addTab("Images", images);
         SpringUtilities.makeCompactGrid(this,
                 2, 1, //rows, cols
                 6, 6,        //initX, initY
@@ -145,6 +184,227 @@ public class CreateConfig extends JPanel implements Observer {
 
         return this;
     }
+
+
+    /**
+     * Loads all image files in a given directory. Extension filter with regular expression.
+     *
+     * @param dir Directory containing images
+     * @return ArrayList<File> with all image files in a directory
+     */
+    public ArrayList<File> getImages(File dir) {
+        if (dir.length() > 0) {
+            if (dir.exists()) {
+                File[] files = dir.listFiles(extensionFilter);
+
+                return new ArrayList<File>(Arrays.asList(files));
+            } else return new ArrayList<File>();
+        } else return new ArrayList<File>();
+    }
+
+
+    /**
+     * Filter so that only the image files in a directory will be selected
+     */
+    java.io.FileFilter extensionFilter = new java.io.FileFilter() {
+        public boolean accept(File file) {
+            Matcher matcher = pattern.matcher(file.getName());
+            return matcher.matches();
+        }
+    };
+
+
+    private JPanel createImageListTable(ArrayList<File> imageFilesA, ArrayList<File> imageFilesN) {
+        ArrayList<String> aFiles = reader.getIncludedFiles(aDir);  //These lists contain the files that were specified for this test.
+        ArrayList<String> nFiles = reader.getIncludedFiles(nDir);
+        JPanel panel = new JPanel();
+        panel.setLayout(new GridBagLayout());
+        GridBagConstraints c = new GridBagConstraints();
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.anchor = GridBagConstraints.LINE_START;
+        JLabel title = new JLabel("Please select the neutral and affective images to be included in the test.", SwingConstants.LEFT);
+        Font f = title.getFont();
+
+        title.setFont(new Font(f.getName(), Font.PLAIN, 24));
+
+        c.fill = GridBagConstraints.HORIZONTAL;
+
+        c.gridwidth = 2;
+        c.gridx = 0;
+        c.gridy = 0;
+        panel.add(title, c);
+        JLabel aLabel = new JLabel("Affective Images");
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.gridwidth = 1;
+
+        c.insets = new Insets(70, 0, 0, 0);
+        c.gridx = 0;
+        c.gridy = 1;
+        panel.add(aLabel, c);
+        tableA = new JTable(new ImageTableModel(imageFilesA, aFiles));
+        tableA.setComponentPopupMenu(new JPopupMenu());
+        JScrollPane scrollPaneA = new JScrollPane(tableA);
+        tableA.setFillsViewportHeight(true);
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.gridx = 0;
+        c.gridy = 2;
+        c.insets = new Insets(10, 0, 0, 0);
+        final JPopupMenu popupMenuA = new JPopupMenu();
+        JMenuItem selectAllA = new JMenuItem("Select All");
+        selectAllA.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                selectAll(tableA, true);
+            }
+        });
+        popupMenuA.add(selectAllA);
+        JMenuItem deselectAllA = new JMenuItem("Deselect All");
+        deselectAllA.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                selectAll(tableA, false);
+            }
+        });
+        popupMenuA.add(deselectAllA);
+        tableA.setComponentPopupMenu(popupMenuA);
+        panel.add(scrollPaneA, c);
+
+        JLabel nLabel = new JLabel("Neutral Images");
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.insets = new Insets(70, 0, 0, 0);
+        c.gridx = 1;
+        c.gridy = 1;
+        panel.add(nLabel, c);
+        tableN = new JTable(new ImageTableModel(imageFilesN, nFiles));
+        JScrollPane scrollPaneN = new JScrollPane(tableN);
+        tableN.setFillsViewportHeight(true);
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.gridx = 1;
+        c.gridy = 2;
+        c.insets = new Insets(10, 0, 0, 0);
+        final JPopupMenu popupMenuN = new JPopupMenu();
+        JMenuItem selectAllN = new JMenuItem("Select All");
+        selectAllN.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                selectAll(tableN, true);
+            }
+        });
+        popupMenuN.add(selectAllN);
+        JMenuItem deselectAllN = new JMenuItem("Deselect All");
+        deselectAllN.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                selectAll(tableN, false);
+            }
+        });
+        popupMenuN.add(deselectAllN);
+        tableN.setComponentPopupMenu(popupMenuN);
+
+        panel.add(scrollPaneN, c);
+
+        return panel;
+    }
+
+    private void refreshTables() {
+        ArrayList<File> imageFilesA = getImages(aDir);
+        ArrayList<File> imageFilesN = getImages(nDir);
+        ArrayList<String> aFiles = reader.getIncludedFiles(aDir);  //These lists contain the files that were specified for this test.
+        ArrayList<String> nFiles = reader.getIncludedFiles(nDir);
+        tableA.setModel(new ImageTableModel(imageFilesA, aFiles));
+        tableN.setModel(new ImageTableModel(imageFilesN, nFiles));
+        tableA.repaint();
+        tableN.repaint();
+
+    }
+
+
+    private void selectAll(JTable table, boolean select) {
+        TableModel model = table.getModel();
+        for (int x = 0; x < model.getRowCount(); x++) {
+            model.setValueAt(select, x, 1);
+        }
+        table.setModel(model);
+    }
+
+
+    //Table model for the two JTables that contain the image files. This model contains the data that is displayed.
+    //When it is the first time a test is created all image files in a directory are added. When it is a modification of an existing test
+    //then only the already included images are selected.
+    class ImageTableModel extends AbstractTableModel {
+
+        public ImageTableModel(ArrayList<File> imageFiles, ArrayList<String> includedFiles) {
+            data = new Object[imageFiles.size()][2];
+            int x = 0;
+            for (File f : imageFiles) {
+                data[x][0] = f.getName();
+                if (newTest || includedFiles.size() == 0) {
+                    data[x][1] = new Boolean(true);
+                } else {
+                    if (includedFiles.contains(f.getName())) {
+                        data[x][1] = new Boolean(true);
+                    } else {
+                        data[x][1] = new Boolean(false);
+                    }
+                }
+                x++;
+            }
+
+
+        }
+
+        private String[] columnNames = {"Image File",
+                "Included"};
+
+        private Object[][] data;
+
+
+        public int getColumnCount() {
+            return columnNames.length;
+        }
+
+        public int getRowCount() {
+            return data.length;
+        }
+
+        public String getColumnName(int col) {
+            return columnNames[col];
+        }
+
+        public Object getValueAt(int row, int col) {
+            return data[row][col];
+        }
+
+        /*
+         * JTable uses this method to determine the default renderer/
+         * editor for each cell.  If we didn't implement this method,
+         * then the last column would contain text ("true"/"false"),
+         * rather than a check box.
+         */
+        public Class getColumnClass(int c) {
+            return getValueAt(0, c).getClass();
+        }
+
+        public boolean isCellEditable(int row, int col) {
+            //Note that the data/cell address is constant,
+            //no matter where the cell appears onscreen.
+            if (col < 1) {
+                return false;
+            } else {
+                return true;
+            }
+        }
+
+        public void setValueAt(Object value, int row, int col) {
+            data[row][col] = value;
+            fireTableCellUpdated(row, col);
+        }
+    }
+
 
     private JPanel createMainPanel() {
         JPanel panel = new JPanel(new SpringLayout());
@@ -181,6 +441,8 @@ public class CreateConfig extends JPanel implements Observer {
                 File file = getDirectory();
                 if (file != null) {
                     inputAffDir.setText(file.getName());
+                    aDir = file.getAbsoluteFile();
+                    refreshTables();
                     workingDir = file.getParentFile();
                 } else {
                     inputAffDir.setText("");
@@ -196,6 +458,8 @@ public class CreateConfig extends JPanel implements Observer {
                 File file = getDirectory();
                 if (file != null) {
                     inputNeutralDir.setText(file.getName());
+                    nDir = file.getAbsoluteFile();
+                    refreshTables();
                     workingDir = file.getParentFile();
 
                 } else {
@@ -1052,6 +1316,10 @@ public class CreateConfig extends JPanel implements Observer {
         pw.println("DataSteps " + checkForValue(inputDataStepSize.getText()));
         pw.println("MaxSizePerc " + checkForValue(inputMaxSizeP.getText()));
         pw.println("ImageSizePerc " + checkForValue(inputImageSizeP.getText()));
+        pw.println();
+        pw.println();
+        pw.println("# Unique ID value. This value is used to determine whether this file has changed since the last time the test was taken.");
+        pw.println("ID " + createIDValue());
         pw.flush();
         pw.close();
         try {
@@ -1061,6 +1329,8 @@ public class CreateConfig extends JPanel implements Observer {
         } catch (IOException ignored) {
             ignored.printStackTrace();
         }
+
+        writeXML();
     }
 
 
@@ -1109,6 +1379,10 @@ public class CreateConfig extends JPanel implements Observer {
             System.gc();
 
         }
+    }
+
+    private String createIDValue() {
+        return "123456";
     }
 
     private String checkForValue(String input) {
@@ -1162,9 +1436,13 @@ public class CreateConfig extends JPanel implements Observer {
 
     private void LoadConfig(File file) {
         boolean hasPractice = true, builtinPractice = true, hasColoredBorders = true;
+        newTest = false;
+        workingDir = file.getParentFile();
         TestConfig config = new TestConfig(file);
         inputBorderSize.setText(config.getValue("BorderWidth"));
         inputAffDir.setText(config.getValue("AffectiveDir"));
+        aDir = new File(workingDir.getAbsoluteFile() + File.separator + "images" + File.separator + inputAffDir.getText() + File.separator);
+        //TODO eigenlijk zou dit hardcoded images niet moeten.
         inputBreak.setText(config.getValue("BreakAfter"));
         inputDataStepSize.setText(config.getValue("DataSteps"));
         if (inputDataStepSize.getText().equals("")) {
@@ -1172,6 +1450,10 @@ public class CreateConfig extends JPanel implements Observer {
         }
         inputLangFile.setText(config.getValue("LanguageFile"));
         inputNeutralDir.setText(config.getValue("NeutralDir"));
+        nDir = new File(workingDir.getAbsoluteFile() + File.separator + "images" + File.separator + inputNeutralDir.getText() + File.separator);
+        //TODO eigenlijk zou dit hardcoded images niet moeten.
+        refreshTables();
+        System.out.println(nDir.getAbsolutePath());
         inputPrDir.setText(config.getValue("PracticeDir"));
         inputPullTag.setText(config.getValue("PullTag"));
         inputPushTag.setText(config.getValue("PushTag"));
@@ -1275,6 +1557,7 @@ public class CreateConfig extends JPanel implements Observer {
             inputHasPractice.setSelected(false);
             disablePracticeAction();
         }
+
     }
 
 
@@ -1285,6 +1568,81 @@ public class CreateConfig extends JPanel implements Observer {
     private Color getColor(String hex) {
         int intColor = Integer.parseInt(hex, 16);
         return new Color(intColor);
+    }
+
+
+    private void writeXML() {
+        try {
+            TableModel modelA = tableA.getModel();
+            TableModel modelN = tableN.getModel();
+            DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+
+            // root elements
+            Document doc = docBuilder.newDocument();
+            Element rootElement = doc.createElement("root");
+            doc.appendChild(rootElement);
+
+
+            for (int x = 0; x < modelA.getRowCount(); x++) {   //Retrieve the data from the table and add the checked images to the included xml file.
+
+                String file = modelA.getValueAt(x, 0).toString();
+                Boolean add = Boolean.parseBoolean(modelA.getValueAt(x, 1).toString());
+                if (add) {
+                    Element image = doc.createElement("image");
+                    rootElement.appendChild(image);
+                    Attr attr = doc.createAttribute("file");
+                    attr.setValue(file);
+                    image.setAttributeNode(attr);
+                }
+            }
+
+
+            // write the content into xml file
+            TransformerFactory transformerFactory = TransformerFactory.newInstance();
+            Transformer transformer = transformerFactory.newTransformer();
+            DOMSource source = new DOMSource(doc);
+            StreamResult result = new StreamResult(new File(aDir.getAbsolutePath() + File.separator + "included.xml"));
+
+            transformer.transform(source, result);
+
+            // root elements
+            doc = docBuilder.newDocument();
+            rootElement = doc.createElement("root");
+            doc.appendChild(rootElement);
+
+
+            for (int x = 0; x < modelN.getRowCount(); x++) {   //Retrieve the data from the table and add the checked images to the included xml file.
+
+                String file = modelN.getValueAt(x, 0).toString();
+                Boolean add = Boolean.parseBoolean(modelN.getValueAt(x, 1).toString());
+                if (add) {
+                    Element image = doc.createElement("image");
+                    rootElement.appendChild(image);
+                    Attr attr = doc.createAttribute("file");
+                    attr.setValue(file);
+                    image.setAttributeNode(attr);
+                }
+            }
+
+            // write the content into xml file
+            transformerFactory = TransformerFactory.newInstance();
+            transformer = transformerFactory.newTransformer();
+            source = new DOMSource(doc);
+            result = new StreamResult(new File(nDir.getAbsolutePath() + File.separator + "included.xml"));
+
+            // Output to console for testing
+            // StreamResult result = new StreamResult(System.out);
+
+            transformer.transform(source, result);
+
+            System.out.println("File saved!");
+
+        } catch (ParserConfigurationException pce) {
+            pce.printStackTrace();
+        } catch (TransformerException tfe) {
+            tfe.printStackTrace();
+        }
     }
 }
 

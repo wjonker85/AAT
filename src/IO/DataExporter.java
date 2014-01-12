@@ -18,16 +18,20 @@
 package IO;
 
 import Model.AATModel;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import org.w3c.dom.*;
 
 import javax.swing.*;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
+import javax.swing.table.TableModel;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -385,7 +389,7 @@ public class DataExporter {
     }
 
     private static String[][] createDataTable(Document doc, HashMap<String, Integer> variableMap) {
-        int columns = variableMap.size() + 1;
+        int columns = variableMap.size() + 3; //TODO was +1
         NodeList participantList = doc.getElementsByTagName("participant");
         int rows = participantList.getLength() + 1;
         String[][] tableData = new String[rows][columns];
@@ -393,8 +397,10 @@ public class DataExporter {
         tableData[0][0] = "id";
         for (String key : variableMap.keySet()) {    //create first row
             int pos = variableMap.get(key);
+            System.out.println("key pos " + key + " " + pos + " " + columns);
             pos++; //shift 1 to the right for the id column;
             tableData[0][pos] = key;
+
         }
 
         for (int x = 0; x < participantList.getLength(); x++) {
@@ -410,8 +416,9 @@ public class DataExporter {
                     NodeList rTimeList = image.getElementsByTagName("reactionTime");
                     Node rTimeNode = rTimeList.item(0).getFirstChild();
                     String reactionTime = rTimeNode.getNodeValue();
-
+                    System.out.println("Image " + imageName);
                     int pos = variableMap.get(imageName);
+                    System.out.println("TEST " + pos);
                     pos++; //Shift 1 to the right
                     tableData[x + 1][pos] = reactionTime;
                 }
@@ -539,7 +546,10 @@ public class DataExporter {
         pw.close();
         fw.close();
     }
+
+
 }
+
 
 //About dialog
 class MessageDialog extends JDialog {

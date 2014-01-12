@@ -69,7 +69,8 @@ public class TestConfig {
             "TestRatio",
             "TrialSize",
             "MaxSizePerc",
-            "ImageSizePerc"
+            "ImageSizePerc",
+            "ID"
 
     };
 

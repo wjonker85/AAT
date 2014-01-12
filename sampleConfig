@@ -2,36 +2,55 @@
 #
 # The next options are for determining the course of the test.
 #
-# Trails - defines the number of trails
+# Trials - defines the number of trails
 # BreakAfter - after how much Trails the test is on a break. Set this to a higher number than the trails
-#	       if you a break is not necessary.
+#	       if a break is not necessary.
 # PracticeRepeat - How many practice images are needed at the beginning of the test. The total number of images
 # 		   Shown is twice this amount. (Every image has a pull and push variant). Comment this or set to 0 when you don't want a practice.
+# DisplayQuestions - Should the questions be asked Before or After the test. Set to None for no questions
+# ShowBoxPlot - Set this to True when you want to display a boxplot showing the results, otherwise set to False
 
-Trials 2
-BreakAfter 1
-PracticeRepeat 1
+Trials 4
+BreakAfter 2
+PracticeRepeat 3
+DisplayQuestions None
+ShowBoxPlot True
+
+#The next two options are only needed when you want to change the ratio push/pull in the two conditions (push:pull). Default is 50% push and 50% #pull 1:1 ratio.
+
+
+AffectRatio 1:1
+NeutralRatio 1:1
+
+#This option specifies the ratio of Affective vs Neutral images (Affect:Neutral). Default is a 1:1 ratio. 
+
+
+TestRatio 1:1
+
+#This option sets the number of images shown in each trial. Normally this options doesnt need to be set. Only needed when you change the ratio('s)
+#and want a specified number of images in each trial
+
+# TrialSize 20
 
 #The next options are for the way images should be shown on screen. A test can use the build in method that can create a colored border around
-#An image.
-# ColoredBorders - If this is set to True, then the program will show a colored border around the image
+#an image.
+# ColoredBorders - If this is set to True, the program will show a colored border around the image
 # BorderColorPush - Determines the color to be used for the push images. Color is in hex value.
 # BorderColorPull - Same for the pull images.
 # BorderWidth - Specifies the width the border has in the center position.
 # PracticeFillColor - Specifies the color the practice image gets. This only works if the PracticeDir is not set
-# StepSize - Determines how often the image gets resized. This has to be an odd number. A higher number is smoother, but can make the pc slow
-# DataSteps - Determines how many resize steps get recorded in the data file. This also has to be an odd number
-# PullTag & PushTag - These are needed when ColoredBorders is set to False. Image file names should contain these tags.
+
 
 ColoredBorders True
 BorderColorPush F5FE02
 BorderColorPull 00A4E7
-PracticeFillColor FFDEDE
 BorderWidth 20
-StepSize 31
-DataSteps 9
-PullTag pull
-PushTag push
+PracticeFillColor FFDEDE
+
+# PullTag & PushTag - These are needed when ColoredBorders is set to False. Image file names should contain these tags.
+
+# PullTag pull
+# PushTag push
 
 #Next options are for the specification of directories
 # AffectiveDir - This is the directory containing the affective images
@@ -39,25 +58,38 @@ PushTag push
 # PracticeDir - A directory containing Practice images. If this is not set, the program will use self-generated images with the specified fill
 # color. It will also use the border colors that are specified. 
 
-AffectiveDir Affective
-NeutralDir Neutral
-#PracticeDir
 
+AffectiveDir NA
+NeutralDir NA
+# PracticeDir practice
 
+#The next option specifies in which file the data will be saved. When not set it will default to Data.xml
+
+# Data.xml
 #It is possible for the same test to have different languages. 
 #LanguageFile specifies the language file used for this test. Change this value to another language file for the test to be performed in a 
 #different language.
 
-LanguageFile English.AAT
+LanguageFile NA
+
+#When a questionnaire is added to the AAT, the next option specifies which file contains those questions. 
+
+# Questionnaire questionnaire.xml
+
+#Next options are for test performance
+# StepSize - Determines in how many steps the image is resized. This has to be an odd number. A higher number is smoother, but setting this  
+#	     too high can be bad for performance. (Defaults to 31 when not set)
+# DataSteps - Determines the accuracy for data recording. Higher value means smaller movements are recorded, but this also increases
+#	     the error rate. (Defaults to 9 when not set)
+# MaxSizePerc - Determines how large the image can be. Value is percentage of the screen height. Can be >100% (Default 100%)
+# ImageSizePerc - Determines how large the image will be when first shown on the screen. Value is percentage of the screen height. Can be >100%
+#		  (Default 50%)
+
+StepSize 31
+DataSteps 9
+MaxSizePerc 100
+ImageSizePerc 50
 
 
-# The next to options specify the data files that will be used to store all the data in. These files are in CSV format.
-# ParticipantsFile - For all the data gather about the participants
-# DataFile - In this file all measurements will be saved. 
-
-ParticipantsFile Participants.csv
-DataFile Data.csv
-
-
-
-
+# Unique ID value. This value is used to determine whether this file has changed since the last time the test was taken.
+ID 123456

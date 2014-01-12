@@ -51,6 +51,10 @@ public class XMLReader {
             "finished"
     };
 
+    public XMLReader() {
+        //just an empty constructor.
+    }
+
     public XMLReader(File languageFile) {
 
         extraQuestions = new ArrayList<QuestionData>();
@@ -152,5 +156,42 @@ public class XMLReader {
 
     public ArrayList<QuestionData> getExtraQuestions() {
         return extraQuestions;
+    }
+
+
+
+    public ArrayList<String> getIncludedFiles(File dir) {
+        ArrayList<String> files = new ArrayList<String>();
+
+        try {
+            File xmlFile = new File(dir.getAbsoluteFile() + File.separator + "included.xml");
+            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+            Document doc = dBuilder.parse(xmlFile);
+            doc.getDocumentElement().normalize();
+            NodeList nList = doc.getElementsByTagName("image");
+            for (int x = 0; x < nList.getLength(); x++) {
+                Node fstNode = nList.item(x);
+
+                if (fstNode.getNodeType() == Node.ELEMENT_NODE) {
+                    Element element = (Element) fstNode;
+                    String file = element.getAttribute("file");
+                    System.out.println("Included "+file);
+                    files.add(file);
+                }
+            }
+        } catch (Exception e) {
+            System.out.println(e.getStackTrace());
+        }
+        return files;
+    }
+
+    //Same result as the above, but this time returns as an arraylist of Files
+    public ArrayList<File> getIncludedFilesF(File dir) {
+        ArrayList<File> result = new ArrayList<File>();
+        for(String s : getIncludedFiles(dir)) {
+                 result.add(new File(s));
+        }
+        return result;
     }
 }
