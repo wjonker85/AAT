@@ -89,6 +89,8 @@ public class AATModel extends Observable {
     private int lastSize;
     private boolean saveData;
 
+    private int export_id;
+
     //Constructor.
     public AATModel() {
         //   testStatus = AATModel.TEST_STOPPED;
@@ -127,7 +129,7 @@ public class AATModel extends Observable {
         run = 0;
         int id = testData.getHighestID();
         id++;          //new higher id
-        newParticipant = new ParticipantData(id);
+        newParticipant = new ParticipantData(id,newAAT.getTest_id());
 
         //     if (newAAT.getNoOfQuestions() > 0) {   //When there are extra question, show them
         if (newAAT.getDisplayQuestions().equals("Before")) {
@@ -148,6 +150,16 @@ public class AATModel extends Observable {
 
     public final TestData getTestData() {
         return testData;
+    }
+
+    public void setExport_id(int id) {
+        this.export_id = id;
+        this.setChanged();
+        notifyObservers("Export");
+    }
+
+    public int getExport_id() {
+        return export_id;
     }
 
 //---------------------------Test Progress---------------------------------------------------------

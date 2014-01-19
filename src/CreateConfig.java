@@ -21,6 +21,7 @@ import AAT.Util.TitledSeparator;
 import Configuration.TestConfig;
 import Controller.JoystickController;
 import IO.XMLReader;
+import IO.XMLWriter;
 import Model.AATModel;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
@@ -84,6 +85,7 @@ public class CreateConfig extends JPanel implements Observer {
     private JTextField inputMaxSizeP, inputImageSizeP;
     private JTable tableA, tableN;
     private Boolean newTest;
+    private int test_id = 1;
     private XMLReader reader;
 
 
@@ -1330,7 +1332,7 @@ public class CreateConfig extends JPanel implements Observer {
             ignored.printStackTrace();
         }
 
-        writeXML();
+       XMLWriter.writeXMLImagesList(tableA.getModel(),tableN.getModel(),aDir,nDir);
     }
 
 
@@ -1382,7 +1384,13 @@ public class CreateConfig extends JPanel implements Observer {
     }
 
     private String createIDValue() {
-        return "123456";
+        if(newTest) {
+        return "1";
+        }
+        else {
+            int newId = test_id++;       //Increase the old id with one.
+            return String.valueOf(newId);
+        }
     }
 
     private String checkForValue(String input) {
@@ -1434,11 +1442,29 @@ public class CreateConfig extends JPanel implements Observer {
         }
     }
 
+    /**
+     * Load a current config file for editing.
+     * @param file the config file.
+     */
     private void LoadConfig(File file) {
         boolean hasPractice = true, builtinPractice = true, hasColoredBorders = true;
         newTest = false;
         workingDir = file.getParentFile();
         TestConfig config = new TestConfig(file);
+        if(config.getValue("ID").length()>0) {
+            try {
+            test_id = Integer.parseInt(config.getValue("ID"));
+            }
+            catch (Exception e)  {
+                System.out.println("Invalid ID value detected, resetting the value to 99999");
+                test_id = 99999;
+            }
+
+        }
+        else {
+            test_id = 1;  //Older config files don't have the id option. Add the ID to upgrade these config files to the newest version.
+        }
+
         inputBorderSize.setText(config.getValue("BorderWidth"));
         inputAffDir.setText(config.getValue("AffectiveDir"));
         aDir = new File(workingDir.getAbsoluteFile() + File.separator + "images" + File.separator + inputAffDir.getText() + File.separator);
@@ -1571,78 +1597,6 @@ public class CreateConfig extends JPanel implements Observer {
     }
 
 
-    private void writeXML() {
-        try {
-            TableModel modelA = tableA.getModel();
-            TableModel modelN = tableN.getModel();
-            DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
 
-            // root elements
-            Document doc = docBuilder.newDocument();
-            Element rootElement = doc.createElement("root");
-            doc.appendChild(rootElement);
-
-
-            for (int x = 0; x < modelA.getRowCount(); x++) {   //Retrieve the data from the table and add the checked images to the included xml file.
-
-                String file = modelA.getValueAt(x, 0).toString();
-                Boolean add = Boolean.parseBoolean(modelA.getValueAt(x, 1).toString());
-                if (add) {
-                    Element image = doc.createElement("image");
-                    rootElement.appendChild(image);
-                    Attr attr = doc.createAttribute("file");
-                    attr.setValue(file);
-                    image.setAttributeNode(attr);
-                }
-            }
-
-
-            // write the content into xml file
-            TransformerFactory transformerFactory = TransformerFactory.newInstance();
-            Transformer transformer = transformerFactory.newTransformer();
-            DOMSource source = new DOMSource(doc);
-            StreamResult result = new StreamResult(new File(aDir.getAbsolutePath() + File.separator + "included.xml"));
-
-            transformer.transform(source, result);
-
-            // root elements
-            doc = docBuilder.newDocument();
-            rootElement = doc.createElement("root");
-            doc.appendChild(rootElement);
-
-
-            for (int x = 0; x < modelN.getRowCount(); x++) {   //Retrieve the data from the table and add the checked images to the included xml file.
-
-                String file = modelN.getValueAt(x, 0).toString();
-                Boolean add = Boolean.parseBoolean(modelN.getValueAt(x, 1).toString());
-                if (add) {
-                    Element image = doc.createElement("image");
-                    rootElement.appendChild(image);
-                    Attr attr = doc.createAttribute("file");
-                    attr.setValue(file);
-                    image.setAttributeNode(attr);
-                }
-            }
-
-            // write the content into xml file
-            transformerFactory = TransformerFactory.newInstance();
-            transformer = transformerFactory.newTransformer();
-            source = new DOMSource(doc);
-            result = new StreamResult(new File(nDir.getAbsolutePath() + File.separator + "included.xml"));
-
-            // Output to console for testing
-            // StreamResult result = new StreamResult(System.out);
-
-            transformer.transform(source, result);
-
-            System.out.println("File saved!");
-
-        } catch (ParserConfigurationException pce) {
-            pce.printStackTrace();
-        } catch (TransformerException tfe) {
-            tfe.printStackTrace();
-        }
-    }
 }
 

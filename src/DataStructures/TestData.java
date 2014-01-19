@@ -18,6 +18,8 @@
 package DataStructures;
 
 import AAT.AatObject;
+import AAT.Util.FileUtils;
+import Model.AATModel;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
@@ -29,6 +31,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -49,17 +52,82 @@ public class TestData {
     public TestData(AatObject newAAT) {
         this.newAAT = newAAT;
         this.trials = newAAT.getRepeat();
+        //TODO gebruikte images toevoegen. Alleen als betreffende test_id nog niet bestaat.
         if (newAAT.hasPractice()) {    //Add 1 tot the number of trials when there is a practice trial
             trials++;
         }
         this.dataFile = newAAT.getDataFile();
         if (dataFile.exists()) {
             loadFileData();
+            checkAndFixOldData(dataFile,doc,newAAT);
+            if(!hasTestID(newAAT.getTest_id())) {
+                System.out.println("Test id not present in the data file, adding required test data to the data file");
+                addTestData(newAAT.getTest_id(), "testje2");  //Add the current test_id and used image files to the data.xml file.
+            }
         } else {
             createXMLDOC();
+            System.out.println("New data file created, adding test data");
+            addTestData(newAAT.getTest_id(), "testje");
         }
         getHighestID();
     }
+
+    /**
+     *
+     * @param test_id the current test_id
+     * @return whether this test id is added to the datafile.
+     */
+    private boolean hasTestID(int test_id)  {
+
+        NodeList testList = doc.getElementsByTagName("test");
+        if (testList.getLength() > 0) {
+            for(int x = 0;x<testList.getLength();x++) {
+                Element test = (Element) testList.item(x);
+                int value = Integer.parseInt(test.getAttribute("test_id"));
+                if(value == test_id) {             //Test id has been used before, so no need for adding the images to the data file.
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+
+    private void addTestData(int test_id, String comment) {
+        Element root = doc.getDocumentElement();
+
+
+        Element test = doc.createElement("test");
+        root.appendChild(test);
+        test.setAttribute("test_id", String.valueOf(test_id));
+        Element commentElement = doc.createElement("comment");
+        Text commentValue = doc.createTextNode(comment);
+        commentElement.appendChild(commentValue);
+        test.appendChild(commentElement);
+
+        //Adding the affective images
+        addImageToData(test,newAAT.affectiveImages,AATImage.AFFECTIVE);
+        addImageToData(test,newAAT.neutralImages,AATImage.NEUTRAL);
+        FileUtils.writeDataToFile(dataFile, doc);
+
+    }
+
+    //Add the used images to the data file.
+    private void addImageToData(Element testElement,ArrayList<File> images, int type)  {
+        for (File file : images) {
+            System.out.println("Adding file to data.xml: "+file.getName());
+            Element image = doc.createElement("image");
+            testElement.appendChild(image);
+            Attr fileAttr = doc.createAttribute("file");
+            fileAttr.setValue(file.getName());
+            image.setAttributeNode(fileAttr);
+            Attr typeAttr = doc.createAttribute("type");
+            typeAttr.setValue(String.valueOf(type));
+            image.setAttributeNode(typeAttr);
+        }
+    }
+
 
     private void loadFileData() {
         try {
@@ -125,6 +193,7 @@ public class TestData {
         Element participant = doc.createElement("participant");
         HashMap<String, String> questionnaire = newParticipant.getQuestionnaire();
         participant.setAttribute("id", String.valueOf(newParticipant.getId()));
+        participant.setAttribute("test_id", String.valueOf(newParticipant.getTestID()));
         // child.setAttribute("name", "value");
         root.appendChild(participant);
         if (questionnaire != null) {
@@ -179,28 +248,125 @@ public class TestData {
                 trial.appendChild(image);
             }
         }
-        writeDataToFile(dataFile);
+        FileUtils.writeDataToFile(dataFile, doc);
     }
 
-    public void writeDataToFile(File file) {
-        try {
-            // Prepare the DOM document for writing
-            Source source = new DOMSource(doc);
-
-            // Prepare the output file
-            Result result = new StreamResult(file);
-
-            // Write the DOM document to the file
-            TransformerFactory transformerFactory = TransformerFactory.newInstance();
-            transformerFactory.setAttribute("indent-number", 4);
-            Transformer transformer = transformerFactory.newTransformer();
-            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-
-            transformer.transform(source, result);
-        } catch (Exception e) {
-            e.printStackTrace();
+    /**
+     * Upgrade the data.xml file to the new structure.
+     *
+     * @param doc Xml document
+     */
+    private void checkAndFixOldData(File dataFile, Document doc, AatObject AAT) {
+        System.out.println("Checking whether this test has data from older versions and upgrade the data file when necessary.");
+        Boolean upgrade = false;
+        NodeList participantsList = doc.getElementsByTagName("participant");
+        for (int x = 0; x < participantsList.getLength(); x++) {
+            Element participant = (Element) participantsList.item(x);
+            if (!participant.hasAttribute("test_id")) {
+                System.out.println("Old version detected, first add test id 0 to the participants.");
+                upgrade = true;
+                participant.setAttribute("test_id", "-1");
+            }
+        }
+        if (upgrade) {
+            addTestData(doc, AAT, -1, "Old test data");
         }
     }
+
+
+    private void addTestData(Document doc, AatObject AAT, int test_id, String comment) {
+        System.out.println("Add required test data.");
+        Element root = doc.getDocumentElement();
+        Element test = doc.createElement("test");
+        root.appendChild(test);
+        test.setAttribute("test_id", String.valueOf(test_id));
+        Element commentElement = doc.createElement("comment");
+        Text commentValue = doc.createTextNode(comment);
+        commentElement.appendChild(commentValue);
+        test.appendChild(commentElement);
+
+        //Adding the affective images
+        addImageToData(doc, test, collectAllImages(doc,AATImage.AFFECTIVE), AATImage.AFFECTIVE);
+        addImageToData(doc, test, collectAllImages(doc,AATImage.NEUTRAL), AATImage.NEUTRAL);
+        System.out.println("Writing the changes to disk");
+        FileUtils.writeDataToFile(dataFile, doc);
+
+    }
+
+    //Add the used images to the data file.
+    private  void addImageToData(Document doc, Element testElement, ArrayList<File> images, int type) {
+        for (File file : images) {
+            System.out.println("Adding file to data.xml: " + file.getName());
+            Element image = doc.createElement("image");
+            testElement.appendChild(image);
+            Attr fileAttr = doc.createAttribute("file");
+            fileAttr.setValue(file.getName());
+            image.setAttributeNode(fileAttr);
+            Attr typeAttr = doc.createAttribute("type");
+            typeAttr.setValue(String.valueOf(type));
+            image.setAttributeNode(typeAttr);
+        }
+    }
+
+    /**
+     * Find all the image file names used by participants which do not have an test_id attributed to them.
+     * This is done so old data files can be upgraded to new style datafiles.
+     *
+     * @param doc  XML document
+     * @param type Image type, affective, neutral or practice.
+     * @return
+     */
+    private  ArrayList<File> collectAllImages(Document doc, int type) {
+        String imgType = "";
+        ArrayList<File> result = new ArrayList<File>();
+        ArrayList<String> unique = new ArrayList<String>();
+        if (type == AATImage.AFFECTIVE) {
+            System.out.println("Upgrade: Collecting affective images");
+            imgType = "Affective";
+        } else if (type == AATImage.NEUTRAL) {
+            System.out.println("Upgrade: Collecting neutral images");
+            imgType = "Neutral";
+        } else if (type == AATImage.PRACTICE) {
+            System.out.println("Upgrade: Collecting practice images");
+            imgType = "practice";
+        }
+
+        NodeList participantsList = doc.getElementsByTagName("participant");
+
+        for (int x = 0; x < participantsList.getLength(); x++) {
+            Element participant = (Element) participantsList.item(x);
+            if (participant.getAttribute("test_id").equalsIgnoreCase(("-1"))) {
+                System.out.println("Collecting images for participant "+participant.getAttribute("id"));
+                NodeList imageList = participant.getElementsByTagName("image");
+                System.out.println("Found "+imageList.getLength()+" "+"images");
+                for (int i = 0; i < imageList.getLength(); i++) {
+                    Element image = (Element) imageList.item(i);
+                    NodeList nameList = image.getElementsByTagName("imageName");
+                    Node imageNameNode = nameList.item(0).getFirstChild();
+                    String imageName = imageNameNode.getNodeValue();
+
+                    NodeList typeList = image.getElementsByTagName("type");
+                    Node typeNode = typeList.item(0).getFirstChild();
+                    String typeValue = typeNode.getNodeValue();
+                    System.out.println("Found image "+imageName+" "+typeValue);
+                    if (typeValue.equalsIgnoreCase(imgType)) {
+                        if (!unique.contains(imageName)) {
+                            result.add(new File(imageName));
+                            unique.add(imageName);
+                            System.out.println("Upgrading datafile: adding " + imageName);
+                        }
+                    }
+
+
+                }
+                //TODO ook practice.
+            }
+
+        }
+        return result;
+    } 
+    
+
 
     public Document getDocument() {
         return doc;

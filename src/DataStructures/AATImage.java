@@ -60,7 +60,7 @@ public class AATImage {
         }
 
         name = imageFile.getName();
-
+        System.out.println("Adding image 1 "+imageFile.getAbsoluteFile());
         this.image = loadImage(imageFile, aatObject.getImageSizePerc());
 
 
@@ -76,7 +76,7 @@ public class AATImage {
             borderWidth = aatObject.getBorderWidth();
         }
         name = imageFile.getName() + "_" + repeat;
-
+        System.out.println("Adding image 2 "+name);
         this.image = loadImage(imageFile, aatObject.getImageSizePerc());
 
 

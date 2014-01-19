@@ -17,6 +17,7 @@
 
 package AAT;
 
+import AAT.Util.FileUtils;
 import DataStructures.AATImage;
 
 import java.awt.*;
@@ -59,7 +60,7 @@ public class HighMemoryAAT extends AatObject {
             if (this.hasColoredBorders()) {
 
                 for (int x = 0; x < size; x++) {
-                    for (File image : getImages(practiceDir)) {
+                    for (File image : FileUtils.getImages(practiceDir)) {
                         AATImage pull = new AATImage(image, AATImage.PULL, this, x); //Add push and pull version
                         AATImage push = new AATImage(image, AATImage.PUSH, this, x);
                         list.add(pull);
@@ -70,7 +71,7 @@ public class HighMemoryAAT extends AatObject {
                 //TODO: PracticeRepeat
 
                 for (int x = 0; x < practiceRepeat; x++) {
-                    for (File image : getImages(practiceDir)) {
+                    for (File image : FileUtils.getImages(practiceDir)) {
                         if (image.getName().contains(testConfig.getValue("PullTag"))) {
                             AATImage pull = new AATImage(image, AATImage.PULL, this, x); //Two instances for every image
                             list.add(pull);

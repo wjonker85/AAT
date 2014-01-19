@@ -18,10 +18,12 @@
 package AAT;
 
 
+import AAT.Util.FileUtils;
 import Configuration.TestConfig;
 import DataStructures.AATImage;
 import DataStructures.Questionnaire;
 import IO.XMLReader;
+import IO.XMLWriter;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -29,8 +31,7 @@ import org.w3c.dom.NodeList;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.File;
-import java.io.FileFilter;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Hashtable;
@@ -56,7 +57,7 @@ public abstract class AatObject {
     private XMLReader xmlReader;
     //TODO: renamen
 
-    private String id;
+    private int test_id = 1;
 
     //Test variables
     private int repeat;
@@ -102,11 +103,7 @@ public abstract class AatObject {
     private File dataFile;
 
 
-    //regex for extension filtering
-    private Pattern pattern;
 
-    private static final String IMAGE_PATTERN =
-            "([^\\s]+(\\.(?i)(jpeg|jpg|png|gif|bmp))$)";
 
     private static final String HEX_PATTERN = "(^[0-9A-F]+$)";
 
@@ -140,23 +137,57 @@ public abstract class AatObject {
      * @throws FalseConfigException When there are mistakes in the config file
      */
     public AatObject(File config) throws FalseConfigException {
-        pattern = Pattern.compile(IMAGE_PATTERN); //create regex
+
         Pattern hexPattern = Pattern.compile(HEX_PATTERN);
         testConfig = new TestConfig(config);
         String workingDir = config.getParentFile().getAbsolutePath();
 
         System.out.println("Checking configuration");
-        id = testConfig.getValue("ID");
+        if(testConfig.getValue("ID").length()>0) {
+        try {
+
+        test_id = Integer.parseInt(testConfig.getValue("ID"));
+            System.out.println("Test ID "+test_id);
+        }
+        catch (Exception e)   {
+
+            throw new FalseConfigException("Test id value is not a correct integer value.");
+        }
+        }
+        else {          //Add a new id value to the config file.
+            test_id = 1;
+            Writer output;
+            try {
+                FileWriter fw = null;
+                try {
+                    fw = new FileWriter(config,true);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                PrintWriter pw = new PrintWriter(fw);
+
+            pw.write("\n# Unique ID value. This value is used to determine whether this file has changed since the last time the test was taken.\n");
+            pw.write("ID 0\n");
+                pw.flush();
+                pw.close();
+                try {
+                    if (fw != null) {
+                        fw.close();
+                    }
+                } catch (IOException ignored) {
+                    ignored.printStackTrace();
+                }
+            }
+            catch (Exception e) {
+                System.out.println("Could not write to config file.");
+            }
+        }
+
         String datFile = testConfig.getValue("DataFile");
         //TODO uitzoeken wat de teststatus is. Indien nodig moet de datafile verandert worden en de oudere gebackuped worden.
         if (datFile.equals("")) {
-            datFile = "Data" + id + ".xml"; //Set to default.
+            datFile = "Data.xml"; //Set to default.
         }
-
-        if (!datFile.contains(id)) {
-            datFile = removeExtention(datFile) + id + ".xml";
-        }
-
 
         dataFile = new File(workingDir + File.separator + datFile);
         String langFile = testConfig.getValue("LanguageFile");
@@ -452,27 +483,6 @@ public abstract class AatObject {
 
     }
 
-    /**
-     * Loads all image files in a given directory. Extension filter with regular expression.
-     *
-     * @param dir Directory containing images
-     * @return ArrayList<File> with all image files in a directory
-     */
-    public ArrayList<File> getImages(File dir) {
-        File[] files = dir.listFiles(extensionFilter);
-        return new ArrayList<File>(Arrays.asList(files));
-    }
-
-
-    /**
-     * Filter so that only the image files in a directory will be selected
-     */
-    FileFilter extensionFilter = new FileFilter() {
-        public boolean accept(File file) {
-            Matcher matcher = pattern.matcher(file.getName());
-            return matcher.matches();
-        }
-    };
 
 
     /**
@@ -618,8 +628,9 @@ public abstract class AatObject {
     public boolean imageComplete(File neutral, File affective) {
         int aCount = 0;
         int nCount = 0;
-        ArrayList<File> aDisk = getImages(affective);
-        ArrayList<File> nDisk = getImages(neutral);
+
+        ArrayList<File> aDisk = FileUtils.getImages(affective);
+        ArrayList<File> nDisk = FileUtils.getImages(neutral);
         ArrayList<String> aFiles = xmlReader.getIncludedFiles(affective);
         ArrayList<String> nFiles = xmlReader.getIncludedFiles(neutral);
         for(File f : aDisk) {
@@ -644,7 +655,9 @@ public abstract class AatObject {
         return false;
     }
 
-
+    public int getTest_id() {
+        return test_id;
+    }
 
     public String getType(int i) {
         if (i == AATImage.AFFECTIVE) {

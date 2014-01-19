@@ -165,6 +165,10 @@ public class XMLReader {
 
         try {
             File xmlFile = new File(dir.getAbsoluteFile() + File.separator + "included.xml");
+            if(!xmlFile.exists()) {        //Create the included.xml files when they are not present. Done for backwards compatibility with older versions of the test.
+              System.out.println("Included.xml doesn't exist, creating one.");
+                XMLWriter.writeXMLImagesList(dir);
+            }
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
             Document doc = dBuilder.parse(xmlFile);
@@ -188,9 +192,12 @@ public class XMLReader {
 
     //Same result as the above, but this time returns as an arraylist of Files
     public ArrayList<File> getIncludedFilesF(File dir) {
+
         ArrayList<File> result = new ArrayList<File>();
         for(String s : getIncludedFiles(dir)) {
-                 result.add(new File(s));
+                 String image = dir.getAbsolutePath()+File.separator+s;
+                 System.out.println("Added image "+image);
+                 result.add(new File(image));
         }
         return result;
     }

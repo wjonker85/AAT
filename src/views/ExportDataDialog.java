@@ -23,9 +23,13 @@ import Model.AATModel;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableModel;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.HashMap;
 
 /**
  * Created by IntelliJ IDEA.
@@ -40,11 +44,15 @@ public class ExportDataDialog extends JFrame {
     private JTextField minRTime, maxRtime, errorPerc;
     private JCheckBox removeFalseCenter, practiceCheck;
     private int min, max, perc = 10;
+    public int test_id;
+    private SelectTestRevision testRevision;
 
-    public ExportDataDialog(final AATModel model) {
+    public ExportDataDialog(final AATModel model, int test_id) {
 
         this.setName("Export Data");
         this.setTitle("Export Data - options");
+        System.out.println("Using test id "+test_id);
+
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 
@@ -151,6 +159,12 @@ public class ExportDataDialog extends JFrame {
         p.setOpaque(true);
         setContentPane(mainPanel);
         pack();
+
+        //    SelectTestRevision.setEnabled(true);
+        //    SelectTestRevision.setVisible(true);
+          //  this.setVisible(false);
+          //  this.setEnabled(false);
+
     }
 
     /**
@@ -186,7 +200,6 @@ public class ExportDataDialog extends JFrame {
             throw new SubmitDataException("Error percentage can't be higher than 100%");
         }
     }
-
 
     /*
    Create a dialog for the selection of the file where the exported data is saved to
@@ -233,6 +246,10 @@ public class ExportDataDialog extends JFrame {
             super(error);
         }
     }
+
+
+
+
 }
 
 //filter voor de file extensions. Komt ook van het internet. Wordt nu gebruik om .input en csv bestanden te filteren.

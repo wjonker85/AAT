@@ -17,8 +17,10 @@
 
 import AAT.AatObject;
 import Controller.JoystickController;
+import IO.DataExporter;
 import Model.AATModel;
 import views.ExportDataDialog;
+import views.SelectTestRevision;
 import views.TestFrame;
 
 import javax.imageio.ImageIO;
@@ -36,6 +38,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -185,8 +188,18 @@ public class AAT_Main extends JFrame implements Observer {
         //Export data
         exportData.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent actionEvent) {
-                ExportDataDialog export = new ExportDataDialog(model);
-                export.setVisible(true);
+
+                HashMap<String, String> testData = DataExporter.getTestRevisions(model);
+
+                if (testData.size() > 1) {
+                    SelectTestRevision testRevision = new SelectTestRevision(testData, model.getTest().getTest_id(), model);
+                    testRevision.setEnabled(true);
+                    testRevision.setVisible(true);
+                    testRevision.requestFocus();
+                } else {                 //Data from just one test.
+                    ExportDataDialog export = new ExportDataDialog(model, model.getTest().getTest_id());
+                    export.setVisible(true);
+                }
             }
         });
 
@@ -226,6 +239,11 @@ public class AAT_Main extends JFrame implements Observer {
             exportData.setEnabled(true);
             runButton.setEnabled(true);
             System.gc();
+        }
+        if (o.toString().equalsIgnoreCase("Export")) {
+            System.out.println("Showing data exporter, using id "+model.getExport_id());
+            ExportDataDialog export = new ExportDataDialog(model, model.getExport_id());
+            export.setVisible(true);
         }
     }
 
