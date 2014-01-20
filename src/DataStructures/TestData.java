@@ -19,16 +19,12 @@ package DataStructures;
 
 import AAT.AatObject;
 import AAT.Util.FileUtils;
-import Model.AATModel;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.*;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -59,32 +55,31 @@ public class TestData {
         this.dataFile = newAAT.getDataFile();
         if (dataFile.exists()) {
             loadFileData();
-            checkAndFixOldData(dataFile,doc,newAAT);
-            if(!hasTestID(newAAT.getTest_id())) {
+            checkAndFixOldData(dataFile, doc, newAAT);
+            if (!hasTestID(newAAT.getTest_id())) {
                 System.out.println("Test id not present in the data file, adding required test data to the data file");
-                addTestData(newAAT.getTest_id(), "testje2");  //Add the current test_id and used image files to the data.xml file.
+                addTestData(newAAT.getTest_id(), newAAT.trialSize, "testje2");  //Add the current test_id and used image files to the data.xml file.
             }
         } else {
             createXMLDOC();
             System.out.println("New data file created, adding test data");
-            addTestData(newAAT.getTest_id(), "testje");
+            addTestData(newAAT.getTest_id(), newAAT.trialSize, "testje");
         }
         getHighestID();
     }
 
     /**
-     *
      * @param test_id the current test_id
      * @return whether this test id is added to the datafile.
      */
-    private boolean hasTestID(int test_id)  {
+    private boolean hasTestID(int test_id) {
 
         NodeList testList = doc.getElementsByTagName("test");
         if (testList.getLength() > 0) {
-            for(int x = 0;x<testList.getLength();x++) {
+            for (int x = 0; x < testList.getLength(); x++) {
                 Element test = (Element) testList.item(x);
                 int value = Integer.parseInt(test.getAttribute("test_id"));
-                if(value == test_id) {             //Test id has been used before, so no need for adding the images to the data file.
+                if (value == test_id) {             //Test id has been used before, so no need for adding the images to the data file.
                     return true;
                 }
             }
@@ -94,29 +89,30 @@ public class TestData {
     }
 
 
-    private void addTestData(int test_id, String comment) {
+    private void addTestData(int test_id, int trials, String comment) {
         Element root = doc.getDocumentElement();
 
 
         Element test = doc.createElement("test");
         root.appendChild(test);
         test.setAttribute("test_id", String.valueOf(test_id));
+        test.setAttribute("trials", String.valueOf(trials));
         Element commentElement = doc.createElement("comment");
         Text commentValue = doc.createTextNode(comment);
         commentElement.appendChild(commentValue);
         test.appendChild(commentElement);
 
         //Adding the affective images
-        addImageToData(test,newAAT.affectiveImages,AATImage.AFFECTIVE);
-        addImageToData(test,newAAT.neutralImages,AATImage.NEUTRAL);
+        addImageToData(test, newAAT.affectiveImages, AATImage.AFFECTIVE);
+        addImageToData(test, newAAT.neutralImages, AATImage.NEUTRAL);
         FileUtils.writeDataToFile(dataFile, doc);
 
     }
 
     //Add the used images to the data file.
-    private void addImageToData(Element testElement,ArrayList<File> images, int type)  {
+    private void addImageToData(Element testElement, ArrayList<File> images, int type) {
         for (File file : images) {
-            System.out.println("Adding file to data.xml: "+file.getName());
+            System.out.println("Adding file to data.xml: " + file.getName());
             Element image = doc.createElement("image");
             testElement.appendChild(image);
             Attr fileAttr = doc.createAttribute("file");
@@ -269,32 +265,38 @@ public class TestData {
             }
         }
         if (upgrade) {
-            addTestData(doc, AAT, -1, "Old test data");
+            addTestData(doc, AAT, -1,getNoTrials(doc,-1), "Old test data");
         }
     }
 
 
-    private void addTestData(Document doc, AatObject AAT, int test_id, String comment) {
+    private void addTestData(Document doc, AatObject AAT, int test_id, int trials, String comment) {
         System.out.println("Add required test data.");
         Element root = doc.getDocumentElement();
         Element test = doc.createElement("test");
         root.appendChild(test);
         test.setAttribute("test_id", String.valueOf(test_id));
+        test.setAttribute("trials", String.valueOf(trials));
         Element commentElement = doc.createElement("comment");
         Text commentValue = doc.createTextNode(comment);
         commentElement.appendChild(commentValue);
         test.appendChild(commentElement);
 
         //Adding the affective images
-        addImageToData(doc, test, collectAllImages(doc,AATImage.AFFECTIVE), AATImage.AFFECTIVE);
-        addImageToData(doc, test, collectAllImages(doc,AATImage.NEUTRAL), AATImage.NEUTRAL);
+        addImageToData(doc, test, collectAllImages(doc, AATImage.AFFECTIVE), AATImage.AFFECTIVE);
+        addImageToData(doc, test, collectAllImages(doc, AATImage.NEUTRAL), AATImage.NEUTRAL);
+        ArrayList<File> practiceList = collectAllImages(doc,AATImage.PRACTICE);
+        if(practiceList.size()>0) {
+            addImageToData(doc, test, practiceList, AATImage.PRACTICE);
+        }
+        //    if(AAT.)
         System.out.println("Writing the changes to disk");
         FileUtils.writeDataToFile(dataFile, doc);
 
     }
 
     //Add the used images to the data file.
-    private  void addImageToData(Document doc, Element testElement, ArrayList<File> images, int type) {
+    private void addImageToData(Document doc, Element testElement, ArrayList<File> images, int type) {
         for (File file : images) {
             System.out.println("Adding file to data.xml: " + file.getName());
             Element image = doc.createElement("image");
@@ -316,7 +318,7 @@ public class TestData {
      * @param type Image type, affective, neutral or practice.
      * @return
      */
-    private  ArrayList<File> collectAllImages(Document doc, int type) {
+    private ArrayList<File> collectAllImages(Document doc, int type) {
         String imgType = "";
         ArrayList<File> result = new ArrayList<File>();
         ArrayList<String> unique = new ArrayList<String>();
@@ -336,9 +338,9 @@ public class TestData {
         for (int x = 0; x < participantsList.getLength(); x++) {
             Element participant = (Element) participantsList.item(x);
             if (participant.getAttribute("test_id").equalsIgnoreCase(("-1"))) {
-                System.out.println("Collecting images for participant "+participant.getAttribute("id"));
+                System.out.println("Collecting images for participant " + participant.getAttribute("id"));
                 NodeList imageList = participant.getElementsByTagName("image");
-                System.out.println("Found "+imageList.getLength()+" "+"images");
+                System.out.println("Found " + imageList.getLength() + " " + "images");
                 for (int i = 0; i < imageList.getLength(); i++) {
                     Element image = (Element) imageList.item(i);
                     NodeList nameList = image.getElementsByTagName("imageName");
@@ -348,7 +350,7 @@ public class TestData {
                     NodeList typeList = image.getElementsByTagName("type");
                     Node typeNode = typeList.item(0).getFirstChild();
                     String typeValue = typeNode.getNodeValue();
-                    System.out.println("Found image "+imageName+" "+typeValue);
+                    System.out.println("Found image " + imageName + " " + typeValue);
                     if (typeValue.equalsIgnoreCase(imgType)) {
                         if (!unique.contains(imageName)) {
                             result.add(new File(imageName));
@@ -364,9 +366,23 @@ public class TestData {
 
         }
         return result;
-    } 
-    
+    }
 
+    private int getNoTrials(Document doc, int test_id) {
+        int max = 0;
+        NodeList participantsList = doc.getElementsByTagName("participant");
+
+        for (int x = 0; x < participantsList.getLength(); x++) {
+            Element participant = (Element) participantsList.item(x);
+            if (participant.getAttribute("test_id").equalsIgnoreCase(("-1"))) {
+                NodeList trialList = participant.getElementsByTagName("trial");
+                if (trialList.getLength() > max) {
+                    max = trialList.getLength();
+                }
+            }
+        }
+        return max;
+    }
 
     public Document getDocument() {
         return doc;

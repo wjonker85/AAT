@@ -75,7 +75,7 @@ public class CreateConfig extends JPanel implements Observer {
     private JCheckBox inputBoxplot, inputColoredBorder, inputHasPractice, inputBuiltinPractice;
     private int pullColor, pushColor, prFillColor;
     private File workingDir = new File("");
-    private File nDir, aDir;
+    private File nDir, aDir,pDir;
     private AATModel model;
     private JoystickController joystick;
     private TestFrame testFrame;
@@ -83,10 +83,12 @@ public class CreateConfig extends JPanel implements Observer {
     private JButton prDirButton;
     private String practRepeatValue = "3";
     private JTextField inputMaxSizeP, inputImageSizeP;
-    private JTable tableA, tableN;
+    private JTable tableA, tableN,tableP;
     private Boolean newTest;
     private int test_id = 1;
     private XMLReader reader;
+    private JLabel pLabel;
+    private JScrollPane scrollPaneP;
 
 
     //regex for extension filtering
@@ -104,6 +106,7 @@ public class CreateConfig extends JPanel implements Observer {
         pattern = Pattern.compile(IMAGE_PATTERN); //create regex
         nDir = new File("");
         aDir = new File("");
+        pDir = new File("");
         newTest = true;
         reader = new XMLReader();
 
@@ -171,11 +174,17 @@ public class CreateConfig extends JPanel implements Observer {
                 "Sets the main configuration of the test");
         tabbedPane.setMnemonicAt(0, KeyEvent.VK_1);
         add(tabbedPane);
-
-        JPanel images = createImageListTable(getImages(aDir), getImages(nDir));
+        ArrayList<File> practiceImages = new ArrayList<File>();
+        if(inputPrDir.getText().length()>0) {
+           practiceImages = getImages(pDir);
+        }
+        JPanel images = createImageListTable(getImages(aDir), getImages(nDir),getImages(pDir));
+        JScrollPane contentPane = new JScrollPane(images);
+        contentPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        contentPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
         //   JPanel images = createImageListTable(getImages(new File("/home/marcel/AAT/AAT/images/Affective/")),getImages(new File("/home/marcel/AAT/AAT/images/Neutral/")));
 
-        tabbedPane.addTab("Images", images);
+        tabbedPane.addTab("Images", contentPane);
         SpringUtilities.makeCompactGrid(this,
                 2, 1, //rows, cols
                 6, 6,        //initX, initY
@@ -216,7 +225,7 @@ public class CreateConfig extends JPanel implements Observer {
     };
 
 
-    private JPanel createImageListTable(ArrayList<File> imageFilesA, ArrayList<File> imageFilesN) {
+    private JPanel createImageListTable(ArrayList<File> imageFilesA, ArrayList<File> imageFilesN, ArrayList<File> imageFilesP) {
         ArrayList<String> aFiles = reader.getIncludedFiles(aDir);  //These lists contain the files that were specified for this test.
         ArrayList<String> nFiles = reader.getIncludedFiles(nDir);
         JPanel panel = new JPanel();
@@ -309,18 +318,74 @@ public class CreateConfig extends JPanel implements Observer {
 
         panel.add(scrollPaneN, c);
 
+
+            System.out.println("Adding practice table");
+            pLabel = new JLabel("Practice Images");
+            c.fill = GridBagConstraints.HORIZONTAL;
+            c.insets = new Insets(70, 0, 0, 0);
+            c.gridx = 2;
+            c.gridy = 1;
+            panel.add(pLabel, c);
+            tableP = new JTable(new ImageTableModel(imageFilesP, nFiles));
+            scrollPaneP = new JScrollPane(tableP);
+            tableP.setFillsViewportHeight(true);
+            c.fill = GridBagConstraints.HORIZONTAL;
+            c.gridx = 2;
+            c.gridy = 2;
+            c.insets = new Insets(10, 0, 0, 0);
+            final JPopupMenu popupMenuP = new JPopupMenu();
+            JMenuItem selectAllP = new JMenuItem("Select All");
+            selectAllP.addActionListener(new ActionListener() {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    selectAll(tableP, true);
+                }
+            });
+            popupMenuP.add(selectAllP);
+            JMenuItem deselectAllP = new JMenuItem("Deselect All");
+            deselectAllP.addActionListener(new ActionListener() {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    selectAll(tableP, false);
+                }
+            });
+            popupMenuP.add(deselectAllP);
+            tableP.setComponentPopupMenu(popupMenuP);
+            panel.add(scrollPaneP, c);
+            scrollPaneP.setVisible(false);
+        pLabel.setVisible(false);
+
+
+      //  }
+
+
         return panel;
     }
 
     private void refreshTables() {
         ArrayList<File> imageFilesA = getImages(aDir);
         ArrayList<File> imageFilesN = getImages(nDir);
+
         ArrayList<String> aFiles = reader.getIncludedFiles(aDir);  //These lists contain the files that were specified for this test.
         ArrayList<String> nFiles = reader.getIncludedFiles(nDir);
+
         tableA.setModel(new ImageTableModel(imageFilesA, aFiles));
         tableN.setModel(new ImageTableModel(imageFilesN, nFiles));
+
         tableA.repaint();
         tableN.repaint();
+
+
+        if(!inputBuiltinPractice.isSelected() &&  inputHasPractice.isSelected()) {          //Add the images when a practice dir is selected
+            ArrayList<File> imageFilesP = getImages(pDir);
+            ArrayList<String> pFiles = reader.getIncludedFiles(pDir);
+            tableP.setModel(new ImageTableModel(imageFilesP, pFiles));
+            scrollPaneP.setVisible(true);
+            pLabel.setVisible(true);
+            tableP.repaint();
+        }
 
     }
 
@@ -596,6 +661,8 @@ public class CreateConfig extends JPanel implements Observer {
                 File file = getDirectory();
                 if (file != null) {
                     inputPrDir.setText(file.getName());
+                    pDir = file.getAbsoluteFile();
+                    refreshTables();
                     workingDir = file.getParentFile();
                     inputPracticeFill.setEnabled(false);
                     inputPracticeFill.setBackground(Color.lightGray);
@@ -1332,7 +1399,7 @@ public class CreateConfig extends JPanel implements Observer {
             ignored.printStackTrace();
         }
 
-       XMLWriter.writeXMLImagesList(tableA.getModel(),tableN.getModel(),aDir,nDir);
+       XMLWriter.writeXMLImagesList(tableA.getModel(),tableN.getModel(),tableP.getModel(),aDir,nDir,pDir);
     }
 
 
@@ -1478,9 +1545,9 @@ public class CreateConfig extends JPanel implements Observer {
         inputNeutralDir.setText(config.getValue("NeutralDir"));
         nDir = new File(workingDir.getAbsoluteFile() + File.separator + "images" + File.separator + inputNeutralDir.getText() + File.separator);
         //TODO eigenlijk zou dit hardcoded images niet moeten.
-        refreshTables();
+
         System.out.println(nDir.getAbsolutePath());
-        inputPrDir.setText(config.getValue("PracticeDir"));
+
         inputPullTag.setText(config.getValue("PullTag"));
         inputPushTag.setText(config.getValue("PushTag"));
         inputQuestion.setText(config.getValue("Questionnaire"));
@@ -1584,6 +1651,18 @@ public class CreateConfig extends JPanel implements Observer {
             disablePracticeAction();
         }
 
+        //Load the value for the practice images directory.
+        if(config.getValue("PracticeDir").length()>0 && inputHasPractice.isSelected() && !inputBuiltinPractice.isSelected()) {
+
+            inputPrDir.setEnabled(true);
+            inputPrDir.setForeground(Color.black);
+            inputPrDir.setText(config.getValue("PracticeDir"));
+            pDir = new File(workingDir.getAbsoluteFile() + File.separator + "images" + File.separator + inputPrDir.getText() + File.separator);
+            System.out.println("Practice directory found at "+pDir.getAbsoluteFile());
+        }
+
+        //Refresh the images tables.
+        refreshTables();
     }
 
 

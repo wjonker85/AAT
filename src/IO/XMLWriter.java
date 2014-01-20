@@ -23,7 +23,7 @@ import java.util.ArrayList;
 public class XMLWriter {
 
 
-    public static void writeXMLImagesList(TableModel modelA, TableModel modelN, File aDir, File nDir) {
+    public static void writeXMLImagesList(TableModel modelA, TableModel modelN, TableModel modelP,File aDir, File nDir, File pDir) {
         try {
             //   TableModel modelA = tableA.getModel();
             //  TableModel modelN = tableN.getModel();
@@ -87,6 +87,38 @@ public class XMLWriter {
             // StreamResult result = new StreamResult(System.out);
 
             transformer.transform(source, result);
+
+            // root elements
+            if(modelP.getRowCount()>0) {
+            doc = docBuilder.newDocument();
+            rootElement = doc.createElement("root");
+            doc.appendChild(rootElement);
+
+            for (int x = 0; x < modelP.getRowCount(); x++) {   //Retrieve the data from the table and add the checked images to the included xml file.
+
+                String file = modelP.getValueAt(x, 0).toString();
+                Boolean add = Boolean.parseBoolean(modelP.getValueAt(x, 1).toString());
+                if (add) {
+                    System.out.println("Adding practice image "+file);
+                    Element image = doc.createElement("image");
+                    rootElement.appendChild(image);
+                    Attr attr = doc.createAttribute("file");
+                    attr.setValue(file);
+                    image.setAttributeNode(attr);
+                }
+            }
+
+            // write the content into xml file
+            transformerFactory = TransformerFactory.newInstance();
+            transformer = transformerFactory.newTransformer();
+            source = new DOMSource(doc);
+            result = new StreamResult(new File(pDir.getAbsolutePath() + File.separator + "included.xml"));
+
+            // Output to console for testing
+            // StreamResult result = new StreamResult(System.out);
+
+            transformer.transform(source, result);
+            }
 
             System.out.println("File saved!");
 

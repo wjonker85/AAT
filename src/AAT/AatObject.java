@@ -89,12 +89,13 @@ public abstract class AatObject {
     //Different lists, containing the files
     public ArrayList<File> neutralImages;
     public ArrayList<File> affectiveImages;
+    public ArrayList<File> practiceImages;
     private ArrayList<AATImage> testList; //Random list that contains the push or pull images.
 
     public File practiceDir;
 
     private String pullTag = "pull", pushTag = "push";
-    private String nDir, aDir;
+    private String nDir, aDir, pDir;
 
     //Hashmaps containing color information and the optional questions
     private Hashtable<Integer, String> colorTable;    //Contains the border colors
@@ -225,14 +226,19 @@ public abstract class AatObject {
         // id = getHighestID();
         nDir = testConfig.getValue("NeutralDir");
         aDir = testConfig.getValue("AffectiveDir");
+        pDir = testConfig.getValue("PracticeDir");
         File neutralDir = new File(workingDir + File.separator +"images"+File.separator+ nDir);
         System.out.println(neutralDir);
         File affectiveDir = new File(workingDir + File.separator +"images"+File.separator+ aDir);
+        File prDir = new File(workingDir + File.separator +"images"+File.separator+ pDir);
         if (nDir.equals("") || !neutralDir.isDirectory()) {
             throw new FalseConfigException("Directory for the neutral images is not set properly");
         }
         if (aDir.equals("") || !affectiveDir.isDirectory()) {
             throw new FalseConfigException("Directory for the affective images is not set properly");
+        }
+        if(pDir.length()>0 && !prDir.isDirectory()) {
+            throw new FalseConfigException("Directory for the practice images is not set properly");
         }
         if (!imageComplete(neutralDir,affectiveDir)) {
             throw new FalseConfigException("Some of the configured images are not present");
@@ -308,10 +314,11 @@ public abstract class AatObject {
                     throw new FalseConfigException("When ColoredBorders is set to false, PracticeDir has to be defined");
                 } else {
                     practiceDir = new File(practDir);
+                    System.out.println("Practice dir: "+practDir);
                     if (!practiceDir.isDirectory()) {
                         throw new FalseConfigException("The directory for the practice images is nog properly configured");
                     }
-
+                    practiceImages = xmlReader.getIncludedFilesF(practiceDir);
                 }
             }
             //TODO: 
@@ -380,11 +387,13 @@ public abstract class AatObject {
                     }
                 } else {
                     System.out.println("Practice without colored borders");
-                    practiceDir = new File(workingDir + File.separator + practDir);
+                    practiceDir = new File(workingDir + File.separator+"images"+File.separator + practDir);
+                    System.out.println("Practice dir is set to " + practiceDir.getAbsoluteFile());
                     if (!practiceDir.isDirectory()) {
                         throw new FalseConfigException("The directory for the practice images is nog properly configured");
                     }
-                    System.out.println("Practice dir is set to " + practiceDir);
+                    practiceImages = xmlReader.getIncludedFilesF(practiceDir);
+
                 }
                 testList = createRandomPracticeList(); //TODO: Can be done nicer
                 if (testList.size() == 0) {
