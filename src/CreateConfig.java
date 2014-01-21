@@ -1455,7 +1455,9 @@ public class CreateConfig extends JPanel implements Observer {
         return "1";
         }
         else {
-            int newId = test_id++;       //Increase the old id with one.
+            int newId = test_id; //Increase the old id with one.
+            newId++;
+            System.out.println("New ID value is "+newId);
             return String.valueOf(newId);
         }
     }
@@ -1521,6 +1523,7 @@ public class CreateConfig extends JPanel implements Observer {
         if(config.getValue("ID").length()>0) {
             try {
             test_id = Integer.parseInt(config.getValue("ID"));
+                System.out.println("Test ID = "+test_id);
             }
             catch (Exception e)  {
                 System.out.println("Invalid ID value detected, resetting the value to 99999");

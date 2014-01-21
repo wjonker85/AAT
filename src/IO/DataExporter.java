@@ -264,21 +264,6 @@ public class DataExporter {
                     Element image = (Element) typeElement.getParentNode();
                     image.getParentNode().removeChild(image);
                 }
-                //  NodeList typeList = image.getElementsByTagName("type");
-                //    System.out.println("Searching practice image at "+x);
-                //    Node typeNode = typeList.item(0).getFirstChild();
-                //     String type = typeNode.getNodeValue();
-                //   System.out.println("Found "+type);
-                //     Element trial = (Element) image.getParentNode();
-
-                //    if (type.equalsIgnoreCase("practice")) {
-                //         System.out.println("Removing image at "+x);
-                //       trial.removeChild(image);
-                // image.getParentNode().removeChild(image);
-                //  trial.getParentNode().removeChild(trial);
-                //  doc.normalize();    //TODO kijken of dit nodig is.
-                //  return doc;
-                //   }
             }
             NodeList typeList2 = doc.getElementsByTagName("type");
             System.out.println("No images after" + typeList2.getLength());
@@ -464,7 +449,7 @@ public class DataExporter {
         NodeList participantList = doc.getElementsByTagName("participant");
 
         int rows = participantList.getLength() + 1;
-        System.out.println("Created table with "+rows+ " rows and "+columns+" columns");
+        System.out.println("Created table with " + rows + " rows and " + columns + " columns");
         String[][] tableData = new String[rows][columns];
         for (int x = 0; x < tableData.length; x++) {        //Fill the array with empty strings;
             for (int y = 0; y < tableData[0].length; y++) {
@@ -485,7 +470,7 @@ public class DataExporter {
             Element participant = (Element) participantList.item(x);
             tableData[x + 1][0] = participant.getAttribute("id");
             NodeList trialList = participant.getElementsByTagName("trial");
-            System.out.println("No. trials "+trialList.getLength());
+            System.out.println("No. trials " + trialList.getLength());
             for (int n = 0; n < trialList.getLength(); n++) {
                 Element trial = (Element) trialList.item(n);
                 NodeList imageList = trial.getElementsByTagName("image");
@@ -530,10 +515,10 @@ public class DataExporter {
                     Node imageNameNode = nameList.item(0).getFirstChild();
                     String imageName = imageNameNode.getNodeValue();
                     String variableName = x + "_" + imageName; //Trial nr + imageName
+                    System.out.println("Adding variable " + variableName);
                     if (!outputData.containsKey(variableName)) {
                         outputData.put(variableName, count);
                     }
-
                 }
             }
         } catch (Exception e) {
@@ -549,53 +534,40 @@ public class DataExporter {
 
     private static HashMap<String, Integer> createVariableMap(Document doc, String export_id) {
         HashMap<String, Integer> outputData = new HashMap<String, Integer>();
-        try {
-            int y = 0;    //Count the number of valid participants.
+   //     try {
+
             NodeList testList = doc.getElementsByTagName("test");
             for (int x = 0; x < testList.getLength(); x++) {
                 Element testElement = (Element) testList.item(x);
                 String test_id = testElement.getAttribute("test_id");
+                System.out.println("Test ID "+test_id+" compare "+export_id);
+                int trials = Integer.parseInt(testElement.getAttribute("trials"));
+                System.out.println("No Trials "+trials);
                 if (test_id.equalsIgnoreCase(export_id)) {
-                    NodeList imageList = doc.getElementsByTagName("image");
-                    for (int i = 0; i < imageList.getLength(); i++) {
-                        Element image = (Element) imageList.item(i);
-                        int count = i + (y * imageList.getLength());
-                        String variableName = y + "_" + createVariableName(image);
-                        System.out.println("Adding variable "+variableName+" at position "+count);
-                        outputData.put(variableName, count);
+                    for (int y = 0; y < trials; y++) {
+                        NodeList imageList = testElement.getElementsByTagName("image");
+                        System.out.println("No. images in the test: "+imageList.getLength());
+                        for (int i = 0; i < imageList.getLength(); i++) {
+                            Element image = (Element) imageList.item(i);
+
+                            int count = i + (y * imageList.getLength());
+
+                            String variableName = y + "_" + createVariableName(image);
+                            System.out.println("Adding variable " + variableName + " at position " + count);
+                            outputData.put(variableName, count);
+                        }
                     }
-                    y++;
                 }
             }
-            //         Element firstParticipant = (Element) participantsList.item(0);
 
-            //       NodeList trialList = firstParticipant.getElementsByTagName("trial");
-            //     Element firstTrial = (Element) trialList.item(0);
-            //    NodeList imageList = firstTrial.getElementsByTagName("image");
-            //    Element firstImage = (Element) imageList.item(0);
-            //    NodeList typeList = firstImage.getElementsByTagName("type");
-            //   Node type = typeList.item(0).getFirstChild();
-            //   if(type.getNodeValue().equalsIgnoreCase("practice"))    { //use next trial in list
-            //       firstTrial = (Element) trialList.item(1);
-            //       imageList = firstTrial.getElementsByTagName("image");
-            //   }
-            //     for (int x = 0; x < trialList.getLength(); x++) {         //First collect the variable names
-            //         Element trial = (Element) trialList.item(x);
-            //         NodeList imageList = trial.getElementsByTagName("image");
-            //         for (int i = 0; i < imageList.getLength(); i++) {
-            //             Element image = (Element) imageList.item(i);
-            //             int count = i + (x * imageList.getLength());
-            //             String variableName = x + "_" + createVariableName(image);
-            //             outputData.put(variableName, count);
-            //         }
-            //   }
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(null,
-                    "Problem exporting measures, possible that all the measures contain too much mistakes",
-                    "Configuration error",
-                    JOptionPane.ERROR_MESSAGE);
-            System.out.println("Problem exporting measures, possible that all the measures contain too much mistakes");
-        }
+      //  } catch (Exception e) {
+        //    JOptionPane.showMessageDialog(null,
+         //           "Problem exporting measures, possible that all the measures contain too much mistakes",
+         //           "Configuration error",
+         //           JOptionPane.ERROR_MESSAGE);
+         // System.out.println(e.getMessage()+"\n"+e.getStackTrace());
+        //    System.out.println("Problem exporting measures, possible that all the measures contain too much mistakes");
+    //    }
         return outputData;
     }
 
@@ -609,8 +581,11 @@ public class DataExporter {
         return newMap;
     }
 
+
+    //TODO dit moet nog aangepast worden zodat de juiste variabele naam gemaakt kan worden.
     private static String createVariableName(Element image) {
         NodeList directionList = image.getElementsByTagName("direction");
+          System.out.println("Directions "+directionList.getLength());
         Node direction = directionList.item(0).getFirstChild();
         NodeList typeList = image.getElementsByTagName("type");
         Node type = typeList.item(0).getFirstChild();

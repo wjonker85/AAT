@@ -139,6 +139,7 @@ public abstract class AatObject {
      */
     public AatObject(File config) throws FalseConfigException {
 
+        practiceImages = new ArrayList<File>();
         Pattern hexPattern = Pattern.compile(HEX_PATTERN);
         testConfig = new TestConfig(config);
         String workingDir = config.getParentFile().getAbsolutePath();

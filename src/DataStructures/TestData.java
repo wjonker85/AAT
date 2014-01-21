@@ -29,6 +29,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Objects;
 
 /**
  * Created with IntelliJ IDEA.
@@ -58,12 +59,12 @@ public class TestData {
             checkAndFixOldData(dataFile, doc, newAAT);
             if (!hasTestID(newAAT.getTest_id())) {
                 System.out.println("Test id not present in the data file, adding required test data to the data file");
-                addTestData(newAAT.getTest_id(), newAAT.trialSize, "testje2");  //Add the current test_id and used image files to the data.xml file.
+                addTestData(newAAT.getTest_id(), newAAT.trialSize, newAAT.getPullTag(), newAAT.getPushTag(), "Created on "); //TODO datum toevoegen //Add the current test_id and used image files to the data.xml file.
             }
         } else {
             createXMLDOC();
             System.out.println("New data file created, adding test data");
-            addTestData(newAAT.getTest_id(), newAAT.trialSize, "testje");
+            addTestData(newAAT.getTest_id(), newAAT.trialSize, newAAT.getPullTag(), newAAT.getPushTag(), "Created on ");
         }
         getHighestID();
     }
@@ -89,7 +90,7 @@ public class TestData {
     }
 
 
-    private void addTestData(int test_id, int trials, String comment) {
+    private void addTestData(int test_id, int trials, String pullTag, String pushTag, String comment) {
         Element root = doc.getDocumentElement();
 
 
@@ -97,6 +98,8 @@ public class TestData {
         root.appendChild(test);
         test.setAttribute("test_id", String.valueOf(test_id));
         test.setAttribute("trials", String.valueOf(trials));
+        test.setAttribute("pullTag", pullTag);
+        test.setAttribute("pushTag", pushTag);
         Element commentElement = doc.createElement("comment");
         Text commentValue = doc.createTextNode(comment);
         commentElement.appendChild(commentValue);
@@ -105,6 +108,18 @@ public class TestData {
         //Adding the affective images
         addImageToData(test, newAAT.affectiveImages, AATImage.AFFECTIVE);
         addImageToData(test, newAAT.neutralImages, AATImage.NEUTRAL);
+
+        if (newAAT.practiceImages.size() > 0) {
+            addImageToData(test, newAAT.practiceImages, AATImage.PRACTICE);
+        } else if (newAAT.hasPractice()) {      //Add the practice images.
+            ArrayList<File> practiceImages = new ArrayList<File>();
+            for (int x = 0; x < newAAT.practiceRepeat * 2; x++) {
+                //Create a list with the used practice images.
+                String image = "practice_" + x;
+                practiceImages.add(new File(image));
+            }
+            addImageToData(test, practiceImages, AATImage.PRACTICE);
+        }
         FileUtils.writeDataToFile(dataFile, doc);
 
     }
@@ -190,6 +205,7 @@ public class TestData {
         HashMap<String, String> questionnaire = newParticipant.getQuestionnaire();
         participant.setAttribute("id", String.valueOf(newParticipant.getId()));
         participant.setAttribute("test_id", String.valueOf(newParticipant.getTestID()));
+
         // child.setAttribute("name", "value");
         root.appendChild(participant);
         if (questionnaire != null) {
@@ -265,18 +281,114 @@ public class TestData {
             }
         }
         if (upgrade) {
-            addTestData(doc, AAT, -1,getNoTrials(doc,-1), "Old test data");
+
+            HashMap<String,imageObject> tagsMap = findTags(doc);
+            //First find the two most used tags.
+        imageObject largest = new imageObject();
+        imageObject second = new imageObject();
+           int count = 0;
+           for(String tag : tagsMap.keySet()) {
+               if(tagsMap.get(tag).count >count) {
+                   largest = tagsMap.get(tag);
+                   count = largest.count;
+               }
+           }
+         tagsMap.remove(largest.tag);
+        System.out.println("Largest is set to "+largest.tag);
+        double largestAvg = (double) largest.time / (double) largest.count;
+
+        count = 0;
+        for(String tag : tagsMap.keySet()) {
+            if(tagsMap.get(tag).count >count) {
+                second = tagsMap.get(tag);
+                count = largest.count;
+            }
+        }
+        System.out.println("Second is set to "+second.tag);
+        double secondAvg = (double) second.time / (double) second.count;
+
+        System.out.println("Largest "+largestAvg+" Second "+ secondAvg);
+            String pushTag = largest.tag;
+            String pullTag = second.tag;
+            if(largestAvg > secondAvg) {
+                pushTag = second.tag;
+                pullTag = largest.tag;
+            }
+            System.out.println("Pull tag set to: "+pullTag+" Push tag set to: "+pushTag);
+            addTestData(doc, AAT, -1, pullTag, pushTag, getNoTrials(doc, -1), "Old test data");
         }
     }
 
 
-    private void addTestData(Document doc, AatObject AAT, int test_id, int trials, String comment) {
+    private HashMap<String, imageObject> findTags(Document doc) {
+        HashMap<String,imageObject> result = new HashMap<String, imageObject>();
+
+        NodeList participants = doc.getElementsByTagName("participant");
+
+        for (int y = 0; y < participants.getLength(); y++) {
+            Element participant = (Element) participants.item(y);
+            String test_id = participant.getAttribute("test_id");
+            if (test_id.equalsIgnoreCase("-1")) {
+                NodeList imageList = participant.getElementsByTagName("image");
+                System.out.println("No. images "+imageList.getLength());
+                for (int i = 0; i < imageList.getLength(); i++) {
+                    Element image = (Element) imageList.item(i);
+                    NodeList directions = image.getElementsByTagName("direction");
+                    System.out.println("Directions "+directions.getLength());
+                    Node direction = directions.item(0).getFirstChild();
+                    String tag = direction.getNodeValue();
+                    System.out.println("tag "+tag);
+                    NodeList rTimes = image.getElementsByTagName("reactionTime");
+                    Node rtime = rTimes.item(0).getFirstChild();
+                    int time = Integer.parseInt(rtime.getNodeValue());
+                    System.out.println("tag "+tag+" "+time);
+                    if(!result.containsKey(tag)) {
+                        result.put(tag,new imageObject(tag,time,1));
+                    }
+                    else {
+                        result.get(tag).increaseCount();
+                        result.get(tag).addReactionTime(time);
+                    }
+                }
+
+            }
+        }
+        return result;
+    }
+
+    private class imageObject {
+
+        public imageObject() {}
+
+        public imageObject(String tag,int time,int count) {
+            this.tag = tag;
+            this.time = time;
+            this.count = count;
+        }
+
+        public void increaseCount() {
+            count++;
+        }
+
+        public void addReactionTime(int time) {
+            this.time = this.time  +time;
+        }
+
+        public int time;
+        public String tag;
+        public int count;
+    }
+
+
+    private void addTestData(Document doc, AatObject AAT, int test_id, String pullTag, String pushTag, int trials, String comment) {
         System.out.println("Add required test data.");
         Element root = doc.getDocumentElement();
         Element test = doc.createElement("test");
         root.appendChild(test);
         test.setAttribute("test_id", String.valueOf(test_id));
         test.setAttribute("trials", String.valueOf(trials));
+        test.setAttribute("pullTag", pullTag);
+        test.setAttribute("pushTag", pushTag);
         Element commentElement = doc.createElement("comment");
         Text commentValue = doc.createTextNode(comment);
         commentElement.appendChild(commentValue);
@@ -285,8 +397,8 @@ public class TestData {
         //Adding the affective images
         addImageToData(doc, test, collectAllImages(doc, AATImage.AFFECTIVE), AATImage.AFFECTIVE);
         addImageToData(doc, test, collectAllImages(doc, AATImage.NEUTRAL), AATImage.NEUTRAL);
-        ArrayList<File> practiceList = collectAllImages(doc,AATImage.PRACTICE);
-        if(practiceList.size()>0) {
+        ArrayList<File> practiceList = collectAllImages(doc, AATImage.PRACTICE);
+        if (practiceList.size() > 0) {
             addImageToData(doc, test, practiceList, AATImage.PRACTICE);
         }
         //    if(AAT.)

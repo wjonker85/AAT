@@ -197,8 +197,9 @@ public class AAT_Main extends JFrame implements Observer {
                     testRevision.setVisible(true);
                     testRevision.requestFocus();
                 } else {                 //Data from just one test.
-                    ExportDataDialog export = new ExportDataDialog(model, model.getTest().getTest_id());
-                    export.setVisible(true);
+                      model.setExport_id(model.getTest().getTest_id());
+                 //   ExportDataDialog export = new ExportDataDialog(model, model.getTest().getTest_id());
+                 //   export.setVisible(true);
                 }
             }
         });
