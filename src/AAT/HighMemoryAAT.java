@@ -95,10 +95,10 @@ public class HighMemoryAAT extends AatObject {
 
             int i = 0;
             for (int x = 0; x < size; x++) {
-                AATImage pull = new AATImage(AATImage.PULL, c, i, this);
+                AATImage pull = new AATImage(AATImage.PULL, c, x, this);
                 list.add(pull);
                 i++;
-                AATImage push = new AATImage(AATImage.PUSH, c, i, this);
+                AATImage push = new AATImage(AATImage.PUSH, c, x, this);
                 list.add(push);
                 i++;
             }

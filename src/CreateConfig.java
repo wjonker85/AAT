@@ -16,6 +16,8 @@
  */
 
 import AAT.AatObject;
+import AAT.Util.ExtensionFileFilter;
+import AAT.Util.FileUtils;
 import AAT.Util.SpringUtilities;
 import AAT.Util.TitledSeparator;
 import Configuration.TestConfig;
@@ -23,27 +25,15 @@ import Controller.JoystickController;
 import IO.XMLReader;
 import IO.XMLWriter;
 import Model.AATModel;
-import org.w3c.dom.Attr;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import views.TestFrame;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
+import java.awt.event.*;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -75,7 +65,7 @@ public class CreateConfig extends JPanel implements Observer {
     private JCheckBox inputBoxplot, inputColoredBorder, inputHasPractice, inputBuiltinPractice;
     private int pullColor, pushColor, prFillColor;
     private File workingDir = new File("");
-    private File nDir, aDir,pDir;
+    private File nDir, aDir, pDir, currentConfig;
     private AATModel model;
     private JoystickController joystick;
     private TestFrame testFrame;
@@ -83,7 +73,7 @@ public class CreateConfig extends JPanel implements Observer {
     private JButton prDirButton;
     private String practRepeatValue = "3";
     private JTextField inputMaxSizeP, inputImageSizeP;
-    private JTable tableA, tableN,tableP;
+    private JTable tableA, tableN, tableP;
     private Boolean newTest;
     private int test_id = 1;
     private XMLReader reader;
@@ -107,33 +97,66 @@ public class CreateConfig extends JPanel implements Observer {
         nDir = new File("");
         aDir = new File("");
         pDir = new File("");
+        currentConfig = new File("");
         newTest = true;
         reader = new XMLReader();
 
         JToolBar toolbar = new JToolBar("Toolbar", JToolBar.HORIZONTAL);
+        final JButton newButton = new JButton(new ImageIcon("document-new.png"));
+        newButton.setToolTipText("Create a new AAT Config file");
+        newButton.setPreferredSize(new Dimension(48, 48));
+
+
         JButton openButton = new JButton(new ImageIcon("document-open.png"));
         openButton.setToolTipText("Open a AAT Config file");
         openButton.setPreferredSize(new Dimension(48, 48));
-        openButton.addActionListener(new ActionListener() {
+
+        final JButton saveAsButton = new JButton(new ImageIcon("document-saveAs.png"));
+        saveAsButton.setPreferredSize(new Dimension(48, 48));
+        saveAsButton.setToolTipText("Save AAT Config file as ...");
+        saveAsButton.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                File file = ConfigOpenDialog();
+            public void actionPerformed(ActionEvent e) {
+                File file = fileSaveDialog("AATConfig");
                 if (file != null) {
+                    writeToFile(file);
+                    currentConfig = file;
                     workingDir = file.getParentFile();
-                    LoadConfig(file);
+                    JOptionPane.showMessageDialog(null,
+                            "AAT Config file saved.");
                 }
             }
         });
-        JButton saveButton = new JButton(new ImageIcon("document-save.png"));
+
+        saveAsButton.setEnabled(false);
+
+        final JButton saveButton = new JButton(new ImageIcon("document-save.png"));
         saveButton.setPreferredSize(new Dimension(48, 48));
         saveButton.setToolTipText("Save AAT Config file");
         saveButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                writeToFile(fileSaveDialog("AATConfig"));
+                if (currentConfig.exists()) {
+                    writeToFile(currentConfig);
+                    JOptionPane.showMessageDialog(null,
+                            "AAT Config file saved.");
+                } else {
+                    File file = fileSaveDialog("AATConfig");
+                    if (file != null) {
+                        writeToFile(file);
+                        currentConfig = file;
+                        workingDir = file.getParentFile();
+                        JOptionPane.showMessageDialog(null,
+                                "AAT Config file saved.");
+                    }
+
+                }
             }
         });
-        JButton tryButton = new JButton(new ImageIcon("playButton48.png"));
+
+        saveButton.setEnabled(false);
+
+        final JButton tryButton = new JButton(new ImageIcon("playButton48.png"));
         tryButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
@@ -163,22 +186,33 @@ public class CreateConfig extends JPanel implements Observer {
         });
         tryButton.setToolTipText("Try the current configuration");
         tryButton.setPreferredSize(new Dimension(48, 48));
+        tryButton.setEnabled(false);
+
+
+
+
+
+        toolbar.add(newButton);
         toolbar.add(openButton);
+        toolbar.add(saveAsButton);
         toolbar.add(saveButton);
         toolbar.add(tryButton);
         this.add(toolbar);
         JTabbedPane tabbedPane = new JTabbedPane();
         ImageIcon icon = null;
-        JScrollPane scrollPane = new JScrollPane(createMainPanel());
+        final JPanel mainPanel = createMainPanel();
+        mainPanel.setEnabled(false);
+        mainPanel.setVisible(false);
+        JScrollPane scrollPane = new JScrollPane(mainPanel);
         tabbedPane.addTab("AAT configuration", icon, scrollPane,
                 "Sets the main configuration of the test");
         tabbedPane.setMnemonicAt(0, KeyEvent.VK_1);
         add(tabbedPane);
         ArrayList<File> practiceImages = new ArrayList<File>();
-        if(inputPrDir.getText().length()>0) {
-           practiceImages = getImages(pDir);
+        if (inputPrDir.getText().length() > 0) {
+            practiceImages = getImages(pDir);
         }
-        JPanel images = createImageListTable(getImages(aDir), getImages(nDir),getImages(pDir));
+        JPanel images = createImageListTable(getImages(aDir), getImages(nDir), getImages(pDir));
         JScrollPane contentPane = new JScrollPane(images);
         contentPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         contentPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
@@ -189,6 +223,42 @@ public class CreateConfig extends JPanel implements Observer {
                 2, 1, //rows, cols
                 6, 6,        //initX, initY
                 6, 6);       //xPad, yPad
+
+        openButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                File file = ConfigOpenDialog();
+                if (file != null) {
+                    workingDir = file.getParentFile();
+                    LoadConfig(file);
+                    currentConfig = file;
+                    saveAsButton.setEnabled(true);
+                    saveButton.setEnabled(true);
+                    tryButton.setEnabled(true);
+                    mainPanel.setEnabled(true);
+                    mainPanel.setVisible(true); //Show and enable all the buttons and options.
+                    repaint();
+                }
+            }
+        });
+
+
+        newButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                File file = fileSaveDialog("AATConfig");
+                if (file != null) {
+                    writeToFile(file);
+                    currentConfig = file;
+                    workingDir = file.getParentFile();
+                    saveAsButton.setEnabled(true);
+                    saveButton.setEnabled(true);
+                    tryButton.setEnabled(true);
+                    mainPanel.setEnabled(true);
+                    mainPanel.setVisible(true); //Show and enable all the buttons and options.
+                }
+            }
+        });
     }
 
     private Observer getInstance() {
@@ -280,6 +350,7 @@ public class CreateConfig extends JPanel implements Observer {
         });
         popupMenuA.add(deselectAllA);
         tableA.setComponentPopupMenu(popupMenuA);
+        setTableColumnWidths(tableA);
         panel.add(scrollPaneA, c);
 
         JLabel nLabel = new JLabel("Neutral Images");
@@ -289,6 +360,7 @@ public class CreateConfig extends JPanel implements Observer {
         c.gridy = 1;
         panel.add(nLabel, c);
         tableN = new JTable(new ImageTableModel(imageFilesN, nFiles));
+        setTableColumnWidths(tableN);
         JScrollPane scrollPaneN = new JScrollPane(tableN);
         tableN.setFillsViewportHeight(true);
         c.fill = GridBagConstraints.HORIZONTAL;
@@ -319,49 +391,63 @@ public class CreateConfig extends JPanel implements Observer {
         panel.add(scrollPaneN, c);
 
 
-            System.out.println("Adding practice table");
-            pLabel = new JLabel("Practice Images");
-            c.fill = GridBagConstraints.HORIZONTAL;
-            c.insets = new Insets(70, 0, 0, 0);
-            c.gridx = 2;
-            c.gridy = 1;
-            panel.add(pLabel, c);
-            tableP = new JTable(new ImageTableModel(imageFilesP, nFiles));
-            scrollPaneP = new JScrollPane(tableP);
-            tableP.setFillsViewportHeight(true);
-            c.fill = GridBagConstraints.HORIZONTAL;
-            c.gridx = 2;
-            c.gridy = 2;
-            c.insets = new Insets(10, 0, 0, 0);
-            final JPopupMenu popupMenuP = new JPopupMenu();
-            JMenuItem selectAllP = new JMenuItem("Select All");
-            selectAllP.addActionListener(new ActionListener() {
+        System.out.println("Adding practice table");
+        pLabel = new JLabel("Practice Images");
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.insets = new Insets(70, 0, 0, 0);
+        c.gridx = 2;
+        c.gridy = 1;
+        panel.add(pLabel, c);
+        tableP = new JTable(new ImageTableModel(imageFilesP, nFiles));
+        setTableColumnWidths(tableP);
+        scrollPaneP = new JScrollPane(tableP);
+        tableP.setFillsViewportHeight(true);
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.gridx = 2;
+        c.gridy = 2;
+        c.insets = new Insets(10, 0, 0, 0);
+        final JPopupMenu popupMenuP = new JPopupMenu();
+        JMenuItem selectAllP = new JMenuItem("Select All");
+        selectAllP.addActionListener(new ActionListener() {
 
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    selectAll(tableP, true);
-                }
-            });
-            popupMenuP.add(selectAllP);
-            JMenuItem deselectAllP = new JMenuItem("Deselect All");
-            deselectAllP.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                selectAll(tableP, true);
+            }
+        });
+        popupMenuP.add(selectAllP);
+        JMenuItem deselectAllP = new JMenuItem("Deselect All");
+        deselectAllP.addActionListener(new ActionListener() {
 
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    selectAll(tableP, false);
-                }
-            });
-            popupMenuP.add(deselectAllP);
-            tableP.setComponentPopupMenu(popupMenuP);
-            panel.add(scrollPaneP, c);
-            scrollPaneP.setVisible(false);
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                selectAll(tableP, false);
+            }
+        });
+        popupMenuP.add(deselectAllP);
+        tableP.setComponentPopupMenu(popupMenuP);
+        panel.add(scrollPaneP, c);
+        scrollPaneP.setVisible(false);
         pLabel.setVisible(false);
 
 
-      //  }
+        //  }
 
 
         return panel;
+    }
+
+
+    private void setTableColumnWidths(JTable table) {
+        TableColumn column = null;
+        for (int i = 0; i < 2; i++) {
+            column = table.getColumnModel().getColumn(i);
+            if (i == 1) {
+                column.setPreferredWidth(300); //third column is bigger
+            } else {
+                column.setPreferredWidth(20);
+            }
+        }
     }
 
     private void refreshTables() {
@@ -378,7 +464,7 @@ public class CreateConfig extends JPanel implements Observer {
         tableN.repaint();
 
 
-        if(!inputBuiltinPractice.isSelected() &&  inputHasPractice.isSelected()) {          //Add the images when a practice dir is selected
+        if (!inputBuiltinPractice.isSelected() && inputHasPractice.isSelected()) {          //Add the images when a practice dir is selected
             ArrayList<File> imageFilesP = getImages(pDir);
             ArrayList<String> pFiles = reader.getIncludedFiles(pDir);
             tableP.setModel(new ImageTableModel(imageFilesP, pFiles));
@@ -507,10 +593,14 @@ public class CreateConfig extends JPanel implements Observer {
             public void actionPerformed(ActionEvent actionEvent) {
                 File file = getDirectory();
                 if (file != null) {
-                    inputAffDir.setText(file.getName());
                     aDir = file.getAbsoluteFile();
+                    try {
+                        inputAffDir.setText(FileUtils.getRelativePath(workingDir, aDir));
+                    } catch (IOException e) {
+                        inputAffDir.setText(file.getName());
+                    }
+
                     refreshTables();
-                    workingDir = file.getParentFile();
                 } else {
                     inputAffDir.setText("");
                 }
@@ -523,12 +613,23 @@ public class CreateConfig extends JPanel implements Observer {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 File file = getDirectory();
-                if (file != null) {
-                    inputNeutralDir.setText(file.getName());
-                    nDir = file.getAbsoluteFile();
-                    refreshTables();
-                    workingDir = file.getParentFile();
 
+                if (file != null) {
+                    nDir = file.getAbsoluteFile();
+                    try {
+                        inputNeutralDir.setText(FileUtils.getRelativePath(workingDir, nDir));
+
+                    } catch (IOException e) {
+                        System.out.println(e.getMessage());
+                        inputNeutralDir.setText(file.getName());
+                    }
+
+
+                    System.out.println("Working dir: " + workingDir.getAbsoluteFile());
+                    System.out.println("neutral dir: " + nDir.getAbsoluteFile());
+                    System.out.println("Relative path: ");
+
+                    refreshTables();
                 } else {
                     inputNeutralDir.setText("");
                 }
@@ -551,7 +652,6 @@ public class CreateConfig extends JPanel implements Observer {
                 File file = fileOpenDialog();
                 if (file != null) {
                     inputLangFile.setText(file.getName());
-                    workingDir = file.getParentFile();
                 } else {
                     inputLangFile.setText("");
                 }
@@ -660,10 +760,13 @@ public class CreateConfig extends JPanel implements Observer {
             public void actionPerformed(ActionEvent actionEvent) {
                 File file = getDirectory();
                 if (file != null) {
-                    inputPrDir.setText(file.getName());
                     pDir = file.getAbsoluteFile();
+                    try {
+                        inputPrDir.setText(FileUtils.getRelativePath(workingDir, pDir));
+                    } catch (IOException e) {
+                        inputPrDir.setText(file.getName());
+                    }
                     refreshTables();
-                    workingDir = file.getParentFile();
                     inputPracticeFill.setEnabled(false);
                     inputPracticeFill.setBackground(Color.lightGray);
                 } else {
@@ -846,7 +949,6 @@ public class CreateConfig extends JPanel implements Observer {
                 File file = fileOpenDialog();
                 if (file != null) {
                     inputQuestion.setText(file.getName());
-                    workingDir = file.getParentFile();
                 } else {
                     inputQuestion.setText("");
                 }
@@ -864,12 +966,22 @@ public class CreateConfig extends JPanel implements Observer {
 
         panel.add(Box.createVerticalStrut(10));
         panel.add(Box.createVerticalStrut(10));
-        panel.add(new TitledSeparator("Ratio options (Only change when needed)", 0));
+        panel.add(new TitledSeparator("Advanced Options", 0));
         panel.add(new TitledSeparator("", -1));
+        JLabel advancedOptions = new JLabel("<html>Do you want to enable the advanced options? <br> WARNING: Only change these options when you really have to. <br>" +
+                "For example: creating tests with custom ratio's or when you are having performance problems.<br>" +
+                "Wrong settings can cause corrupt data!");
+        JCheckBox enableAdvanced = new JCheckBox("Enable advanced options");
+        enableAdvanced.setSelected(false);
+        panel.add(advancedOptions);
+        panel.add(enableAdvanced);
+
+
         JPanel affectRatioP = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JPanel neutralRatioP = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JPanel testRatioPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JLabel testRatioL = new JLabel("Set the ratio affect : neutral images");
+
         JLabel affectiveRatioL = new JLabel("Set the pull:push ratio for the affect images");
         JLabel neutralRatioL = new JLabel("Set the pull:push ratio for the neutral images");
         JLabel trialSizeL = new JLabel("Set the number of images in a trial to a custom value");
@@ -913,21 +1025,47 @@ public class CreateConfig extends JPanel implements Observer {
         inputTrialSize.setPreferredSize(new Dimension(50, 20));
         trialsizeP.add(inputTrialSize);
         trialsizeP.add(Box.createHorizontalBox());
-        panel.add(testRatioL);
-        panel.add(testRatioPanel);
-        panel.add(affectiveRatioL);
-        panel.add(affectRatioP);
-        panel.add(neutralRatioL);
-        panel.add(neutralRatioP);
-        panel.add(trialSizeL);
-        panel.add(trialsizeP);
 
-        panel.add(Box.createVerticalStrut(10));
-        panel.add(Box.createVerticalStrut(10));
-        panel.add(new TitledSeparator("Performance options (Only change when needed)", 0));
-        panel.add(new TitledSeparator("", -1));
-        panel.add(Box.createVerticalStrut(5));
-        panel.add(Box.createVerticalStrut(5));
+        final JPanel ratioPanelL = new JPanel(new SpringLayout());
+        ratioPanelL.setEnabled(false);
+        ratioPanelL.setVisible(false);
+        final JPanel ratioPanelR = new JPanel(new SpringLayout());
+        ratioPanelR.setEnabled(false);
+        ratioPanelR.setVisible(false);
+        //    ratioPanelL.add(Box.createVerticalStrut(10));
+        //    ratioPanelR.add(Box.createVerticalStrut(10));
+        ratioPanelL.add(new TitledSeparator("Ratio options (Only change when needed)", 0));
+        ratioPanelR.add(new TitledSeparator("", -1));
+        ratioPanelL.add(testRatioL);
+        ratioPanelR.add(testRatioPanel);
+        ratioPanelL.add(affectiveRatioL);
+        ratioPanelR.add(affectRatioP);
+        ratioPanelL.add(neutralRatioL);
+        ratioPanelR.add(neutralRatioP);
+        ratioPanelL.add(trialSizeL);
+        ratioPanelR.add(trialsizeP);
+        panel.add(ratioPanelL);
+        panel.add(ratioPanelR);
+
+        SpringUtilities.makeCompactGrid(ratioPanelL,
+                5, 1, //rows, cols
+                6, 6,        //initX, initY
+                6, 16);       //xPad, yPad
+
+        SpringUtilities.makeCompactGrid(ratioPanelR,
+                5, 1, //rows, cols
+                6, 10,        //initX, initY
+                6, 6);       //xPad, yPad
+
+
+        final JPanel perfPanelL = new JPanel(new SpringLayout());
+        final JPanel perfPanelR = new JPanel(new SpringLayout());
+        perfPanelL.add(Box.createVerticalStrut(10));
+        perfPanelR.add(Box.createVerticalStrut(10));
+        perfPanelL.add(new TitledSeparator("Performance options (Only change when needed)", 0));
+        perfPanelR.add(new TitledSeparator("", -1));
+        perfPanelL.add(Box.createVerticalStrut(5));
+        perfPanelR.add(Box.createVerticalStrut(5));
         inputStepSize = new JFormattedTextField(NumberFormat.getInstance());
         inputStepSize.setText("31");
         inputStepSize.setPreferredSize(new Dimension(50, 15));
@@ -939,20 +1077,19 @@ public class CreateConfig extends JPanel implements Observer {
         JLabel stepL = new JLabel("<html>Change in how many steps the image will be resized, has to be an odd number" +
                 "<br>A higher value means the image will be resized more smoothly<br>" +
                 "Warning: When set too high, resizing may get too slow</html", JLabel.LEFT);
-        JLabel dataStepL = new JLabel("<html>Change the accuracy of the joystick, When set to a larger number, errors are faster detected. <br>" +
-                "This also needs to be an odd number. <br>" +
+        JLabel dataStepL = new JLabel("<html>Change the accuracy of the joystick (Odd number), When set to a larger number, errors are faster detected. <br>" +
                 "Warning: When set too high even very small movements of the joystick are recorded as error</html>", JLabel.LEFT);
 
 
-        panel.add(stepL);
+        perfPanelL.add(stepL);
         stepSizeP.add(inputStepSize);
         stepSizeP.add(Box.createHorizontalBox());
-        panel.add(stepSizeP);
-        panel.add(dataStepL);
+        perfPanelR.add(stepSizeP);
+        perfPanelL.add(dataStepL);
         //     panel.setMaximumSize(new Dimension(500, 20));
         dataStepP.add(inputDataStepSize);
         dataStepP.add(Box.createHorizontalBox());
-        panel.add(dataStepP);
+        perfPanelR.add(dataStepP);
 
         JLabel imgSizeL = new JLabel("<html>Set the size the image will have when first shown on the screen<br>" +
                 "Value is percentage of the height of your screen</html>");
@@ -960,10 +1097,10 @@ public class CreateConfig extends JPanel implements Observer {
         inputImageSizeP = new JFormattedTextField(NumberFormat.getIntegerInstance());
         inputImageSizeP.setText("50");
         inputImageSizeP.setPreferredSize(new Dimension(50, 20));
-        panel.add(imgSizeL);
+        perfPanelL.add(imgSizeL);
         imgSizeP.add(inputImageSizeP);
         imgSizeP.add(Box.createHorizontalBox());
-        panel.add(imgSizeP);
+        perfPanelR.add(imgSizeP);
 
         JLabel maxSizeL = new JLabel("<html>Set the maximum size the image can be. Value is percentage of the height of your screen.<br>" +
                 "This value can be set higher than 100%, the image will then be resized larger than your screen height</html>");
@@ -973,15 +1110,64 @@ public class CreateConfig extends JPanel implements Observer {
         inputMaxSizeP.setPreferredSize(new Dimension(50, 20));
         maxSizeP.add(inputMaxSizeP);
         maxSizeP.add(Box.createHorizontalBox());
-        panel.add(maxSizeL);
-        panel.add(maxSizeP);
+        perfPanelL.add(maxSizeL);
+        perfPanelR.add(maxSizeP);
+
+        panel.add(perfPanelL);
+        panel.add(perfPanelR);
+
+        //Disable these panels at the start, so students don't become tempted to change these options.
+        perfPanelL.setEnabled(false);
+        perfPanelL.setVisible(false);
+        perfPanelR.setEnabled(false);
+        perfPanelR.setVisible(false);
+
+        SpringUtilities.makeCompactGrid(perfPanelL,
+                7, 1, //rows, cols
+                6, 6,        //initX, initY
+                6, 10);       //xPad, yPad
+
+        SpringUtilities.makeCompactGrid(perfPanelR,
+                7, 1, //rows, cols
+                6, 6,        //initX, initY
+                6, 16);       //xPad, yPad
+
 
         enableBuiltinPracticeAction(); //Enable this by default
         //   scrollPane.add(this.createRatiosPanel());
         //   scrollPane.add(this.createPerformancePanel());
 
+
+        //   return scrollPane;
+
+        //Toggle the visibility of the advanced options.
+        enableAdvanced.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent itemEvent) {
+                if (itemEvent.getStateChange() == ItemEvent.SELECTED) {
+                    ratioPanelL.setEnabled(true);
+                    ratioPanelL.setVisible(true);
+                    ratioPanelR.setEnabled(true);
+                    ratioPanelR.setVisible(true);
+                    perfPanelL.setEnabled(true);
+                    perfPanelL.setVisible(true);
+                    perfPanelR.setEnabled(true);
+                    perfPanelR.setVisible(true);
+                } else if (itemEvent.getStateChange() == ItemEvent.DESELECTED) {
+                    ratioPanelL.setEnabled(false);
+                    ratioPanelL.setVisible(false);
+                    ratioPanelR.setEnabled(false);
+                    ratioPanelR.setVisible(false);
+                    perfPanelL.setEnabled(false);
+                    perfPanelL.setVisible(false);
+                    perfPanelR.setEnabled(false);
+                    perfPanelR.setVisible(false);
+                }
+            }
+        });
+
         SpringUtilities.makeCompactGrid(panel,
-                47, 2, //rows, cols
+                39, 2, //rows, cols
                 6, 6,        //initX, initY
                 6, 6);       //xPad, yPad
         //   return scrollPane;
@@ -1399,7 +1585,7 @@ public class CreateConfig extends JPanel implements Observer {
             ignored.printStackTrace();
         }
 
-       XMLWriter.writeXMLImagesList(tableA.getModel(),tableN.getModel(),tableP.getModel(),aDir,nDir,pDir);
+        XMLWriter.writeXMLImagesList(tableA.getModel(), tableN.getModel(), tableP.getModel(), aDir, nDir, pDir);
     }
 
 
@@ -1436,6 +1622,9 @@ public class CreateConfig extends JPanel implements Observer {
         {
             export = fc.getSelectedFile();
         }
+        else {
+            export = null;
+        }
         return export;
     }
 
@@ -1451,13 +1640,12 @@ public class CreateConfig extends JPanel implements Observer {
     }
 
     private String createIDValue() {
-        if(newTest) {
-        return "1";
-        }
-        else {
+        if (newTest) {
+            return "1";
+        } else {
             int newId = test_id; //Increase the old id with one.
             newId++;
-            System.out.println("New ID value is "+newId);
+            System.out.println("New ID value is " + newId);
             return String.valueOf(newId);
         }
     }
@@ -1470,49 +1658,10 @@ public class CreateConfig extends JPanel implements Observer {
         }
     }
 
-    //filter voor de file extensions. Komt ook van het internet. Wordt nu gebruik om .input en csv bestanden te filteren.
-    class ExtensionFileFilter extends FileFilter {
-        String description;
-
-        String extensions[];
-
-        public ExtensionFileFilter(String description, String extensions[]) {
-            if (description == null) {
-                this.description = extensions[0];
-            } else {
-                this.description = description;
-            }
-            this.extensions = extensions.clone();
-            toLower(this.extensions);
-        }
-
-        private void toLower(String array[]) {
-            for (int i = 0, n = array.length; i < n; i++) {
-                array[i] = array[i].toLowerCase();
-            }
-        }
-
-        public String getDescription() {
-            return description;
-        }
-
-        public boolean accept(File file) {
-            if (file.isDirectory()) {
-                return true;
-            } else {
-                String path = file.getAbsolutePath().toLowerCase();
-                for (String extension : extensions) {
-                    if ((path.endsWith(extension) && (path.charAt(path.length() - extension.length() - 1)) == '.')) {
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
-    }
 
     /**
      * Load a current config file for editing.
+     *
      * @param file the config file.
      */
     private void LoadConfig(File file) {
@@ -1520,24 +1669,22 @@ public class CreateConfig extends JPanel implements Observer {
         newTest = false;
         workingDir = file.getParentFile();
         TestConfig config = new TestConfig(file);
-        if(config.getValue("ID").length()>0) {
+        if (config.getValue("ID").length() > 0) {
             try {
-            test_id = Integer.parseInt(config.getValue("ID"));
-                System.out.println("Test ID = "+test_id);
-            }
-            catch (Exception e)  {
+                test_id = Integer.parseInt(config.getValue("ID"));
+                System.out.println("Test ID = " + test_id);
+            } catch (Exception e) {
                 System.out.println("Invalid ID value detected, resetting the value to 99999");
                 test_id = 99999;
             }
 
-        }
-        else {
+        } else {
             test_id = 1;  //Older config files don't have the id option. Add the ID to upgrade these config files to the newest version.
         }
 
         inputBorderSize.setText(config.getValue("BorderWidth"));
         inputAffDir.setText(config.getValue("AffectiveDir"));
-        aDir = new File(workingDir.getAbsoluteFile() + File.separator + "images" + File.separator + inputAffDir.getText() + File.separator);
+        aDir = new File(workingDir.getAbsoluteFile() + File.separator + inputAffDir.getText() + File.separator);
         //TODO eigenlijk zou dit hardcoded images niet moeten.
         inputBreak.setText(config.getValue("BreakAfter"));
         inputDataStepSize.setText(config.getValue("DataSteps"));
@@ -1546,7 +1693,7 @@ public class CreateConfig extends JPanel implements Observer {
         }
         inputLangFile.setText(config.getValue("LanguageFile"));
         inputNeutralDir.setText(config.getValue("NeutralDir"));
-        nDir = new File(workingDir.getAbsoluteFile() + File.separator + "images" + File.separator + inputNeutralDir.getText() + File.separator);
+        nDir = new File(workingDir.getAbsoluteFile() + File.separator + inputNeutralDir.getText() + File.separator);
         //TODO eigenlijk zou dit hardcoded images niet moeten.
 
         System.out.println(nDir.getAbsolutePath());
@@ -1655,13 +1802,15 @@ public class CreateConfig extends JPanel implements Observer {
         }
 
         //Load the value for the practice images directory.
-        if(config.getValue("PracticeDir").length()>0 && inputHasPractice.isSelected() && !inputBuiltinPractice.isSelected()) {
+        if (config.getValue("PracticeDir").length() > 0 && inputHasPractice.isSelected() && !inputBuiltinPractice.isSelected()) {
 
             inputPrDir.setEnabled(true);
             inputPrDir.setForeground(Color.black);
             inputPrDir.setText(config.getValue("PracticeDir"));
-            pDir = new File(workingDir.getAbsoluteFile() + File.separator + "images" + File.separator + inputPrDir.getText() + File.separator);
-            System.out.println("Practice directory found at "+pDir.getAbsoluteFile());
+            pDir = new File(workingDir.getAbsoluteFile() + File.separator + inputPrDir.getText() + File.separator);
+            //TODO hier aanpassen
+
+            System.out.println("Practice directory found at " + pDir.getAbsoluteFile());
         }
 
         //Refresh the images tables.
@@ -1677,7 +1826,6 @@ public class CreateConfig extends JPanel implements Observer {
         int intColor = Integer.parseInt(hex, 16);
         return new Color(intColor);
     }
-
 
 
 }

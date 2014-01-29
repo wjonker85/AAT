@@ -4,6 +4,7 @@ import Model.AATModel;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -19,12 +20,14 @@ public class SelectTestRevision extends JFrame {
 
     AATModel AATmodel;
     private JTable table;
+    private boolean current;
 
-    public SelectTestRevision(HashMap<String, String> testData, int current_id, AATModel AATmodel) {
+    public SelectTestRevision(HashMap<String, String> testData, int current_id, AATModel AATmodel,boolean current) {
 
         this.setName("Test revisions");
         this.setTitle("Export Data - test selection");
         this.AATmodel = AATmodel;
+        this.current = current;
         JLabel title = new JLabel("Multiple versions of the test are found in the data file. \n Please select the one to use.", SwingConstants.LEFT);
         Font f = title.getFont();
 
@@ -90,7 +93,7 @@ public class SelectTestRevision extends JFrame {
         for(int x= 0;x<model.getRowCount();x++) {
             Boolean b = (Boolean) model.getValueAt(x,2);
             if(b) {
-                AATmodel.setExport_id(Integer.parseInt(model.getValueAt(x,0).toString()));
+                AATmodel.setExport_id(Integer.parseInt(model.getValueAt(x,0).toString()),current);
                 this.dispose();
                 return;
             }
@@ -103,6 +106,18 @@ public class SelectTestRevision extends JFrame {
         JPanel tablePanel = new JPanel();
         //    scrollPane.setHorizontalScrollBarPolicy(Scroll);
         table = new JTable(new RevisionTableModel(testData, current_id));
+        TableColumn column = null;
+        for (int i = 0; i < 3; i++) {
+            column = table.getColumnModel().getColumn(i);
+            if (i == 1) {
+                column.setPreferredWidth(300); //third column is bigger
+            } else {
+                column.setPreferredWidth(20);
+            }
+        }
+     //   table.getColumnModel().getColumn(0).setPreferredWidth(27);
+      //  table.getColumnModel().getColumn(2).setPreferredWidth(27);
+      //  table.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
         JScrollPane scrollPane = new JScrollPane(table);
         tablePanel.add(scrollPane);
         return tablePanel;

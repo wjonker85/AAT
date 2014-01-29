@@ -92,7 +92,7 @@ public abstract class AatObject {
     public ArrayList<File> practiceImages;
     private ArrayList<AATImage> testList; //Random list that contains the push or pull images.
 
-    public File practiceDir;
+    public File practiceDir,affectiveDir,neutralDir;
 
     private String pullTag = "pull", pushTag = "push";
     private String nDir, aDir, pDir;
@@ -228,10 +228,10 @@ public abstract class AatObject {
         nDir = testConfig.getValue("NeutralDir");
         aDir = testConfig.getValue("AffectiveDir");
         pDir = testConfig.getValue("PracticeDir");
-        File neutralDir = new File(workingDir + File.separator +"images"+File.separator+ nDir);
+        neutralDir = new File(workingDir +File.separator+ nDir);
         System.out.println(neutralDir);
-        File affectiveDir = new File(workingDir + File.separator +"images"+File.separator+ aDir);
-        File prDir = new File(workingDir + File.separator +"images"+File.separator+ pDir);
+        affectiveDir = new File(workingDir +File.separator+ aDir);
+        File prDir = new File(workingDir + File.separator+ pDir);
         if (nDir.equals("") || !neutralDir.isDirectory()) {
             throw new FalseConfigException("Directory for the neutral images is not set properly");
         }
@@ -330,7 +330,7 @@ public abstract class AatObject {
         } catch (Exception e) {
             throw new FalseConfigException("Number of trials is not configured properly");
         }
-        System.out.println("Number of Trials is" + testConfig.getValue("Trials"));
+        System.out.println("Number of Trials is"  + testConfig.getValue("Trials"));
         try {
             breakAfter = Integer.parseInt(testConfig.getValue("BreakAfter"));
         } catch (Exception e) {
@@ -388,7 +388,7 @@ public abstract class AatObject {
                     }
                 } else {
                     System.out.println("Practice without colored borders");
-                    practiceDir = new File(workingDir + File.separator+"images"+File.separator + practDir);
+                    practiceDir = new File(workingDir +File.separator + practDir);
                     System.out.println("Practice dir is set to " + practiceDir.getAbsoluteFile());
                     if (!practiceDir.isDirectory()) {
                         throw new FalseConfigException("The directory for the practice images is nog properly configured");

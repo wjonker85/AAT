@@ -18,18 +18,13 @@
 package views;
 
 import AAT.Util.SpringUtilities;
+import DataStructures.TestMetaData;
 import IO.DataExporter;
-import Model.AATModel;
-
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
-import javax.swing.table.AbstractTableModel;
-import javax.swing.table.TableModel;
-import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.util.HashMap;
 
 /**
  * Created by IntelliJ IDEA.
@@ -44,14 +39,15 @@ public class ExportDataDialog extends JFrame {
     private JTextField minRTime, maxRtime, errorPerc;
     private JCheckBox removeFalseCenter, practiceCheck;
     private int min, max, perc = 10;
-    public int test_id;
-    private SelectTestRevision testRevision;
+    private TestMetaData metaData;
 
-    public ExportDataDialog(final AATModel model, int test_id) {
+    public ExportDataDialog(final TestMetaData metaData) {
 
         this.setName("Export Data");
         this.setTitle("Export Data - options");
+        int test_id = metaData.getExport_id();
         System.out.println("Using test id "+test_id);
+        this.metaData = metaData;
 
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
@@ -116,7 +112,7 @@ public class ExportDataDialog extends JFrame {
                     File saveFile = fileSaveDialog("Measures.csv");
                     setEnabled(false);
                     //  DataExporter.exportMeasurementsAnova(model, saveFile, min, max, perc, practiceCheck.isSelected(), removeFalseCenter.isSelected());
-                    DataExporter.exportMeasurements(model, saveFile, min, max, perc, practiceCheck.isSelected(), removeFalseCenter.isSelected());
+                    DataExporter.exportMeasurements(metaData, saveFile, min, max, perc, practiceCheck.isSelected(), removeFalseCenter.isSelected());
 
                 } catch (SubmitDataException e) {
                     JOptionPane.showMessageDialog(null,
@@ -134,7 +130,7 @@ public class ExportDataDialog extends JFrame {
                     validateInput();
                     File saveFile = fileSaveDialog("Questionnaire.csv");
                     setEnabled(false);
-                    DataExporter.exportQuestionnaire(model, saveFile, min, max, perc, practiceCheck.isSelected());
+                    DataExporter.exportQuestionnaire(metaData, saveFile, min, max, perc, practiceCheck.isSelected());
 
 
                 } catch (SubmitDataException e) {
@@ -159,12 +155,6 @@ public class ExportDataDialog extends JFrame {
         p.setOpaque(true);
         setContentPane(mainPanel);
         pack();
-
-        //    SelectTestRevision.setEnabled(true);
-        //    SelectTestRevision.setVisible(true);
-          //  this.setVisible(false);
-          //  this.setEnabled(false);
-
     }
 
     /**

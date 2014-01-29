@@ -22,6 +22,7 @@ import AAT.HighMemoryAAT;
 import DataStructures.AATImage;
 import DataStructures.ParticipantData;
 import DataStructures.TestData;
+import org.w3c.dom.Document;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -90,6 +91,8 @@ public class AATModel extends Observable {
     private boolean saveData;
 
     private int export_id;
+    private Document exportDocument;
+    private TestData exportTestData;
 
     //Constructor.
     public AATModel() {
@@ -101,7 +104,7 @@ public class AATModel extends Observable {
     //Load a new AAT from file
     public void loadNewAAT(File configFile) throws AatObject.FalseConfigException {
         newAAT = new HighMemoryAAT(configFile);
-        testData = new TestData(newAAT);
+        testData = new TestData(newAAT,this);
     }
 
     //Starts a new instance of the AAT. With no. times it has to repeat and when there will be a break.
@@ -152,10 +155,40 @@ public class AATModel extends Observable {
         return testData;
     }
 
-    public void setExport_id(int id) {
+    public void setExport_id(int id, boolean current) {
         this.export_id = id;
         this.setChanged();
+        if(current) {
         notifyObservers("Export");
+        }
+        else {
+            notifyObservers("Export_foreign");
+        }
+    }
+
+    public void setExportTestData(TestData testData) {
+        exportTestData = testData;
+    }
+
+    public TestData getExportTestData() {
+        return exportTestData;
+    }
+
+    public void setExport_idNoNotify(int id) {
+           this.export_id = id;
+    }
+
+    public void setDataLoadedExport() {
+        this.setChanged();
+        notifyObservers("Data_loaded_export");
+    }
+
+    public Document getExportDocument() {
+           return exportDocument;
+    }
+
+    public void setExportDocument(Document doc) {
+        this.exportDocument = doc;
     }
 
     public int getExport_id() {
