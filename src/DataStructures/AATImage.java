@@ -74,8 +74,12 @@ public class AATImage {
             int intValue = Integer.parseInt(aatObject.getBorderColor(direction), 16);
             borderColor = new Color(intValue);
             borderWidth = aatObject.getBorderWidth();
+            name = imageFile.getName() + "_" + repeat;
         }
-        name = imageFile.getName() + "_" + repeat;
+        else {
+            name = imageFile.getName();
+        }
+
         System.out.println("Adding image 2 "+name);
         this.image = loadImage(imageFile, aatObject.getImageSizePerc());
 

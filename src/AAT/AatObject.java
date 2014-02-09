@@ -671,9 +671,11 @@ public abstract class AatObject {
 
     public String getType(int i) {
         if (i == AATImage.AFFECTIVE) {
-            return aDir;
+            File f = new File(aDir);
+            return f.getName();
         } else if (i == AATImage.NEUTRAL) {
-            return nDir;
+            File f = new File(nDir);
+            return f.getName();
         } else {
             return "practice";
         }

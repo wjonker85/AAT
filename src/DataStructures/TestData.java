@@ -34,6 +34,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -62,6 +63,8 @@ public class TestData {
     private AatObject newAAT;
     public String affLabelOldData;
     public String neutLabelOldData;
+    public String pullTagOldData;
+    public String pushTagOldData;
     private String affLabel, neutLabel;
     private AATModel model;
     private boolean externalData;
@@ -71,8 +74,15 @@ public class TestData {
         this.model = model;
         this.newAAT = newAAT;
         this.trials = newAAT.getRepeat();
+
         affLabel = newAAT.affectiveDir.getName();
+        if(affLabel.contains(File.separator)) {
+            affLabel = affLabel.substring(affLabel.lastIndexOf(File.separator));      //Only the last directory name for the affective category.
+        }
         neutLabel = newAAT.neutralDir.getName();
+        if(neutLabel.contains(File.separator)) {
+            neutLabel = neutLabel.substring(neutLabel.lastIndexOf(File.separator));
+        }
         DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
         Date date = new Date();
         String dateString = dateFormat.format(date);
@@ -87,12 +97,12 @@ public class TestData {
             checkAndFixOldData(doc);
             if (!hasTestID(newAAT.getTest_id())) {
                 System.out.println("Test id not present in the data file, adding required test data to the data file");
-                addTestMetaData(newAAT.getTest_id(), newAAT.getRepeat(), newAAT.centerPos(), newAAT.getPullTag(), newAAT.getPushTag(), affLabel, neutLabel, "Created on " + dateString); //Add the current test_id and used image files to the data.xml file.
+                addTestMetaData(newAAT.getTest_id(), newAAT.getRepeat(), newAAT.centerPos(), newAAT.getPullTag(), newAAT.getPushTag(), affLabel, neutLabel, "Created on " + dateString,newAAT.hasColoredBorders()); //Add the current test_id and used image files to the data.xml file.
             }
         } else {
             createXMLDOC();
             System.out.println("New data file created, adding test data");
-            addTestMetaData(newAAT.getTest_id(), newAAT.getRepeat(), newAAT.centerPos(), newAAT.getPullTag(), newAAT.getPushTag(), affLabel, neutLabel, "Created on " + dateString);
+            addTestMetaData(newAAT.getTest_id(), newAAT.getRepeat(), newAAT.centerPos(), newAAT.getPullTag(), newAAT.getPushTag(), affLabel, neutLabel, "Created on " + dateString,newAAT.hasColoredBorders());
         }
       //  model.setDataLoaded();
     }
@@ -125,6 +135,7 @@ public class TestData {
         int centerPos, trials;
         TestMetaData metaData = null;
         NodeList testList = doc.getElementsByTagName("test");
+        boolean borders = true;
         if (testList.getLength() > 0) {
             for (int x = 0; x < testList.getLength(); x++) {
                 Element test = (Element) testList.item(x);
@@ -136,8 +147,9 @@ public class TestData {
                     pullTag = test.getAttribute("pullTag");
                     centerPos = Integer.parseInt(test.getAttribute("centerPos"));
                     trials = Integer.parseInt(test.getAttribute("trials"));
+                    borders = Boolean.parseBoolean(test.getAttribute("generatedBorders"));
 
-                    metaData = new TestMetaData(test_id, trials, doc, labelA, labelN, pushTag, pullTag, centerPos);
+                    metaData = new TestMetaData(test_id, trials, doc, labelA, labelN, pushTag, pullTag, centerPos,borders);
 
                 }
             }
@@ -203,7 +215,7 @@ public class TestData {
      * @param neutLabel
      * @param comment
      */
-    private void addTestMetaData(int test_id, int trials, int centerPos, String pullTag, String pushTag, String affLabel, String neutLabel, String comment) {
+    private void addTestMetaData(int test_id, int trials, int centerPos, String pullTag, String pushTag, String affLabel, String neutLabel, String comment, boolean borders) {
         Element root = doc.getDocumentElement();
 
         System.out.println("Adding " + trials + " trials");
@@ -216,6 +228,7 @@ public class TestData {
         test.setAttribute("labelA", affLabel);
         test.setAttribute("labelN", neutLabel);
         test.setAttribute("centerPos", String.valueOf(centerPos));
+        test.setAttribute("generatedBorders",String.valueOf(borders));
         Element commentElement = doc.createElement("comment");
         Text commentValue = doc.createTextNode(comment);
         commentElement.appendChild(commentValue);
@@ -297,9 +310,11 @@ public class TestData {
      * @param labelA
      * @param labelN
      */
-    public void continueUpgrade(String labelA, String labelN) {
+    public void continueUpgrade(String labelA, String labelN, String pullTag, String pushTag) {
         this.affLabelOldData = labelA;
         this.neutLabelOldData = labelN;
+        this.pullTagOldData = pullTag;
+        this.pushTagOldData = pushTag;
         FixOldData();
     }
 
@@ -420,7 +435,7 @@ public class TestData {
             }
         }
         if (upgrade) {
-            LabelInputFrame labelFrame = new LabelInputFrame(getLabels(doc), this);
+            LabelInputFrame labelFrame = new LabelInputFrame(getLabels(doc),getDirLabels(), this);
             labelFrame.display();
         }
         else if(externalData) {
@@ -433,11 +448,12 @@ public class TestData {
     }
 
     /**
-     * Upgrade the data file to the new structure. This means finding and adding metadata to the test.
+     * Find the labels used for the pull and push images. Collects the tags used from the data file and adds them to an array.
+     * Assumes that the push reaction is faster than the pull reaction.
+     * @return
      */
-    private void FixOldData() {
-        NodeList participantsList = doc.getElementsByTagName("participant");
-
+    private String[] getDirLabels() {
+       String[] result = new String[2];
         HashMap<String, imageObject> tagsMap = findTags(doc);
         //First find the two most used tags.
         imageObject largest = new imageObject();
@@ -470,13 +486,60 @@ public class TestData {
             pushTag = second.tag;
             pullTag = largest.tag;
         }
-        System.out.println("Pull tag set to: " + pullTag + " Push tag set to: " + pushTag);
-        addUpgradeTestMetaData(doc, -1, getCenterPos(doc), pullTag, pushTag, getNoTrials(doc, -1), "Backed up data containing " + participantsList.getLength() + " participants.");
+        result[0] = pushTag;
+        result[1] = pullTag;
+        return result;
+    }
+
+    /**
+     * Upgrade the data file to the new structure. This means finding and adding metadata to the test.
+     */
+    private void FixOldData() {
+        NodeList participantsList = doc.getElementsByTagName("participant");
+        System.out.println("Pull tag set to: " + pullTagOldData + " Push tag set to: " + pushTagOldData);
+        addUpgradeTestMetaData(doc, -1, getCenterPos(doc), pullTagOldData, pushTagOldData, getNoTrials(doc, -1), "Backed up data containing " + participantsList.getLength() + " participants.",oldTestHasColoredBorders());
        if(externalData) {        //When this class is used for loading a separate data file, then notify the observers that the upgrade is ready.
         model.setDataLoadedExport();
        }
     }
 
+
+    /**
+     * Check whether the old test uses auto-generated colored borders or a different type of pull and push stimulus
+     * @return true for auto generated colored borders in the old test data.
+     */
+    private boolean oldTestHasColoredBorders() {
+        NodeList participants = doc.getElementsByTagName("participant");
+        int pullCount = 0;
+        int pushCount = 0;
+
+        for (int y = 0; y < participants.getLength(); y++) {
+            Element participant = (Element) participants.item(y);
+            String test_id = participant.getAttribute("test_id");
+            if (test_id.equalsIgnoreCase("-1")) {       //Find the labels used by the backed up data.
+                NodeList imageList = participant.getElementsByTagName("image");
+
+                for (int i = 0; i < imageList.getLength(); i++) {
+                    Element image = (Element) imageList.item(i);
+                    NodeList imgNameList = image.getElementsByTagName("imageName");
+                    Node imgNameNode = imgNameList.item(0).getFirstChild();
+                    String imgName = imgNameNode.getNodeValue();
+                    if(imgName.contains(pullTagOldData)) {
+                        pushCount++;
+                    }
+                    if(imgName.contains(pushTagOldData)) {
+                        pullCount++;
+                    }
+
+                }
+            }
+           if(pushCount >0 && pullCount >0) {      //both tags are found in the image file names, so assuming colored borders is not used
+                return false;
+           }
+        }
+
+            return true;        //When direction tags are not found, the test must have self generated colored borders.
+    }
     /**
      * Find the joysticks center position.
      * @param doc
@@ -655,7 +718,7 @@ public class TestData {
      * @param trials
      * @param comment
      */
-    private void addUpgradeTestMetaData(Document doc, int test_id, int centerPos, String pullTag, String pushTag, int trials, String comment) {
+    private void addUpgradeTestMetaData(Document doc, int test_id, int centerPos, String pullTag, String pushTag, int trials, String comment, boolean borders) {
         System.out.println("Add required test data.");
         Element root = doc.getDocumentElement();
         Element test = doc.createElement("test");
@@ -667,6 +730,7 @@ public class TestData {
         test.setAttribute("labelA", affLabelOldData);
         test.setAttribute("labelN", neutLabelOldData);
         test.setAttribute("centerPos", String.valueOf(centerPos));
+        test.setAttribute("generatedBorders",String.valueOf(borders));
 
         Element commentElement = doc.createElement("comment");
         Text commentValue = doc.createTextNode(comment);
@@ -790,16 +854,17 @@ public class TestData {
 class LabelInputFrame extends JFrame {
 
     private TestData testData;
-    private JComboBox<String> affBox;
-    private JTextField neutField;
+    private JComboBox<String> affBox,pullBox;
+    private JTextField neutField,pushField;
 
-    public LabelInputFrame(final String[] labels, final TestData testData) {
+    public LabelInputFrame(final String[] typeLabels,final String[] dirLabels, final TestData testData) {
         super("Upgrading old test data");
         this.testData = testData;
 
 
         JLabel title = new JLabel("<html>You are using data from an older version of the AAT. <br> Your data file will be upgraded." +
-                "<br>Please make sure the labels for the affective and neutral category are correct. </html>", SwingConstants.LEFT);
+                "<br>Please make sure the labels for the affective and neutral category are correct<br> Also change the push and pull labels to the " +
+                "correct values. </html>", SwingConstants.LEFT);
         Font f = title.getFont();
 
         title.setFont(new Font(f.getName(), Font.BOLD, 14));
@@ -824,8 +889,8 @@ class LabelInputFrame extends JFrame {
         mainPanel.add(affLabel, c);
 
 
-        affBox = new JComboBox<String>(labels);
-        affBox.setSelectedItem(labels[0]);
+        affBox = new JComboBox<String>(typeLabels);
+        affBox.setSelectedItem(typeLabels[0]);
         //  c.gridwidth = 4;
         c.insets = new Insets(20, 10, 0, 0);
         c.fill = GridBagConstraints.HORIZONTAL;
@@ -844,7 +909,7 @@ class LabelInputFrame extends JFrame {
         //   c.weightx = 1;
         mainPanel.add(neutLabel, c);
 
-        neutField = new JTextField(labels[1]);
+        neutField = new JTextField(typeLabels[1]);
         //  c.gridwidth = 4;
         c.fill = GridBagConstraints.HORIZONTAL;
         c.insets = new Insets(20, 10, 0, 0);
@@ -860,9 +925,61 @@ class LabelInputFrame extends JFrame {
             public void itemStateChanged(ItemEvent itemEvent) {
                 int index = affBox.getSelectedIndex();
                 index = (index + 1) % 2;
-                neutField.setText(labels[index]);
+                neutField.setText(typeLabels[index]);
             }
         });
+
+        JLabel pullLabel = new JLabel("label for the pull images: ");
+        //   c.gridwidth = 4;
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.insets = new Insets(20, 10, 0, 0);
+        c.gridx = 0;
+        c.gridy = 2;
+        //  c.weightx = 1;
+        mainPanel.add(pullLabel, c);
+
+
+        pullBox = new JComboBox<String>(dirLabels);
+        pullBox.setSelectedItem(dirLabels[0]);
+        //  c.gridwidth = 4;
+        c.insets = new Insets(20, 10, 0, 0);
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.gridx = 3;
+        c.gridy = 2;
+        //  c.weightx = 1;
+        mainPanel.add(pullBox, c);
+
+
+        JLabel pushLabel = new JLabel("label for the push images: ");
+        //  c.gridwidth = 4;
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.insets = new Insets(20, 10, 0, 0);
+        c.gridx = 0;
+        c.gridy = 3;
+        //   c.weightx = 1;
+        mainPanel.add(pushLabel, c);
+
+        pushField = new JTextField(dirLabels[1]);
+        //  c.gridwidth = 4;
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.insets = new Insets(20, 10, 0, 0);
+        c.gridx = 3;
+        c.gridy = 3;
+        //  c.weightx = 1;
+        mainPanel.add(pushField, c);
+
+        neutField.setEditable(false); //Just set to readonly
+
+        pullBox.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent itemEvent) {
+                int index = pullBox.getSelectedIndex();
+                index = (index + 1) % 2;
+                pushField.setText(dirLabels[index]);
+            }
+        });
+
+
 
         JButton okButton = new JButton("Ok");
         okButton.addActionListener(new ActionListener() {
@@ -877,7 +994,7 @@ class LabelInputFrame extends JFrame {
         //   c.gridwidth = 2;
         c.insets = new Insets(20, 10, 0, 0);
         c.gridx = 1;
-        c.gridy = 2;
+        c.gridy = 4;
         //   c.weightx = 0.5;
         mainPanel.add(okButton, c);
         content.add(labelPanel);
@@ -896,7 +1013,7 @@ class LabelInputFrame extends JFrame {
 
 
     private void okAction() {
-        testData.continueUpgrade(affBox.getSelectedItem().toString(), neutField.getText());
+        testData.continueUpgrade(affBox.getSelectedItem().toString(), neutField.getText(),pullBox.getSelectedItem().toString(),pushField.getText());
         //     testData.affLabelOldData = affBox.getSelectedItem().toString();
         //     testData.neutLabelOldData = neutField.getText();
         this.dispose();

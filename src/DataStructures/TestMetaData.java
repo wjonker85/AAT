@@ -16,6 +16,7 @@ public class TestMetaData {
     private String afflabel,neutLabel,pushTag,pullTag;
     private Document data;
     private ArrayList<File> neutralImages,affectiveImages,practiceImages;
+    private boolean coloredBorders;
 
     public TestMetaData(int export_id
             ,int trials
@@ -25,6 +26,7 @@ public class TestMetaData {
             , String pushTag
             , String pullTag
             , int centerpos
+            , boolean coloredBorders
           )
     {
          this.export_id = export_id;
@@ -35,8 +37,11 @@ public class TestMetaData {
         this.pullTag = pullTag;
         this.pushTag = pushTag;
         this.centerpos = centerpos;
+        this.coloredBorders = coloredBorders;
     }
 
+
+    public int getTrials() { return trials;}
 
     public int getExport_id() {
         return export_id;
@@ -99,6 +104,10 @@ public class TestMetaData {
 
     public ArrayList<File> getPracticeImages() {
         return practiceImages;
+    }
+
+    public boolean hasColoredBorders() {
+        return coloredBorders;
     }
 
 }
