@@ -25,6 +25,7 @@ import Controller.JoystickController;
 import IO.XMLReader;
 import IO.XMLWriter;
 import Model.AATModel;
+import views.HTMLEditPanel;
 import views.TestFrame;
 
 import javax.swing.*;
@@ -45,6 +46,7 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 
 /**
  * Created with IntelliJ IDEA.
@@ -79,6 +81,7 @@ public class CreateConfig extends JPanel implements Observer {
     private XMLReader reader;
     private JLabel pLabel;
     private JScrollPane scrollPaneP;
+    HTMLEditPanel htmlEditPanel;
 
 
     //regex for extension filtering
@@ -122,6 +125,7 @@ public class CreateConfig extends JPanel implements Observer {
                     writeToFile(file);
                     currentConfig = file;
                     workingDir = file.getParentFile();
+                    htmlEditPanel.save();
                     JOptionPane.showMessageDialog(null,
                             "AAT Config file saved.");
                 }
@@ -150,7 +154,9 @@ public class CreateConfig extends JPanel implements Observer {
                                 "AAT Config file saved.");
                     }
 
+
                 }
+                htmlEditPanel.save();  //Save the language file.
             }
         });
 
@@ -219,6 +225,15 @@ public class CreateConfig extends JPanel implements Observer {
         //   JPanel images = createImageListTable(getImages(new File("/home/marcel/AAT/AAT/images/Affective/")),getImages(new File("/home/marcel/AAT/AAT/images/Neutral/")));
 
         tabbedPane.addTab("Images", contentPane);
+
+        htmlEditPanel = new HTMLEditPanel();
+
+           JScrollPane HtmlEditPane = new JScrollPane((htmlEditPanel));
+        HtmlEditPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        HtmlEditPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+
+        tabbedPane.addTab("Language File",HtmlEditPane);
+
         SpringUtilities.makeCompactGrid(this,
                 2, 1, //rows, cols
                 6, 6,        //initX, initY
@@ -442,7 +457,7 @@ public class CreateConfig extends JPanel implements Observer {
         TableColumn column = null;
         for (int i = 0; i < 2; i++) {
             column = table.getColumnModel().getColumn(i);
-            if (i == 1) {
+            if (i == 0) {
                 column.setPreferredWidth(300); //third column is bigger
             } else {
                 column.setPreferredWidth(20);
@@ -459,7 +474,8 @@ public class CreateConfig extends JPanel implements Observer {
 
         tableA.setModel(new ImageTableModel(imageFilesA, aFiles));
         tableN.setModel(new ImageTableModel(imageFilesN, nFiles));
-
+        setTableColumnWidths(tableA);
+        setTableColumnWidths(tableN);
         tableA.repaint();
         tableN.repaint();
 
@@ -470,6 +486,7 @@ public class CreateConfig extends JPanel implements Observer {
             tableP.setModel(new ImageTableModel(imageFilesP, pFiles));
             scrollPaneP.setVisible(true);
             pLabel.setVisible(true);
+            setTableColumnWidths(tableP);
             tableP.repaint();
         }
 
@@ -651,7 +668,21 @@ public class CreateConfig extends JPanel implements Observer {
             public void actionPerformed(ActionEvent actionEvent) {
                 File file = fileOpenDialog();
                 if (file != null) {
+                    if(file.exists()) {
                     inputLangFile.setText(file.getName());
+                        htmlEditPanel.setDocument(file);
+                    }
+                    else {
+                        int reply = JOptionPane.showConfirmDialog(null, "Do you want to create the file: "+file.getName()+" ?", "Create new language file", JOptionPane.YES_NO_OPTION);
+                        if (reply == JOptionPane.YES_OPTION) {
+                            inputLangFile.setText(file.getName());
+                            htmlEditPanel.setDocument(file);
+                        }
+                        else {
+                            inputLangFile.setText("");
+                            System.exit(0);
+                        }
+                    }
                 } else {
                     inputLangFile.setText("");
                 }
@@ -1439,6 +1470,7 @@ public class CreateConfig extends JPanel implements Observer {
         }
         pw.write("ShowBoxPlot " + boxPlot);
         pw.println();
+        pw.write("PlotType " + "Boxplot");
         pw.println();
         pw.write(ratioHeader);
         pw.println();
@@ -1692,6 +1724,8 @@ public class CreateConfig extends JPanel implements Observer {
             inputDataStepSize.setText("9");
         }
         inputLangFile.setText(config.getValue("LanguageFile"));
+        File langFile = new File(workingDir.getAbsoluteFile() + File.separator + inputLangFile.getText() + File.separator);
+        htmlEditPanel.setDocument(langFile);
         inputNeutralDir.setText(config.getValue("NeutralDir"));
         nDir = new File(workingDir.getAbsoluteFile() + File.separator + inputNeutralDir.getText() + File.separator);
         //TODO eigenlijk zou dit hardcoded images niet moeten.
