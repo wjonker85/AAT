@@ -23,12 +23,15 @@ import DataStructures.Questionnaire;
 import Model.AATModel;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import javax.swing.text.Document;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.StyleSheet;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -50,8 +53,13 @@ public class QuestionPanel extends JPanel {
     private int maxLabelSize = 0;
     private JScrollPane scrollPane;
     private JTextArea introductionPane;
+    private Boolean editMode = false;
+    private Questionnaire questionnaire;
 
     public QuestionPanel(final AATModel model) {
+        if (model == null) {
+            editMode = true;
+        }
         //  super(new BoxLayout(this, BoxLayout.Y_AXIS));
         JPanel mainPanel = new JPanel();
         JPanel contentPanel = new JPanel();
@@ -99,25 +107,26 @@ public class QuestionPanel extends JPanel {
 
         // mainPanel.add(scrollPane);
         //   questionsPanel.add(introductionPane);
+        if (model != null) {
+            JButton submitButton = new JButton("Submit");
+            JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+            submitButton.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent actionEvent) {
+                    if (checkAnswered()) {
+                        model.addExtraQuestions(getResults());
+                        setVisible(false);
+                    } else {
+                        repaint();
+                    }
+                    //   setDisabled();
 
-        JButton submitButton = new JButton("Submit");
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        submitButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent actionEvent) {
-                if (checkAnswered()) {
-                    model.addExtraQuestions(getResults());
-                    setVisible(false);
-                } else {
-                    repaint();
                 }
-                //   setDisabled();
-
-            }
-        });
-        buttonPanel.setBackground(Color.black);
-        buttonPanel.setForeground(Color.white);
-        buttonPanel.add(submitButton);
-        contentPanel.add(buttonPanel);
+            });
+            buttonPanel.setBackground(Color.black);
+            buttonPanel.setForeground(Color.white);
+            buttonPanel.add(submitButton);
+            contentPanel.add(buttonPanel);
+        }
         //    mainPanel.add(contentPanel);
         scrollPane = new JScrollPane(contentPanel,
                 JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
@@ -166,12 +175,15 @@ public class QuestionPanel extends JPanel {
      * @param questionnaire The optional questionnaire received from the model
      */
     public void displayQuestions(Questionnaire questionnaire) {
+        this.questionnaire = questionnaire;
         introductionPane.setText(questionnaire.getIntroduction());
-        for (QuestionData questionObject : questionnaire.getExtraQuestions()) {
-
+        for (int x = 0; x < questionnaire.getExtraQuestions().size(); x++) {
+            //for (QuestionData questionObject : questionnaire.getExtraQuestions()) {
+            QuestionData questionObject = questionnaire.getExtraQuestions().get(x);
             //   JLabel question = new JLabel(questionObject.getQuestion(), JLabel.TRAILING);
             Dimension screen = getToolkit().getScreenSize();
-            JEditorPane question = new JEditorPane();
+            MouseActionEditorPane question = new MouseActionEditorPane(editMode, questionObject, x, this);
+
             question.setEditable(false);
             question.setMaximumSize(new Dimension(screen.width / 3, screen.height));
             question.setMinimumSize(new Dimension(screen.width / 3, 20));
@@ -249,6 +261,22 @@ public class QuestionPanel extends JPanel {
         //  this.repaint();
     }
 
+
+    public void changeQuestion(QuestionData newQuestion, int pos) {
+        questionnaire.getExtraQuestions().set(pos, newQuestion);
+        questionsPanel.removeAll();
+        //  questionsPanel = new JPanel(new SpringLayout());
+        questionsPanel.setBackground(Color.black);
+        questionsPanel.setForeground(Color.WHITE);
+        displayQuestions(questionnaire);
+        questionsPanel.revalidate();
+        repaint();
+        //    questionnairePanel.
+        this.revalidate();
+        this.repaint();
+
+    }
+
     private void calculateLabelWidth(JLabel label) {
         Font labelFont = label.getFont();
         String labelText = label.getText();
@@ -284,7 +312,7 @@ public class QuestionPanel extends JPanel {
         private JLabel leftLabel;
 
         public SemDiffPanel(int size, String left, String right, boolean isRequired) {
-            super();
+            super(editMode);
             this.isRequired = isRequired;
             this.size = size;
             this.setLayout(new FlowLayout(FlowLayout.LEFT));
@@ -367,7 +395,7 @@ public class QuestionPanel extends JPanel {
         JTextArea textArea;
 
         public TextAreaPanel(boolean isRequired) {
-            super();
+            super(editMode);
             this.isRequired = isRequired;
             textArea = new JTextArea(10, 40);
             textArea.setLineWrap(true);
@@ -410,7 +438,7 @@ public class QuestionPanel extends JPanel {
         private ButtonGroup closedButtons;
 
         public ClosedButtonsPanel(Object[] options, boolean isRequired) {
-            super();
+            super(editMode);
             this.isRequired = isRequired;
             closedButtons = new ButtonGroup();
             JPanel answerPanel = new JPanel(new SpringLayout());
@@ -471,7 +499,7 @@ public class QuestionPanel extends JPanel {
         JTextField textInput;
 
         public OpenQuestionPanel(boolean isRequired) {
-            super();
+            super(editMode);
             this.isRequired = isRequired;
             textInput = new JTextField(10);
             setLayout(new FlowLayout(FlowLayout.LEFT));
@@ -510,7 +538,7 @@ public class QuestionPanel extends JPanel {
         JComboBox answerOptions;
 
         public ClosedComboPanel(Object[] options, boolean isRequired) {
-            super();
+            super(editMode);
             this.isRequired = isRequired;
             Object[] newOptions = new Object[options.length + 1];
             newOptions[0] = "";
@@ -560,7 +588,7 @@ public class QuestionPanel extends JPanel {
         private JLabel leftLabel;
 
         public LikertPanel(int size, String left, String right, boolean isRequired) {
-            super();
+            super(editMode);
             this.isRequired = isRequired;
             setLayout(new FlowLayout(FlowLayout.LEFT));
             this.setBackground(Color.black);
@@ -630,30 +658,391 @@ public class QuestionPanel extends JPanel {
         }
 
     }
-}
 
-abstract class DisplayQuestion extends JPanel {
+    class MouseActionEditorPane extends JEditorPane implements MouseListener {
 
-    public JLabel asterisks;
-    public boolean isRequired = true;
+        Border blackBorder = BorderFactory.createLineBorder(Color.BLACK);
+        Border redBorder = BorderFactory.createLineBorder(Color.RED, 5);
+        private int pos;
+        private QuestionData question;
+        private QuestionPanel parent;
 
-    public DisplayQuestion() {
-        asterisks = new JLabel("*", JLabel.TRAILING);
-        asterisks.setFont(new Font("Roman", Font.BOLD, 20));
-        asterisks.setForeground(Color.WHITE);
+        public MouseActionEditorPane(boolean editMode, QuestionData question, int pos, QuestionPanel parent) {
+            if (editMode) {
+                this.pos = pos;
+                this.parent = parent;
+                this.question = question;
+                addMouseListener(this);
+
+            }
+        }
+
+        @Override
+        public void mouseClicked(MouseEvent mouseEvent) {
+            QuestionEditFrame qEdit = new QuestionEditFrame(question, pos, parent);
+            qEdit.setEnabled(true);
+            qEdit.setVisible(true);
+        }
+
+        @Override
+        public void mousePressed(MouseEvent mouseEvent) {
+
+        }
+
+        @Override
+        public void mouseReleased(MouseEvent mouseEvent) {
+
+        }
+
+        @Override
+        public void mouseEntered(MouseEvent mouseEvent) {
+            setBorder(redBorder);
+        }
+
+        @Override
+        public void mouseExited(MouseEvent mouseEvent) {
+            setBorder(blackBorder);
+        }
+
     }
 
-    public abstract String getValue();
 
-    public abstract String getType();
+    class QuestionEditFrame extends JFrame {
+        private QuestionData question;
+        private String currentType;
+        private String[] types = {"likert", "closed", "open", "closed_button", "textArea", "sem_diff"};
+        private JComboBox typeCombo;
+        private int pos;
+        private JPanel editPanel;
+        private QuestionEditor qEditor;
+        private QuestionPanel parent;
 
-    public abstract void changeLabelSize(int width);
+        public QuestionEditFrame(QuestionData question, int pos, QuestionPanel parent) {
+            this.pos = pos;
+            this.parent = parent;
+            JPanel setTypePanel = new JPanel();
+            editPanel = new JPanel();
+            JLabel typeLabel = new JLabel("Type of question: ");
+            setTypePanel.add(typeLabel);
+            typeCombo = new JComboBox(types);
+            if (question != null) {
+                currentType = question.getType();
+                System.out.println("Current type = " + currentType);
+                typeCombo.setSelectedItem(currentType);
+                changeQuestionEditor();
+            }
+            setTypePanel.add(typeCombo);
+            JButton setTypeButton = new JButton("Set question type");
+            setTypeButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent actionEvent) {
+                    currentType = typeCombo.getSelectedItem().toString();
+                    changeQuestionEditor();
+                }
+            });
+            setTypePanel.add(setTypeButton);
 
-    public void setRequired(Boolean isRequired) {
-        this.isRequired = isRequired;
+            this.question = question;
+
+            this.setSize(new Dimension(400, 400));
+            JPanel mainPanel = new JPanel();
+            mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+            mainPanel.add(setTypePanel);
+
+            JPanel questionPanel = new JPanel();
+            questionPanel.setPreferredSize(new Dimension(400, 400));
+            questionPanel.add(new JLabel(question.getQuestion()));
+            // mainPanel.add(questionPanel);
+            JPanel buttonPanel = new JPanel();
+            JButton okButton = new JButton("Ok");
+            okButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent actionEvent) {
+                    if (qEditor.validated()) {
+                        changeQuestion();
+                    }
+                }
+            });
+            buttonPanel.add(okButton);
+            mainPanel.add(editPanel);
+            mainPanel.add(buttonPanel);
+            this.getContentPane().add(mainPanel);
+        }
+
+        private void changeQuestionEditor() {
+            editPanel.removeAll();
+            if (currentType.equalsIgnoreCase("closed")) {
+
+            } else if (currentType.equalsIgnoreCase("open")) {
+                OpenPanel p = new OpenPanel(question);
+                editPanel.removeAll();
+                editPanel.add(p);
+                qEditor = p;
+                revalidate();
+            } else if (currentType.equalsIgnoreCase("closed_button")) {
+
+            } else if (currentType.equalsIgnoreCase("textArea")) {
+                TextAreaQPanel p = new TextAreaQPanel(question);
+                editPanel.add(p);
+                qEditor = p;
+
+            } else if (currentType.equalsIgnoreCase("semDiff") || currentType.equalsIgnoreCase("likert")) {
+                LikertDiffPanel p = new LikertDiffPanel(question);
+                editPanel.add(p);
+                qEditor = p;
+
+            }
+            revalidate();
+        }
+
+        private void changeQuestion() {
+            parent.changeQuestion(qEditor.getQuestion(), pos);
+        }
+
+
+        private class OpenPanel extends JPanel implements QuestionEditor {
+            private JTextField question, qLabel;
+            private JCheckBox required;
+
+            public OpenPanel(QuestionData original) {
+                this.setLayout(new SpringLayout());
+                this.add(new JLabel("Question: "));
+                question = new JTextField();
+                question.setPreferredSize(new Dimension(250, 20));
+                this.add(question);
+                this.add(new JLabel("Label for analysis: "));
+                qLabel = new JTextField();
+                this.add(qLabel);
+                JLabel reqLabel = new JLabel("Required: ");
+                this.add(reqLabel);
+                required = new JCheckBox();
+                required.setSelected(true);
+                this.add(required);
+                if (original != null) {
+                    question.setText(original.getQuestion());
+                    qLabel.setText(original.getQuestion());
+                    required.setSelected(original.isRequired());
+                }
+                SpringUtilities.makeCompactGrid(this,
+                        3, 2, //rows, cols
+                        6, 6,        //initX, initY
+                        6, 6);       //xPad, yPad
+
+
+            }
+
+            @Override
+            public QuestionData getQuestion() {
+                QuestionData questionData = new QuestionData("open");
+                questionData.setKey(qLabel.getText());
+                questionData.setQuestion(question.getText());
+                questionData.setRequired(required.isSelected());
+                return questionData;
+            }
+
+            @Override
+            public boolean validated() {
+                return true;
+            }
+        }
+
+        private class LikertDiffPanel extends JPanel implements QuestionEditor {
+            private JTextField qLabel;
+            private JTextField question, left, right, size;
+            private String type;
+            private JCheckBox required;
+
+            public LikertDiffPanel(QuestionData original) {
+                this.type = original.getType();
+                this.setLayout(new SpringLayout());
+
+                this.add(new JLabel("Question: "));
+
+                question = new JTextField();
+                question.setPreferredSize(new Dimension(250, 20));
+                this.add(question);
+                left = new JTextField();
+                JLabel leftLabel = new JLabel("Left label: ");
+                left.setPreferredSize(new Dimension(120, 20));
+                this.add(leftLabel);
+                this.add(left);
+                right = new JTextField();
+                JLabel rightLabel = new JLabel("Right label: ");
+                right.setPreferredSize(new Dimension(120, 20));
+                this.add(rightLabel);
+                this.add(right);
+                size = new JTextField();
+                JLabel sizeLabel = new JLabel("No options: ");
+                this.add(sizeLabel);
+                this.add(size);
+                size.setPreferredSize(new Dimension(40, 20));
+
+                this.add(new JLabel("Label for analysis: "));
+                qLabel = new JTextField();
+                this.add(qLabel);
+                JLabel reqLabel = new JLabel("Required: ");
+                this.add(reqLabel);
+                required = new JCheckBox();
+                required.setSelected(true);
+                this.add(required);
+                if (original != null) {
+                    question.setText(original.getQuestion());
+                    left.setText(original.getLeftText());
+                    right.setText(original.getRightText());
+                    size.setText(String.valueOf(original.getSize()));
+                    qLabel.setText(original.getQuestion());
+                    required.setSelected(original.isRequired());
+                }
+                SpringUtilities.makeCompactGrid(this,
+                        6, 2, //rows, cols
+                        6, 6,        //initX, initY
+                        6, 6);       //xPad, yPad
+
+            }
+
+            @Override
+            public QuestionData getQuestion() {
+
+                QuestionData questionData = new QuestionData(type);
+                questionData.setKey(qLabel.getText());
+                questionData.setQuestion(question.getText());
+                questionData.setLeftText(left.getText());
+                questionData.setRightText(right.getText());
+                questionData.setSize(Integer.parseInt(size.getText()));
+                questionData.setRequired(required.isSelected());
+                return questionData;
+            }
+
+            @Override
+            public boolean validated() {
+                try {
+                    int x = Integer.parseInt(size.getText());
+                    if (x > 0) {
+                        return true;
+                    } else return false;
+                } catch (Exception e) {
+                    return false;
+                }
+            }
+        }
+
+
+        private class TextAreaQPanel extends JPanel implements QuestionEditor {
+            private JTextField qLabel;
+            private JTextField question;
+            private JCheckBox required;
+
+            public TextAreaQPanel(QuestionData original) {
+                this.setLayout(new SpringLayout());
+                this.add(new JLabel("Question: "));
+                question = new JTextField();
+                this.add(question);
+                this.add(new JLabel("Label for analysis: "));
+                qLabel = new JTextField();
+                this.add(qLabel);
+                JLabel reqLabel = new JLabel("Required: ");
+                this.add(reqLabel);
+                required = new JCheckBox();
+                required.setSelected(true);
+                this.add(required);
+                if (original != null) {
+                    question.setText(original.getQuestion());
+                    qLabel.setText(original.getQuestion());
+                    required.setSelected(original.isRequired());
+                }
+                SpringUtilities.makeCompactGrid(this,
+                        3, 2, //rows, cols
+                        6, 6,        //initX, initY
+                        6, 6);       //xPad, yPad
+
+            }
+
+            @Override
+            public QuestionData getQuestion() {
+                QuestionData questionData = new QuestionData("textArea");
+                questionData.setKey(qLabel.getText());
+                questionData.setQuestion(question.getText());
+                questionData.setRequired(required.isSelected());
+                return questionData;
+            }
+
+            @Override
+            public boolean validated() {
+                return true;
+            }
+        }
     }
 
-    public void changeAsteriskColor(Color c) {
-        asterisks.setForeground(c);
+    interface QuestionEditor {
+        public QuestionData getQuestion();
+
+        public boolean validated();
+    }
+
+
+    class MouseActionPanel extends JPanel implements MouseListener {
+
+        Border blackBorder = BorderFactory.createLineBorder(Color.BLACK);
+        Border redBorder = BorderFactory.createLineBorder(Color.RED, 5);
+
+
+        public MouseActionPanel(boolean editMode) {
+            if (editMode) {
+                addMouseListener(this);
+            }
+        }
+
+        @Override
+        public void mouseClicked(MouseEvent mouseEvent) {
+
+        }
+
+        @Override
+        public void mousePressed(MouseEvent mouseEvent) {
+
+        }
+
+        @Override
+        public void mouseReleased(MouseEvent mouseEvent) {
+
+        }
+
+        @Override
+        public void mouseEntered(MouseEvent mouseEvent) {
+            setBorder(redBorder);
+        }
+
+        @Override
+        public void mouseExited(MouseEvent mouseEvent) {
+            setBorder(blackBorder);
+        }
+    }
+
+
+    abstract class DisplayQuestion extends JPanel {
+
+        public JLabel asterisks;
+        public boolean isRequired = true;
+
+        public DisplayQuestion(Boolean editMode) {
+            super(editMode);
+            asterisks = new JLabel("*", JLabel.TRAILING);
+            asterisks.setFont(new Font("Roman", Font.BOLD, 20));
+            asterisks.setForeground(Color.WHITE);
+        }
+
+        public abstract String getValue();
+
+        public abstract String getType();
+
+        public abstract void changeLabelSize(int width);
+
+        public void setRequired(Boolean isRequired) {
+            this.isRequired = isRequired;
+        }
+
+        public void changeAsteriskColor(Color c) {
+            asterisks.setForeground(c);
+        }
     }
 }

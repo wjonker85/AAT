@@ -74,6 +74,7 @@ public abstract class AatObject {
     private String displayQuestions;
     private boolean showBoxPlot;
     private Questionnaire questionnaire;
+    private String plotType = "";
 
     //Test view variables
     private int borderWidth;
@@ -415,6 +416,9 @@ public abstract class AatObject {
         } else {
             throw new FalseConfigException("ShowBoxPlot should be either True or False");
         }
+
+        plotType = testConfig.getPlotType(testConfig.getValue("PlotType"));
+
         if (!testConfig.getValue("AffectRatio").equals("")) {
             a_pushPerc = getPercentage(testConfig.getValue("AffectRatio"), "AffectRatio");
         }
@@ -588,6 +592,9 @@ public abstract class AatObject {
         return showBoxPlot;
     }
 
+    public String getPlotType() {
+        return plotType;
+    }
 
     /**
      * @return How many times the test has to be repeated

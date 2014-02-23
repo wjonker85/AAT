@@ -22,10 +22,12 @@ import AAT.Util.SpringUtilities;
 import AAT.Util.TitledSeparator;
 import Configuration.TestConfig;
 import Controller.JoystickController;
+import DataStructures.Questionnaire;
 import IO.XMLReader;
 import IO.XMLWriter;
 import Model.AATModel;
 import views.HTMLEditPanel;
+import views.QuestionPanel;
 import views.TestFrame;
 
 import javax.swing.*;
@@ -233,6 +235,15 @@ public class CreateConfig extends JPanel implements Observer {
         HtmlEditPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
 
         tabbedPane.addTab("Language File",HtmlEditPane);
+
+
+        QuestionPanel questionPanel = new QuestionPanel(null); //without reference to model.
+        JScrollPane questionPane = new JScrollPane(questionPanel);
+        XMLReader reader = new XMLReader(new File("/home/marcel/AAT/Dutch.xml"));
+        reader.addQuestionnaire(new File("/home/marcel/AAT/q.xml"));
+        Questionnaire q = new Questionnaire(reader.getExtraQuestions(),reader.getQuestionnaireIntro());
+        questionPanel.displayQuestions(q);
+        tabbedPane.addTab("Questionnaire",questionPane);
 
         SpringUtilities.makeCompactGrid(this,
                 2, 1, //rows, cols
@@ -1465,12 +1476,14 @@ public class CreateConfig extends JPanel implements Observer {
         pw.write("DisplayQuestions " + checkForValue(inputQuestions.getSelectedItem().toString()));
         pw.println();
         String boxPlot = "False";
+        String plotType = "";
         if (inputBoxplot.isSelected()) {
             boxPlot = "True";
+            plotType = "boxplot";
         }
         pw.write("ShowBoxPlot " + boxPlot);
         pw.println();
-        pw.write("PlotType " + "Boxplot");
+        pw.write("PlotType " + plotType);
         pw.println();
         pw.write(ratioHeader);
         pw.println();

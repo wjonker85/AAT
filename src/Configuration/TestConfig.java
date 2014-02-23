@@ -40,6 +40,8 @@ public class TestConfig {
     private Map<String, String> testOptions = new HashMap<String, String>();
     private File testConfig;
 
+    String[] plotTypes = { "boxplot","2dline" };
+
     //All the configuration options
     String[] options = {
             "ColoredBorders",
@@ -70,7 +72,8 @@ public class TestConfig {
             "TrialSize",
             "MaxSizePerc",
             "ImageSizePerc",
-            "ID"
+            "ID",
+            "PlotType"
 
     };
 
@@ -119,6 +122,15 @@ public class TestConfig {
         }
     }
 
+    //Check whether a given plot type is valid.
+    public String getPlotType(String input) {
+        for(String s : plotTypes ) {
+            if(input.trim().equalsIgnoreCase(s)) {
+                return s;
+            }
+        }
+        return "";
+    }
 
     public String getValue(String key) {
         return testOptions.get(key);

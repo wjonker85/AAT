@@ -42,6 +42,7 @@ public class TestFrame extends JFrame implements Observer {
     private CardLayout cl;
     private JPanel displayPanel;
     private BoxPlot boxPlot;
+    private PlotPanel plotPanel;
     private AATView aatView;
     private QuestionPanel questionsView;
     private Cursor invisibleCursor;
@@ -54,10 +55,12 @@ public class TestFrame extends JFrame implements Observer {
         questionsView = new QuestionPanel(model);
         aatView = new AATView(model);
         boxPlot = new BoxPlot(model);
+        plotPanel = new PlotPanel(model);
         model.addObserver(aatView);
         displayPanel.add(questionsView, "questions");
         displayPanel.add(aatView, "aat");
         displayPanel.add(boxPlot, "boxPlot");
+        displayPanel.add(plotPanel, "plot");
         //  resultsView = new BoxPlot()
 
         this.setLayout(new GridBagLayout());
@@ -94,6 +97,7 @@ public class TestFrame extends JFrame implements Observer {
         aatView = null;
         boxPlot = null;
         questionsView = null;
+        plotPanel = null;
         System.gc();
         this.setVisible(false);
         this.setEnabled(false);
@@ -124,12 +128,19 @@ public class TestFrame extends JFrame implements Observer {
 
         //Results Screen
         if (o.toString().equals("Display results")) {
-            boxPlot.init();
-            try {
-                boxPlot.display(true);
-                cl.show(displayPanel, "boxPlot");
-            } catch (Exception e) {
-                System.out.println("Error: Boxplot cannot be shown");
+            if (model.getTest().getPlotType().equalsIgnoreCase("boxplot")) {
+                boxPlot.init();
+                try {
+                    boxPlot.display(true);
+                    cl.show(displayPanel, "boxPlot");
+                } catch (Exception e) {
+                    System.out.println("Error: Boxplot cannot be shown");
+                }
+            }
+            else {
+                setCursor(Cursor.getDefaultCursor());
+                plotPanel.displayPlot(true);
+                cl.show(displayPanel,"plot");
             }
         }
 
@@ -137,6 +148,7 @@ public class TestFrame extends JFrame implements Observer {
             boxPlot = null;
             System.gc();
             boxPlot = new BoxPlot(model);
+            plotPanel = new PlotPanel(model);
             this.setVisible(false);
         }
     }
