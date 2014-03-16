@@ -1,14 +1,8 @@
 package AAT.validation;
 
-import AAT.AatObject;
-import DataStructures.AATImage;
-import DataStructures.Questionnaire;
-import DataStructures.TestConfiguration;
 import IO.ConfigFileReader;
-import IO.XMLReader;
 
 import java.io.*;
-import java.util.Hashtable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -24,396 +18,316 @@ public class AATValidator {
      * @param config The config file
      * @throws FalseConfigException When there are mistakes in the config file
      * <p/>
-     * workingDir
-     * testID
-     * dataFile
-     * langFile
-     * DisplayQuestions
-     * "questionnaireFile"
-     * neutralDir
-     * affectiveDir
-     * practiceDir
-     * coloredBorders
      */
+
     public static File workingDir;
 
-    public static TestConfiguration ValidateTestConfig(File config) throws FalseConfigException {
+
+    //Create a map containing all the test variables with validators attached to them.
+    public static TestConfigurationMap<String> createValidatedConfigMap(File config) throws FalseConfigException {
 
         TestConfigurationMap<String> testConfigurationMap = new TestConfigurationMap<String>();
         ConfigFileReader configFileReader = new ConfigFileReader(config);
+        //First set the working directory
         workingDir = new File(config.getParentFile().getAbsolutePath());
         testConfigurationMap.GetSetConfigOption("workingDir", workingDir);
+
+        //Check for the ID value
         String idValue = "1";
         Boolean newID = true;
         if (configFileReader.getValue("ID").length() > 0) {
             idValue = configFileReader.getValue("ID");
             newID = false;
         }
-        TestConfigurationOption id = testConfigurationMap.GetSetConfigOption("testID", configFileReader.getValue("ID"));
-        id.addValidator(new IConfigValidator<String>() {
-            @Override
-            public void validate(String s) throws FalseConfigException {
-                try {
-                    Integer.parseInt(s);
-                } catch (Exception e) {
-                    throw new FalseConfigException("Test id value is not a correct integer value.");
-                }
-            }
-        });
 
+        if (newID) {          //Add a new id value to the config file.
+            addNewIDToConfigFile(config);
+        }
 
-        //TODO uitzoeken wat de teststatus is. Indien nodig moet de datafile verandert worden en de oudere gebackuped worden.
+        TestConfigurationOption<Integer> id = testConfigurationMap.GetSetConfigOption("testID", parseIntWithException("testID", configFileReader.getValue("ID")));
+
+        //Specify the data file
         String datFile = configFileReader.getValue("DataFile");
-
         if (datFile.equals("")) {
             datFile = "Data.xml"; //Set to default.
         }
         testConfigurationMap.GetSetConfigOption("dataFile", datFile);
+
+
+        //Set the basic properties of the test trialsize break etc.
+        TestConfigurationOption<Integer> trials = testConfigurationMap.GetSetConfigOption("trials", parseIntWithException("trials", configFileReader.getValue("Trials")));
+        trials.addValidator(new NumberValidator("trials", 0, trials.getValue() + 1, false));
+        TestConfigurationOption<Integer> breakAfter = testConfigurationMap.GetSetConfigOption("breakAfter", parseIntWithException("breakAfter", configFileReader.getValue("BreakAfter")));
+        breakAfter.addValidator(new NumberValidator("breakAfter", -2, trials.getValue(), false));
+
+        //Check for a correct language file.
         TestConfigurationOption<File> lFile = testConfigurationMap.GetSetConfigOption("langFile", createFullPathFile(configFileReader.getValue("LanguageFile")));
         lFile.addValidator(new FileExistsValidator("Language"));
+
+        //Check whether the test has a questionnaire and when applicable this questionnaire needs to be displayed.
         TestConfigurationOption<String> displayQuestions = testConfigurationMap.GetSetConfigOption("displayQuestions", configFileReader.getValue("DisplayQuestions"));
         displayQuestions.addValidator(new IConfigValidator<String>() {
             @Override
             public void validate(String s) throws FalseConfigException {
-                  if(!(s.equalsIgnoreCase("Before") || s.equalsIgnoreCase("Afters") || s.equalsIgnoreCase("None"))) {
-                      throw new FalseConfigException("DisplayQuestions should be either Before, After or None");
-                  }
+                if (!(s.equalsIgnoreCase("Before") || s.equalsIgnoreCase("Afters") || s.equalsIgnoreCase("None"))) {
+                    throw new FalseConfigException("DisplayQuestions should be either Before, After or None");
+                }
             }
         });
-        TestConfigurationOption<File> questionnaireFile = testConfigurationMap.GetSetConfigOption("questionnaireFile",createFullPathFile(configFileReader.getValue("Questionnaire")));
+        TestConfigurationOption<File> questionnaireFile = testConfigurationMap.GetSetConfigOption("questionnaireFile", createFullPathFile(configFileReader.getValue("Questionnaire")));
         questionnaireFile.addValidator(new FileExistsValidator("Questionnaire"));
-        TestConfigurationOption<File> neutralDir = testConfigurationMap.GetSetConfigOption("neutralDir",createFullPathFile(configFileReader.getValue("NeutralDir")));
+
+        //Set the directories containing the neutral and affective images.
+        TestConfigurationOption<File> neutralDir = testConfigurationMap.GetSetConfigOption("neutralDir", createFullPathFile(configFileReader.getValue("NeutralDir")));
         neutralDir.addValidator(new ImageDirectoryValidator("Neutral"));
-        TestConfigurationOption<File> affectiveDir = testConfigurationMap.GetSetConfigOption("affectiveDir",createFullPathFile(configFileReader.getValue("AffectiveDir")));
+        TestConfigurationOption<File> affectiveDir = testConfigurationMap.GetSetConfigOption("affectiveDir", createFullPathFile(configFileReader.getValue("AffectiveDir")));
         affectiveDir.addValidator(new ImageDirectoryValidator("Affective"));
-        TestConfigurationOption<File> practiceDir = testConfigurationMap.GetSetConfigOption("practiceDir",createFullPathFile(configFileReader.getValue("PracticeDir")));
-        practiceDir.addValidator(new ImageDirectoryValidator("Practice"));
+
+        //See whether the test has practice images and how often they should be repeated.
+        TestConfigurationOption<Integer> practiceRepeat = testConfigurationMap.GetSetConfigOption("practiceRepeat", parseIntWithException("practiceRepeat", configFileReader.getValue("PracticeRepeat")));
+        practiceRepeat.addValidator(new NumberValidator("PracticeRepeat", 0, -1, false));
+
+        //See whether the AAT program should draw colored borders around the images or that the researcher has created it's own cue for the push or pull condition
         boolean doBorders = false;
-        if(configFileReader.getValue("ColoredBorders").equalsIgnoreCase("true")) {
+        if (configFileReader.getValue("ColoredBorders").equalsIgnoreCase("true")) {
             doBorders = true;
         }
-        if(configFileReader.getValue("ColoredBorders").equalsIgnoreCase("false")) {
+        if (configFileReader.getValue("ColoredBorders").equalsIgnoreCase("false")) {
             doBorders = false;
         }
-        TestConfigurationOption<Boolean> coloredBorders = testConfigurationMap.GetSetConfigOption("coloredBorders",doBorders);
-
-     //   XMLReader xmlReader = new XMLReader(testConfiguration.getLanguageFile());       TODO andere oplossing hiervoor
-        //TODO
-        //    xmlReader.addQuestionnaire(questionFile);      TODO andere optie
-
-      //  }
-        // id = getHighestID();
-
-
-//        if (!imageComplete(neutralDir, affectiveDir)) {             //TODO ook naar een andere plek
-  //          throw new FalseConfigException("Some of the configured images are not present");
-    //    }
-
-        //    xmlReader = new TextReader(languageFile);
-
-        // neutralImages = getImages(neutralDir);
-
-       // neutralImages = xmlReader.getIncludedFilesF(neutralDir);     //TODO dit ook
-
-    //    System.out.println("Neutral " + configFileReader.getValue("NeutralDir") + " " + neutralDir);
-    //    if (neutralImages.size() == 0) {
-    //        throw new FalseConfigException("Neutral images directory contains no images");
-    //    }
-        //    affectiveImages = getImages(affectiveDir);
-     //   affectiveImages = xmlReader.getIncludedFilesF(affectiveDir);
-      //  if (affectiveImages.size() == 0) {
-      //      throw new FalseConfigException("Affective images directory contains no images");
-      //  }
-      //  if (hasQuestions) {
-      //      questionnaire = new Questionnaire(xmlReader.getExtraQuestions(), xmlReader.getQuestionnaireIntro());
-      //  }
-
-        if (coloredBorders.getValue()) {
-
-            System.out.println("Colored borders is set to True");
-            TestConfigurationOption<File> pullColor = testConfigurationMap.GetSetConfigOption("borderColorPull",createFullPathFile(configFileReader.getValue("BorderColorPull")));
+        TestConfigurationOption<Boolean> coloredBorders = testConfigurationMap.GetSetConfigOption("coloredBorders", doBorders);
+        if (coloredBorders.getValue()) {        //Test uses auto-generated colored borders
+            TestConfigurationOption<String> pullColor = testConfigurationMap.GetSetConfigOption("borderColorPull", configFileReader.getValue("BorderColorPull"));
             pullColor.addValidator(new ColorValidator("pull"));
-            TestConfigurationOption<File> pushColor = testConfigurationMap.GetSetConfigOption("borderColorPush",createFullPathFile(configFileReader.getValue("BorderColorPush")));
+            TestConfigurationOption<String> pushColor = testConfigurationMap.GetSetConfigOption("borderColorPush", configFileReader.getValue("BorderColorPush"));
             pushColor.addValidator(new ColorValidator("push"));
-            try {
-                testConfigurationMap.GetSetConfigOption("borderWidth",Integer.parseInt(configFileReader.getValue("BorderWidth")));
-            } catch (Exception e) {
-                throw new FalseConfigException("Border width is not configured properly");
+            testConfigurationMap.GetSetConfigOption("borderWidth", parseIntWithException("BorderWidth", configFileReader.getValue("BorderWidth")));
+        } else {
+            //Researcher has specified it's own pull and push cues. Labels to define the push and pull images are necessary now.
+            TestConfigurationOption<String> pullTag = testConfigurationMap.GetSetConfigOption("pullTag", configFileReader.getValue("PullTag"));
+            pullTag.addValidator(new StringLengthValidator("pull tag"));
+            TestConfigurationOption<String> pushTag = testConfigurationMap.GetSetConfigOption("pushTag", configFileReader.getValue("PushTag"));
+            pushTag.addValidator(new StringLengthValidator("push tag"));
+
+            if (practiceRepeat.getValue() > 0) {   //No border and a practice. Researcher has to supply the test with it's own practice images.
+                TestConfigurationOption<File> practiceDir = testConfigurationMap.GetSetConfigOption("practiceDir", createFullPathFile(configFileReader.getValue("PracticeDir")));
+                practiceDir.addValidator(new ImageDirectoryValidator("Practice"));
             }
-        } else {       //Check for pull and push tag
-            System.out.println("Colored borders is set to False:");
-            testConfigurationMap.GetSetConfigOption("pullTag",configFileReader.getValue("PullTag"));
-            pushTag = configFileReader.getValue("PushTag");
-            if (pullTag.length() == 0) {
-                throw new FalseConfigException("Pull tag is not set");
-            }
-            if (pushTag.length() == 0) {
-                throw new FalseConfigException("Push tag is not set");
-            }     //Check for practice dir
-            System.out.println("Pull tag is set to " + pullTag);
-            System.out.println("Push tag is set to " + pushTag);
-            if (practiceRepeat > 0) {
-                System.out.println("Practice repeat >0");
-                practice = true;
-                String practDir = configFileReader.getValue("PracticeDir");
-                if (practDir.equals("")) {
-                    throw new FalseConfigException("When ColoredBorders is set to false, PracticeDir has to be defined");
+        }
+
+        if (practiceRepeat.getValue() > 0) {
+            if (!testConfigurationMap.contains("practiceDir")) {
+                if (coloredBorders.getValue()) {
+                    System.out.println("Practice with colored borders");
+                    TestConfigurationOption practiceFillColor = testConfigurationMap.GetSetConfigOption("practiceFillColor", configFileReader.getValue("PracticeFillColor"));
+                    practiceFillColor.addValidator(new ColorValidator("Practice fill color"));
                 } else {
-                    practiceDir = new File(practDir);
-                    System.out.println("Practice dir: " + practDir);
-                    if (!practiceDir.isDirectory()) {
-                        throw new FalseConfigException("The directory for the practice images is nog properly configured");
-                    }
-                    practiceImages = xmlReader.getIncludedFilesF(practiceDir);
+                    throw new FalseConfigException("When practiceDir isn't set, ColoredBorder has to be set to True \n" +
+                            "Or you forgot to set the directory containing the practice images");
                 }
             }
-            //TODO:
-        }
-        try {
-
-            repeat = Integer.parseInt(configFileReader.getValue("Trials"));
-        } catch (Exception e) {
-            throw new FalseConfigException("Number of trials is not configured properly");
-        }
-        System.out.println("Number of Trials is" + configFileReader.getValue("Trials"));
-        try {
-            breakAfter = Integer.parseInt(configFileReader.getValue("BreakAfter"));
-        } catch (Exception e) {
-            throw new FalseConfigException("BreakAfter is not configured properly");
-        }
-        System.out.println("There will be a break after " + breakAfter + " trials");
-        if (!configFileReader.getValue("StepSize").equals("")) {
-            try {
-                stepSize = Integer.parseInt(configFileReader.getValue("StepSize"));
-            } catch (Exception e) {
-                throw new FalseConfigException("StepSize is not configured properly");
-            }
-            if (stepSize % 2 == 0) {
-                throw new FalseConfigException("Stepsize should be and odd number");
-            }
-        }
-        if (!configFileReader.getValue("DataSteps").equals("")) {
-            try {
-                dataSteps = Integer.parseInt(configFileReader.getValue("DataSteps"));
-            } catch (Exception e) {
-                throw new FalseConfigException("DataSteps is not configured properly");
-            }
-            if (dataSteps % 2 == 0) {
-                throw new FalseConfigException("DataSteps should be and odd number");
-            }
-        }
-
-        if (!configFileReader.getValue("PracticeRepeat").equals("")) {  //When a value for practice repeat is set, check validity
-            try {
-
-                practiceRepeat = Integer.parseInt(configFileReader.getValue("PracticeRepeat"));
-            } catch (Exception e) {
-                throw new FalseConfigException("PracticeRepeat is not configured properly");
-            }
-            if (practiceRepeat > 0) {
-                practice = true;
-                System.out.println("Test has practice");
-                String practDir = configFileReader.getValue("PracticeDir");
-
-                if (practDir.equals("")) {
-                    System.out.println("Practice dir is not defined");
-                    if (coloredBorders) {
-                        System.out.println("Practice with colored borders");
-                        practiceFillColor = configFileReader.getValue("PracticeFillColor");
-                        Matcher matcher;
-                        hexPattern.matcher(practiceFillColor);
-                        matcher = hexPattern.matcher(practiceFillColor);
-                        if (!(practiceFillColor.length() == 6) || !matcher.matches()) {
-                            throw new FalseConfigException("The color specified for the practice image fill color is not a valid 6 character hex value\n" +
-                                    "Or you forgot to set the directory containing the practice images");
-                        }
-                    } else {
-                        throw new FalseConfigException("When practiceDir isn't set, ColoredBorder has to be set to True \n" +
-                                "Or you forgot to set the directory containing the practice images");
-                    }
-                } else {
-                    System.out.println("Practice without colored borders");
-                    practiceDir = new File(workingDir + File.separator + practDir);
-                    System.out.println("Practice dir is set to " + practiceDir.getAbsoluteFile());
-                    if (!practiceDir.isDirectory()) {
-                        throw new FalseConfigException("The directory for the practice images is nog properly configured");
-                    }
-                    practiceImages = xmlReader.getIncludedFilesF(practiceDir);
-
-                }
-                testList = createRandomPracticeList(); //TODO: Can be done nicer
-                if (testList.size() == 0) {
-                    throw new FalseConfigException("Practice images directory contains no images");
-                }
-                testList = null; //Remove the test list from memory
-                practice = true;
-            }
-
-
         }
 
         String hasBoxplot = configFileReader.getValue("ShowBoxPlot");
-        if (hasBoxplot.equals("True")) {
-            showBoxPlot = true;
-        } else if (hasBoxplot.equals("False")) {
-            showBoxPlot = false;
+        if (hasBoxplot.equalsIgnoreCase("True")) {
+            testConfigurationMap.GetSetConfigOption("showBoxPlot", true);
+        } else if (hasBoxplot.equalsIgnoreCase("False")) {
+            testConfigurationMap.GetSetConfigOption("showBoxPlot", false);
         } else {
             throw new FalseConfigException("ShowBoxPlot should be either True or False");
         }
 
-        plotType = configFileReader.getPlotType(configFileReader.getValue("PlotType"));
 
+        //--------------------- Advanced options  ----------------------------------------------------------------------------------------
+        testConfigurationMap.GetSetConfigOption("PlotType", configFileReader.getPlotType(configFileReader.getValue("PlotType")));
         if (!configFileReader.getValue("AffectRatio").equals("")) {
-            a_pushPerc = getPercentage(configFileReader.getValue("AffectRatio"), "AffectRatio");
+            TestConfigurationOption<Integer> a_pushPerc = testConfigurationMap.GetSetConfigOption("affectRatio", getPercentage(configFileReader.getValue("AffectRatio"), "AffectRatio"));
         }
         if (!configFileReader.getValue("NeutralRatio").equals("")) {
-            n_pushPerc = getPercentage(configFileReader.getValue("NeutralRatio"), "NeutralRatio");
+            TestConfigurationOption<Integer> n_pushPerc = testConfigurationMap.GetSetConfigOption("neutralRatio", getPercentage(configFileReader.getValue("NeutralRatio"), "NeutralRatio"));
         }
         if (!configFileReader.getValue("TestRatio").equals("")) {
-            affectPerc = getPercentage(configFileReader.getValue("TestRatio"), "TestRatio");
+            TestConfigurationOption<Integer> affectPerc = testConfigurationMap.GetSetConfigOption("testRatio", getPercentage(configFileReader.getValue("TestRatio"), "TestRatio"));
         }
         if (!configFileReader.getValue("TrialSize").equals("")) {
-            try {
-                trialSize = Integer.parseInt(configFileReader.getValue("TrialSize"));
-            } catch (Exception e) {
-                throw new AatObject.FalseConfigException("TrialSize is not set to a correct number");
-            }
+            TestConfigurationOption<Integer> trialSize = testConfigurationMap.GetSetConfigOption("trialSize", parseIntWithException("TrialSize", configFileReader.getValue("TrialSize")));
         }
-
         if (!configFileReader.getValue("MaxSizePerc").equals("")) {
-            try {
-                maxSizePerc = Integer.parseInt(configFileReader.getValue("MaxSizePerc"));
-            } catch (Exception e) {
-                throw new AatObject.FalseConfigException("Maximum image size is not a number");
-            }
-            if (maxSizePerc <= 0) {
-                throw new AatObject.FalseConfigException("Maximum image size should be larger than 0");
-            }
-        }
-        if (!configFileReader.getValue("ImageSizePerc").equals("")) {
-            try {
-                imageSizePerc = Integer.parseInt(configFileReader.getValue("ImageSizePerc"));
-            } catch (Exception e) {
-                throw new AatObject.FalseConfigException("Image start size percentage is not a number");
-            }
-            if (imageSizePerc <= 0) {
-                throw new AatObject.FalseConfigException("Image start size percentage should be larger than 0");
-            }
-        }
-        if (breakAfter == repeat) {
-            throw new FalseConfigException("Number of trials and Break After values cannot be the same");
+            TestConfigurationOption<Integer> imageSizePerc = testConfigurationMap.GetSetConfigOption("imageSizePerc", parseIntWithException("ImageSizePerc", configFileReader.getValue("ImageSizePerc")));
         }
 
+        //Set some performance options.
+        TestConfigurationOption<Integer> stepSize = testConfigurationMap.GetSetConfigOption("stepSize", parseIntWithException("StepSize", configFileReader.getValue("StepSize")));
+        stepSize.addValidator(new NumberValidator("StepSize", 0, 101, true));
+        TestConfigurationOption<Integer> dataSteps = testConfigurationMap.GetSetConfigOption("dataSteps", parseIntWithException("DataSteps", configFileReader.getValue("DataSteps")));
+        stepSize.addValidator(new NumberValidator("StepSize", 0, 101, true));
 
-        if (newID) {          //Add a new id value to the config file.    //TODO dit ergens achteraan plaatsen.
-            Writer output;
+        return testConfigurationMap;
+    }
+
+    private static void addNewIDToConfigFile(File config) {
+        Writer output;
+        try {
+            FileWriter fw = null;
             try {
-                FileWriter fw = null;
-                try {
-                    fw = new FileWriter(config, true);
-                } catch (IOException e) {
-                    e.printStackTrace();
+                fw = new FileWriter(config, true);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            PrintWriter pw = new PrintWriter(fw);
+
+            pw.write("\n# Unique ID value. This value is used to determine whether this file has changed since the last time the test was taken.\n");
+            pw.write("ID 0\n");
+            pw.flush();
+            pw.close();
+            try {
+                if (fw != null) {
+                    fw.close();
                 }
-                PrintWriter pw = new PrintWriter(fw);
-
-                pw.write("\n# Unique ID value. This value is used to determine whether this file has changed since the last time the test was taken.\n");
-                pw.write("ID 0\n");
-                pw.flush();
-                pw.close();
-                try {
-                    if (fw != null) {
-                        fw.close();
-                    }
-                } catch (IOException ignored) {
-                    ignored.printStackTrace();
-                }
-            } catch (Exception e) {
-                System.out.println("Could not write to config file.");
+            } catch (IOException ignored) {
+                ignored.printStackTrace();
             }
+        } catch (Exception e) {
+            System.out.println("Could not write to config file.");
         }
     }
 
+
+    private static int getPercentage(String ratio, String s) throws FalseConfigException {
+        if (!ratio.contains(":")) {
+            throw new FalseConfigException(s + " is not a correct ratio");
+        }
+
+        String[] str = ratio.split(":");
+        if (str.length != 2) {
+            throw new FalseConfigException(s + " is not a correct ratio");
+        }
+        float first, second;
+        try {
+            first = Integer.parseInt(str[0]);
+            second = Integer.parseInt(str[1]);
+        } catch (Exception e) {
+            throw new FalseConfigException(s + " is not a correct ratio");
+        }
+        if (first == 0) {
+            return 0;
+        }
+        int total = (int) (first + second);
+        return (int) ((first / total) * 100f);
+
+    }
+
+    public static int parseIntWithException(String label, String value) throws FalseConfigException {
+        int returnValue;
+        try {
+            returnValue = Integer.parseInt(value);
+        } catch (Exception e) {
+            throw new FalseConfigException("Value for " + label + " is not a number");
+        }
+        return returnValue;
+    }
 
     public static File createFullPathFile(String file) {
         return new File(workingDir + File.separator + file);
     }
-
-    //Check whether a given directory is a valid directory.
-    class ImageDirectoryValidator implements IConfigValidator<File>
-    {
-       private String type;
-
-        public ImageDirectoryValidator(String type)
-        {
-            this.type = type;
-        }
-
-        @Override
-        public void validate(File dir) throws FalseConfigException {
-            if (dir.getName().equals("") || !dir.isDirectory()) {
-                throw new FalseConfigException("Directory for the "+type+" images is not set properly");
-            }
-        }
-    }
-
-   class StringLengthValidator implements IConfigValidator<String> {
-
-       private String label;
-
-       public StringLengthValidator(String label) {
-           this.label = label;
-       }
-
-       @Override
-       public void validate(String s) throws FalseConfigException {
-           if(s.length() == 0) {
-               throw new FalseConfigException(label+" is not set to a correct value");
-           }
-       }
-   }
 }
 
-    class ColorValidator implements IConfigValidator<String> {
+//----------------------------------Validators ----------------------------------------------------------------------
+//Check whether a given directory is a valid directory.
+class ImageDirectoryValidator implements IConfigValidator<File> {
 
-        private static final String HEX_PATTERN = "(^[0-9A-F]+$)";
-        private String label;
-        Pattern hexPattern;
+    private String type;
 
-        public ColorValidator(String label)
-        {
-            hexPattern = Pattern.compile(HEX_PATTERN);
-            this.label = label;
+    public ImageDirectoryValidator(String type) {
+        this.type = type;
+    }
+
+    @Override
+    public void validate(File dir) throws FalseConfigException {
+        if (dir.getName().equals("") || !dir.isDirectory()) {
+            throw new FalseConfigException("Directory for the " + type + " images is not set properly");
         }
+    }
+}
 
-        @Override
-        public void validate(String s) throws FalseConfigException {
-            Matcher matcher = hexPattern.matcher(s);
-            if (!(s.length() == 6) || !matcher.matches()) {
-                throw new FalseConfigException("The color specified for the "+label+" border is not a valid 6 character hex value");
-            }
+class StringLengthValidator implements IConfigValidator<String> {
+    private String label;
+
+    public StringLengthValidator(String label) {
+        this.label = label;
+    }
+
+    @Override
+    public void validate(String s) throws FalseConfigException {
+        if (s.length() == 0) {
+            throw new FalseConfigException(label + " is not set to a correct value");
+        }
+    }
+}
+
+class ColorValidator implements IConfigValidator<String> {
+
+    private static final String HEX_PATTERN = "(^[0-9A-F]+$)";
+    Pattern hexPattern;
+    private String label;
+
+    public ColorValidator(String label) {
+        hexPattern = Pattern.compile(HEX_PATTERN);
+        this.label = label;
+    }
+
+    @Override
+    public void validate(String s) throws FalseConfigException {
+        Matcher matcher = hexPattern.matcher(s);
+        if (!(s.length() == 6) || !matcher.matches()) {
+            throw new FalseConfigException("The color specified for the " + label + " border is not a valid 6 character hex value");
         }
     }
 
 
+}
 
-    //Check whether a specified file exists
-    class FileExistsValidator implements IConfigValidator<File>  {
+class NumberValidator implements IConfigValidator<Integer> {
+    private String label;
+    private int min, max;
+    private boolean oddNumber;
 
-       private String type;
-        public FileExistsValidator(String type) {
-              this.type = type;
+
+    public NumberValidator(String label, int min, int max, boolean oddNumber) {
+        this.label = label;
+        this.min = min;
+        this.max = max;
+        this.oddNumber = oddNumber;
+    }
+
+    @Override
+    public void validate(Integer integer) throws FalseConfigException {
+        int value = integer.intValue();
+        if (max == -1) max = value + 1;
+        if (value < min || value > max) {
+            throw new FalseConfigException("Value " + value + " for property " + label + " is set either too large or too small.");
         }
-
-        @Override
-        public void validate(File file) throws FalseConfigException {
-            if(file.getName().length() == 0 || !file.exists() || file.isDirectory())  {
-                   throw new FalseConfigException(type +" is not configured properly.")
+        if (oddNumber) {
+            if (value % 2 == 0) {
+                throw new FalseConfigException("Value " + value + " for property " + label + " has to be an odd number");
             }
         }
     }
+}
 
+//Check whether a specified file exists
+class FileExistsValidator implements IConfigValidator<File> {
 
+    private String type;
 
+    public FileExistsValidator(String type) {
+        this.type = type;
+    }
 
-
-
+    @Override
+    public void validate(File file) throws FalseConfigException {
+        if (file.getName().length() == 0 || !file.exists() || file.isDirectory()) {
+            throw new FalseConfigException(type + " is not configured properly.");
+        }
+    }
+}

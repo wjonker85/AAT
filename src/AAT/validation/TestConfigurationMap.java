@@ -82,7 +82,7 @@ public class TestConfigurationMap<TKey> {
         return option;
     }
 
-    private boolean contains(TKey key) {
+    public boolean contains(TKey key) {
         if (StringOptions.containsKey(key) || IntegerOptions.containsKey(key) || BoolOptions.containsKey(key) || FileOptions.containsKey(key)) {
             return true;
         } else {
@@ -90,17 +90,55 @@ public class TestConfigurationMap<TKey> {
         }
     }
 
+    public int getIntValue(TKey key) throws FalseConfigException{
+         if(IntegerOptions.containsKey(key)) {
+             return IntegerOptions.get(key).getValue();
+         }
+        else {
+             throw new FalseConfigException(String.valueOf(key) + " not found.");
+         }
+    }
+
+    public File getFileValue(TKey key) throws  FalseConfigException {
+        if(FileOptions.containsKey(key)) {
+            return FileOptions.get(key).getValue();
+        }
+        else {
+            throw new FalseConfigException(String.valueOf(key) + " not found.");
+        }
+    }
+
+    public boolean getBooleanValue(TKey key) throws FalseConfigException{
+        if(BoolOptions.containsKey(key)) {
+            return BoolOptions.get(key).getValue();
+        }
+        else {
+            throw new FalseConfigException(String.valueOf(key) + " not found.");
+        }
+    }
+
+    public String getStringValue(TKey key) throws FalseConfigException{
+        if(StringOptions.containsKey(key)) {
+            return StringOptions.get(key).getValue();
+        }
+        else {
+            throw new FalseConfigException(String.valueOf(key) + " not found.");
+        }
+    }
+
     public int getSize() {
         return IntegerOptions.size() + StringOptions.size() + BoolOptions.size()+ FileOptions.size();
     }
 
-    public boolean isValidated() {
+    public boolean isValidated() throws FalseConfigException {
         for (TestConfigurationOption<String> option : StringOptions.values()) {
             if(option.getValidator() == null) {
                 return true; //Assume true when no validator is set.
             }
-            if (!option.getValidator().validated(option.getValue())) {
-                return false;
+            try {
+                option.getValidator().validate(option.getValue());
+            } catch (FalseConfigException e) {
+                  throw e;
             }
         }
 
@@ -108,8 +146,10 @@ public class TestConfigurationMap<TKey> {
             if(option.getValidator() == null) {
                 return true; //Assume true when no validator is set.
             }
-            if (!option.getValidator().validated(option.getValue())) {
-                return false;
+            try {
+                option.getValidator().validate(option.getValue());
+            } catch (FalseConfigException e) {
+                throw e;
             }
         }
 
@@ -117,8 +157,10 @@ public class TestConfigurationMap<TKey> {
             if(option.getValidator() == null) {
                 return true; //Assume true when no validator is set.
             }
-            if (!option.getValidator().validated(option.getValue())) {
-                return false;
+            try {
+                option.getValidator().validate(option.getValue());
+            } catch (FalseConfigException e) {
+                throw e;
             }
         }
 
@@ -126,18 +168,19 @@ public class TestConfigurationMap<TKey> {
             if(option.getValidator() == null) {
                 return true; //Assume true when no validator is set.
             }
-            if (!option.getValidator().validated(option.getValue())) {
-                return false;
+            try {
+                option.getValidator().validate(option.getValue());
+            } catch (FalseConfigException e) {
+                throw e;
             }
         }
-        return true;
+        return true;      //When no exception is thrown, test configuration is valid and loading can continue.
     }
 }
 
 class TestConfigurationOption<TValue> implements IConfigOption<TValue> {
     private TValue value;
     private IConfigValidator<TValue> validator = null;
-
 
     public TestConfigurationOption(TValue value) {
         this.value = value;
@@ -151,7 +194,7 @@ class TestConfigurationOption<TValue> implements IConfigOption<TValue> {
     @Override
     public void setValue(TValue value) {
         this.value = value;
-    }
+     }
 
     @Override
     public void addValidator(IConfigValidator<TValue> validator) {
