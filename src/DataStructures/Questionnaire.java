@@ -7,7 +7,7 @@ import java.util.ArrayList;
  * User: marcel
  * Date: 5/5/12
  * Time: 4:16 PM
- * Simple class containing the questionnaire data
+ * Simple class containing the Questionnaire data
  */
 public class Questionnaire {
 

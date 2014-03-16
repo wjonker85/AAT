@@ -46,7 +46,7 @@ public class ParticipantData {
     }
 
 
-    public void addQuestionData(HashMap<String, String> questionData) {    //Add extra participant info, based on the questionnaire
+    public void addQuestionData(HashMap<String, String> questionData) {    //Add extra participant info, based on the Questionnaire
         this.questionData = questionData;
     }
 

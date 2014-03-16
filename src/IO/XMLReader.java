@@ -23,6 +23,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import javax.swing.*;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
@@ -40,7 +41,7 @@ public class XMLReader {
 
     private Map<String, String> testText = new HashMap<String, String>();
     private ArrayList<QuestionData> extraQuestions;
-    private String introduction = ""; //introduction for the questionnaire;
+    private String introduction = ""; //introduction for the Questionnaire;
     private Document doc;
     private Document questionnaire;
 
@@ -58,16 +59,19 @@ public class XMLReader {
     public XMLReader(File languageFile) {
 
         extraQuestions = new ArrayList<QuestionData>();
-        try {
-            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-            DocumentBuilder db = dbf.newDocumentBuilder();
-            doc = db.parse(languageFile);
-            doc.getDocumentElement().normalize();
+        if (languageFile.exists()) {
+            try {
 
-        } catch (Exception e) {
-            e.printStackTrace();
+                DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+                DocumentBuilder db = dbf.newDocumentBuilder();
+                doc = db.parse(languageFile);
+                doc.getDocumentElement().normalize();
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            readText();
         }
-        readText();
     }
 
     public void addQuestionnaire(File questionFile) {
@@ -91,52 +95,61 @@ public class XMLReader {
 
 
     private void readQuestions() {
-        NodeList questions = questionnaire.getElementsByTagName("questionnaire");
-        Element allQuestions = (Element) questions.item(0);
-        NodeList introductionList = allQuestions.getElementsByTagName("introduction");
-        Node introductionNode = introductionList.item(0);
-        Node introductionText = introductionNode.getFirstChild();
-        introduction = introductionText.getNodeValue();
-        NodeList questionList = allQuestions.getElementsByTagName("question");
-        QuestionData newQuestion = null;
+        try {
+            NodeList questions = questionnaire.getElementsByTagName("Questionnaire");
+            Element allQuestions = (Element) questions.item(0);
+            NodeList introductionList = allQuestions.getElementsByTagName("introduction");
+            Node introductionNode = introductionList.item(0);
+            Node introductionText = introductionNode.getFirstChild();
+            introduction = introductionText.getNodeValue();
+            NodeList questionList = allQuestions.getElementsByTagName("question");
+            QuestionData newQuestion = null;
 
-        for (int x = 0; x < questionList.getLength(); x++) {
-            Node fstNode = questionList.item(x);
+            for (int x = 0; x < questionList.getLength(); x++) {
+                Node fstNode = questionList.item(x);
 
-            if (fstNode.getNodeType() == Node.ELEMENT_NODE) {
-                Element element = (Element) fstNode;
-                String type = element.getAttribute("type");
-                String required = element.getAttribute("required");
+                if (fstNode.getNodeType() == Node.ELEMENT_NODE) {
+                    Element element = (Element) fstNode;
+                    String type = element.getAttribute("type");
+                    String required = element.getAttribute("required");
 
-                newQuestion = new QuestionData(type);
-                if (required.equalsIgnoreCase("false")) {
-                    newQuestion.setRequired(false);
-                }
-                newQuestion.setQuestion(getValue("text", element));
-                newQuestion.setKey(getValue("key", element));
-                if (type.equals("closed_combo") || type.equals("closed_buttons")) {
-                    NodeList optionList = element.getElementsByTagName("option");
+                    newQuestion = new QuestionData(type);
+                    if (required.equalsIgnoreCase("false")) {
+                        newQuestion.setRequired(false);
+                    }
+                    newQuestion.setQuestion(getValue("text", element));
+                    newQuestion.setKey(getValue("key", element));
+                    if (type.equals("closed_combo") || type.equals("closed_buttons")) {
+                        NodeList optionList = element.getElementsByTagName("option");
 
-                    for (int i = 0; i < optionList.getLength(); i++) {
-                        Node oNode = optionList.item(i);
-                        if (oNode.getNodeType() == Node.ELEMENT_NODE) {
-                            Node option = oNode.getChildNodes().item(0);
-                            newQuestion.addOptions(option.getNodeValue());
+                        for (int i = 0; i < optionList.getLength(); i++) {
+                            Node oNode = optionList.item(i);
+                            if (oNode.getNodeType() == Node.ELEMENT_NODE) {
+                                Node option = oNode.getChildNodes().item(0);
+                                newQuestion.addOptions(option.getNodeValue());
+                            }
                         }
                     }
+                    if (type.equals("open")) {
+                        //
+                    }
+                    if (type.equals("likert") || type.equals("sem_diff")) {
+                        newQuestion.setLeftText(getValue("left", element));
+                        newQuestion.setRightText(getValue("right", element));
+                        String size = getValue("size", element);
+                        newQuestion.setSize(Integer.parseInt(size));
+                    }
                 }
-                if (type.equals("open")) {
-                    //
-                }
-                if (type.equals("likert") || type.equals("sem_diff")) {
-                    newQuestion.setLeftText(getValue("left", element));
-                    newQuestion.setRightText(getValue("right", element));
-                    String size = getValue("size", element);
-                    newQuestion.setSize(Integer.parseInt(size));
-                }
+                extraQuestions.add(newQuestion);
             }
-            extraQuestions.add(newQuestion);
+        } catch (Exception e) {
+            //custom title, error icon
+            JOptionPane.showMessageDialog(null,
+                    "Invalid Questionnaire file.",
+                    "XML Error",
+                    JOptionPane.ERROR_MESSAGE);
         }
+
     }
 
     private static String getValue(String tag, Element element) {
@@ -159,14 +172,13 @@ public class XMLReader {
     }
 
 
-
     public ArrayList<String> getIncludedFiles(File dir) {
         ArrayList<String> files = new ArrayList<String>();
 
         try {
             File xmlFile = new File(dir.getAbsoluteFile() + File.separator + "included.xml");
-            if(!xmlFile.exists()) {        //Create the included.xml files when they are not present. Done for backwards compatibility with older versions of the test.
-              System.out.println("Included.xml doesn't exist, creating one.");
+            if (!xmlFile.exists()) {        //Create the included.xml files when they are not present. Done for backwards compatibility with older versions of the test.
+                System.out.println("Included.xml doesn't exist, creating one.");
                 XMLWriter.writeXMLImagesList(dir);
             }
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -180,7 +192,7 @@ public class XMLReader {
                 if (fstNode.getNodeType() == Node.ELEMENT_NODE) {
                     Element element = (Element) fstNode;
                     String file = element.getAttribute("file");
-                    System.out.println("Included "+file);
+                    System.out.println("Included " + file);
                     files.add(file);
                 }
             }
@@ -194,10 +206,10 @@ public class XMLReader {
     public ArrayList<File> getIncludedFilesF(File dir) {
 
         ArrayList<File> result = new ArrayList<File>();
-        for(String s : getIncludedFiles(dir)) {
-                 String image = dir.getAbsolutePath()+File.separator+s;
-                 System.out.println("Added image "+image);
-                 result.add(new File(image));
+        for (String s : getIncludedFiles(dir)) {
+            String image = dir.getAbsolutePath() + File.separator + s;
+            System.out.println("Added image " + image);
+            result.add(new File(image));
         }
         return result;
     }

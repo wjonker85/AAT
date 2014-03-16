@@ -17,7 +17,6 @@
 
 package AAT;
 
-import AAT.Util.FileUtils;
 import DataStructures.AATImage;
 
 import java.awt.*;
@@ -74,11 +73,11 @@ public class HighMemoryAAT extends AatObject {
                 for (int x = 0; x < practiceRepeat; x++) {
                     for(File image : practiceImages) {
                  //   for (File image : FileUtils.getImages(practiceDir)) {
-                        if (image.getName().contains(testConfig.getValue("PullTag"))) {
+                        if (image.getName().contains(configFileReader.getValue("PullTag"))) {
                             AATImage pull = new AATImage(image, AATImage.PULL, this, x); //Two instances for every image
                             list.add(pull);
                         }
-                        if (image.getName().contains(testConfig.getValue("PushTag"))) {
+                        if (image.getName().contains(configFileReader.getValue("PushTag"))) {
                             AATImage push = new AATImage(image, AATImage.PUSH, this, x);
                             list.add(push);      //Load the neutral images
                         }
@@ -160,21 +159,21 @@ public class HighMemoryAAT extends AatObject {
         ArrayList<AATImage> randomList = new ArrayList<AATImage>();
         for (File image : neutralImages) {
             // System.out.println(image.getName());
-            if (image.getName().contains(testConfig.getValue("PullTag"))) {
+            if (image.getName().contains(configFileReader.getValue("PullTag"))) {
                 AATImage pull = new AATImage(image, AATImage.PULL, AATImage.NEUTRAL, this); //Two instances for every image
                 randomList.add(pull);
             }
-            if (image.getName().contains(testConfig.getValue("PushTag"))) {
+            if (image.getName().contains(configFileReader.getValue("PushTag"))) {
                 AATImage push = new AATImage(image, AATImage.PUSH, AATImage.NEUTRAL, this);
                 randomList.add(push);      //Load the neutral images
             }
         }
         for (File image : affectiveImages) {
-            if (image.getName().contains(testConfig.getValue("PullTag"))) {
+            if (image.getName().contains(configFileReader.getValue("PullTag"))) {
                 AATImage pull = new AATImage(image, AATImage.PULL, AATImage.AFFECTIVE, this); //Two instances for every image
                 randomList.add(pull);
             }
-            if (image.getName().contains(testConfig.getValue("PushTag"))) {
+            if (image.getName().contains(configFileReader.getValue("PushTag"))) {
                 AATImage push = new AATImage(image, AATImage.PUSH, AATImage.AFFECTIVE, this);
                 randomList.add(push);      //Load the neutral images
             }

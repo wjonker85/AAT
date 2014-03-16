@@ -97,7 +97,7 @@ public class ExportDataDialog extends JFrame {
         JPanel controlPanel = new JPanel();
         controlPanel.setLayout(new BoxLayout(controlPanel, BoxLayout.X_AXIS));
         JButton saveMeasures = new JButton("Export measurement data");
-        JButton saveParticipants = new JButton("Export questionnaire data");
+        JButton saveParticipants = new JButton("Export Questionnaire data");
         JButton closeButton = new JButton("Close");
         closeButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent actionEvent) {

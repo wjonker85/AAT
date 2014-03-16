@@ -247,7 +247,7 @@ public class AATModel extends Observable {
 
                 } else if (run == repeat) {   //No more runs left, Test has ended
                     testStatus = AATModel.TEST_SHOW_FINISHED;    //Notify observers about it
-                    if (!newAAT.getDisplayQuestions().equals("After")) {  //questionnaire has to be added at the end
+                    if (!newAAT.getDisplayQuestions().equals("After")) {  //Questionnaire has to be added at the end
                         if (saveData) {
                             testData.addParticipant(newParticipant);
                         }

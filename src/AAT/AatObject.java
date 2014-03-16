@@ -19,21 +19,15 @@ package AAT;
 
 
 import AAT.Util.FileUtils;
-import Configuration.TestConfig;
+import AAT.validation.FalseConfigException;
+import DataStructures.TestConfiguration;
+import IO.ConfigFileReader;
 import DataStructures.AATImage;
 import DataStructures.Questionnaire;
 import IO.XMLReader;
-import IO.XMLWriter;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -52,7 +46,7 @@ import java.util.regex.Pattern;
 public abstract class AatObject {
 
     //Configuration readers
-    public TestConfig testConfig;
+    public ConfigFileReader configFileReader;
     //   private TextReader xmlReader;
     private XMLReader xmlReader;
     //TODO: renamen
@@ -109,27 +103,7 @@ public abstract class AatObject {
 
     private static final String HEX_PATTERN = "(^[0-9A-F]+$)";
 
-    public static String removeExtention(String filePath) {
-        // These first few lines the same as Justin's
-        File f = new File(filePath);
 
-        // if it's a directory, don't remove the extention
-        if (f.isDirectory()) return filePath;
-
-        String name = f.getName();
-
-        // Now we know it's a file - don't need to do any special hidden
-        // checking or contains() checking because of:
-        final int lastPeriodPos = name.lastIndexOf('.');
-        if (lastPeriodPos <= 0) {
-            // No period after first character - return name as it was passed in
-            return filePath;
-        } else {
-            // Remove the last period and everything after it
-            File renamed = new File(f.getParent(), name.substring(0, lastPeriodPos));
-            return renamed.getPath();
-        }
-    }
 
     /**
      * Constructor Loads all the configuration data from the config file and the language file specified in that config
@@ -138,18 +112,19 @@ public abstract class AatObject {
      * @param config The config file
      * @throws FalseConfigException When there are mistakes in the config file
      */
-    public AatObject(File config) throws FalseConfigException {
+    public static TestConfiguration ValidateTestConfig(File config) throws FalseConfigException {
 
+        TestConfiguration testConfiguration = new TestConfiguration();
         practiceImages = new ArrayList<File>();
         Pattern hexPattern = Pattern.compile(HEX_PATTERN);
-        testConfig = new TestConfig(config);
+        configFileReader = new ConfigFileReader(config);
         String workingDir = config.getParentFile().getAbsolutePath();
 
         System.out.println("Checking configuration");
-        if(testConfig.getValue("ID").length()>0) {
+        if(configFileReader.getValue("ID").length()>0) {
         try {
 
-        test_id = Integer.parseInt(testConfig.getValue("ID"));
+        test_id = Integer.parseInt(configFileReader.getValue("ID"));
             System.out.println("Test ID "+test_id);
         }
         catch (Exception e)   {
@@ -186,14 +161,14 @@ public abstract class AatObject {
             }
         }
 
-        String datFile = testConfig.getValue("DataFile");
+        String datFile = configFileReader.getValue("DataFile");
         //TODO uitzoeken wat de teststatus is. Indien nodig moet de datafile verandert worden en de oudere gebackuped worden.
         if (datFile.equals("")) {
             datFile = "Data.xml"; //Set to default.
         }
 
         dataFile = new File(workingDir + File.separator + datFile);
-        String langFile = testConfig.getValue("LanguageFile");
+        String langFile = configFileReader.getValue("LanguageFile");
         File languageFile = new File(workingDir + File.separator + langFile);
         if (langFile.equals("") || !languageFile.exists() || languageFile.isDirectory()) {
             throw new FalseConfigException("No language file specified");
@@ -203,32 +178,32 @@ public abstract class AatObject {
         System.out.println("Language file = " + langFile);
 
         //TODO
-        displayQuestions = testConfig.getValue("DisplayQuestions");
+        displayQuestions = configFileReader.getValue("DisplayQuestions");
         if (!displayQuestions.equals("Before") && !displayQuestions.equals("After") && !displayQuestions.equals("None")) {
             throw new FalseConfigException("DisplayQuestions should be either Before, After or None");
         }
-        if (!displayQuestions.equals("None")) {   //Test has a questionnaire
-            System.out.println("Test has a questionnaire");
+        if (!displayQuestions.equals("None")) {   //Test has a Questionnaire
+            System.out.println("Test has a Questionnaire");
             hasQuestions = true;
-            String qFile = testConfig.getValue("Questionnaire");
+            String qFile = configFileReader.getValue("Questionnaire");
             System.out.println("Questionnaire is set to " + qFile);
             File questionFile = new File(workingDir + File.separator + qFile);
             if (qFile.length() == 0) {
-                throw new FalseConfigException("The specified questionnaire doesn't exist");
+                throw new FalseConfigException("The specified Questionnaire doesn't exist");
             }
             if (questionFile.exists() && !questionFile.isDirectory()) {
                 hasQuestions = true;
                 xmlReader.addQuestionnaire(questionFile);
             } else if (!questionFile.exists() && !(qFile.length() > 0)) {
-                throw new FalseConfigException("The specified questionnaire doesn't exist");
+                throw new FalseConfigException("The specified Questionnaire doesn't exist");
             }
         } else {
             hasQuestions = false;
         }
         // id = getHighestID();
-        nDir = testConfig.getValue("NeutralDir");
-        aDir = testConfig.getValue("AffectiveDir");
-        pDir = testConfig.getValue("PracticeDir");
+        nDir = configFileReader.getValue("NeutralDir");
+        aDir = configFileReader.getValue("AffectiveDir");
+        pDir = configFileReader.getValue("PracticeDir");
         neutralDir = new File(workingDir +File.separator+ nDir);
         System.out.println(neutralDir);
         affectiveDir = new File(workingDir +File.separator+ aDir);
@@ -253,7 +228,7 @@ public abstract class AatObject {
 
         neutralImages = xmlReader.getIncludedFilesF(neutralDir);
 
-        System.out.println("Neutral " + testConfig.getValue("NeutralDir") + " " + neutralDir);
+        System.out.println("Neutral " + configFileReader.getValue("NeutralDir") + " " + neutralDir);
         if (neutralImages.size() == 0) {
             throw new FalseConfigException("Neutral images directory contains no images");
         }
@@ -265,22 +240,22 @@ public abstract class AatObject {
         if (hasQuestions) {
             questionnaire = new Questionnaire(xmlReader.getExtraQuestions(), xmlReader.getQuestionnaireIntro());
         }
-        String doBorders = testConfig.getValue("ColoredBorders");
+        String doBorders = configFileReader.getValue("ColoredBorders");
         if (!doBorders.equals("True") && !doBorders.equals("False")) {
             throw new FalseConfigException("ColoredBorders has a false value, must be True or False");
         }
         coloredBorders = doBorders.equals("True");
 
-        if (testConfig.getValue("ColoredBorders").equals("True")) {
+        if (configFileReader.getValue("ColoredBorders").equals("True")) {
             System.out.println("Colored borders is set to True");
             colorTable = new Hashtable<Integer, String>();
-            String pullColor = testConfig.getValue("BorderColorPull");
+            String pullColor = configFileReader.getValue("BorderColorPull");
             Matcher matcher = hexPattern.matcher(pullColor);
             if (!(pullColor.length() == 6) || !matcher.matches()) {
                 throw new FalseConfigException("The color specified for the pull border is not a valid 6 character hex value");
             }
 
-            String pushColor = testConfig.getValue("BorderColorPush");
+            String pushColor = configFileReader.getValue("BorderColorPush");
             matcher = hexPattern.matcher(pushColor);
             if (!(pushColor.length() == 6) || !matcher.matches()) {
                 throw new FalseConfigException("The color specified for the push border is not a valid 6 character hex value");
@@ -290,7 +265,7 @@ public abstract class AatObject {
             colorTable.put(AATImage.PULL, pullColor);
             colorTable.put(AATImage.PUSH, pushColor);
             try {
-                borderWidth = Integer.parseInt(testConfig.getValue("BorderWidth"));
+                borderWidth = Integer.parseInt(configFileReader.getValue("BorderWidth"));
             } catch (Exception e) {
                 throw new FalseConfigException("Border width is not configured properly");
             }
@@ -298,8 +273,8 @@ public abstract class AatObject {
             System.out.println("Border pull color is: " + pullColor);
         } else {       //Check for pull and push tag
             System.out.println("Colored borders is set to False:");
-            pullTag = testConfig.getValue("PullTag");
-            pushTag = testConfig.getValue("PushTag");
+            pullTag = configFileReader.getValue("PullTag");
+            pushTag = configFileReader.getValue("PushTag");
             if (pullTag.length() == 0) {
                 throw new FalseConfigException("Pull tag is not set");
             }
@@ -311,7 +286,7 @@ public abstract class AatObject {
             if (practiceRepeat > 0) {
                 System.out.println("Practice repeat >0");
                 practice = true;
-                String practDir = testConfig.getValue("PracticeDir");
+                String practDir = configFileReader.getValue("PracticeDir");
                 if (practDir.equals("")) {
                     throw new FalseConfigException("When ColoredBorders is set to false, PracticeDir has to be defined");
                 } else {
@@ -323,24 +298,24 @@ public abstract class AatObject {
                     practiceImages = xmlReader.getIncludedFilesF(practiceDir);
                 }
             }
-            //TODO: 
+            //TODO:
         }
         try {
 
-            repeat = Integer.parseInt(testConfig.getValue("Trials"));
+            repeat = Integer.parseInt(configFileReader.getValue("Trials"));
         } catch (Exception e) {
             throw new FalseConfigException("Number of trials is not configured properly");
         }
-        System.out.println("Number of Trials is"  + testConfig.getValue("Trials"));
+        System.out.println("Number of Trials is"  + configFileReader.getValue("Trials"));
         try {
-            breakAfter = Integer.parseInt(testConfig.getValue("BreakAfter"));
+            breakAfter = Integer.parseInt(configFileReader.getValue("BreakAfter"));
         } catch (Exception e) {
             throw new FalseConfigException("BreakAfter is not configured properly");
         }
         System.out.println("There will be a break after " + breakAfter + " trials");
-        if (!testConfig.getValue("StepSize").equals("")) {
+        if (!configFileReader.getValue("StepSize").equals("")) {
             try {
-                stepSize = Integer.parseInt(testConfig.getValue("StepSize"));
+                stepSize = Integer.parseInt(configFileReader.getValue("StepSize"));
             } catch (Exception e) {
                 throw new FalseConfigException("StepSize is not configured properly");
             }
@@ -348,9 +323,9 @@ public abstract class AatObject {
                 throw new FalseConfigException("Stepsize should be and odd number");
             }
         }
-        if (!testConfig.getValue("DataSteps").equals("")) {
+        if (!configFileReader.getValue("DataSteps").equals("")) {
             try {
-                dataSteps = Integer.parseInt(testConfig.getValue("DataSteps"));
+                dataSteps = Integer.parseInt(configFileReader.getValue("DataSteps"));
             } catch (Exception e) {
                 throw new FalseConfigException("DataSteps is not configured properly");
             }
@@ -359,23 +334,23 @@ public abstract class AatObject {
             }
         }
 
-        if (!testConfig.getValue("PracticeRepeat").equals("")) {  //When a value for practice repeat is set, check validity
+        if (!configFileReader.getValue("PracticeRepeat").equals("")) {  //When a value for practice repeat is set, check validity
             try {
 
-                practiceRepeat = Integer.parseInt(testConfig.getValue("PracticeRepeat"));
+                practiceRepeat = Integer.parseInt(configFileReader.getValue("PracticeRepeat"));
             } catch (Exception e) {
                 throw new FalseConfigException("PracticeRepeat is not configured properly");
             }
             if (practiceRepeat > 0) {
                 practice = true;
                 System.out.println("Test has practice");
-                String practDir = testConfig.getValue("PracticeDir");
+                String practDir = configFileReader.getValue("PracticeDir");
 
                 if (practDir.equals("")) {
                     System.out.println("Practice dir is not defined");
                     if (coloredBorders) {
                         System.out.println("Practice with colored borders");
-                        practiceFillColor = testConfig.getValue("PracticeFillColor");
+                        practiceFillColor = configFileReader.getValue("PracticeFillColor");
                         Matcher matcher;
                         hexPattern.matcher(practiceFillColor);
                         matcher = hexPattern.matcher(practiceFillColor);
@@ -408,7 +383,7 @@ public abstract class AatObject {
 
         }
 
-        String hasBoxplot = testConfig.getValue("ShowBoxPlot");
+        String hasBoxplot = configFileReader.getValue("ShowBoxPlot");
         if (hasBoxplot.equals("True")) {
             showBoxPlot = true;
         } else if (hasBoxplot.equals("False")) {
@@ -417,28 +392,28 @@ public abstract class AatObject {
             throw new FalseConfigException("ShowBoxPlot should be either True or False");
         }
 
-        plotType = testConfig.getPlotType(testConfig.getValue("PlotType"));
+        plotType = configFileReader.getPlotType(configFileReader.getValue("PlotType"));
 
-        if (!testConfig.getValue("AffectRatio").equals("")) {
-            a_pushPerc = getPercentage(testConfig.getValue("AffectRatio"), "AffectRatio");
+        if (!configFileReader.getValue("AffectRatio").equals("")) {
+            a_pushPerc = getPercentage(configFileReader.getValue("AffectRatio"), "AffectRatio");
         }
-        if (!testConfig.getValue("NeutralRatio").equals("")) {
-            n_pushPerc = getPercentage(testConfig.getValue("NeutralRatio"), "NeutralRatio");
+        if (!configFileReader.getValue("NeutralRatio").equals("")) {
+            n_pushPerc = getPercentage(configFileReader.getValue("NeutralRatio"), "NeutralRatio");
         }
-        if (!testConfig.getValue("TestRatio").equals("")) {
-            affectPerc = getPercentage(testConfig.getValue("TestRatio"), "TestRatio");
+        if (!configFileReader.getValue("TestRatio").equals("")) {
+            affectPerc = getPercentage(configFileReader.getValue("TestRatio"), "TestRatio");
         }
-        if (!testConfig.getValue("TrialSize").equals("")) {
+        if (!configFileReader.getValue("TrialSize").equals("")) {
             try {
-                trialSize = Integer.parseInt(testConfig.getValue("TrialSize"));
+                trialSize = Integer.parseInt(configFileReader.getValue("TrialSize"));
             } catch (Exception e) {
                 throw new FalseConfigException("TrialSize is not set to a correct number");
             }
         }
 
-        if (!testConfig.getValue("MaxSizePerc").equals("")) {
+        if (!configFileReader.getValue("MaxSizePerc").equals("")) {
             try {
-                maxSizePerc = Integer.parseInt(testConfig.getValue("MaxSizePerc"));
+                maxSizePerc = Integer.parseInt(configFileReader.getValue("MaxSizePerc"));
             } catch (Exception e) {
                 throw new FalseConfigException("Maximum image size is not a number");
             }
@@ -446,9 +421,9 @@ public abstract class AatObject {
                 throw new FalseConfigException("Maximum image size should be larger than 0");
             }
         }
-        if (!testConfig.getValue("ImageSizePerc").equals("")) {
+        if (!configFileReader.getValue("ImageSizePerc").equals("")) {
             try {
-                imageSizePerc = Integer.parseInt(testConfig.getValue("ImageSizePerc"));
+                imageSizePerc = Integer.parseInt(configFileReader.getValue("ImageSizePerc"));
             } catch (Exception e) {
                 throw new FalseConfigException("Image start size percentage is not a number");
             }
@@ -462,16 +437,7 @@ public abstract class AatObject {
     }
 
 
-    /**
-     * False configuration exception
-     */
-    public class FalseConfigException extends Exception {
 
-        public FalseConfigException(String error) {
-            super(error);
-        }
-
-    }
 
     private int getPercentage(String ratio, String s) throws FalseConfigException {
         if (!ratio.contains(":")) {

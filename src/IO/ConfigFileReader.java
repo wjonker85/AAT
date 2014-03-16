@@ -15,7 +15,7 @@
  *
  */
 
-package Configuration;
+package IO;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -35,7 +35,7 @@ import java.util.StringTokenizer;
  * can be set in this file
  */
 
-public class TestConfig {
+public class ConfigFileReader {
 
     private Map<String, String> testOptions = new HashMap<String, String>();
     private File testConfig;
@@ -78,7 +78,7 @@ public class TestConfig {
     };
 
     //Constructor, fills the Hashtable with the options
-    public TestConfig(File testConfig) {
+    public ConfigFileReader(File testConfig) {
         this.testConfig = testConfig;
         testOptions = new Hashtable<String, String>();
         for (String option : options) {

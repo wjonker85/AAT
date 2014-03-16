@@ -345,7 +345,7 @@ public class TestData {
 
     /**
      * This method adds all the data gathered about a participant that has taken the test to the Document. This includes
-     * the answers to the questionnaire and all the measurements
+     * the answers to the Questionnaire and all the measurements
      *
      * @param newParticipant The participant data
      */

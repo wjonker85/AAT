@@ -18,6 +18,7 @@
 package views;
 
 import Model.AATModel;
+import views.Questionnaire.QuestionPanel;
 
 import javax.swing.*;
 import java.awt.*;
