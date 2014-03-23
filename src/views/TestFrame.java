@@ -129,7 +129,7 @@ public class TestFrame extends JFrame implements Observer {
 
         //Results Screen
         if (o.toString().equals("Display results")) {
-            if (model.getTest().getPlotType().equalsIgnoreCase("boxplot")) {
+            if (model.getTest().getTestConfiguration().getPlotType().equalsIgnoreCase("boxplot")) {
                 boxPlot.init();
                 try {
                     boxPlot.display(true);

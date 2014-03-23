@@ -193,9 +193,7 @@ public class QuestionPanel extends JPanel {
 
 
     public void displayQuestions(File file) {
-        XMLReader reader = new XMLReader(new File(""));
-        reader.addQuestionnaire(file);
-        Questionnaire q = new Questionnaire(reader.getExtraQuestions(), reader.getQuestionnaireIntro());
+        Questionnaire q = XMLReader.getQuestionnaire(file);
         displayQuestions(q);
     }
 

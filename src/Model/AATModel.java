@@ -17,13 +17,16 @@
 
 package Model;
 
-import AAT.AatObject;
+import AAT.AbstractAAT;
 import AAT.HighMemoryAAT;
+import AAT.validation.AATValidator;
+import AAT.validation.FalseConfigException;
 import DataStructures.AATDataRecorder;
 import DataStructures.AATImage;
 import DataStructures.ParticipantData;
 import org.w3c.dom.Document;
 
+import javax.swing.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
@@ -53,7 +56,7 @@ import java.util.Observable;
 public class AATModel extends Observable {
 
 
-    private AatObject newAAT;
+    private AbstractAAT newAAT;
 
     //Test status
     private final static int TEST_STOPPED = 0;
@@ -102,19 +105,19 @@ public class AATModel extends Observable {
 //------------------------------initialise AAT --------------------------------------------------
 
     //Load a new AAT from file
-    public void loadNewAAT(File configFile) throws AatObject.FalseConfigException {
-        newAAT = new HighMemoryAAT(configFile);
-        AATDataRecorder = new AATDataRecorder(newAAT,this);
-    }
+    public void loadNewAAT(File configFile) throws FalseConfigException  {
+            newAAT = new HighMemoryAAT(AATValidator.validatedTestConfiguration(configFile));
+            AATDataRecorder = new AATDataRecorder(newAAT, this);
+   }
 
     //Starts a new instance of the AAT. With no. times it has to repeat and when there will be a break.
     public void startTest(boolean saveData) {
         this.saveData = saveData; //Don't save the data when testing configuration
-        this.repeat = newAAT.getRepeat();
-        this.breakAfter = newAAT.getBreakAfter();
-        this.previousDataPos = (newAAT.getDataSteps() + 1) / 2; //Set the previous position to the center Data position
-        this.previousPos = (newAAT.getStepRate() + 1) / 2;  //Set the previous position to the center display position
-        if (newAAT.hasPractice()) {        //If set in the config, first do a practice.
+     //   this.repeat = newAAT.getRepeat();
+     //   this.breakAfter = newAAT.getBreakAfter();
+        this.previousDataPos = (newAAT.getTestConfiguration().getDataSteps() + 1) / 2; //Set the previous position to the center Data position
+        this.previousPos = (newAAT.getTestConfiguration().getStepSize() + 1) / 2;  //Set the previous position to the center display position
+        if (newAAT.getTestConfiguration().getHasPractice()) {        //If set in the config, first do a practice.
             practice = true; //Set the test to practice mode
             repeat++;     //Make these one higher, because of the practice
             breakAfter++;
@@ -122,7 +125,7 @@ public class AATModel extends Observable {
             testList = newAAT.createRandomPracticeList();
         } else {   //Test has no practice so create random list of images
             practice = false;
-            if (newAAT.hasColoredBorders()) {
+            if (newAAT.getTestConfiguration().getColoredBorders()) {
                 testList = newAAT.createRandomListBorders(); //create a new Random list
             } else {
                 testList = newAAT.createRandomListNoBorders();
@@ -132,10 +135,9 @@ public class AATModel extends Observable {
         run = 0;
         int id = AATDataRecorder.getHighestID();
         id++;          //new higher id
-        newParticipant = new ParticipantData(id,newAAT.getTest_id());
+        newParticipant = new ParticipantData(id,newAAT.getTestConfiguration().getTestID());
 
-        //     if (newAAT.getNoOfQuestions() > 0) {   //When there are extra question, show them
-        if (newAAT.getDisplayQuestions().equals("Before")) {
+        if (newAAT.getTestConfiguration().getDisplayQuestions().equals("Before")) {
             testStatus = AATModel.TEST_WAIT_FOR_QUESTIONS;
             this.setChanged();
             notifyObservers("Show questions");      //Notify the observer that a new test is started.
@@ -147,7 +149,7 @@ public class AATModel extends Observable {
 
     }
 
-    public final AatObject getTest() {
+    public final AbstractAAT getTest() {
         return newAAT;
     }
 
@@ -213,7 +215,7 @@ public class AATModel extends Observable {
             } else {
                 testStatus = AATModel.TEST_WAIT_FOR_TRIGGER;
 
-                if (newAAT.hasColoredBorders()) {
+                if (newAAT.getTestConfiguration().getColoredBorders()) {
                     testList = newAAT.createRandomListBorders(); //create a new Random list
                 } else {
                     testList = newAAT.createRandomListNoBorders();
@@ -237,7 +239,7 @@ public class AATModel extends Observable {
                 run++;
                 count = 0;
                 if (run == breakAfter) {    //Test needs a break
-                    if (newAAT.hasColoredBorders()) {
+                    if (newAAT.getTestConfiguration().getColoredBorders()) {
                         testList = newAAT.createRandomListBorders(); //create a new Random list
                     } else {
                         testList = newAAT.createRandomListNoBorders();
@@ -247,7 +249,7 @@ public class AATModel extends Observable {
 
                 } else if (run == repeat) {   //No more runs left, Test has ended
                     testStatus = AATModel.TEST_SHOW_FINISHED;    //Notify observers about it
-                    if (!newAAT.getDisplayQuestions().equals("After")) {  //Questionnaire has to be added at the end
+                    if (!newAAT.getTestConfiguration().getDisplayQuestions().equals("After")) {  //Questionnaire has to be added at the end
                         if (saveData) {
                             AATDataRecorder.addParticipant(newParticipant);
                         }
@@ -258,7 +260,7 @@ public class AATModel extends Observable {
 
                 } else {           //Continue with a new run
 
-                    if (newAAT.hasColoredBorders()) {
+                    if (newAAT.getTestConfiguration().getColoredBorders()) {
                         testList = newAAT.createRandomListBorders(); //create a new Random list
                     } else {
                         testList = newAAT.createRandomListNoBorders();
@@ -339,10 +341,10 @@ public class AATModel extends Observable {
      */
     public synchronized HashMap<String, float[]> getResultsPerCondition() {
         HashMap<String, float[]> results = new HashMap<String, float[]>();
-        String pull = newAAT.getPullTag();
-        String push = newAAT.getPushTag();
-        String nDir = newAAT.getNeutralDir();
-        String aDir = newAAT.getAffectiveDir();
+        String pull = newAAT.getTestConfiguration().getPullTag();
+        String push = newAAT.getTestConfiguration().getPushTag();
+        String nDir = newAAT.getTestConfiguration().getNeutralDir().getName();
+        String aDir = newAAT.getTestConfiguration().getAffectiveDir().getName();
         results.put(pull + " & " + nDir, newParticipant.getMeasures(AATImage.PULL, AATImage.NEUTRAL));
         results.put(pull + " & " + aDir, newParticipant.getMeasures(AATImage.PULL, AATImage.AFFECTIVE));
         results.put(push + " & " + nDir, newParticipant.getMeasures(AATImage.PUSH, AATImage.NEUTRAL));
@@ -379,9 +381,9 @@ public class AATModel extends Observable {
     public synchronized void maxPullorPush(int value) {
         if (testStatus == AATModel.IMAGE_LOADED || testStatus == AATModel.PRACTICE_IMAGE_LOADED) { //Only listen when there is an image loaded
             newParticipant.addResult(value, getMeasurement());     //adds last results to the other measurements
-            if (current.getDirection() == AATImage.PULL && value == newAAT.getDataSteps()) {   //check if the requested action has been performed
+            if (current.getDirection() == AATImage.PULL && value == newAAT.getTestConfiguration().getDataSteps()) {   //check if the requested action has been performed
                 testStatus = AATModel.TEST_WAIT_FOR_TRIGGER;
-                lastSize = newAAT.getStepRate();
+                lastSize = newAAT.getTestConfiguration().getStepSize();
                 removeImage();
             } else if (current.getDirection() == AATImage.PUSH && value == 1) {
                 testStatus = AATModel.TEST_WAIT_FOR_TRIGGER;
@@ -406,7 +408,7 @@ public class AATModel extends Observable {
         this.setChanged();
         notifyObservers("Wait screen");
         previousPos = resize;
-        previousDataPos = (newAAT.getDataSteps() + 1) / 2;
+        previousDataPos = (newAAT.getTestConfiguration().getDataSteps() + 1) / 2;
     }
 
     /**
@@ -419,7 +421,7 @@ public class AATModel extends Observable {
             case AATModel.TEST_SHOW_RESULTS:
                 testStatus = AATModel.TEST_STOPPED;
                 this.setChanged();
-                if (newAAT.getDisplayQuestions().equals("After")) {
+                if (newAAT.getTestConfiguration().getDisplayQuestions().equals("After")) {
                     this.notifyObservers("Show questions");
                 } else {
                     this.notifyObservers("Finished");
@@ -429,13 +431,13 @@ public class AATModel extends Observable {
 
             case AATModel.TEST_SHOW_FINISHED:
                                   //TODO niet op boolean boxplot, maar op plot type.
-                if (newAAT.hasBoxPlot()) {
+                if (newAAT.getTestConfiguration().getShowBoxPlot()) {
                     testStatus = AATModel.TEST_SHOW_RESULTS;
                     this.setChanged();
                     this.notifyObservers("Display results");
                 } else {
                     testStatus = AATModel.TEST_STOPPED;
-                    if (newAAT.getDisplayQuestions().equals("After")) {
+                    if (newAAT.getTestConfiguration().getDisplayQuestions().equals("After")) {
                         this.setChanged();
                         this.notifyObservers("Show questions");
                     } else {
@@ -446,7 +448,7 @@ public class AATModel extends Observable {
                 break;
 
             case AATModel.TEST_WAIT_FOR_TRIGGER:
-                resize = (newAAT.getStepRate() + 1) / 2; //Set back to center
+                resize = (newAAT.getTestConfiguration().getStepSize() + 1) / 2; //Set back to center
                 if (practice) {
                     testStatus = AATModel.PRACTICE_IMAGE_LOADED;
                 } else {
@@ -468,7 +470,7 @@ public class AATModel extends Observable {
     public void addExtraQuestions(HashMap<String, String> extraQuestions) {
         this.newParticipant.addQuestionData(extraQuestions);
         this.setChanged();
-        if (newAAT.getDisplayQuestions().equals("After")) {
+        if (newAAT.getTestConfiguration().getDisplayQuestions().equals("After")) {
             if (saveData) {
                 AATDataRecorder.addParticipant(newParticipant);
             }

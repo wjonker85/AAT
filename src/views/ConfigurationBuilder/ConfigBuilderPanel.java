@@ -1,10 +1,11 @@
 package views.ConfigurationBuilder;
 
-import AAT.AatObject;
+import AAT.AbstractAAT;
 import AAT.Util.ExtensionFileFilter;
 import AAT.Util.FileUtils;
 import AAT.Util.SpringUtilities;
 import AAT.Util.TitledSeparator;
+import AAT.validation.FalseConfigException;
 import Controller.JoystickController;
 import DataStructures.TestConfiguration;
 import IO.ConfigFileReader;
@@ -146,7 +147,7 @@ public class ConfigBuilderPanel extends JPanel implements  Observer{
                     testFile.delete();    //Delete the test config file
 
 
-                } catch (AatObject.FalseConfigException e) {
+                } catch (FalseConfigException e) {
                     JOptionPane.showMessageDialog(null,
                             e.getMessage(),
                             "Configuration error",
@@ -1075,14 +1076,14 @@ public class ConfigBuilderPanel extends JPanel implements  Observer{
 
 
 
-    private String createIDValue() {
+    private int createIDValue() {
         if (newTest) {
-            return "1";
+            return 1;
         } else {
             int newId = test_id; //Increase the old id with one.
             newId++;
             System.out.println("New ID value is " + newId);
-            return String.valueOf(newId);
+            return newId;
         }
     }
 
@@ -1268,10 +1269,10 @@ public class ConfigBuilderPanel extends JPanel implements  Observer{
     private TestConfiguration getConfiguration() {
         TestConfiguration configuration = new TestConfiguration();
 
-        configuration.setDataFile("data.xml");
-        configuration.setAffectiveDir(inputAffDir.getText());
-        configuration.setNeutralDir(inputNeutralDir.getText());
-        configuration.setPracticeDir(inputPrDir.getText());
+        configuration.setDataFile(createFullPathFile("data.xml"));
+        configuration.setAffectiveDir(createFullPathFile(inputAffDir.getText()));
+        configuration.setNeutralDir(createFullPathFile(inputNeutralDir.getText()));
+        configuration.setPracticeDir(createFullPathFile(inputPrDir.getText()));
         configuration.setTrials(Integer.parseInt(inputTrials.getText()));
         configuration.setBreakAfter(Integer.parseInt(inputBreak.getText()));
         configuration.setPracticeRepeat(Integer.parseInt(inputPractRepeat.getText()));
@@ -1279,8 +1280,8 @@ public class ConfigBuilderPanel extends JPanel implements  Observer{
             configuration.setShowBoxPlot(true);
         }
         configuration.setDisplayQuestions(inputQuestions.getSelectedItem().toString());
-        configuration.setQuestionnaireFile(inputQuestionFile.getText());
-        configuration.setLanguageFile(inputLangFile.getText());
+        configuration.setQuestionnaireFile(createFullPathFile(inputQuestionFile.getText()));
+        configuration.setLanguageFile(createFullPathFile(inputLangFile.getText()));
         if (inputColoredBorder.isSelected()) {
             configuration.setColoredBorders(true);
             configuration.setPullColor(Integer.toHexString(inputPullColor.getBackground().getRGB()));
@@ -1316,6 +1317,9 @@ public class ConfigBuilderPanel extends JPanel implements  Observer{
 
     //TODO add  "PlotType"
 
+    public File createFullPathFile(String file) {
+        return new File(workingDir + File.separator + file);
+    }
 
     @Override
     public void update(Observable observable, Object o) {

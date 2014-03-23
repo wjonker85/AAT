@@ -74,7 +74,7 @@ public class JoystickController extends Thread implements Observer {
 
     //Start the thread
     public void run() {
-        stepSizeDisplay = model.getTest().getStepRate();
+        stepSizeDisplay = model.getTest().getTestConfiguration().getStepSize();
         pollController(joyStick);
     }
 

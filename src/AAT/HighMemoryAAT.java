@@ -17,7 +17,9 @@
 
 package AAT;
 
+import AAT.validation.FalseConfigException;
 import DataStructures.AATImage;
+import DataStructures.TestConfiguration;
 
 import java.awt.*;
 import java.io.File;
@@ -33,15 +35,15 @@ import java.util.Collections;
  * Version of the AAT to be run on computers with enough RAM. In this version all the images are preloaded in memory
  * so the test can work faster and record reactionTimes more precise.
  */
-public class HighMemoryAAT extends AatObject {
+public class HighMemoryAAT extends AbstractAAT {
 
 
     /**
-     * @param config The configuration file for the test
-     * @throws FalseConfigException, when there are configuration errors
+     * @param testConfiguration The configuration file for the test
+     *
      */
-    public HighMemoryAAT(File config) throws FalseConfigException {
-        super(config);
+    public HighMemoryAAT(TestConfiguration testConfiguration) throws FalseConfigException {
+        super(testConfiguration);
     }
 
 
@@ -54,12 +56,12 @@ public class HighMemoryAAT extends AatObject {
      */
     public ArrayList<AATImage> createRandomPracticeList() {
         ArrayList<AATImage> list = new ArrayList<AATImage>();
-        int size = practiceRepeat * 2;
-        if (practiceDir != null) {  //image dir is set
-            if (this.hasColoredBorders()) {
+        int size = getTestConfiguration().getPracticeRepeat() * 2;
+        if (getTestConfiguration().getPracticeDir().exists()) {  //image dir is set
+            if (getTestConfiguration().getColoredBorders()) {
 
                 for (int x = 0; x < size; x++) {
-                      for(File image : practiceImages) {
+                      for(File image : getPracticeImages()) {
                   //  for (File image : FileUtils.getImages(practiceDir)) {
                         AATImage pull = new AATImage(image, AATImage.PULL, this, x); //Add push and pull version
                         AATImage push = new AATImage(image, AATImage.PUSH, this, x);
@@ -70,14 +72,14 @@ public class HighMemoryAAT extends AatObject {
             } else {  //Do practice with push and pull tags in image file name
                 //TODO: PracticeRepeat
 
-                for (int x = 0; x < practiceRepeat; x++) {
-                    for(File image : practiceImages) {
+                for (int x = 0; x < getTestConfiguration().getPracticeRepeat(); x++) {
+                    for(File image : getPracticeImages()) {
                  //   for (File image : FileUtils.getImages(practiceDir)) {
-                        if (image.getName().contains(configFileReader.getValue("PullTag"))) {
+                        if (image.getName().contains(getTestConfiguration().getPullTag())) {
                             AATImage pull = new AATImage(image, AATImage.PULL, this, x); //Two instances for every image
                             list.add(pull);
                         }
-                        if (image.getName().contains(configFileReader.getValue("PushTag"))) {
+                        if (image.getName().contains(getTestConfiguration().getPushTag())) {
                             AATImage push = new AATImage(image, AATImage.PUSH, this, x);
                             list.add(push);      //Load the neutral images
                         }
@@ -86,8 +88,8 @@ public class HighMemoryAAT extends AatObject {
             }
         } else {             //Else let the test create the images itself
             Color c;
-            if (practiceFillColor.length() > 0) {
-                c = Color.decode("#" + practiceFillColor);
+            if (getTestConfiguration().getPracticeFillColor().length() > 0) {
+                c = Color.decode("#" + getTestConfiguration().getPracticeFillColor());
             } else {
                 c = Color.gray;
             }
@@ -114,16 +116,17 @@ public class HighMemoryAAT extends AatObject {
      */
     public ArrayList<AATImage> createRandomListBorders() {
         ArrayList<AATImage> randomList = new ArrayList<AATImage>();
+        int trialSize =   getTestConfiguration().getTrialSize();
         if (trialSize == 0) {  //not set in the config
-            trialSize = (neutralImages.size() + affectiveImages.size()) * 2;
+            trialSize = (getNeutralImages().size() + getAffectiveImages().size()) * 2;
         }
         System.out.println("Trial Size = " + trialSize);
-        float aSize = (affectPerc * trialSize) / 100f;
+        float aSize = (getAffectPerc() * trialSize) / 100f;
         int affectSize = Math.round(aSize);
         System.out.println("Affect size " + affectSize);
         int neutralSize = trialSize - affectSize;
-        randomList.addAll(createList(neutralSize, n_pushPerc, neutralImages, AATImage.NEUTRAL));
-        randomList.addAll(createList(affectSize, a_pushPerc, affectiveImages, AATImage.AFFECTIVE));
+        randomList.addAll(createList(neutralSize, getN_pushPerc(), getNeutralImages(), AATImage.NEUTRAL));
+        randomList.addAll(createList(affectSize, getA_pushPerc(), getAffectiveImages(), AATImage.AFFECTIVE));
         Collections.shuffle(randomList);    //Randomise the list
         Runtime runtime = Runtime.getRuntime();
         System.out.println("Free memory : " + runtime.freeMemory());
@@ -157,23 +160,23 @@ public class HighMemoryAAT extends AatObject {
 
     public ArrayList<AATImage> createRandomListNoBorders() {
         ArrayList<AATImage> randomList = new ArrayList<AATImage>();
-        for (File image : neutralImages) {
+        for (File image : getNeutralImages()) {
             // System.out.println(image.getName());
-            if (image.getName().contains(configFileReader.getValue("PullTag"))) {
+            if (image.getName().contains(getTestConfiguration().getPullTag())) {
                 AATImage pull = new AATImage(image, AATImage.PULL, AATImage.NEUTRAL, this); //Two instances for every image
                 randomList.add(pull);
             }
-            if (image.getName().contains(configFileReader.getValue("PushTag"))) {
+            if (image.getName().contains(getTestConfiguration().getPushTag())) {
                 AATImage push = new AATImage(image, AATImage.PUSH, AATImage.NEUTRAL, this);
                 randomList.add(push);      //Load the neutral images
             }
         }
-        for (File image : affectiveImages) {
-            if (image.getName().contains(configFileReader.getValue("PullTag"))) {
+        for (File image : getNeutralImages()) {
+            if (image.getName().contains(getTestConfiguration().getPullTag())) {
                 AATImage pull = new AATImage(image, AATImage.PULL, AATImage.AFFECTIVE, this); //Two instances for every image
                 randomList.add(pull);
             }
-            if (image.getName().contains(configFileReader.getValue("PushTag"))) {
+            if (image.getName().contains(getTestConfiguration().getPushTag())) {
                 AATImage push = new AATImage(image, AATImage.PUSH, AATImage.AFFECTIVE, this);
                 randomList.add(push);      //Load the neutral images
             }

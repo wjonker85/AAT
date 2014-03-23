@@ -17,7 +17,7 @@
 
 package DataStructures;
 
-import AAT.AatObject;
+import AAT.AbstractAAT;
 import AAT.Util.FileUtils;
 import Model.AATModel;
 import org.w3c.dom.*;
@@ -53,7 +53,7 @@ public class AATDataRecorder {
     private Document doc;
     private int trials;
     private File dataFile;
-    private AatObject newAAT;
+    private AbstractAAT newAAT;
     public String affLabelOldData;
     public String neutLabelOldData;
     public String pullTagOldData;
@@ -62,17 +62,17 @@ public class AATDataRecorder {
     private AATModel model;
     private boolean externalData;
 
-    public AATDataRecorder(AatObject newAAT, AATModel model) {
+    public AATDataRecorder(AbstractAAT newAAT, AATModel model) {
         externalData = false;
         this.model = model;
         this.newAAT = newAAT;
-        this.trials = newAAT.getRepeat();
+        this.trials = newAAT.getTestConfiguration().getTrials();
 
-        affLabel = newAAT.affectiveDir.getName();
+        affLabel = newAAT.getTestConfiguration().getAffectiveDir().getName();
         if(affLabel.contains(File.separator)) {
             affLabel = affLabel.substring(affLabel.lastIndexOf(File.separator));      //Only the last directory name for the affective category.
         }
-        neutLabel = newAAT.neutralDir.getName();
+        neutLabel = newAAT.getTestConfiguration().getNeutralDir().getName();
         if(neutLabel.contains(File.separator)) {
             neutLabel = neutLabel.substring(neutLabel.lastIndexOf(File.separator));
         }
@@ -80,22 +80,22 @@ public class AATDataRecorder {
         Date date = new Date();
         String dateString = dateFormat.format(date);
 
-        if (newAAT.hasPractice()) {    //Add 1 tot the number of trials when there is a practice trial
+        if (newAAT.getTestConfiguration().getHasPractice()) {    //Add 1 tot the number of trials when there is a practice trial
             trials++;
         }
-        this.dataFile = newAAT.getDataFile();
+        this.dataFile = newAAT.getTestConfiguration().getDataFile();
         if (dataFile.exists()) {
-            System.out.println("No trials is set to " + newAAT.getRepeat());
+            System.out.println("No trials is set to " + trials);
             loadFileData();
             checkAndFixOldData(doc);
-            if (!hasTestID(newAAT.getTest_id())) {
+            if (!hasTestID(newAAT.getTestConfiguration().getTestID())) {
                 System.out.println("Test id not present in the data file, adding required test data to the data file");
-                addTestMetaData(newAAT.getTest_id(), newAAT.getRepeat(), newAAT.centerPos(), newAAT.getPullTag(), newAAT.getPushTag(), affLabel, neutLabel, "Created on " + dateString,newAAT.hasColoredBorders()); //Add the current test_id and used image files to the data.xml file.
+                addTestMetaData(newAAT.getTestConfiguration().getTestID(), trials, newAAT.centerPos(), newAAT.getTestConfiguration().getPullTag(), newAAT.getTestConfiguration().getPushTag(), affLabel, neutLabel, "Created on " + dateString,newAAT.getTestConfiguration().getColoredBorders()); //Add the current test_id and used image files to the data.xml file.
             }
         } else {
             createXMLDOC();
             System.out.println("New data file created, adding test data");
-            addTestMetaData(newAAT.getTest_id(), newAAT.getRepeat(), newAAT.centerPos(), newAAT.getPullTag(), newAAT.getPushTag(), affLabel, neutLabel, "Created on " + dateString,newAAT.hasColoredBorders());
+            addTestMetaData(newAAT.getTestConfiguration().getTestID(),trials, newAAT.centerPos(), newAAT.getTestConfiguration().getPullTag(), newAAT.getTestConfiguration().getPushTag(), affLabel, neutLabel, "Created on " + dateString,newAAT.getTestConfiguration().getColoredBorders());
         }
       //  model.setDataLoaded();
     }
@@ -172,7 +172,6 @@ public class AATDataRecorder {
                 }
             }
         }
-
         return false;
     }
 
@@ -228,14 +227,14 @@ public class AATDataRecorder {
         test.appendChild(commentElement);
 
         //Adding the affective images
-        addImageToData(test, newAAT.affectiveImages, AATImage.AFFECTIVE);
-        addImageToData(test, newAAT.neutralImages, AATImage.NEUTRAL);
+        addImageToData(test, newAAT.getAffectiveImages(), AATImage.AFFECTIVE);
+        addImageToData(test, newAAT.getNeutralImages(), AATImage.NEUTRAL);
 
-        if (newAAT.practiceImages.size() > 0) {
-            addImageToData(test, newAAT.practiceImages, AATImage.PRACTICE);
-        } else if (newAAT.hasPractice()) {      //Add the practice images.
+        if (newAAT.getPracticeImages().size() > 0) {
+            addImageToData(test, newAAT.getPracticeImages(), AATImage.PRACTICE);
+        } else if (newAAT.getTestConfiguration().getHasPractice()) {      //Add the practice images.
             ArrayList<File> practiceImages = new ArrayList<File>();
-            for (int x = 0; x < newAAT.practiceRepeat * 2; x++) {
+            for (int x = 0; x < newAAT.getTestConfiguration().getPracticeRepeat() * 2; x++) {
                 //Create a list with the used practice images.
                 String image = "practice_" + x;
                 practiceImages.add(new File(image));
@@ -380,9 +379,9 @@ public class AATDataRecorder {
                 imageName.appendChild(imageNameStr);
                 image.appendChild(imageName);
                 Element direction = doc.createElement("direction");
-                String dirValue = newAAT.getPullTag();
+                String dirValue = newAAT.getTestConfiguration().getPullTag();
                 if (imageData.getDirection() == AATImage.PUSH) {
-                    dirValue = newAAT.getPushTag();
+                    dirValue = newAAT.getTestConfiguration().getPushTag();
                 }
                 Text imgDirection = doc.createTextNode(dirValue);
                 direction.appendChild(imgDirection);

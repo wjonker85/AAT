@@ -3,46 +3,9 @@ package AAT.validation;
 import DataStructures.TestConfiguration;
 
 /**
- * Created by marcel on 3/23/14.
+ * Fill the testConfig with the validated value which were read from the AAT config file.
  */
 public class ConfigurationFiller {
-
-
-    //All the configuration options
-    public static String[] options = {
-            "ColoredBorders",
-            "BorderColorPush",
-            "BorderColorPull",
-            "BorderWidth",
-            "StepSize",
-            "DataSteps",
-            "Trials",
-            "BreakAfter",
-            "AffectiveDir",
-            "NeutralDir",
-            "LanguageFile",
-            "PracticeDir",
-            "PracticeFillColor",
-            "PracticeRepeat",
-            "NoPracticeTrials",
-            "ParticipantsFile",
-            "DataFile",
-            "PullTag",
-            "PushTag",
-            "DisplayQuestions",
-            "ShowBoxPlot",
-            "Questionnaire",
-            "AffectRatio",
-            "NeutralRatio",
-            "TestRatio",
-            "TrialSize",
-            "MaxSizePerc",
-            "ImageSizePerc",
-            "ID",
-            "PlotType"
-
-    };
-
 
     public static TestConfiguration fillTestConfiguration(TestConfigurationMap<String> validatedConfiguration) {
         TestConfiguration testConfiguration = new TestConfiguration();
@@ -64,9 +27,9 @@ public class ConfigurationFiller {
             testConfiguration.setPracticeFillColor(validatedConfiguration.getStringValue("PracticeFillColor"));
             testConfiguration.setPullTag(validatedConfiguration.getStringValue("PullTag"));
             testConfiguration.setPushTag(validatedConfiguration.getStringValue("PushTag"));
-            testConfiguration.setNeutralDir(validatedConfiguration.getStringValue("NeutralDir"));
-            testConfiguration.setAffectiveDir(validatedConfiguration.getStringValue("AffectiveDir"));
-            testConfiguration.setPracticeDir(validatedConfiguration.getStringValue("PracticeDir"));
+            testConfiguration.setNeutralDir(validatedConfiguration.getFileValue("NeutralDir"));
+            testConfiguration.setAffectiveDir(validatedConfiguration.getFileValue("AffectiveDir"));
+            testConfiguration.setPracticeDir(validatedConfiguration.getFileValue("PracticeDir"));
             testConfiguration.setQuestionnaireFile(validatedConfiguration.getFileValue("Questionnaire"));
             testConfiguration.setLanguageFile(validatedConfiguration.getFileValue("LanguageFile"));
             testConfiguration.setStepSize(validatedConfiguration.getIntValue("StepSize"));
@@ -74,6 +37,12 @@ public class ConfigurationFiller {
             testConfiguration.setMaxSizePerc(validatedConfiguration.getIntValue("MaxSizePerc"));
             testConfiguration.setImageSizePerc(validatedConfiguration.getIntValue("ImageSizePerc"));
             testConfiguration.setTestID(validatedConfiguration.getIntValue("ID"));
+            if(testConfiguration.getPracticeDir().length() >0 || testConfiguration.getPracticeFillColor().length() > 0) {
+                testConfiguration.setHasPractice(true);
+            }
+            else {
+                testConfiguration.setHasPractice(false);
+            }
             //    testConfiguration.setHasPractice( boolean hasPractice);
             //    testConfiguration.setHasQuestionnaire( boolean hasQuestionnaire);
             testConfiguration.setDataFile(validatedConfiguration.getFileValue("DataFile"));

@@ -35,7 +35,7 @@ public class AATValidator {
             JOptionPane.showMessageDialog(null,e.getMessage(),"Configuration Error",JOptionPane.ERROR_MESSAGE);
             return null;
         }
-        return testConfigurationMap;
+        return testConfiguration;
     }
 
     //Create a map containing all the test variables with validators attached to them.
@@ -184,7 +184,6 @@ public class AATValidator {
     }
 
     private static void addNewIDToConfigFile(File config) {
-        Writer output;
         try {
             FileWriter fw = null;
             try {

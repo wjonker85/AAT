@@ -17,7 +17,7 @@
 
 package DataStructures;
 
-import AAT.AatObject;
+import AAT.AbstractAAT;
 import AAT.Util.ImageUtils;
 
 import javax.imageio.ImageIO;
@@ -49,31 +49,29 @@ public class AATImage {
     private Color borderColor;
     private int borderWidth;
 
-    public AATImage(File imageFile, int direction, int type, AatObject aatObject) {
+    public AATImage(File imageFile, int direction, int type, AbstractAAT newAAT) {
         this.direction = direction;
         this.type = type;
-        hasBorders = aatObject.hasColoredBorders();
+        hasBorders = newAAT.getTestConfiguration().getColoredBorders();
         if (hasBorders) {
-            int intValue = Integer.parseInt(aatObject.getBorderColor(direction), 16);
+            int intValue = Integer.parseInt(newAAT.getBorderColor(direction), 16);
             borderColor = new Color(intValue);
-            borderWidth = aatObject.getBorderWidth();
+            borderWidth = newAAT.getTestConfiguration().getBorderWidth();
         }
 
         name = imageFile.getName();
         System.out.println("Adding image 1 "+imageFile.getAbsoluteFile());
-        this.image = loadImage(imageFile, aatObject.getImageSizePerc());
-
-
+        this.image = loadImage(imageFile, newAAT.getTestConfiguration().getImageSizePerc());
     }
 
-    public AATImage(File imageFile, int direction, AatObject aatObject, int repeat) {
+    public AATImage(File imageFile, int direction, AbstractAAT newAAT, int repeat) {
         this.direction = direction;
         this.type = PRACTICE;
-        hasBorders = aatObject.hasColoredBorders();
+        hasBorders = newAAT.getTestConfiguration().getColoredBorders();
         if (hasBorders) {
-            int intValue = Integer.parseInt(aatObject.getBorderColor(direction), 16);
+            int intValue = Integer.parseInt(newAAT.getBorderColor(direction), 16);
             borderColor = new Color(intValue);
-            borderWidth = aatObject.getBorderWidth();
+            borderWidth = newAAT.getTestConfiguration().getBorderWidth();
             name = imageFile.getName() + "_" + repeat;
         }
         else {
@@ -81,19 +79,19 @@ public class AATImage {
         }
 
         System.out.println("Adding image 2 "+name);
-        this.image = loadImage(imageFile, aatObject.getImageSizePerc());
+        this.image = loadImage(imageFile, newAAT.getTestConfiguration().getImageSizePerc());
 
 
     }
 
     //Create a generated AAT Image. This creates an image that is just a square with the given color.
-    public AATImage(int direction, Color color, int nr, AatObject aatObject) {
+    public AATImage(int direction, Color color, int nr, AbstractAAT newAAT) {
         this.direction = direction;
-        hasBorders = aatObject.hasColoredBorders();
-        int intValue = Integer.parseInt(aatObject.getBorderColor(direction), 16);
+        hasBorders = newAAT.getTestConfiguration().getColoredBorders();
+        int intValue = Integer.parseInt(newAAT.getBorderColor(direction), 16);
         borderColor = new Color(intValue);
-        borderWidth = aatObject.getBorderWidth();
-        this.image = getPracticeImage(color, aatObject.getImageSizePerc());
+        borderWidth = newAAT.getTestConfiguration().getBorderWidth();
+        this.image = getPracticeImage(color, newAAT.getTestConfiguration().getImageSizePerc());
         this.type = AATImage.PRACTICE;
         this.name = "practice_" + nr;
     }

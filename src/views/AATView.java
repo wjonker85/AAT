@@ -72,9 +72,9 @@ public class AATView extends JPanel implements Observer {
         this.add(textPane);
         textPane.setBounds(100, 100, screen.width - 100, screen.height - 100);
         textPane.setEditable(false);
-        centerPoint = Math.round(model.getTest().getStepRate() / 2);      //eerst centerPoint begint op stepStart.
+        centerPoint = Math.round(model.getTest().getTestConfiguration().getStepSize() / 2);      //eerst centerPoint begint op stepStart.
         inputY = centerPoint; //Start in the center
-        displayText = model.getTest().getIntroductionText(); //Test starts with an introduction tekst.
+        displayText = model.getTest().getTranslation("introduction"); //Test starts with an introduction tekst.
     }
 
     /**
@@ -131,7 +131,7 @@ public class AATView extends JPanel implements Observer {
     public void imageShow(Graphics g) {
         this.setBackground(new Color(0));
         BufferedImage img = model.getNextImage();
-        Dimension imageSize = ImageUtils.setupImage(img, centerPoint, inputY, model.getTest().getMaxSizePerc());
+        Dimension imageSize = ImageUtils.setupImage(img, centerPoint, inputY, model.getTest().getTestConfiguration().getMaxSizePerc());
         if (inputY != centerPoint) {    //  Only resize image when joystick moves
             img = ImageUtils.resizeImageWithHint(img, (int) imageSize.getWidth(), (int) imageSize.getHeight(), img.getType());
         }
@@ -174,7 +174,7 @@ public class AATView extends JPanel implements Observer {
          * zwart scherm
          */
         if (o.toString().equals("Break")) {
-            displayText = model.getTest().getBreakText();
+            displayText = model.getTest().getTranslation("break");
             blackScreen = true;
             showInfo = true;
             repaint();
@@ -213,7 +213,7 @@ public class AATView extends JPanel implements Observer {
          * Practice is geeindigd, getTestStartText() uit config file laden
          */
         if (o.toString().equals("Practice ended")) {
-            displayText = model.getTest().getTestStartText();
+            displayText = model.getTest().getTranslation("start");
             blackScreen = true;
             showInfo = true;
             repaint();
@@ -236,7 +236,7 @@ public class AATView extends JPanel implements Observer {
          * Nu eerst alleen het scherm onzichtbaar maken.
          */
         if (o.toString().equals("Show finished")) {
-            displayText = model.getTest().getTestFinishedText();
+            displayText = model.getTest().getTranslation("finished");
             blackScreen = true;
             showInfo = true;
             repaint();

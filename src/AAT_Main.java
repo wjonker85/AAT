@@ -15,7 +15,7 @@
  *
  */
 
-import AAT.AatObject;
+import AAT.validation.FalseConfigException;
 import Controller.JoystickController;
 import DataStructures.AATDataRecorder;
 import IO.DataExporter;
@@ -35,7 +35,9 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -57,27 +59,13 @@ import java.util.Observer;
 public class AAT_Main extends JFrame implements Observer {
 
 
+    final JMenuItem exportData;
+    final JButton runButton;
     private AATModel model;
     private JoystickController joystick;
     private TestFrame testFrame;
-    final JMenuItem exportData;
-    final JButton runButton;
     private AATDataRecorder inputAATDataRecorder;
     private int foreign_id;
-
-    /**
-     * Start the main thread.
-     *
-     * @param args no arguments used
-     */
-    public static void main(String[] args) {
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                UIManager.put("swing.boldMetal", Boolean.FALSE);
-                new AAT_Main().setVisible(true);
-            }
-        });
-    }
 
     //Build the user interface
     public AAT_Main() {
@@ -151,17 +139,20 @@ public class AAT_Main extends JFrame implements Observer {
                 if (configFile != null) {
                     if (configFile.exists()) {
                         try {
-   //                         model = new AATModel();
-   //                         model.addObserver(getInstance());
                             model.loadNewAAT(configFile);     //Only start when config is valid
                             runButton.setEnabled(true);
-                            if (model.getTest().hasData()) {
-                                exportData.setEnabled(true);
+                            try {
+                                BufferedReader br = new BufferedReader(new FileReader(model.getTest().getTestConfiguration().getDataFile()));
+                                if (br.readLine() != null) {
+                                    exportData.setEnabled(true);
+                                }
+                            } catch (IOException e) {
+                                System.out.println("Data read error: " + e.getMessage());
                             }
                             joystick = new JoystickController(model);
                             joystick.start(); //Start joystick Thread
                             model.addObserver(joystick);
-                        } catch (AatObject.FalseConfigException e) {
+                        } catch (FalseConfigException e) {
                             runButton.setEnabled(false);
                             exportData.setEnabled(false);
                             JOptionPane.showMessageDialog(null,
@@ -201,13 +192,12 @@ public class AAT_Main extends JFrame implements Observer {
                 HashMap<String, String> testData = DataExporter.getTestRevisions(model.getAATDataRecorder().getDocument());
 
                 if (testData.size() > 1) {
-                    SelectTestRevision testRevision = new SelectTestRevision(testData, model.getTest().getTest_id(), model,true);
+                    SelectTestRevision testRevision = new SelectTestRevision(testData, model.getTest().getTestConfiguration().getTestID(), model, true);
                     testRevision.setEnabled(true);
                     testRevision.setVisible(true);
                     testRevision.requestFocus();
                 } else {                 //Data from just one test.
-                   //   model.setExport_id(model.getTest().getTest_id(),true);  //Set export ID and notify observers
-                    ExportDataDialog export = new ExportDataDialog(model.getAATDataRecorder().getTestMetaData(model.getTest().getTest_id()));
+                    ExportDataDialog export = new ExportDataDialog(model.getAATDataRecorder().getTestMetaData(model.getTest().getTestConfiguration().getTestID()));
                     export.setVisible(true);
                 }
             }
@@ -220,17 +210,13 @@ public class AAT_Main extends JFrame implements Observer {
             public void actionPerformed(ActionEvent actionEvent) {
 
                 File dataFile = fileOpenDialog(new AAT.Util.ExtensionFileFilter("XML File", new String[]{"XML", "xm;"}));
-                if(dataFile !=null) {
-                    if(dataFile.exists()) {
-                        inputAATDataRecorder = new AATDataRecorder(dataFile,model);      //Load data from xml file. Notifies observers when ready.
+                if (dataFile != null) {
+                    if (dataFile.exists()) {
+                        inputAATDataRecorder = new AATDataRecorder(dataFile, model);      //Load data from xml file. Notifies observers when ready.
                     }
                 }
             }
         });
-
-
-
-
 
 
         //Exit
@@ -247,12 +233,25 @@ public class AAT_Main extends JFrame implements Observer {
         pack();
     }
 
+    /**
+     * Start the main thread.
+     *
+     * @param args no arguments used
+     */
+    public static void main(String[] args) {
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                UIManager.put("swing.boldMetal", Boolean.FALSE);
+                new AAT_Main().setVisible(true);
+            }
+        });
+    }
 
     //File dialog to select a file to be opened, accepts a file filter.
     public File fileOpenDialog(FileFilter fileFilter) {
 
         JFileChooser fc = new JFileChooser();
-       // fc.setCurrentDirectory(workingDir);
+        // fc.setCurrentDirectory(workingDir);
         File file = null;
 
         fc.setFileFilter(fileFilter);
@@ -291,37 +290,35 @@ public class AAT_Main extends JFrame implements Observer {
             System.gc();
         }
 
-        if(o.toString().equalsIgnoreCase("Data_loaded_export")) {
+        if (o.toString().equalsIgnoreCase("Data_loaded_export")) {
             HashMap<String, String> testData = DataExporter.getTestRevisions(model.getExportDocument());
-            if(testData.size()> 1)   {
-                SelectTestRevision testRevision = new SelectTestRevision(testData, -99, model,false);
+            if (testData.size() > 1) {
+                SelectTestRevision testRevision = new SelectTestRevision(testData, -99, model, false);
                 testRevision.setEnabled(true);
                 testRevision.setVisible(true);
                 testRevision.requestFocus();
-            }
-            else {
-                System.out.println("Single set of data found for id "+model.getExport_id());
-                model.setExport_id(model.getExport_id(),false);        //Set export ID and notify observers
+            } else {
+                System.out.println("Single set of data found for id " + model.getExport_id());
+                model.setExport_id(model.getExport_id(), false);        //Set export ID and notify observers
 
-         //       ExportDataDialog export = new ExportDataDialog(inputAATDataRecorder.getTestMetaData(inputAATDataRecorder.getHighestTestID()));
-         //       export.setVisible(true);
+                //       ExportDataDialog export = new ExportDataDialog(inputAATDataRecorder.getTestMetaData(inputAATDataRecorder.getHighestTestID()));
+                //       export.setVisible(true);
             }
         }
 
         if (o.toString().equalsIgnoreCase("Export")) {
-            System.out.println("Showing data exporter, using id "+model.getExport_id());
+            System.out.println("Showing data exporter, using id " + model.getExport_id());
             ExportDataDialog export = new ExportDataDialog(model.getAATDataRecorder().getTestMetaData(model.getExport_id()));
             export.setVisible(true);
         }
 
         if (o.toString().equalsIgnoreCase("Export_foreign")) {
             inputAATDataRecorder = model.getExportAATDataRecorder();
-            System.out.println("Showing data exporter, using id "+model.getExport_id());
+            System.out.println("Showing data exporter, using id " + model.getExport_id());
             ExportDataDialog export = new ExportDataDialog(inputAATDataRecorder.getTestMetaData(model.getExport_id()));
             export.setVisible(true);
         }
     }
-
 
 
     private Observer getInstance() {

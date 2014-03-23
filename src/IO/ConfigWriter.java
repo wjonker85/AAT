@@ -167,12 +167,12 @@ public class ConfigWriter {
         pw.write(dirHeader);
         pw.println();
         pw.println();
-        pw.write("AffectiveDir " + checkForValue(configuration.getAffectiveDir()));
+        pw.write("AffectiveDir " + checkForValue(configuration.getAffectiveDir().getAbsolutePath()));
         pw.println();
-        pw.write("NeutralDir " + checkForValue(configuration.getNeutralDir()));
+        pw.write("NeutralDir " + checkForValue(configuration.getNeutralDir().getAbsolutePath()));
         pw.println();
         if (configuration.getPracticeDir().length() > 0) {
-            pw.write("PracticeDir " + checkForValue(configuration.getPracticeDir()));
+            pw.write("PracticeDir " + checkForValue(configuration.getPracticeDir().getAbsolutePath()));
             pw.println();
         } else {
             pw.write("# PracticeDir practice");
@@ -187,7 +187,7 @@ public class ConfigWriter {
         pw.write(languageHeader);
         pw.println();
         pw.println();
-        pw.write("LanguageFile " + checkForValue(configuration.getLanguageFile()));
+        pw.write("LanguageFile " + checkForValue(configuration.getLanguageFile().getAbsolutePath()));
         pw.println();
         pw.println();
         pw.write(questionHeader);

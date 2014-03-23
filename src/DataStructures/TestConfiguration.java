@@ -28,12 +28,13 @@ public class TestConfiguration {
     private Boolean practiceFill = false;
     private String practiceFillColor = "";
     private String pullTag = "", pushTag = "";
-    private String neutralDir = "", affectiveDir = "", practiceDir = "";
+    private File neutralDir,affectiveDir, practiceDir;
     private File questionnaireFile;
     private File languageFile;
     private int stepSize, dataSteps, maxSizePerc, imageSizePerc;
     private File dataFile;
     private int testID;
+    private String plotType = "BoxPlot";
 
     public int getTrials() {
         return trials;
@@ -171,27 +172,27 @@ public class TestConfiguration {
         this.pushTag = pushTag;
     }
 
-    public String getNeutralDir() {
+    public File getNeutralDir() {
         return neutralDir;
     }
 
-    public void setNeutralDir(String neutralDir) {
+    public void setNeutralDir(File neutralDir) {
         this.neutralDir = neutralDir;
     }
 
-    public String getAffectiveDir() {
+    public File getAffectiveDir() {
         return affectiveDir;
     }
 
-    public void setAffectiveDir(String affectiveDir) {
+    public void setAffectiveDir(File affectiveDir) {
         this.affectiveDir = affectiveDir;
     }
 
-    public String getPracticeDir() {
+    public File getPracticeDir() {
         return practiceDir;
     }
 
-    public void setPracticeDir(String practiceDir) {
+    public void setPracticeDir(File practiceDir) {
         this.practiceDir = practiceDir;
     }
 
@@ -251,7 +252,7 @@ public class TestConfiguration {
         this.testID = testID;
     }
 
-    public boolean isHasPractice() {
+    public boolean getHasPractice() {
         return hasPractice;
     }
 
@@ -259,7 +260,7 @@ public class TestConfiguration {
         this.hasPractice = hasPractice;
     }
 
-    public boolean isHasQuestionnaire() {
+    public boolean getHasQuestionnaire() {
         return hasQuestionnaire;
     }
 
@@ -281,5 +282,13 @@ public class TestConfiguration {
 
     public void setWorkingDir(File workingDir) {
         this.workingDir = workingDir;
+    }
+
+    public void setPlotType(String plotType) {
+        this.plotType = plotType;
+    }
+
+    public String getPlotType() {
+        return plotType;
     }
 }

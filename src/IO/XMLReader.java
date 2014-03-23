@@ -18,6 +18,7 @@
 package IO;
 
 import DataStructures.QuestionData;
+import DataStructures.Questionnaire;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -39,69 +40,63 @@ import java.util.Map;
  */
 public class XMLReader {
 
-    private Map<String, String> testText = new HashMap<String, String>();
-    private ArrayList<QuestionData> extraQuestions;
-    private String introduction = ""; //introduction for the Questionnaire;
-    private Document doc;
-    private Document questionnaire;
 
-    String[] options = {              //Keys defining the different texts
-            "introduction",
-            "start",
-            "break",
-            "finished"
-    };
-
-    public XMLReader() {
-        //just an empty constructor.
-    }
-
-    public XMLReader(File languageFile) {
-
-        extraQuestions = new ArrayList<QuestionData>();
-        if (languageFile.exists()) {
-            try {
-
-                DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-                DocumentBuilder db = dbf.newDocumentBuilder();
-                doc = db.parse(languageFile);
-                doc.getDocumentElement().normalize();
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            readText();
-        }
-    }
-
-    public void addQuestionnaire(File questionFile) {
+    public static HashMap<String,String> getTranslations(File languageFile) {
+        HashMap<String,String> translations = new HashMap<String, String>();
+        Document doc = null;
+        String[] options = {              //Keys defining the different texts
+                "introduction",
+                "start",
+                "break",
+                "finished"
+        };
         try {
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             DocumentBuilder db = dbf.newDocumentBuilder();
-            questionnaire = db.parse(questionFile);
-            questionnaire.getDocumentElement().normalize();
+            doc = db.parse(languageFile);
+            doc.getDocumentElement().normalize();
+        }
+        catch(Exception e) {
+            e.printStackTrace();
+        }
+        for (String option : options) {
+            translations.put(option, getValue(option, doc.getDocumentElement()));
+        }
+           return translations;
+    }
+
+    public static Questionnaire getQuestionnaire(File questionFile)
+    {
+        Document doc = null;
+
+        try {
+            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            DocumentBuilder db = dbf.newDocumentBuilder();
+            doc = db.parse(questionFile);
+            doc.getDocumentElement().normalize();
 
         } catch (Exception e) {
             e.printStackTrace();
         }
-        readQuestions();
+        return new Questionnaire(readQuestions(doc),readIntroductionString(doc));
     }
 
-    private void readText() {
-        for (String option : options) {
-            testText.put(option, getValue(option, doc.getDocumentElement()));
-        }
+    private static String readIntroductionString(Document doc) {
+        NodeList questions = doc.getElementsByTagName("Questionnaire");
+        Element allQuestions = (Element) questions.item(0);
+        NodeList introductionList = allQuestions.getElementsByTagName("introduction");
+        Node introductionNode = introductionList.item(0);
+        Node introductionText = introductionNode.getFirstChild();
+        String introduction = introductionText.getNodeValue();
+        return introduction;
     }
 
 
-    private void readQuestions() {
+    private static ArrayList<QuestionData> readQuestions(Document doc) {
+        ArrayList<QuestionData> allQuestionsList = new ArrayList<QuestionData>();
         try {
-            NodeList questions = questionnaire.getElementsByTagName("Questionnaire");
+            NodeList questions = doc.getElementsByTagName("Questionnaire");
             Element allQuestions = (Element) questions.item(0);
-            NodeList introductionList = allQuestions.getElementsByTagName("introduction");
-            Node introductionNode = introductionList.item(0);
-            Node introductionText = introductionNode.getFirstChild();
-            introduction = introductionText.getNodeValue();
             NodeList questionList = allQuestions.getElementsByTagName("question");
             QuestionData newQuestion = null;
 
@@ -140,7 +135,7 @@ public class XMLReader {
                         newQuestion.setSize(Integer.parseInt(size));
                     }
                 }
-                extraQuestions.add(newQuestion);
+                allQuestionsList.add(newQuestion);
             }
         } catch (Exception e) {
             //custom title, error icon
@@ -149,7 +144,7 @@ public class XMLReader {
                     "XML Error",
                     JOptionPane.ERROR_MESSAGE);
         }
-
+        return allQuestionsList;
     }
 
     private static String getValue(String tag, Element element) {
@@ -158,21 +153,17 @@ public class XMLReader {
         return node.getNodeValue();
     }
 
-    //Returns the requested value belonging to a key in the Hashmap
-    public String getValue(String key) {
-        return testText.get(key);
-    }
 
-    public String getQuestionnaireIntro() {
-        return introduction;
-    }
+//    public String getQuestionnaireIntro() {
+//        return introduction;
+//    }
 
-    public ArrayList<QuestionData> getExtraQuestions() {
-        return extraQuestions;
-    }
+//    public ArrayList<QuestionData> getExtraQuestions() {
+//        return extraQuestions;
+ //   }
 
 
-    public ArrayList<String> getIncludedFiles(File dir) {
+    public static ArrayList<String> getIncludedFiles(File dir) {
         ArrayList<String> files = new ArrayList<String>();
 
         try {
@@ -203,7 +194,7 @@ public class XMLReader {
     }
 
     //Same result as the above, but this time returns as an arraylist of Files
-    public ArrayList<File> getIncludedFilesF(File dir) {
+    public static ArrayList<File> getIncludedFilesF(File dir) {
 
         ArrayList<File> result = new ArrayList<File>();
         for (String s : getIncludedFiles(dir)) {
