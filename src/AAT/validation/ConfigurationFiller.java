@@ -10,6 +10,7 @@ public class ConfigurationFiller {
     public static TestConfiguration fillTestConfiguration(TestConfigurationMap<String> validatedConfiguration) {
         TestConfiguration testConfiguration = new TestConfiguration();
         try {
+            System.out.println("HIERRRRR");
             testConfiguration.setTrials(validatedConfiguration.getIntValue("Trials"));
             testConfiguration.setBreakAfter(validatedConfiguration.getIntValue("BreakAfter"));
             testConfiguration.setPracticeRepeat(validatedConfiguration.getIntValue("PracticeRepeat"));
@@ -48,7 +49,7 @@ public class ConfigurationFiller {
             testConfiguration.setDataFile(validatedConfiguration.getFileValue("DataFile"));
             testConfiguration.setWorkingDir(validatedConfiguration.getFileValue("WorkingDir"));
         } catch (FalseConfigException e) {
-
+              e.printStackTrace();
         }
         return testConfiguration;
     }

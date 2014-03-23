@@ -65,6 +65,8 @@ public abstract class AbstractAAT {
     public AbstractAAT(TestConfiguration testConfiguration) throws FalseConfigException {
 
         this.testConfiguration = testConfiguration;
+        System.out.println("TestConfig "+testConfiguration.getPullTag());
+    //    System.out.println("bla "+testConfiguration.getNeutralDir().getAbsolutePath());
         neutralImages = XMLReader.getIncludedFilesF(testConfiguration.getNeutralDir());
         if (neutralImages.size() == 0) {
             throw new FalseConfigException("Neutral images directory contains no images");
@@ -165,7 +167,7 @@ public abstract class AbstractAAT {
         if (direction == AATImage.PULL) {
             return testConfiguration.getPullColor();
         } else {
-            return testConfiguration.getPullColor();
+            return testConfiguration.getPushColor();
         }
     }
 

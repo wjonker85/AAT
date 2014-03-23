@@ -1294,6 +1294,7 @@ public class ConfigBuilderPanel extends JPanel implements  Observer{
         configuration.setStepSize(Integer.parseInt(inputStepSize.getText()));
         configuration.setDataSteps(Integer.parseInt(inputDataStepSize.getText()));
         configuration.setMaxSizePerc(Integer.parseInt(inputMaxSizeP.getText()));
+        configuration.setImageSizePerc(Integer.parseInt(inputImageSizeP.getText()));
         configuration.setAffectRatio(inputAffectRatioPush.getText() + ":" + inputAffectRatioPull.getText());
         configuration.setNeutralRatio(inputNeutralRatioPush.getText() + ":" + inputNeutralRatioPull.getText());
         configuration.setTestRatio(inputTestRatioA.getText() + ":" + inputTestRatioN.getText());
@@ -1318,7 +1319,14 @@ public class ConfigBuilderPanel extends JPanel implements  Observer{
     //TODO add  "PlotType"
 
     public File createFullPathFile(String file) {
-        return new File(workingDir + File.separator + file);
+        System.out.println("Test "+file);
+        File f = new File(file);
+        if(f.isAbsolute()) {
+            return f;
+        }
+        else {
+            return new File(workingDir + File.separator + file);
+        }
     }
 
     @Override

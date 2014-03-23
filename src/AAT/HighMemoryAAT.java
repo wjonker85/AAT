@@ -117,7 +117,7 @@ public class HighMemoryAAT extends AbstractAAT {
     public ArrayList<AATImage> createRandomListBorders() {
         ArrayList<AATImage> randomList = new ArrayList<AATImage>();
         int trialSize =   getTestConfiguration().getTrialSize();
-        if (trialSize == 0) {  //not set in the config
+        if (trialSize <= 0) {  //not set in the config
             trialSize = (getNeutralImages().size() + getAffectiveImages().size()) * 2;
         }
         System.out.println("Trial Size = " + trialSize);

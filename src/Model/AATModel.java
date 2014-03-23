@@ -113,8 +113,8 @@ public class AATModel extends Observable {
     //Starts a new instance of the AAT. With no. times it has to repeat and when there will be a break.
     public void startTest(boolean saveData) {
         this.saveData = saveData; //Don't save the data when testing configuration
-     //   this.repeat = newAAT.getRepeat();
-     //   this.breakAfter = newAAT.getBreakAfter();
+        this.repeat = newAAT.getTestConfiguration().getTrials();
+        this.breakAfter = newAAT.getTestConfiguration().getBreakAfter();
         this.previousDataPos = (newAAT.getTestConfiguration().getDataSteps() + 1) / 2; //Set the previous position to the center Data position
         this.previousPos = (newAAT.getTestConfiguration().getStepSize() + 1) / 2;  //Set the previous position to the center display position
         if (newAAT.getTestConfiguration().getHasPractice()) {        //If set in the config, first do a practice.

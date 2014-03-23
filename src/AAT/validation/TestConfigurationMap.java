@@ -111,6 +111,7 @@ public class TestConfigurationMap<TKey> {
 
     public File getFileValue(TKey key) throws FalseConfigException{
         if(FileOptions.containsKey(key)) {
+            System.out.println(key+" "+FileOptions.get(key).getValue());
             return FileOptions.get(key).getValue();
         }
         else {
@@ -151,46 +152,48 @@ public class TestConfigurationMap<TKey> {
 
     public boolean isValidated() throws FalseConfigException {
         for (TestConfigurationOption<String> option : StringOptions.values()) {
-            if(option.getValidator() == null) {
-                return true; //Assume true when no validator is set.
-            }
-            try {
-                option.getValidator().validate(option.getValue());
-            } catch (FalseConfigException e) {
-                  throw e;
+            if (option.getValidator() != null) {
+
+                try {
+                    option.getValidator().validate(option.getValue());
+                } catch (FalseConfigException e) {
+                    throw e;
+                }
+                System.out.println("Config option "+option.getValue()+" validated OK");
             }
         }
 
         for (TestConfigurationOption<Integer> option : IntegerOptions.values()) {
-            if(option.getValidator() == null) {
-                return true; //Assume true when no validator is set.
-            }
-            try {
-                option.getValidator().validate(option.getValue());
-            } catch (FalseConfigException e) {
-                throw e;
+            if (option.getValidator() != null) {
+                try {
+                    option.getValidator().validate(option.getValue());
+                } catch (FalseConfigException e) {
+                    throw e;
+                }
+                System.out.println("Config option "+option.getValue()+" validated OK");
             }
         }
-
         for (TestConfigurationOption<Boolean> option : BoolOptions.values()) {
-            if(option.getValidator() == null) {
-                return true; //Assume true when no validator is set.
-            }
-            try {
-                option.getValidator().validate(option.getValue());
-            } catch (FalseConfigException e) {
-                throw e;
-            }
-        }
+            if (option.getValidator() != null) {
 
-        for (TestConfigurationOption<File> option : FileOptions.values()) {
-            if(option.getValidator() == null) {
-                return true; //Assume true when no validator is set.
+                try {
+                    option.getValidator().validate(option.getValue());
+                } catch (FalseConfigException e) {
+                    throw e;
+                }
+                System.out.println("Config option "+option.getValue()+" validated OK");
             }
-            try {
-                option.getValidator().validate(option.getValue());
-            } catch (FalseConfigException e) {
-                throw e;
+
+        }
+        for (TestConfigurationOption<File> option : FileOptions.values()) {
+            if (option.getValidator() != null) {
+
+                try {
+                    option.getValidator().validate(option.getValue());
+                } catch (FalseConfigException e) {
+                    throw e;
+                }
+                System.out.println("Config option "+option.getValue()+" validated OK");
             }
         }
         return true;      //When no exception is thrown, test configuration is valid and loading can continue.
@@ -207,7 +210,7 @@ class TestConfigurationOption<TValue> implements IConfigOption<TValue> {
 
     @Override
     public TValue getValue() {
-        return null;
+        return value;
     }
 
     @Override
