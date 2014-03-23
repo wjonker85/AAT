@@ -1,5 +1,6 @@
 package IO;
 
+import AAT.Util.FileUtils;
 import DataStructures.TestConfiguration;
 
 import java.io.File;
@@ -167,12 +168,13 @@ public class ConfigWriter {
         pw.write(dirHeader);
         pw.println();
         pw.println();
-        pw.write("AffectiveDir " + checkForValue(configuration.getAffectiveDir().getAbsolutePath()));
+        System.out.println("WORKING "+configuration.getWorkingDir()+" "+configuration.getAffectiveDir());
+        pw.write("AffectiveDir " + FileUtils.getRelativePath(configuration.getWorkingDir(),configuration.getAffectiveDir()));
         pw.println();
-        pw.write("NeutralDir " + checkForValue(configuration.getNeutralDir().getAbsolutePath()));
+        pw.write("NeutralDir " + FileUtils.getRelativePath(configuration.getWorkingDir(),configuration.getNeutralDir()));
         pw.println();
         if (configuration.getPracticeDir().length() > 0) {
-            pw.write("PracticeDir " + checkForValue(configuration.getPracticeDir().getAbsolutePath()));
+            pw.write("PracticeDir " + FileUtils.getRelativePath(configuration.getWorkingDir(),configuration.getPracticeDir()));
             pw.println();
         } else {
             pw.write("# PracticeDir practice");
@@ -187,7 +189,7 @@ public class ConfigWriter {
         pw.write(languageHeader);
         pw.println();
         pw.println();
-        pw.write("LanguageFile " + checkForValue(configuration.getLanguageFile().getAbsolutePath()));
+        pw.write("LanguageFile " + FileUtils.getRelativePath(configuration.getWorkingDir(),configuration.getLanguageFile()));
         pw.println();
         pw.println();
         pw.write(questionHeader);
@@ -197,8 +199,8 @@ public class ConfigWriter {
             pw.write("# Questionnaire Questionnaire.xml");
             pw.println();
         } else {
-            if (configuration.getQuestionnaireFile().length() > 0) {
-                pw.write("Questionnaire " + configuration.getQuestionnaireFile());
+            if (configuration.getQuestionnaireFile().getName().length() > 0) {
+                pw.write("Questionnaire " + FileUtils.getRelativePath(configuration.getWorkingDir(),configuration.getQuestionnaireFile()));
             } else {
                 pw.write("#Questionnaire ");
             }

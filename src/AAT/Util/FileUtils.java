@@ -18,16 +18,23 @@ import java.util.regex.Pattern;
  */
 
 
-
-
 public class FileUtils {
 
 
-    //regex for extension filtering
-    private static Pattern pattern;
-
     private static final String IMAGE_PATTERN =
             "([^\\s]+(\\.(?i)(jpeg|jpg|png|gif|bmp))$)";
+    //regex for extension filtering
+    private static Pattern pattern;
+    /**
+     * Filter so that only the image files in a directory will be selected
+     */
+    static FileFilter extensionFilter = new FileFilter() {
+        public boolean accept(File file) {
+            pattern = Pattern.compile(IMAGE_PATTERN); //create regex
+            Matcher matcher = pattern.matcher(file.getName());
+            return matcher.matches();
+        }
+    };
 
     /**
      * Loads all image files in a given directory. Extension filter with regular expression.
@@ -40,19 +47,6 @@ public class FileUtils {
         return new ArrayList<File>(Arrays.asList(files));
     }
 
-
-    /**
-     * Filter so that only the image files in a directory will be selected
-     */
-    static FileFilter extensionFilter = new FileFilter() {
-        public boolean accept(File file) {
-            pattern = Pattern.compile(IMAGE_PATTERN); //create regex
-            Matcher matcher = pattern.matcher(file.getName());
-            return matcher.matches();
-        }
-    };
-
-
     /**
      * Computes the path for a file relative to a given base, or fails if the only shared
      * directory is the root and the absolute form is better.
@@ -64,21 +58,28 @@ public class FileUtils {
      *                     root prefix "/" or "C:\"
      */
 
-    public static String getRelativePath(File base, File name) throws IOException {
-        File parent = base.getParentFile();
+    public static String getRelativePath(File base, File name) {
+        if(base!=null && name!=null) {
+            File parent = base.getParentFile();
+            if (name.getName().length() > 0) {
+                try {
+                    if (parent == null) {
+                        return name.getAbsolutePath();
+                    }
+                    String bpath = base.getCanonicalPath();
+                    String fpath = name.getCanonicalPath();
 
-        if (parent == null) {
-            throw new IOException("No common directory");
+                    if (fpath.startsWith(bpath)) {
+                        return fpath.substring(bpath.length() + 1);
+                    } else {
+                        return (".." + File.separator + getRelativePath(parent, name));
+                    }
+                } catch (Exception e) {
+                   return name.getAbsolutePath();
+                }
+            }
         }
-
-        String bpath = base.getCanonicalPath();
-        String fpath = name.getCanonicalPath();
-
-        if (fpath.startsWith(bpath)) {
-            return fpath.substring(bpath.length() + 1);
-        } else {
-            return (".." + File.separator + getRelativePath(parent, name));
-        }
+        return "";
     }
 
 

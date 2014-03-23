@@ -138,16 +138,13 @@ public class XMLWriter {
 
 
     public static void writeXMLQuestionnaire(File file, Questionnaire questionnaire) {
-        System.out.println("test");
         try {
-            //   TableModel modelA = tableA.getModel();
-            //  TableModel modelN = tableN.getModel();
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
 
             // root elements
             Document doc = docBuilder.newDocument();
-            Element rootElement = doc.createElement("Questionnaire");
+            Element rootElement = doc.createElement("questionnaire");
             doc.appendChild(rootElement);
 
             //Add the introduction.

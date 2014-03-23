@@ -53,7 +53,8 @@ public class TestFrame extends JFrame implements Observer {
         this.model = model;
         cl = new CardLayout();
         displayPanel = new JPanel(cl);
-        questionsView = new QuestionPanel(model);
+        Dimension screen = getToolkit().getScreenSize();
+        questionsView = new QuestionPanel(model,new Dimension((int) (0.8 * screen.width), (int) (0.75 * screen.height)));
         aatView = new AATView(model);
         boxPlot = new BoxPlot(model);
         plotPanel = new PlotPanel(model);

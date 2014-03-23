@@ -15,6 +15,7 @@
  *
  */
 
+import com.oyoaha.swing.plaf.oyoaha.OyoahaLookAndFeel;
 import views.ConfigurationBuilder.ConfigBuilderPanel;
 import javax.swing.*;
 import java.awt.*;
@@ -63,6 +64,14 @@ public class ConfigurationBuilder {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 //Turn off metal's use of bold fonts
+                try {
+                //    UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
+                 //   OyoahaLookAndFeel laf = new OyoahaLookAndFeel();
+                 //   UIManager.setLookAndFeel(laf);
+                 //   UIManager.setLookAndFeel("com.oyoaha.swing.plaf.oyoaha.OyoahaLookAndFeel");
+                }  catch (Exception e) {
+                    e.printStackTrace();
+                }
                 UIManager.put("swing.boldMetal", Boolean.FALSE);
                 createAndShowGUI();
             }

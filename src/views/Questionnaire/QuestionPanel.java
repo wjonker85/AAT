@@ -60,12 +60,10 @@ public class QuestionPanel extends JPanel {
     private Questionnaire questionnaire;
     private int maxLabelSize = 0;
 
-    public QuestionPanel(final AATModel model) {
+    public QuestionPanel(final AATModel model, Dimension resolution) {
         if (model == null) {
             editMode = true;
         }
-
-        //  super(new BoxLayout(this, BoxLayout.Y_AXIS));
         JPanel mainPanel = new JPanel();
         JPanel contentPanel = new JPanel();
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
@@ -74,19 +72,19 @@ public class QuestionPanel extends JPanel {
         mainPanel.setBackground(Color.black);
         mainPanel.setForeground(Color.white);
         mainPanel.setLayout(new FlowLayout(FlowLayout.CENTER));    //TODO even naar kijken
-        Dimension screen = getToolkit().getScreenSize();
+
         //  this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         this.setLayout(new GridBagLayout());
         this.setBackground(Color.black);
         this.setForeground(Color.white);
-        this.setPreferredSize(new Dimension(screen.width / 2, screen.height));
-        this.setMaximumSize(new Dimension(screen.width / 2, screen.height));
+    //    this.setPreferredSize(new Dimension(screen.width / 2, screen.height));
+    //    this.setMaximumSize(new Dimension(screen.width / 2, screen.height));
 
         if (editMode) {
             JPanel addButtonPanel = new JPanel();
             JButton button = new JButton("Add question");
             addButtonPanel.add(button);
-            contentPanel.add(addButtonPanel);
+          //  contentPanel.add(addButtonPanel);
             button.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent actionEvent) {
@@ -136,27 +134,31 @@ public class QuestionPanel extends JPanel {
             buttonPanel.setBackground(Color.black);
             buttonPanel.setForeground(Color.white);
             buttonPanel.add(submitButton);
-            contentPanel.add(buttonPanel);
+        //    contentPanel.add(buttonPanel);
         }
 
         scrollPane = new JScrollPane(contentPanel,
                 JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
                 JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        if(!editMode) {
+            scrollPane.setPreferredSize(resolution);
+            scrollPane.setMinimumSize(resolution);
+            scrollPane.setMaximumSize(resolution);
+            //     scrollPane.getVerticalScrollBar().setUnitIncrement(16);
 
-        scrollPane.setPreferredSize(new Dimension((int) (0.8 * screen.width), (int) (0.75 * screen.height)));
-        scrollPane.setMinimumSize(new Dimension((int) (0.8 * screen.width), (int) (0.75 * screen.height)));
-        scrollPane.setMaximumSize(new Dimension((int) (0.8 * screen.width), (int) (0.75 * screen.height)));
-        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
-
-        scrollPane.setBorder(BorderFactory.createEmptyBorder());
-        scrollPane.setBackground(Color.black);
-        scrollPane.setForeground(Color.white);
-        JScrollBar vertical = scrollPane.getVerticalScrollBar();
-        InputMap im = vertical.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
-        im.put(KeyStroke.getKeyStroke("DOWN"), "positiveUnitIncrement");
-        im.put(KeyStroke.getKeyStroke("UP"), "negativeUnitIncrement");
-        mainPanel.add(scrollPane);
-        this.add(mainPanel, new GridBagConstraints());
+            scrollPane.setBorder(BorderFactory.createEmptyBorder());
+            scrollPane.setBackground(Color.black);
+            scrollPane.setForeground(Color.white);
+            JScrollBar vertical = scrollPane.getVerticalScrollBar();
+            InputMap im = vertical.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+            im.put(KeyStroke.getKeyStroke("DOWN"), "positiveUnitIncrement");
+            im.put(KeyStroke.getKeyStroke("UP"), "negativeUnitIncrement");
+            //  mainPanel.add(scrollPane);
+            this.add(scrollPane, new GridBagConstraints());
+        }
+        else {
+            this.add(contentPanel, new GridBagConstraints());
+        }
     }
 
 

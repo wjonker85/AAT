@@ -68,7 +68,7 @@ public class XMLReader {
     public static Questionnaire getQuestionnaire(File questionFile)
     {
         Document doc = null;
-
+        System.out.println("Q file "+questionFile.getAbsolutePath());
         try {
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             DocumentBuilder db = dbf.newDocumentBuilder();
@@ -82,7 +82,7 @@ public class XMLReader {
     }
 
     private static String readIntroductionString(Document doc) {
-        NodeList questions = doc.getElementsByTagName("Questionnaire");
+        NodeList questions = doc.getElementsByTagName("questionnaire");
         Element allQuestions = (Element) questions.item(0);
         NodeList introductionList = allQuestions.getElementsByTagName("introduction");
         Node introductionNode = introductionList.item(0);
@@ -95,7 +95,7 @@ public class XMLReader {
     private static ArrayList<QuestionData> readQuestions(Document doc) {
         ArrayList<QuestionData> allQuestionsList = new ArrayList<QuestionData>();
         try {
-            NodeList questions = doc.getElementsByTagName("Questionnaire");
+            NodeList questions = doc.getElementsByTagName("questionnaire");
             Element allQuestions = (Element) questions.item(0);
             NodeList questionList = allQuestions.getElementsByTagName("question");
             QuestionData newQuestion = null;
