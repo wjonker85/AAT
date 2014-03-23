@@ -85,7 +85,7 @@ public class DataExporter {
     }
 //
 //    public static void exportMeasurementsAnova(File file, int minRTime, int maxRTime, int errorPerc, boolean includePractice, boolean removeCenter) {
-//        Document doc = createCopiedDocument(model.getTestData().getDocument());
+//        Document doc = createCopiedDocument(model.getAATDataRecorder().getDocument());
 //        doc = testIDFilter(doc, String.valueOf(model.getExport_id()));
 //        if (!includePractice) {
 //            doc = removePractice(doc);

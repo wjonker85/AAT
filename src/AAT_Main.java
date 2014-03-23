@@ -17,7 +17,7 @@
 
 import AAT.AatObject;
 import Controller.JoystickController;
-import DataStructures.TestData;
+import DataStructures.AATDataRecorder;
 import IO.DataExporter;
 import Model.AATModel;
 import views.ExportDataDialog;
@@ -62,7 +62,7 @@ public class AAT_Main extends JFrame implements Observer {
     private TestFrame testFrame;
     final JMenuItem exportData;
     final JButton runButton;
-    private TestData inputTestData;
+    private AATDataRecorder inputAATDataRecorder;
     private int foreign_id;
 
     /**
@@ -198,7 +198,7 @@ public class AAT_Main extends JFrame implements Observer {
         exportData.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent actionEvent) {
 
-                HashMap<String, String> testData = DataExporter.getTestRevisions(model.getTestData().getDocument());
+                HashMap<String, String> testData = DataExporter.getTestRevisions(model.getAATDataRecorder().getDocument());
 
                 if (testData.size() > 1) {
                     SelectTestRevision testRevision = new SelectTestRevision(testData, model.getTest().getTest_id(), model,true);
@@ -207,7 +207,7 @@ public class AAT_Main extends JFrame implements Observer {
                     testRevision.requestFocus();
                 } else {                 //Data from just one test.
                    //   model.setExport_id(model.getTest().getTest_id(),true);  //Set export ID and notify observers
-                    ExportDataDialog export = new ExportDataDialog(model.getTestData().getTestMetaData(model.getTest().getTest_id()));
+                    ExportDataDialog export = new ExportDataDialog(model.getAATDataRecorder().getTestMetaData(model.getTest().getTest_id()));
                     export.setVisible(true);
                 }
             }
@@ -222,7 +222,7 @@ public class AAT_Main extends JFrame implements Observer {
                 File dataFile = fileOpenDialog(new AAT.Util.ExtensionFileFilter("XML File", new String[]{"XML", "xm;"}));
                 if(dataFile !=null) {
                     if(dataFile.exists()) {
-                        inputTestData = new TestData(dataFile,model);      //Load data from xml file. Notifies observers when ready.
+                        inputAATDataRecorder = new AATDataRecorder(dataFile,model);      //Load data from xml file. Notifies observers when ready.
                     }
                 }
             }
@@ -303,21 +303,21 @@ public class AAT_Main extends JFrame implements Observer {
                 System.out.println("Single set of data found for id "+model.getExport_id());
                 model.setExport_id(model.getExport_id(),false);        //Set export ID and notify observers
 
-         //       ExportDataDialog export = new ExportDataDialog(inputTestData.getTestMetaData(inputTestData.getHighestTestID()));
+         //       ExportDataDialog export = new ExportDataDialog(inputAATDataRecorder.getTestMetaData(inputAATDataRecorder.getHighestTestID()));
          //       export.setVisible(true);
             }
         }
 
         if (o.toString().equalsIgnoreCase("Export")) {
             System.out.println("Showing data exporter, using id "+model.getExport_id());
-            ExportDataDialog export = new ExportDataDialog(model.getTestData().getTestMetaData(model.getExport_id()));
+            ExportDataDialog export = new ExportDataDialog(model.getAATDataRecorder().getTestMetaData(model.getExport_id()));
             export.setVisible(true);
         }
 
         if (o.toString().equalsIgnoreCase("Export_foreign")) {
-            inputTestData = model.getExportTestData();
+            inputAATDataRecorder = model.getExportAATDataRecorder();
             System.out.println("Showing data exporter, using id "+model.getExport_id());
-            ExportDataDialog export = new ExportDataDialog(inputTestData.getTestMetaData(model.getExport_id()));
+            ExportDataDialog export = new ExportDataDialog(inputAATDataRecorder.getTestMetaData(model.getExport_id()));
             export.setVisible(true);
         }
     }

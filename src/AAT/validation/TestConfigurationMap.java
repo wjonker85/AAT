@@ -2,6 +2,7 @@ package AAT.validation;
 
 import AAT.IConfigOption;
 import AAT.Util.FileUtils;
+import DataStructures.TestConfiguration;
 
 import java.io.File;
 import java.util.HashMap;
@@ -99,7 +100,16 @@ public class TestConfigurationMap<TKey> {
          }
     }
 
-    public File getFileValue(TKey key) throws  FalseConfigException {
+    public String getStringValue(TKey key) throws FalseConfigException{
+        if(StringOptions.containsKey(key)) {
+            return StringOptions.get(key).getValue();
+        }
+        else {
+            throw new FalseConfigException(String.valueOf(key) + " not found.");
+        }
+    }
+
+    public File getFileValue(TKey key) throws FalseConfigException{
         if(FileOptions.containsKey(key)) {
             return FileOptions.get(key).getValue();
         }
@@ -117,13 +127,22 @@ public class TestConfigurationMap<TKey> {
         }
     }
 
-    public String getStringValue(TKey key) throws FalseConfigException{
-        if(StringOptions.containsKey(key)) {
-            return StringOptions.get(key).getValue();
+    public TestConfigurationOption<Object> getConfigOption(TKey key) {
+        if(this.contains(key)) {
+            if(BoolOptions.containsKey(key)) {
+                return new TestConfigurationOption<Object>(BoolOptions.get(key).getValue());
+            }
+            else if(FileOptions.containsKey(key)) {
+                return new TestConfigurationOption<Object>(FileOptions.get(key).getValue());
+            }
+            else if(StringOptions.containsKey(key)) {
+                return new TestConfigurationOption<Object>(StringOptions.get(key).getValue());
+            }
+            else if(IntegerOptions.containsKey(key)) {
+                return new TestConfigurationOption<Object>(IntegerOptions.get(key).getValue());
+            }
         }
-        else {
-            throw new FalseConfigException(String.valueOf(key) + " not found.");
-        }
+        return null;
     }
 
     public int getSize() {
@@ -199,6 +218,11 @@ class TestConfigurationOption<TValue> implements IConfigOption<TValue> {
     @Override
     public void addValidator(IConfigValidator<TValue> validator) {
         this.validator = validator;
+    }
+
+    @Override
+    public Class getType() {
+        return value.getClass();
     }
 
     public IConfigValidator<TValue> getValidator() {

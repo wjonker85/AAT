@@ -15,5 +15,7 @@ import AAT.validation.IConfigValidator;
 
         public void addValidator(IConfigValidator<TValue> validator);
 
+        public Class getType();
+
     }
 

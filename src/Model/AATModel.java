@@ -19,9 +19,9 @@ package Model;
 
 import AAT.AatObject;
 import AAT.HighMemoryAAT;
+import DataStructures.AATDataRecorder;
 import DataStructures.AATImage;
 import DataStructures.ParticipantData;
-import DataStructures.TestData;
 import org.w3c.dom.Document;
 
 import java.awt.image.BufferedImage;
@@ -75,7 +75,7 @@ public class AATModel extends Observable {
     private boolean practice;
     //Measurement
 
-    private TestData testData;
+    private AATDataRecorder AATDataRecorder;
     private ParticipantData newParticipant;
     private long startMeasure;
     private int resize;
@@ -92,7 +92,7 @@ public class AATModel extends Observable {
 
     private int export_id;
     private Document exportDocument;
-    private TestData exportTestData;
+    private AATDataRecorder exportAATDataRecorder;
 
     //Constructor.
     public AATModel() {
@@ -104,7 +104,7 @@ public class AATModel extends Observable {
     //Load a new AAT from file
     public void loadNewAAT(File configFile) throws AatObject.FalseConfigException {
         newAAT = new HighMemoryAAT(configFile);
-        testData = new TestData(newAAT,this);
+        AATDataRecorder = new AATDataRecorder(newAAT,this);
     }
 
     //Starts a new instance of the AAT. With no. times it has to repeat and when there will be a break.
@@ -130,7 +130,7 @@ public class AATModel extends Observable {
         }
         count = 0;        //reset counters
         run = 0;
-        int id = testData.getHighestID();
+        int id = AATDataRecorder.getHighestID();
         id++;          //new higher id
         newParticipant = new ParticipantData(id,newAAT.getTest_id());
 
@@ -151,8 +151,8 @@ public class AATModel extends Observable {
         return newAAT;
     }
 
-    public final TestData getTestData() {
-        return testData;
+    public final AATDataRecorder getAATDataRecorder() {
+        return AATDataRecorder;
     }
 
     public void setExport_id(int id, boolean current) {
@@ -166,12 +166,12 @@ public class AATModel extends Observable {
         }
     }
 
-    public void setExportTestData(TestData testData) {
-        exportTestData = testData;
+    public void setExportAATDataRecorder(AATDataRecorder AATDataRecorder) {
+        exportAATDataRecorder = AATDataRecorder;
     }
 
-    public TestData getExportTestData() {
-        return exportTestData;
+    public AATDataRecorder getExportAATDataRecorder() {
+        return exportAATDataRecorder;
     }
 
     public void setExport_idNoNotify(int id) {
@@ -249,7 +249,7 @@ public class AATModel extends Observable {
                     testStatus = AATModel.TEST_SHOW_FINISHED;    //Notify observers about it
                     if (!newAAT.getDisplayQuestions().equals("After")) {  //Questionnaire has to be added at the end
                         if (saveData) {
-                            testData.addParticipant(newParticipant);
+                            AATDataRecorder.addParticipant(newParticipant);
                         }
                     }
 
@@ -470,7 +470,7 @@ public class AATModel extends Observable {
         this.setChanged();
         if (newAAT.getDisplayQuestions().equals("After")) {
             if (saveData) {
-                testData.addParticipant(newParticipant);
+                AATDataRecorder.addParticipant(newParticipant);
             }
             this.notifyObservers("Finished");
         } else {

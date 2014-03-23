@@ -43,7 +43,7 @@ public class ConfigFileReader {
     String[] plotTypes = { "boxplot","2dline" };
 
     //All the configuration options
-    String[] options = {
+    public static String[] options = {
             "ColoredBorders",
             "BorderColorPush",
             "BorderColorPull",

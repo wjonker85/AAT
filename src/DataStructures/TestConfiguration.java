@@ -29,10 +29,10 @@ public class TestConfiguration {
     private String practiceFillColor = "";
     private String pullTag = "", pushTag = "";
     private String neutralDir = "", affectiveDir = "", practiceDir = "";
-    private String questionnaireFile = "";
-    private String languageFile = "";
+    private File questionnaireFile;
+    private File languageFile;
     private int stepSize, dataSteps, maxSizePerc, imageSizePerc;
-    private String dataFile;
+    private File dataFile;
     private int testID;
 
     public int getTrials() {
@@ -195,19 +195,19 @@ public class TestConfiguration {
         this.practiceDir = practiceDir;
     }
 
-    public String getQuestionnaireFile() {
+    public File getQuestionnaireFile() {
         return questionnaireFile;
     }
 
-    public void setQuestionnaireFile(String questionnaireFile) {
+    public void setQuestionnaireFile(File questionnaireFile) {
         this.questionnaireFile = questionnaireFile;
     }
 
     public File getLanguageFile() {
-        return new File(workingDir + File.separator + languageFile);
+        return  languageFile;
     }
 
-    public void setLanguageFile(String languageFile) {
+    public void setLanguageFile(File languageFile) {
         this.languageFile = languageFile;
     }
 
@@ -268,10 +268,10 @@ public class TestConfiguration {
     }
 
     public File getDataFile() {
-        return new File(workingDir + File.separator + dataFile);
+        return dataFile;
     }
 
-    public void setDataFile(String dataFile) {
+    public void setDataFile(File dataFile) {
         this.dataFile = dataFile;
     }
 
@@ -283,5 +283,3 @@ public class TestConfiguration {
         this.workingDir = workingDir;
     }
 }
-
-class

@@ -1,7 +1,9 @@
 package AAT.validation;
 
+import DataStructures.TestConfiguration;
 import IO.ConfigFileReader;
 
+import javax.swing.*;
 import java.io.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -22,15 +24,28 @@ public class AATValidator {
 
     public static File workingDir;
 
+    public static TestConfiguration validatedTestConfiguration(File config) {
+        TestConfiguration testConfiguration = new TestConfiguration();
+        TestConfigurationMap<String> testConfigurationMap;
+        try {
+            testConfigurationMap = createValidatedConfigMap(config);
+            testConfigurationMap.isValidated();
+        }
+        catch (FalseConfigException e) {
+            JOptionPane.showMessageDialog(null,e.getMessage(),"Configuration Error",JOptionPane.ERROR_MESSAGE);
+            return null;
+        }
+        return testConfigurationMap;
+    }
 
     //Create a map containing all the test variables with validators attached to them.
-    public static TestConfigurationMap<String> createValidatedConfigMap(File config) throws FalseConfigException {
+    private static TestConfigurationMap<String> createValidatedConfigMap(File config) throws FalseConfigException {
 
         TestConfigurationMap<String> testConfigurationMap = new TestConfigurationMap<String>();
         ConfigFileReader configFileReader = new ConfigFileReader(config);
         //First set the working directory
         workingDir = new File(config.getParentFile().getAbsolutePath());
-        testConfigurationMap.GetSetConfigOption("workingDir", workingDir);
+        testConfigurationMap.GetSetConfigOption("WorkingDir", workingDir);
 
         //Check for the ID value
         String idValue = "1";
@@ -44,28 +59,28 @@ public class AATValidator {
             addNewIDToConfigFile(config);
         }
 
-        TestConfigurationOption<Integer> id = testConfigurationMap.GetSetConfigOption("testID", parseIntWithException("testID", configFileReader.getValue("ID")));
+        TestConfigurationOption<Integer> id = testConfigurationMap.GetSetConfigOption("ID", parseIntWithException("ID", configFileReader.getValue("ID")));
 
         //Specify the data file
         String datFile = configFileReader.getValue("DataFile");
         if (datFile.equals("")) {
             datFile = "Data.xml"; //Set to default.
         }
-        testConfigurationMap.GetSetConfigOption("dataFile", datFile);
+        testConfigurationMap.GetSetConfigOption("DataFile", datFile);
 
 
         //Set the basic properties of the test trialsize break etc.
-        TestConfigurationOption<Integer> trials = testConfigurationMap.GetSetConfigOption("trials", parseIntWithException("trials", configFileReader.getValue("Trials")));
-        trials.addValidator(new NumberValidator("trials", 0, trials.getValue() + 1, false));
-        TestConfigurationOption<Integer> breakAfter = testConfigurationMap.GetSetConfigOption("breakAfter", parseIntWithException("breakAfter", configFileReader.getValue("BreakAfter")));
-        breakAfter.addValidator(new NumberValidator("breakAfter", -2, trials.getValue(), false));
+        TestConfigurationOption<Integer> trials = testConfigurationMap.GetSetConfigOption("Trials", parseIntWithException("Trials", configFileReader.getValue("Trials")));
+        trials.addValidator(new NumberValidator("Trials", 0, trials.getValue() + 1, false));
+        TestConfigurationOption<Integer> breakAfter = testConfigurationMap.GetSetConfigOption("BreakAfter", parseIntWithException("BreakAfter", configFileReader.getValue("BreakAfter")));
+        breakAfter.addValidator(new NumberValidator("BreakAfter", -2, trials.getValue(), false));
 
         //Check for a correct language file.
-        TestConfigurationOption<File> lFile = testConfigurationMap.GetSetConfigOption("langFile", createFullPathFile(configFileReader.getValue("LanguageFile")));
-        lFile.addValidator(new FileExistsValidator("Language"));
+        TestConfigurationOption<File> lFile = testConfigurationMap.GetSetConfigOption("LanguageFile", createFullPathFile(configFileReader.getValue("LanguageFile")));
+        lFile.addValidator(new FileExistsValidator("LanguageFile"));
 
         //Check whether the test has a questionnaire and when applicable this questionnaire needs to be displayed.
-        TestConfigurationOption<String> displayQuestions = testConfigurationMap.GetSetConfigOption("displayQuestions", configFileReader.getValue("DisplayQuestions"));
+        TestConfigurationOption<String> displayQuestions = testConfigurationMap.GetSetConfigOption("DisplayQuestions", configFileReader.getValue("DisplayQuestions"));
         displayQuestions.addValidator(new IConfigValidator<String>() {
             @Override
             public void validate(String s) throws FalseConfigException {
@@ -74,17 +89,17 @@ public class AATValidator {
                 }
             }
         });
-        TestConfigurationOption<File> questionnaireFile = testConfigurationMap.GetSetConfigOption("questionnaireFile", createFullPathFile(configFileReader.getValue("Questionnaire")));
+        TestConfigurationOption<File> questionnaireFile = testConfigurationMap.GetSetConfigOption("Questionnaire", createFullPathFile(configFileReader.getValue("Questionnaire")));
         questionnaireFile.addValidator(new FileExistsValidator("Questionnaire"));
 
         //Set the directories containing the neutral and affective images.
-        TestConfigurationOption<File> neutralDir = testConfigurationMap.GetSetConfigOption("neutralDir", createFullPathFile(configFileReader.getValue("NeutralDir")));
+        TestConfigurationOption<File> neutralDir = testConfigurationMap.GetSetConfigOption("NeutralDir", createFullPathFile(configFileReader.getValue("NeutralDir")));
         neutralDir.addValidator(new ImageDirectoryValidator("Neutral"));
-        TestConfigurationOption<File> affectiveDir = testConfigurationMap.GetSetConfigOption("affectiveDir", createFullPathFile(configFileReader.getValue("AffectiveDir")));
+        TestConfigurationOption<File> affectiveDir = testConfigurationMap.GetSetConfigOption("AffectiveDir", createFullPathFile(configFileReader.getValue("AffectiveDir")));
         affectiveDir.addValidator(new ImageDirectoryValidator("Affective"));
 
         //See whether the test has practice images and how often they should be repeated.
-        TestConfigurationOption<Integer> practiceRepeat = testConfigurationMap.GetSetConfigOption("practiceRepeat", parseIntWithException("practiceRepeat", configFileReader.getValue("PracticeRepeat")));
+        TestConfigurationOption<Integer> practiceRepeat = testConfigurationMap.GetSetConfigOption("PracticeRepeat", parseIntWithException("PracticeRepeat", configFileReader.getValue("PracticeRepeat")));
         practiceRepeat.addValidator(new NumberValidator("PracticeRepeat", 0, -1, false));
 
         //See whether the AAT program should draw colored borders around the images or that the researcher has created it's own cue for the push or pull condition
@@ -95,22 +110,22 @@ public class AATValidator {
         if (configFileReader.getValue("ColoredBorders").equalsIgnoreCase("false")) {
             doBorders = false;
         }
-        TestConfigurationOption<Boolean> coloredBorders = testConfigurationMap.GetSetConfigOption("coloredBorders", doBorders);
+        TestConfigurationOption<Boolean> coloredBorders = testConfigurationMap.GetSetConfigOption("ColoredBorders", doBorders);
         if (coloredBorders.getValue()) {        //Test uses auto-generated colored borders
-            TestConfigurationOption<String> pullColor = testConfigurationMap.GetSetConfigOption("borderColorPull", configFileReader.getValue("BorderColorPull"));
+            TestConfigurationOption<String> pullColor = testConfigurationMap.GetSetConfigOption("BorderColorPull", configFileReader.getValue("BorderColorPull"));
             pullColor.addValidator(new ColorValidator("pull"));
-            TestConfigurationOption<String> pushColor = testConfigurationMap.GetSetConfigOption("borderColorPush", configFileReader.getValue("BorderColorPush"));
+            TestConfigurationOption<String> pushColor = testConfigurationMap.GetSetConfigOption("BorderColorPush", configFileReader.getValue("BorderColorPush"));
             pushColor.addValidator(new ColorValidator("push"));
-            testConfigurationMap.GetSetConfigOption("borderWidth", parseIntWithException("BorderWidth", configFileReader.getValue("BorderWidth")));
+            testConfigurationMap.GetSetConfigOption("BorderWidth", parseIntWithException("BorderWidth", configFileReader.getValue("BorderWidth")));
         } else {
             //Researcher has specified it's own pull and push cues. Labels to define the push and pull images are necessary now.
-            TestConfigurationOption<String> pullTag = testConfigurationMap.GetSetConfigOption("pullTag", configFileReader.getValue("PullTag"));
-            pullTag.addValidator(new StringLengthValidator("pull tag"));
-            TestConfigurationOption<String> pushTag = testConfigurationMap.GetSetConfigOption("pushTag", configFileReader.getValue("PushTag"));
-            pushTag.addValidator(new StringLengthValidator("push tag"));
+            TestConfigurationOption<String> pullTag = testConfigurationMap.GetSetConfigOption("PullTag", configFileReader.getValue("PullTag"));
+            pullTag.addValidator(new StringLengthValidator("Pull tag"));
+            TestConfigurationOption<String> pushTag = testConfigurationMap.GetSetConfigOption("PushTag", configFileReader.getValue("PushTag"));
+            pushTag.addValidator(new StringLengthValidator("Push tag"));
 
             if (practiceRepeat.getValue() > 0) {   //No border and a practice. Researcher has to supply the test with it's own practice images.
-                TestConfigurationOption<File> practiceDir = testConfigurationMap.GetSetConfigOption("practiceDir", createFullPathFile(configFileReader.getValue("PracticeDir")));
+                TestConfigurationOption<File> practiceDir = testConfigurationMap.GetSetConfigOption("PracticeDir", createFullPathFile(configFileReader.getValue("PracticeDir")));
                 practiceDir.addValidator(new ImageDirectoryValidator("Practice"));
             }
         }
@@ -119,7 +134,7 @@ public class AATValidator {
             if (!testConfigurationMap.contains("practiceDir")) {
                 if (coloredBorders.getValue()) {
                     System.out.println("Practice with colored borders");
-                    TestConfigurationOption practiceFillColor = testConfigurationMap.GetSetConfigOption("practiceFillColor", configFileReader.getValue("PracticeFillColor"));
+                    TestConfigurationOption practiceFillColor = testConfigurationMap.GetSetConfigOption("PracticeFillColor", configFileReader.getValue("PracticeFillColor"));
                     practiceFillColor.addValidator(new ColorValidator("Practice fill color"));
                 } else {
                     throw new FalseConfigException("When practiceDir isn't set, ColoredBorder has to be set to True \n" +
@@ -130,9 +145,9 @@ public class AATValidator {
 
         String hasBoxplot = configFileReader.getValue("ShowBoxPlot");
         if (hasBoxplot.equalsIgnoreCase("True")) {
-            testConfigurationMap.GetSetConfigOption("showBoxPlot", true);
+            testConfigurationMap.GetSetConfigOption("ShowBoxPlot", true);
         } else if (hasBoxplot.equalsIgnoreCase("False")) {
-            testConfigurationMap.GetSetConfigOption("showBoxPlot", false);
+            testConfigurationMap.GetSetConfigOption("ShowBoxPlot", false);
         } else {
             throw new FalseConfigException("ShowBoxPlot should be either True or False");
         }
@@ -141,25 +156,28 @@ public class AATValidator {
         //--------------------- Advanced options  ----------------------------------------------------------------------------------------
         testConfigurationMap.GetSetConfigOption("PlotType", configFileReader.getPlotType(configFileReader.getValue("PlotType")));
         if (!configFileReader.getValue("AffectRatio").equals("")) {
-            TestConfigurationOption<Integer> a_pushPerc = testConfigurationMap.GetSetConfigOption("affectRatio", getPercentage(configFileReader.getValue("AffectRatio"), "AffectRatio"));
+            TestConfigurationOption<Integer> a_pushPerc = testConfigurationMap.GetSetConfigOption("AffectRatio", getPercentage(configFileReader.getValue("AffectRatio"), "AffectRatio"));
         }
         if (!configFileReader.getValue("NeutralRatio").equals("")) {
-            TestConfigurationOption<Integer> n_pushPerc = testConfigurationMap.GetSetConfigOption("neutralRatio", getPercentage(configFileReader.getValue("NeutralRatio"), "NeutralRatio"));
+            TestConfigurationOption<Integer> n_pushPerc = testConfigurationMap.GetSetConfigOption("NeutralRatio", getPercentage(configFileReader.getValue("NeutralRatio"), "NeutralRatio"));
         }
         if (!configFileReader.getValue("TestRatio").equals("")) {
-            TestConfigurationOption<Integer> affectPerc = testConfigurationMap.GetSetConfigOption("testRatio", getPercentage(configFileReader.getValue("TestRatio"), "TestRatio"));
+            TestConfigurationOption<Integer> affectPerc = testConfigurationMap.GetSetConfigOption("TestRatio", getPercentage(configFileReader.getValue("TestRatio"), "TestRatio"));
         }
         if (!configFileReader.getValue("TrialSize").equals("")) {
-            TestConfigurationOption<Integer> trialSize = testConfigurationMap.GetSetConfigOption("trialSize", parseIntWithException("TrialSize", configFileReader.getValue("TrialSize")));
+            TestConfigurationOption<Integer> trialSize = testConfigurationMap.GetSetConfigOption("TrialSize", parseIntWithException("TrialSize", configFileReader.getValue("TrialSize")));
         }
         if (!configFileReader.getValue("MaxSizePerc").equals("")) {
-            TestConfigurationOption<Integer> imageSizePerc = testConfigurationMap.GetSetConfigOption("imageSizePerc", parseIntWithException("ImageSizePerc", configFileReader.getValue("ImageSizePerc")));
+            TestConfigurationOption<Integer> imageSizePerc = testConfigurationMap.GetSetConfigOption("MaxSizePerc", parseIntWithException("MaxSizePerc", configFileReader.getValue("MaxSizePerc")));
+        }
+        if (!configFileReader.getValue("ImageSizePerc").equals("")) {
+            TestConfigurationOption<Integer> imageSizePerc = testConfigurationMap.GetSetConfigOption("ImageSizePerc", parseIntWithException("ImageSizePerc", configFileReader.getValue("ImageSizePerc")));
         }
 
         //Set some performance options.
-        TestConfigurationOption<Integer> stepSize = testConfigurationMap.GetSetConfigOption("stepSize", parseIntWithException("StepSize", configFileReader.getValue("StepSize")));
+        TestConfigurationOption<Integer> stepSize = testConfigurationMap.GetSetConfigOption("StepSize", parseIntWithException("StepSize", configFileReader.getValue("StepSize")));
         stepSize.addValidator(new NumberValidator("StepSize", 0, 101, true));
-        TestConfigurationOption<Integer> dataSteps = testConfigurationMap.GetSetConfigOption("dataSteps", parseIntWithException("DataSteps", configFileReader.getValue("DataSteps")));
+        TestConfigurationOption<Integer> dataSteps = testConfigurationMap.GetSetConfigOption("DataSteps", parseIntWithException("DataSteps", configFileReader.getValue("DataSteps")));
         stepSize.addValidator(new NumberValidator("StepSize", 0, 101, true));
 
         return testConfigurationMap;
