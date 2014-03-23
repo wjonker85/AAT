@@ -162,7 +162,7 @@ public class QuestionPanel extends JPanel {
     }
 
 
-    private void addQuestionAction() {
+    public void addQuestionAction() {
         if (questionnaire == null) {
             questionnaire = new Questionnaire(new ArrayList<QuestionData>(), "");
         }

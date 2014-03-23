@@ -16,6 +16,8 @@ import views.Questionnaire.QuestionPanel;
 import views.TestFrame;
 
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileFilter;
 import java.awt.*;
 import java.awt.event.*;
@@ -161,13 +163,36 @@ public class ConfigBuilderPanel extends JPanel implements  Observer{
         tryButton.setEnabled(false);
 
 
+
         toolbar.add(newButton);
         toolbar.add(openButton);
         toolbar.add(saveAsButton);
         toolbar.add(saveButton);
         toolbar.add(tryButton);
+        toolbar.add(new JSeparator(SwingConstants.VERTICAL));
+        final JButton addButton = new JButton(new ImageIcon("list-add.png"));
+        addButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                questionPanel.addQuestionAction();
+            }
+        });
+        toolbar.add(addButton);
         this.add(toolbar);
+
         tabbedPane = new JTabbedPane();
+        tabbedPane.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent changeEvent) {
+                if(tabbedPane.getTitleAt(tabbedPane.getSelectedIndex()).equals("Questionnaire")) {
+                    addButton.setEnabled(true);
+                }
+                else {
+                    addButton.setEnabled(false);
+                }
+
+            }
+        });
         ImageIcon icon = null;
         final JPanel mainPanel = createMainPanel();
         mainPanel.setEnabled(false);
