@@ -1,6 +1,6 @@
-package AAT.validation;
+package AAT.Configuration.Validation;
 
-import DataStructures.TestConfiguration;
+import AAT.Configuration.TestConfiguration;
 import IO.ConfigFileReader;
 
 import javax.swing.*;

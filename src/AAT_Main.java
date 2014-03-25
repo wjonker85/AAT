@@ -15,7 +15,7 @@
  *
  */
 
-import AAT.validation.FalseConfigException;
+import AAT.Configuration.Validation.FalseConfigException;
 import Controller.JoystickController;
 import DataStructures.AATDataRecorder;
 import IO.DataExporter;

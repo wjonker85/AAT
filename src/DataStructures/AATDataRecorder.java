@@ -18,6 +18,7 @@
 package DataStructures;
 
 import AAT.AbstractAAT;
+import AAT.Configuration.TestMetaData;
 import AAT.Util.FileUtils;
 import Model.AATModel;
 import org.w3c.dom.*;

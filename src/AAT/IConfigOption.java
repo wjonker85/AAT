@@ -1,6 +1,6 @@
 package AAT;
 
-import AAT.validation.IConfigValidator;
+import AAT.Configuration.Validation.IConfigValidator;
 
 /**
  * Created by marcel on 3/16/14.

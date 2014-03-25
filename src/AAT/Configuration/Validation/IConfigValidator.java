@@ -1,4 +1,4 @@
-package AAT.validation;
+package AAT.Configuration.Validation;
 
 /**
  * Created by marcel on 3/16/14.

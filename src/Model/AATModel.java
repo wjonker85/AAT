@@ -19,14 +19,13 @@ package Model;
 
 import AAT.AbstractAAT;
 import AAT.HighMemoryAAT;
-import AAT.validation.AATValidator;
-import AAT.validation.FalseConfigException;
+import AAT.Configuration.Validation.AATValidator;
+import AAT.Configuration.Validation.FalseConfigException;
 import DataStructures.AATDataRecorder;
 import DataStructures.AATImage;
 import DataStructures.ParticipantData;
 import org.w3c.dom.Document;
 
-import javax.swing.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;

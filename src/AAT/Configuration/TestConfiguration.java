@@ -1,11 +1,6 @@
-package DataStructures;
-
-import AAT.IConfigOption;
-import AAT.validation.FalseConfigException;
-import AAT.validation.IConfigValidator;
+package AAT.Configuration;
 
 import java.io.File;
-import java.util.HashMap;
 
 /**
  * Created by marcel on 3/16/14.

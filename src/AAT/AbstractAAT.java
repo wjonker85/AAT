@@ -19,10 +19,10 @@ package AAT;
 
 
 import AAT.Util.FileUtils;
-import AAT.validation.FalseConfigException;
+import AAT.Configuration.Validation.FalseConfigException;
 import DataStructures.AATImage;
-import DataStructures.Questionnaire;
-import DataStructures.TestConfiguration;
+import DataStructures.Questionnaire.Questionnaire;
+import AAT.Configuration.TestConfiguration;
 import IO.XMLReader;
 
 import java.io.File;

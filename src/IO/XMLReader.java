@@ -17,8 +17,7 @@
 
 package IO;
 
-import DataStructures.QuestionData;
-import DataStructures.Questionnaire;
+import DataStructures.Questionnaire.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -30,7 +29,6 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Created by IntelliJ IDEA.
@@ -41,8 +39,8 @@ import java.util.Map;
 public class XMLReader {
 
 
-    public static HashMap<String,String> getTranslations(File languageFile) {
-        HashMap<String,String> translations = new HashMap<String, String>();
+    public static HashMap<String, String> getTranslations(File languageFile) {
+        HashMap<String, String> translations = new HashMap<String, String>();
         Document doc = null;
         String[] options = {              //Keys defining the different texts
                 "introduction",
@@ -55,20 +53,18 @@ public class XMLReader {
             DocumentBuilder db = dbf.newDocumentBuilder();
             doc = db.parse(languageFile);
             doc.getDocumentElement().normalize();
-        }
-        catch(Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         for (String option : options) {
             translations.put(option, getValue(option, doc.getDocumentElement()));
         }
-           return translations;
+        return translations;
     }
 
-    public static Questionnaire getQuestionnaire(File questionFile)
-    {
+    public static Questionnaire getQuestionnaire(File questionFile) {
         Document doc = null;
-        System.out.println("Q file "+questionFile.getAbsolutePath());
+        System.out.println("Q file " + questionFile.getAbsolutePath());
         try {
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             DocumentBuilder db = dbf.newDocumentBuilder();
@@ -78,7 +74,7 @@ public class XMLReader {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return new Questionnaire(readQuestions(doc),readIntroductionString(doc));
+        return new Questionnaire(readQuestions(doc), readIntroductionString(doc));
     }
 
     private static String readIntroductionString(Document doc) {
@@ -92,48 +88,67 @@ public class XMLReader {
     }
 
 
-    private static ArrayList<QuestionData> readQuestions(Document doc) {
-        ArrayList<QuestionData> allQuestionsList = new ArrayList<QuestionData>();
+    private static ArrayList<AbstractQuestion> readQuestions(Document doc) {
+        ArrayList<AbstractQuestion> allQuestionsList = new ArrayList<AbstractQuestion>();
+        String key = "";
+        String question = "";
+        Boolean required = true;
+        String type = "";
         try {
             NodeList questions = doc.getElementsByTagName("questionnaire");
             Element allQuestions = (Element) questions.item(0);
             NodeList questionList = allQuestions.getElementsByTagName("question");
-            QuestionData newQuestion = null;
+            AbstractQuestion newQuestion = null;
 
             for (int x = 0; x < questionList.getLength(); x++) {
                 Node fstNode = questionList.item(x);
 
                 if (fstNode.getNodeType() == Node.ELEMENT_NODE) {
                     Element element = (Element) fstNode;
-                    String type = element.getAttribute("type");
-                    String required = element.getAttribute("required");
+                    type = element.getAttribute("type");
+                    required = element.getAttribute("required").equalsIgnoreCase("false");
 
-                    newQuestion = new QuestionData(type);
-                    if (required.equalsIgnoreCase("false")) {
-                        newQuestion.setRequired(false);
+
+                    if (type.equals("closed_combo")) {
+                        newQuestion = new ClosedComboQuestion();
+
+                    } else if (type.equals("closed_buttons")) {
+                        newQuestion = new ClosedButtonQuestion();
                     }
-                    newQuestion.setQuestion(getValue("text", element));
-                    newQuestion.setKey(getValue("key", element));
-                    if (type.equals("closed_combo") || type.equals("closed_buttons")) {
+                    if (newQuestion != null) {
+                        AbstractClosedQuestion cq = (AbstractClosedQuestion) newQuestion;
                         NodeList optionList = element.getElementsByTagName("option");
 
                         for (int i = 0; i < optionList.getLength(); i++) {
                             Node oNode = optionList.item(i);
                             if (oNode.getNodeType() == Node.ELEMENT_NODE) {
                                 Node option = oNode.getChildNodes().item(0);
-                                newQuestion.addOptions(option.getNodeValue());
+                                cq.addOptions(option.getNodeValue());
                             }
                         }
+                        newQuestion = cq;
                     }
+
                     if (type.equals("open")) {
-                        //
+                        newQuestion = new OpenQuestion();
                     }
-                    if (type.equals("likert") || type.equals("sem_diff")) {
-                        newQuestion.setLeftText(getValue("left", element));
-                        newQuestion.setRightText(getValue("right", element));
+                    if (type.equals("likert"))
+                        newQuestion = new LikertQuestion();
+                    else if (type.equals("sem_diff")) {
+                        newQuestion = new SemDiffQuestion();
+                    }
+                    if (newQuestion != null) {
+                        AbstractScaleQuestion sq = (AbstractScaleQuestion) newQuestion;
+                        sq.setLeft(getValue("left", element));
+                        sq.setRight(getValue("right", element));
                         String size = getValue("size", element);
-                        newQuestion.setSize(Integer.parseInt(size));
+                        sq.setSize(Integer.parseInt(size));
+                        newQuestion = sq;
                     }
+
+                    newQuestion.setQuestion(getValue("text", element));
+                    newQuestion.setKey(getValue("key", element));
+                    newQuestion.setRequired(required);
                 }
                 allQuestionsList.add(newQuestion);
             }
@@ -147,20 +162,12 @@ public class XMLReader {
         return allQuestionsList;
     }
 
+
     private static String getValue(String tag, Element element) {
         NodeList nodes = element.getElementsByTagName(tag).item(0).getChildNodes();
         Node node = nodes.item(0);
         return node.getNodeValue();
     }
-
-
-//    public String getQuestionnaireIntro() {
-//        return introduction;
-//    }
-
-//    public ArrayList<QuestionData> getExtraQuestions() {
-//        return extraQuestions;
- //   }
 
 
     public static ArrayList<String> getIncludedFiles(File dir) {

@@ -1,6 +1,6 @@
-package AAT.validation;
+package AAT.Configuration.Validation;
 
-import DataStructures.TestConfiguration;
+import AAT.Configuration.TestConfiguration;
 
 /**
  * Fill the testConfig with the validated value which were read from the AAT config file.

@@ -1,4 +1,4 @@
-package DataStructures;
+package AAT.Configuration;
 
 import org.w3c.dom.Document;
 

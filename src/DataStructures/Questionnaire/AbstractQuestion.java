@@ -15,7 +15,7 @@
  *
  */
 
-package DataStructures;
+package DataStructures.Questionnaire;
 
 import java.util.ArrayList;
 
@@ -28,21 +28,14 @@ import java.util.ArrayList;
  * to the screen. The key String is used as a column header for use in a table or CSV file.
  */
 
-public class QuestionData {
+public abstract class AbstractQuestion {
 
     private String key;
     private String question;
-    private String type;
-    private int size;
-    private String left;
-    private String right;
+
     private boolean required = true; //Questions are standard required
 
-    private ArrayList<String> options;
-
-    public QuestionData(String type) {
-        options = new ArrayList<String>();
-        this.type = type;
+    public AbstractQuestion() {
     }
 
     public void setKey(String key) {
@@ -53,48 +46,12 @@ public class QuestionData {
         this.question = question;
     }
 
-    public void addOptions(String option) {
-        options.add(option);
-    }
-
-    public void setSize(int size) {
-        this.size = size;
-    }
-
     public String getKey() {
         return key;
     }
 
     public String getQuestion() {
         return question;
-    }
-
-    public void setLeftText(String left) {
-        this.left = left;
-    }
-
-    public void setRightText(String right) {
-        this.right = right;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public int getSize() {
-        return size;
-    }
-
-    public String getLeftText() {
-        return left;
-    }
-
-    public String getRightText() {
-        return right;
-    }
-
-    public ArrayList<String> getOptions() {
-        return options;
     }
 
     public boolean isRequired() {
@@ -104,5 +61,20 @@ public class QuestionData {
     public void setRequired(boolean required) {
         this.required = required;
     }
-}
+
+    public abstract <T> T Accept(IQuestionVisitor<T> visitor);
+
+    public abstract void Accept(IVoidQuestionVisitor visitor);
+    }
+
+
+
+
+
+
+
+
+
+
+
 

@@ -18,11 +18,14 @@
 package views.Questionnaire;
 
 import AAT.Util.SpringUtilities;
-import DataStructures.QuestionData;
-import DataStructures.Questionnaire;
+import DataStructures.Questionnaire.AbstractQuestion;
+import DataStructures.Questionnaire.ClosedComboQuestion;
+import DataStructures.Questionnaire.OpenQuestion;
+import DataStructures.Questionnaire.Questionnaire;
 import IO.XMLReader;
 import IO.XMLWriter;
 import Model.AATModel;
+import views.Questionnaire.QuestionPanels.AbstractQuestionPanel;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -35,9 +38,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by IntelliJ IDEA.
@@ -48,11 +49,12 @@ import java.util.Map;
  * questions come from the language file that is specified in the configuration. These questions are displayed for the
  * actual test is started. But only if there are any.
  */
-public class QuestionPanel extends JPanel {
+public class DisplayQuestionnairePanel extends JPanel implements Observer {
 
 
     private JPanel questionsPanel;
-    private Map<String, DisplayQuestion> questionsMap = new HashMap<String, DisplayQuestion>();
+    private Map<String, AbstractQuestionPanel> questionsMap = new HashMap<String, AbstractQuestionPanel>();
+    private QuestionnaireModel questionnaireModel;
 
     private JScrollPane scrollPane;
     private JTextArea introductionPane;
@@ -60,7 +62,8 @@ public class QuestionPanel extends JPanel {
     private Questionnaire questionnaire;
     private int maxLabelSize = 0;
 
-    public QuestionPanel(final AATModel model, Dimension resolution) {
+    public DisplayQuestionnairePanel(final AATModel model, Dimension resolution) {
+       // questionnaireModel = new QuestionnaireModel();
         if (model == null) {
             editMode = true;
         }
@@ -72,19 +75,14 @@ public class QuestionPanel extends JPanel {
         mainPanel.setBackground(Color.black);
         mainPanel.setForeground(Color.white);
         mainPanel.setLayout(new FlowLayout(FlowLayout.CENTER));    //TODO even naar kijken
-
-        //  this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         this.setLayout(new GridBagLayout());
         this.setBackground(Color.black);
         this.setForeground(Color.white);
-    //    this.setPreferredSize(new Dimension(screen.width / 2, screen.height));
-    //    this.setMaximumSize(new Dimension(screen.width / 2, screen.height));
 
         if (editMode) {
             JPanel addButtonPanel = new JPanel();
             JButton button = new JButton("Add question");
             addButtonPanel.add(button);
-          //  contentPanel.add(addButtonPanel);
             button.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent actionEvent) {
@@ -105,7 +103,6 @@ public class QuestionPanel extends JPanel {
         questionnairePanel.setForeground(Color.white);
         introductionPane = new JTextArea();
         introductionPane.setBorder(BorderFactory.createLineBorder(Color.black, 10));
-        //   introductionPane.setColumns(80);
         introductionPane.setLineWrap(true);
         introductionPane.setWrapStyleWord(true);
         introductionPane.setForeground(Color.white);
@@ -134,7 +131,6 @@ public class QuestionPanel extends JPanel {
             buttonPanel.setBackground(Color.black);
             buttonPanel.setForeground(Color.white);
             buttonPanel.add(submitButton);
-        //    contentPanel.add(buttonPanel);
         }
 
         scrollPane = new JScrollPane(contentPanel,
@@ -144,8 +140,6 @@ public class QuestionPanel extends JPanel {
             scrollPane.setPreferredSize(resolution);
             scrollPane.setMinimumSize(resolution);
             scrollPane.setMaximumSize(resolution);
-            //     scrollPane.getVerticalScrollBar().setUnitIncrement(16);
-
             scrollPane.setBorder(BorderFactory.createEmptyBorder());
             scrollPane.setBackground(Color.black);
             scrollPane.setForeground(Color.white);
@@ -153,7 +147,6 @@ public class QuestionPanel extends JPanel {
             InputMap im = vertical.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
             im.put(KeyStroke.getKeyStroke("DOWN"), "positiveUnitIncrement");
             im.put(KeyStroke.getKeyStroke("UP"), "negativeUnitIncrement");
-            //  mainPanel.add(scrollPane);
             this.add(scrollPane, new GridBagConstraints());
         }
         else {
@@ -164,9 +157,11 @@ public class QuestionPanel extends JPanel {
 
     public void addQuestionAction() {
         if (questionnaire == null) {
-            questionnaire = new Questionnaire(new ArrayList<QuestionData>(), "");
+            questionnaire = new Questionnaire(new ArrayList<AbstractQuestion>(), "");
         }
-        QuestionEditFrame editFrame = new QuestionEditFrame(null, questionnaire.getExtraQuestions().size() + 1, this);
+        OpenQuestion openQuestion = new OpenQuestion();
+        QuestionnaireModel questionnaireModel = new QuestionnaireModel(openQuestion,questionnaire.getExtraQuestions().size() + 1);
+        QuestionEditFrame editFrame = questionnaireModel.getEditFrame();
         editFrame.setEnabled(true);
         editFrame.setVisible(true);
     }
@@ -174,7 +169,7 @@ public class QuestionPanel extends JPanel {
     private boolean checkAnswered() {
         int count = 0;
         for (String key : questionsMap.keySet()) {
-            DisplayQuestion q = questionsMap.get(key);
+            AbstractQuestionPanel q = questionsMap.get(key);
             if (q.getValue().equals("") && q.isRequired) {
                 q.changeAsteriskColor(Color.red);
                 count++;
@@ -200,7 +195,7 @@ public class QuestionPanel extends JPanel {
     }
 
     /**
-     * Displays every question Object in the ArrayList<AAT.QuestionData> A question can be open, have a textField on the screen
+     * Displays every question Object in the ArrayList<AAT.AbstractQuestion> A question can be open, have a textField on the screen
      * or closed and have a combobox with answers
      *
      * @param questionnaire The optional Questionnaire received from the model
@@ -211,8 +206,8 @@ public class QuestionPanel extends JPanel {
         System.out.println("No questions " + questionnaire.getExtraQuestions().size());
         introductionPane.setText(questionnaire.getIntroduction());
         for (int x = 0; x < questionnaire.getExtraQuestions().size(); x++) {
-            //for (QuestionData questionObject : Questionnaire.getExtraQuestions()) {
-            QuestionData questionObject = questionnaire.getExtraQuestions().get(x);
+            //for (AbstractQuestion questionObject : Questionnaire.getExtraQuestions()) {
+            AbstractQuestion questionObject = questionnaire.getExtraQuestions().get(x);
             //   JLabel question = new JLabel(questionObject.getQuestion(), JLabel.TRAILING);
             Dimension screen = getToolkit().getScreenSize();
             MouseActionEditorPane question = new MouseActionEditorPane(editMode, questionObject, x, this);
@@ -236,44 +231,9 @@ public class QuestionPanel extends JPanel {
             question.setForeground(Color.WHITE);
             //    question.setFont(new Font("Roman", Font.PLAIN, 16));
             questionsPanel.add(question);
-            if (questionObject.getType().equals("closed_combo")) {
-                ClosedComboPanel answerOptions = new ClosedComboPanel(questionObject.getOptions().toArray(), questionObject.isRequired());
-                //   question.setLabelFor(answerOptions);
-                questionsPanel.add(answerOptions);
-                questionsMap.put(questionObject.getKey(), answerOptions);
-            }
-            if (questionObject.getType().equals("closed_buttons")) {
-                ClosedButtonsPanel closedButtons = new ClosedButtonsPanel(questionObject.getOptions().toArray(), questionObject.isRequired());
-                //   question.setLabelFor(closedButtons);
-                questionsPanel.add(closedButtons);
-                questionsMap.put(questionObject.getKey(), closedButtons);
-            }
-            if (questionObject.getType().equals("open")) {
-                OpenQuestionPanel textInput = new OpenQuestionPanel(questionObject.isRequired());
-                //    question.setLabelFor(textInput);
-                questionsPanel.add(textInput);
-                questionsMap.put(questionObject.getKey(), textInput);
-            }
-
-            if (questionObject.getType().equals("textarea")) {
-                TextAreaPanel textArea = new TextAreaPanel(questionObject.isRequired());
-                //    question.setLabelFor(textArea);
-                questionsPanel.add(textArea);
-                questionsMap.put(questionObject.getKey(), textArea);
-            }
-            if (questionObject.getType().equals("likert")) {
-                LikertPanel likertScale = new LikertPanel(questionObject.getSize(), questionObject.getLeftText(), questionObject.getRightText(), questionObject.isRequired());
-                //    question.setLabelFor(likertScale);
-                questionsPanel.add(likertScale);
-                questionsMap.put(questionObject.getKey(), likertScale);
-            }
-
-            if (questionObject.getType().equals("sem_diff")) {
-                SemDiffPanel semanticDifferential = new SemDiffPanel(questionObject.getSize(), questionObject.getLeftText(), questionObject.getRightText(), questionObject.isRequired());
-                //   question.setLabelFor(semanticDifferential);
-                questionsPanel.add(semanticDifferential);
-                questionsMap.put(questionObject.getKey(), semanticDifferential);
-            }
+            AbstractQuestionPanel newQuestionPanel = questionObject.Accept(new DisplayQuestionnaireVisitor());
+            questionsPanel.add(newQuestionPanel);
+            questionsMap.put(questionObject.getKey(),newQuestionPanel);
             questionsPanel.setOpaque(true);
         }
         SpringUtilities.makeCompactGrid(questionsPanel,
@@ -281,7 +241,7 @@ public class QuestionPanel extends JPanel {
                 6, 6,        //initX, initY
                 6, 6);       //xPad, yPad
         for (String key : questionsMap.keySet()) {
-            DisplayQuestion q = questionsMap.get(key);
+            AbstractQuestionPanel q = questionsMap.get(key);
             q.changeLabelSize(maxLabelSize);
         }
 
@@ -291,8 +251,7 @@ public class QuestionPanel extends JPanel {
         this.repaint();
     }
 
-
-    public void changeQuestion(QuestionData newQuestion, int pos) {
+    public void changeQuestion(AbstractQuestion newQuestion, int pos) {
         if (pos >= 0 && pos < questionnaire.getExtraQuestions().size()) {
             questionnaire.getExtraQuestions().set(pos, newQuestion);
         } else {
@@ -319,7 +278,7 @@ public class QuestionPanel extends JPanel {
     private HashMap<String, String> getResults() {
         HashMap<String, String> results = new HashMap<String, String>();
         for (String key : questionsMap.keySet()) {
-            DisplayQuestion c = questionsMap.get(key);
+            AbstractQuestionPanel c = questionsMap.get(key);
             String input = c.getValue();
             if (input.equals("")) {
                 input = "N/A";  //Replace the empty input with "N/A"
@@ -329,16 +288,21 @@ public class QuestionPanel extends JPanel {
         return results;
     }
 
+    @Override
+    public void update(Observable observable, Object o) {
+
+    }
+
 
     class MouseActionEditorPane extends JEditorPane implements MouseListener {
 
         Border blackBorder = BorderFactory.createLineBorder(Color.BLACK);
         Border redBorder = BorderFactory.createLineBorder(Color.RED, 5);
         private int pos;
-        private QuestionData question;
-        private QuestionPanel parent;
+        private AbstractQuestion question;
+        private DisplayQuestionnairePanel parent;
 
-        public MouseActionEditorPane(boolean editMode, QuestionData question, int pos, QuestionPanel parent) {
+        public MouseActionEditorPane(boolean editMode, AbstractQuestion question, int pos, DisplayQuestionnairePanel parent) {
             if (editMode) {
                 this.pos = pos;
                 this.parent = parent;
@@ -351,7 +315,8 @@ public class QuestionPanel extends JPanel {
         @Override
         public void mouseClicked(MouseEvent mouseEvent) {
             if(SwingUtilities.isLeftMouseButton(mouseEvent)) {
-            QuestionEditFrame qEdit = new QuestionEditFrame(question, pos, parent);
+                QuestionnaireModel qModel = new QuestionnaireModel(question,pos);
+            QuestionEditFrame qEdit = qModel.getEditFrame();
             qEdit.setEnabled(true);
             qEdit.setVisible(true);
             }

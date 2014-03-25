@@ -1,18 +1,17 @@
 package views.ConfigurationBuilder;
 
-import AAT.AbstractAAT;
 import AAT.Util.ExtensionFileFilter;
 import AAT.Util.FileUtils;
 import AAT.Util.SpringUtilities;
 import AAT.Util.TitledSeparator;
-import AAT.validation.FalseConfigException;
+import AAT.Configuration.Validation.FalseConfigException;
 import Controller.JoystickController;
-import DataStructures.TestConfiguration;
+import AAT.Configuration.TestConfiguration;
 import IO.ConfigFileReader;
 import IO.ConfigWriter;
 import Model.AATModel;
 import views.HTMLEditPanel;
-import views.Questionnaire.QuestionPanel;
+import views.Questionnaire.DisplayQuestionnairePanel;
 import views.TestFrame;
 
 import javax.swing.*;
@@ -22,7 +21,6 @@ import javax.swing.filechooser.FileFilter;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
-import java.io.IOException;
 import java.text.NumberFormat;
 import java.util.Observable;
 import java.util.Observer;
@@ -54,7 +52,7 @@ public class ConfigBuilderPanel extends JPanel implements  Observer{
     private Boolean newTest;
     private int test_id = 1;
 
-    private QuestionPanel questionPanel;
+    private DisplayQuestionnairePanel displayQuestionnairePanel;
     private JScrollPane questionPane;
     private HTMLEditPanel htmlEditPanel;
     private JTabbedPane tabbedPane;
@@ -107,14 +105,14 @@ public class ConfigBuilderPanel extends JPanel implements  Observer{
             public void actionPerformed(ActionEvent e) {
                 if (currentConfig.exists()) {
                     saveAction(currentConfig);
-                    questionPanel.saveQuestionnaire(new File(inputQuestionFile.getText()));
+                    displayQuestionnairePanel.saveQuestionnaire(new File(inputQuestionFile.getText()));
                     JOptionPane.showMessageDialog(null,
                             "AAT Config file saved.");
                 } else {
                     File file = fileSaveDialog("AATConfig");
                     if (file != null) {
                         saveAction(file);
-                        questionPanel.saveQuestionnaire(new File(inputQuestionFile.getText()));
+                        displayQuestionnairePanel.saveQuestionnaire(new File(inputQuestionFile.getText()));
                         currentConfig = file;
                         workingDir = file.getParentFile();
                         JOptionPane.showMessageDialog(null,
@@ -129,7 +127,7 @@ public class ConfigBuilderPanel extends JPanel implements  Observer{
 
         saveButton.setEnabled(false);
 
-        final JButton tryButton = new JButton(new ImageIcon("playButton48.png"));
+        final JButton tryButton = new JButton(new ImageIcon("playGray.png"));
         tryButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
@@ -138,7 +136,7 @@ public class ConfigBuilderPanel extends JPanel implements  Observer{
                     model = new AATModel();
                     model.addObserver(getInstance());
                     saveAction(testFile);
-                    questionPanel.saveQuestionnaire(new File(inputQuestionFile.getText()));
+                    displayQuestionnairePanel.saveQuestionnaire(new File(inputQuestionFile.getText()));
                     model.loadNewAAT(testFile);     //Only start when config is valid
                     joystick = new JoystickController(model);
                     joystick.start(); //Start joystick Thread
@@ -174,7 +172,7 @@ public class ConfigBuilderPanel extends JPanel implements  Observer{
         addButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                questionPanel.addQuestionAction();
+                displayQuestionnairePanel.addQuestionAction();
             }
         });
         toolbar.add(addButton);
@@ -224,8 +222,8 @@ public class ConfigBuilderPanel extends JPanel implements  Observer{
         tabbedPane.addTab("Language File", HtmlEditPane);
 
         Rectangle r = this.getBounds();
-        questionPanel = new QuestionPanel(null,new Dimension(r.width,r.height)); //without reference to model.
-        questionPane = new JScrollPane(questionPanel);
+        displayQuestionnairePanel = new DisplayQuestionnairePanel(null,new Dimension(r.width,r.height)); //without reference to model.
+        questionPane = new JScrollPane(displayQuestionnairePanel);
         tabbedPane.addTab("Questionnaire", questionPane);
 
         SpringUtilities.makeCompactGrid(this,
@@ -675,9 +673,9 @@ public class ConfigBuilderPanel extends JPanel implements  Observer{
                 if (file != null) {
                     inputQuestionFile.setText(file.getName());
                     Rectangle r = getBounds();
-                    questionPanel = new QuestionPanel(null,new Dimension(r.width,r.height));
-                    questionPanel.displayQuestions(file);
-                    questionPane = new JScrollPane((questionPanel));
+                    displayQuestionnairePanel = new DisplayQuestionnairePanel(null,new Dimension(r.width,r.height));
+                    displayQuestionnairePanel.displayQuestions(file);
+                    questionPane = new JScrollPane((displayQuestionnairePanel));
                     tabbedPane.remove(tabbedPane.indexOfTab("Questionnaire"));
                     tabbedPane.addTab("Questionnaire", questionPane);
 
@@ -1163,9 +1161,9 @@ public class ConfigBuilderPanel extends JPanel implements  Observer{
         inputQuestionFile.setText(config.getValue("Questionnaire"));
         System.out.println("Q2 File "+inputQuestionFile.getText());
         Rectangle r = this.getBounds();
-        questionPanel = new QuestionPanel(null,new Dimension(r.width,r.height));
-        questionPanel.displayQuestions(new File(workingDir+File.separator+inputQuestionFile.getText()));
-        questionPane = new JScrollPane((questionPanel));
+        displayQuestionnairePanel = new DisplayQuestionnairePanel(null,new Dimension(r.width,r.height));
+        displayQuestionnairePanel.displayQuestions(new File(workingDir+File.separator+inputQuestionFile.getText()));
+        questionPane = new JScrollPane((displayQuestionnairePanel));
         tabbedPane.remove(tabbedPane.indexOfTab("Questionnaire"));
         tabbedPane.addTab("Questionnaire", questionPane);
         revalidate();

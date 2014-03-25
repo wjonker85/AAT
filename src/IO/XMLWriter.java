@@ -1,8 +1,8 @@
 package IO;
 
 import AAT.Util.FileUtils;
-import DataStructures.QuestionData;
-import DataStructures.Questionnaire;
+import DataStructures.Questionnaire.AbstractQuestion;
+import DataStructures.Questionnaire.Questionnaire;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -153,75 +153,9 @@ public class XMLWriter {
             introduction.appendChild(introductionStr);
             rootElement.appendChild(introduction);
 
-            for (QuestionData question : questionnaire.getExtraQuestions()) {
-                Element questionNode = doc.createElement("question");
-                questionNode.setAttribute("type",question.getType());
-                questionNode.setAttribute(("required"),String.valueOf(question.isRequired()));
-                rootElement.appendChild(questionNode);
-                Element textNode = doc.createElement("text");
-                Text textNodeStr = doc.createTextNode(question.getQuestion());
-                textNode.appendChild(textNodeStr);
-                questionNode.appendChild(textNode);
 
-                if (question.getType().equalsIgnoreCase("likert")) {
-                    System.out.println("likert");
-                    Element sizeNode = doc.createElement("size");
-                    Text sizeNodeTxt = doc.createTextNode(String.valueOf(question.getSize()));
-                    sizeNode.appendChild(sizeNodeTxt);
-                    questionNode.appendChild(sizeNode);
-
-                    Element leftNode = doc.createElement("left");
-                    Text leftNodeTxt = doc.createTextNode(question.getLeftText());
-                    leftNode.appendChild(leftNodeTxt);
-                    questionNode.appendChild(leftNode);
-
-                    Element rightNode = doc.createElement("right");
-                    Text rightNodeTxt = doc.createTextNode(question.getRightText());
-                    rightNode.appendChild(rightNodeTxt);
-                    questionNode.appendChild(rightNode);
-                } else if (question.getType().equalsIgnoreCase("closed_combo")) {
-                    for(String option : question.getOptions()) {
-                        Element optionNode = doc.createElement("option");
-                        Text optionNodeTxt = doc.createTextNode(option);
-                        optionNode.appendChild(optionNodeTxt);
-                        questionNode.appendChild(optionNode);
-                    }
-                } else if (question.getType().equalsIgnoreCase("open")) {
-                    System.out.println("open");
-
-                } else if (question.getType().equalsIgnoreCase("closed_button")) {
-                    System.out.println("closed_button");
-                    for(String option : question.getOptions()) {
-                        Element optionNode = doc.createElement("option");
-                        Text optionNodeTxt = doc.createTextNode(option);
-                        optionNode.appendChild(optionNodeTxt);
-                    }
-
-                } else if (question.getType().equalsIgnoreCase("textArea")) {
-                    System.out.println("textArea");
-
-                } else if (question.getType().equalsIgnoreCase("sem_diff")) {
-                    System.out.println("sem_diff");
-                    Element sizeNode = doc.createElement("size");
-                    Text sizeNodeTxt = doc.createTextNode(String.valueOf(question.getSize()));
-                    sizeNode.appendChild(sizeNodeTxt);
-                    questionNode.appendChild(sizeNode);
-
-                    Element leftNode = doc.createElement("left");
-                    Text leftNodeTxt = doc.createTextNode(question.getLeftText());
-                    leftNode.appendChild(leftNodeTxt);
-                    questionNode.appendChild(leftNode);
-
-                    Element rightNode = doc.createElement("right");
-                    Text rightNodeTxt = doc.createTextNode(question.getRightText());
-                    rightNode.appendChild(rightNodeTxt);
-                    questionNode.appendChild(rightNode);
-                }
-
-                Element keyNode = doc.createElement("key");
-                Text keyNodeStr = doc.createTextNode(question.getKey());
-                keyNode.appendChild(keyNodeStr);
-                questionNode.appendChild(keyNode);
+            for (AbstractQuestion question : questionnaire.getExtraQuestions()) {
+               question.Accept(new XmlQuestionnaireBuilder(doc,rootElement));
             }
             // write the content into xml file
             TransformerFactory transformerFactory = TransformerFactory.newInstance();

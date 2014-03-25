@@ -17,9 +17,9 @@
 
 package AAT;
 
-import AAT.validation.FalseConfigException;
+import AAT.Configuration.Validation.FalseConfigException;
 import DataStructures.AATImage;
-import DataStructures.TestConfiguration;
+import AAT.Configuration.TestConfiguration;
 
 import java.awt.*;
 import java.io.File;

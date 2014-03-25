@@ -1,7 +1,7 @@
 package IO;
 
 import AAT.Util.FileUtils;
-import DataStructures.TestConfiguration;
+import AAT.Configuration.TestConfiguration;
 
 import java.io.File;
 import java.io.FileWriter;

@@ -1,4 +1,4 @@
-package DataStructures;
+package DataStructures.Questionnaire;
 
 import java.util.ArrayList;
 
@@ -12,9 +12,9 @@ import java.util.ArrayList;
 public class Questionnaire {
 
     private String introduction = "";
-    private ArrayList<QuestionData> allQuestions;
+    private ArrayList<AbstractQuestion> allQuestions;
 
-    public Questionnaire(ArrayList<QuestionData> allQuestions, String introduction) {
+    public Questionnaire(ArrayList<AbstractQuestion> allQuestions, String introduction) {
         this.allQuestions = allQuestions;
         this.introduction = introduction;
 
@@ -30,7 +30,7 @@ public class Questionnaire {
      *
      * @return ArrayList with questionObjects. These objects are passed to the questionsView that displays them
      */
-    public ArrayList<QuestionData> getExtraQuestions() {
+    public ArrayList<AbstractQuestion> getExtraQuestions() {
         return allQuestions;
     }
 }

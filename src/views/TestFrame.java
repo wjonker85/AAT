@@ -18,7 +18,7 @@
 package views;
 
 import Model.AATModel;
-import views.Questionnaire.QuestionPanel;
+import views.Questionnaire.DisplayQuestionnairePanel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -45,7 +45,7 @@ public class TestFrame extends JFrame implements Observer {
     private BoxPlot boxPlot;
     private PlotPanel plotPanel;
     private AATView aatView;
-    private QuestionPanel questionsView;
+    private DisplayQuestionnairePanel questionsView;
     private Cursor invisibleCursor;
 
     //Make it a fullscreen frame
@@ -54,7 +54,7 @@ public class TestFrame extends JFrame implements Observer {
         cl = new CardLayout();
         displayPanel = new JPanel(cl);
         Dimension screen = getToolkit().getScreenSize();
-        questionsView = new QuestionPanel(model,new Dimension((int) (0.8 * screen.width), (int) (0.75 * screen.height)));
+        questionsView = new DisplayQuestionnairePanel(model,new Dimension((int) (0.8 * screen.width), (int) (0.75 * screen.height)));
         aatView = new AATView(model);
         boxPlot = new BoxPlot(model);
         plotPanel = new PlotPanel(model);

@@ -18,7 +18,7 @@
 package views;
 
 import AAT.Util.SpringUtilities;
-import DataStructures.TestMetaData;
+import AAT.Configuration.TestMetaData;
 import IO.DataExporter;
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;

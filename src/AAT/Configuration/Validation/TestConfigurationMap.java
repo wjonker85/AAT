@@ -1,8 +1,6 @@
-package AAT.validation;
+package AAT.Configuration.Validation;
 
 import AAT.IConfigOption;
-import AAT.Util.FileUtils;
-import DataStructures.TestConfiguration;
 
 import java.io.File;
 import java.util.HashMap;
