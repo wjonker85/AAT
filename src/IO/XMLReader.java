@@ -94,25 +94,29 @@ public class XMLReader {
         String question = "";
         Boolean required = true;
         String type = "";
+
         try {
             NodeList questions = doc.getElementsByTagName("questionnaire");
             Element allQuestions = (Element) questions.item(0);
             NodeList questionList = allQuestions.getElementsByTagName("question");
-            AbstractQuestion newQuestion = null;
+
 
             for (int x = 0; x < questionList.getLength(); x++) {
+                AbstractQuestion newQuestion = null;
+                boolean elementFound = false;
+
                 Node fstNode = questionList.item(x);
 
                 if (fstNode.getNodeType() == Node.ELEMENT_NODE) {
                     Element element = (Element) fstNode;
                     type = element.getAttribute("type");
                     required = element.getAttribute("required").equalsIgnoreCase("false");
+                    System.out.println("Question found "+type);
 
-
-                    if (type.equals("closed_combo")) {
+                    if (type.equalsIgnoreCase("closed_combo")) {
                         newQuestion = new ClosedComboQuestion();
 
-                    } else if (type.equals("closed_buttons")) {
+                    } else if (type.equalsIgnoreCase("closed_buttons")) {
                         newQuestion = new ClosedButtonQuestion();
                     }
                     if (newQuestion != null) {
@@ -127,17 +131,25 @@ public class XMLReader {
                             }
                         }
                         newQuestion = cq;
+                        elementFound = true;
                     }
 
-                    if (type.equals("open")) {
+                    if (type.equalsIgnoreCase("open")) {
                         newQuestion = new OpenQuestion();
+                        elementFound = true;
                     }
-                    if (type.equals("likert"))
+
+                    if (type.equalsIgnoreCase("textArea")) {
+                        newQuestion = new OpenQuestion();
+                        elementFound = true;
+                    }
+
+                    if (type.equalsIgnoreCase("likert"))
                         newQuestion = new LikertQuestion();
-                    else if (type.equals("sem_diff")) {
+                    else if (type.equalsIgnoreCase("sem_diff")) {
                         newQuestion = new SemDiffQuestion();
                     }
-                    if (newQuestion != null) {
+                    if (newQuestion != null && !elementFound) {
                         AbstractScaleQuestion sq = (AbstractScaleQuestion) newQuestion;
                         sq.setLeft(getValue("left", element));
                         sq.setRight(getValue("right", element));
@@ -154,6 +166,7 @@ public class XMLReader {
             }
         } catch (Exception e) {
             //custom title, error icon
+            e.printStackTrace();
             JOptionPane.showMessageDialog(null,
                     "Invalid Questionnaire file.",
                     "XML Error",
