@@ -138,6 +138,7 @@ public class XMLWriter {
 
 
     public static void writeXMLQuestionnaire(File file, Questionnaire questionnaire) {
+      System.out.println("Saving questionnaire to "+file.getAbsolutePath());
         try {
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder docBuilder = docFactory.newDocumentBuilder();

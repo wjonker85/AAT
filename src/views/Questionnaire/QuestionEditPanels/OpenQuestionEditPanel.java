@@ -12,24 +12,11 @@ import java.util.Observable;
  * Created by marcel on 3/25/14.
  */
 class OpenQuestionEditPanel<T>  extends AbstractQuestionEditPanel {
-    private JTextField question, qLabel;
-    private JCheckBox required;
 
     public OpenQuestionEditPanel(AbstractQuestion original) {
         this.setLayout(new SpringLayout());
-        this.add(new JLabel("Question: "));
-        question = new JTextField();
-        question.setPreferredSize(new Dimension(250, 20));
         this.add(question);
-        this.add(new JLabel("Label for analysis: "));
-        qLabel = new JTextField();
-        this.add(qLabel);
-        JLabel reqLabel = new JLabel("Required: ");
-        this.add(reqLabel);
-        required = new JCheckBox();
-
-        required.setSelected(true);
-        this.add(required);
+        addRequiredFields();
         if (original != null) {
             question.setText(original.getQuestion());
             qLabel.setText(original.getQuestion());
@@ -52,12 +39,8 @@ class OpenQuestionEditPanel<T>  extends AbstractQuestionEditPanel {
 
     @Override
     public boolean validated() {
-        return false;
+        return true;
     }
 
-    @Override
-    public void update(Observable observable, Object o) {
-
-    }
 }
 

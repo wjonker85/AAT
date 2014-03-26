@@ -10,17 +10,30 @@ import java.util.Observable;
  */
 public class QuestionnaireModel<T extends AbstractQuestion> extends Observable {
 
-    private T question;
+    private T original,newQuestion;
     private QuestionEditFrame currentEditFrame;
     private int pos;
 
     public QuestionnaireModel(T question, int pos)   {
-        this.question = question;
+        this.original = question;
+        newQuestion = original;
         this.pos = pos;
     }
 
-    public T getQuestion() {
-        return question;
+    public T getOriginalQuestion() {
+        return original;
+    }
+
+    public T getNewQuestion() {
+        return newQuestion;
+    }
+
+    public void setNewQuestion(T newQuestion) {
+        if(!newQuestion.equals(original)) {
+            this.newQuestion = newQuestion;
+            this.setChanged();
+            this.notifyObservers("submit");
+        }
     }
 
     public QuestionEditFrame getEditFrame()
@@ -29,6 +42,10 @@ public class QuestionnaireModel<T extends AbstractQuestion> extends Observable {
              currentEditFrame = new QuestionEditFrame(this);
          }
         return currentEditFrame;
+    }
+
+    public int getPos() {
+        return pos;
     }
 
    // public QuestionEditFrame changeFrameType(Enum EditFrameType)

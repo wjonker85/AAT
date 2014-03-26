@@ -1,18 +1,12 @@
 package views.Questionnaire;
 
-import AAT.Util.SpringUtilities;
-import DataStructures.Questionnaire.AbstractQuestion;
-import DataStructures.Questionnaire.OpenQuestion;
-import DataStructures.Questionnaire.Questionnaire;
 import views.Questionnaire.QuestionEditPanels.AbstractQuestionEditPanel;
 import views.Questionnaire.QuestionEditPanels.EditQuestionVisitor;
 
 import javax.swing.*;
-import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
-import java.util.Observer;
 
 /**
  * Created by marcel on 3/16/14.
@@ -25,7 +19,6 @@ public class QuestionEditFrame extends JFrame {
     private HashMap<String, String> translationsRev;
     private JComboBox typeCombo;
     private AbstractQuestionEditPanel editPanel;
-    private String currentType;
 
     public QuestionEditFrame(final QuestionnaireModel questionnaireModel) {
         translations = new HashMap<String, String>();
@@ -46,9 +39,8 @@ public class QuestionEditFrame extends JFrame {
         JLabel typeLabel = new JLabel("Type of question: ");
         setTypePanel.add(typeLabel);
         typeCombo = new JComboBox(types);             //TODO vervangen door visitor
-        editPanel = questionnaireModel.getQuestion().Accept(new EditQuestionVisitor());
+        editPanel = questionnaireModel.getNewQuestion().Accept(new EditQuestionVisitor());
         this.add(editPanel);
-
 
 
         setTypePanel.add(typeCombo);
@@ -56,16 +48,14 @@ public class QuestionEditFrame extends JFrame {
         setTypeButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                currentType = translations.get(typeCombo.getSelectedItem().toString());
-               questionnaireModel.hasChanged();
+                questionnaireModel.setNewQuestion(editPanel.getQuestion());
+                questionnaireModel.hasChanged();
                 questionnaireModel.notifyObservers("type changed");
 
             }
         });
         setTypePanel.add(setTypeButton);
 
-
-        //  this.setMinimumSize(new Dimension(400, 400));
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
         mainPanel.add(setTypePanel);
@@ -74,19 +64,18 @@ public class QuestionEditFrame extends JFrame {
         okButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                questionnaireModel.hasChanged();
-                questionnaireModel.notifyObservers("submit");
-                if (editPanel.validated() && editPanel.getQuestion().getKey().length() > 0 && editPanel.getQuestion().getQuestion().length() > 0) {
-                    questionnaireModel.hasChanged();
-                    questionnaireModel.notifyObservers("submit");
-                } else if (editPanel.getQuestion().getKey().length() == 0) {
-                    JOptionPane.showConfirmDialog(null, "Question label needs to be set.", "Validation Error", JOptionPane.ERROR_MESSAGE);
-                } else {
-                    if (editPanel.getQuestion().getQuestion().length() == 0) {
-                        JOptionPane.showConfirmDialog(null, "Question is empty.", "Validation Error", JOptionPane.ERROR_MESSAGE);
-                    }
+                     System.out.println("OK button pressed");
+              //  if (editPanel.validated() && editPanel.getQuestion().getKey().length() > 0 && editPanel.getQuestion().getQuestion().length() > 0) {
+                System.out.println(questionnaireModel.getPos()+" "+questionnaireModel.countObservers());
+                questionnaireModel.setNewQuestion(editPanel.getQuestion());
 
-                }
+           //   } else if (editPanel.getQuestion().getKey().length() == 0) {
+            ///        JOptionPane.showConfirmDialog(null, "Question label needs to be set.", "Validation Error", JOptionPane.ERROR_MESSAGE);
+             //   } else {
+            //        if (editPanel.getQuestion().getQuestion().length() == 0) {
+             //           JOptionPane.showConfirmDialog(null, "Question is empty.", "Validation Error", JOptionPane.ERROR_MESSAGE);
+             //       }
+               // }
             }
         });
         buttonPanel.add(okButton);

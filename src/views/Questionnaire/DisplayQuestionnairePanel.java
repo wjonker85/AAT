@@ -19,7 +19,6 @@ package views.Questionnaire;
 
 import AAT.Util.SpringUtilities;
 import DataStructures.Questionnaire.AbstractQuestion;
-import DataStructures.Questionnaire.ClosedComboQuestion;
 import DataStructures.Questionnaire.OpenQuestion;
 import DataStructures.Questionnaire.Questionnaire;
 import IO.XMLReader;
@@ -61,9 +60,9 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
     private Boolean editMode = false;
     private Questionnaire questionnaire;
     private int maxLabelSize = 0;
+    private QuestionEditFrame currentEditor = null;
 
     public DisplayQuestionnairePanel(final AATModel model, Dimension resolution) {
-       // questionnaireModel = new QuestionnaireModel();
         if (model == null) {
             editMode = true;
         }
@@ -136,7 +135,7 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
         scrollPane = new JScrollPane(contentPanel,
                 JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
                 JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        if(!editMode) {
+        if (!editMode) {
             scrollPane.setPreferredSize(resolution);
             scrollPane.setMinimumSize(resolution);
             scrollPane.setMaximumSize(resolution);
@@ -148,8 +147,7 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
             im.put(KeyStroke.getKeyStroke("DOWN"), "positiveUnitIncrement");
             im.put(KeyStroke.getKeyStroke("UP"), "negativeUnitIncrement");
             this.add(scrollPane, new GridBagConstraints());
-        }
-        else {
+        } else {
             this.add(contentPanel, new GridBagConstraints());
         }
     }
@@ -160,10 +158,15 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
             questionnaire = new Questionnaire(new ArrayList<AbstractQuestion>(), "");
         }
         OpenQuestion openQuestion = new OpenQuestion();
-        QuestionnaireModel questionnaireModel = new QuestionnaireModel(openQuestion,questionnaire.getExtraQuestions().size() + 1);
-        QuestionEditFrame editFrame = questionnaireModel.getEditFrame();
-        editFrame.setEnabled(true);
-        editFrame.setVisible(true);
+        if (currentEditor == null) {
+            questionnaireModel = new QuestionnaireModel(openQuestion, questionnaire.getExtraQuestions().size() + 1);
+            questionnaireModel.addObserver(this);
+            currentEditor = questionnaireModel.getEditFrame();
+            currentEditor.setEnabled(true);
+            currentEditor.setVisible(true);
+        } else {
+            JOptionPane.showConfirmDialog(null, "There is already another question editor open, please close that one first.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private boolean checkAnswered() {
@@ -206,9 +209,7 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
         System.out.println("No questions " + questionnaire.getExtraQuestions().size());
         introductionPane.setText(questionnaire.getIntroduction());
         for (int x = 0; x < questionnaire.getExtraQuestions().size(); x++) {
-            //for (AbstractQuestion questionObject : Questionnaire.getExtraQuestions()) {
             AbstractQuestion questionObject = questionnaire.getExtraQuestions().get(x);
-            //   JLabel question = new JLabel(questionObject.getQuestion(), JLabel.TRAILING);
             Dimension screen = getToolkit().getScreenSize();
             MouseActionEditorPane question = new MouseActionEditorPane(editMode, questionObject, x, this);
 
@@ -218,7 +219,6 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
             question.setPreferredSize(new Dimension(screen.width / 3, 20));
             question.setContentType("text/html");
 
-            //   question.setPreferredSize(new Dimension(screen.width/3,screen.height));
             HTMLEditorKit kit = new HTMLEditorKit();
             question.setEditorKit(kit);
             StyleSheet styleSheet = kit.getStyleSheet();
@@ -229,11 +229,10 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
             question.setText("<body>" + questionObject.getQuestion() + "</body>");
             question.setBackground(Color.black);
             question.setForeground(Color.WHITE);
-            //    question.setFont(new Font("Roman", Font.PLAIN, 16));
             questionsPanel.add(question);
             AbstractQuestionPanel newQuestionPanel = questionObject.Accept(new DisplayQuestionnaireVisitor());
             questionsPanel.add(newQuestionPanel);
-            questionsMap.put(questionObject.getKey(),newQuestionPanel);
+            questionsMap.put(questionObject.getKey(), newQuestionPanel);
             questionsPanel.setOpaque(true);
         }
         SpringUtilities.makeCompactGrid(questionsPanel,
@@ -250,26 +249,6 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
         this.revalidate();
         this.repaint();
     }
-
-    public void changeQuestion(AbstractQuestion newQuestion, int pos) {
-        if (pos >= 0 && pos < questionnaire.getExtraQuestions().size()) {
-            questionnaire.getExtraQuestions().set(pos, newQuestion);
-        } else {
-            System.out.println("Adding question at pos " + pos);
-            questionnaire.getExtraQuestions().add(newQuestion);
-        }
-        questionsPanel.removeAll();
-        questionsPanel.setLayout(new SpringLayout());
-        questionsPanel.setBackground(Color.black);
-        questionsPanel.setForeground(Color.WHITE);
-        displayQuestions(questionnaire);
-        questionsPanel.revalidate();
-        repaint();
-        this.revalidate();
-        this.repaint();
-
-    }
-
 
     /*
    All the components are kept in a hash map, This provides a flexible way to have an unlimited nr of components
@@ -290,9 +269,27 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
 
     @Override
     public void update(Observable observable, Object o) {
+        System.out.println("Update");
+        if (o.toString().equals("submit")) {
 
+            System.out.println("Submit");
+          //  questionnaire.getExtraQuestions().remove(questionnaireModel.getPos());
+            if(questionnaireModel.getPos() <questionnaire.getExtraQuestions().size()) {
+                questionnaire.getExtraQuestions().set(questionnaireModel.getPos(), questionnaireModel.getNewQuestion());
+            }
+            else {
+                questionnaire.getExtraQuestions().add(questionnaireModel.getNewQuestion());
+            }
+            currentEditor.dispose();
+            questionnaireModel.deleteObservers();
+            questionnaireModel = null;
+            currentEditor = null;
+            questionsPanel.removeAll();
+            displayQuestions(questionnaire);
+            revalidate();
+            repaint();
+        }
     }
-
 
     class MouseActionEditorPane extends JEditorPane implements MouseListener {
 
@@ -308,19 +305,18 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
                 this.parent = parent;
                 this.question = question;
                 addMouseListener(this);
-
             }
         }
 
         @Override
         public void mouseClicked(MouseEvent mouseEvent) {
-            if(SwingUtilities.isLeftMouseButton(mouseEvent)) {
-                QuestionnaireModel qModel = new QuestionnaireModel(question,pos);
-            QuestionEditFrame qEdit = qModel.getEditFrame();
-            qEdit.setEnabled(true);
-            qEdit.setVisible(true);
-            }
-            else if(SwingUtilities.isRightMouseButton(mouseEvent)) {
+            if (SwingUtilities.isLeftMouseButton(mouseEvent)) {
+                questionnaireModel = new QuestionnaireModel(question, pos);
+                questionnaireModel.addObserver(parent);
+                currentEditor = questionnaireModel.getEditFrame();
+                currentEditor.setEnabled(true);
+                currentEditor.setVisible(true);
+            } else if (SwingUtilities.isRightMouseButton(mouseEvent)) {
 
             }
         }

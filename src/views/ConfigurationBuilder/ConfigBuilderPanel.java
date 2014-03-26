@@ -21,6 +21,7 @@ import javax.swing.filechooser.FileFilter;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
+import java.nio.file.Path;
 import java.text.NumberFormat;
 import java.util.Observable;
 import java.util.Observer;
@@ -105,14 +106,12 @@ public class ConfigBuilderPanel extends JPanel implements  Observer{
             public void actionPerformed(ActionEvent e) {
                 if (currentConfig.exists()) {
                     saveAction(currentConfig);
-                    displayQuestionnairePanel.saveQuestionnaire(new File(inputQuestionFile.getText()));
                     JOptionPane.showMessageDialog(null,
                             "AAT Config file saved.");
                 } else {
                     File file = fileSaveDialog("AATConfig");
                     if (file != null) {
                         saveAction(file);
-                        displayQuestionnairePanel.saveQuestionnaire(new File(inputQuestionFile.getText()));
                         currentConfig = file;
                         workingDir = file.getParentFile();
                         JOptionPane.showMessageDialog(null,
@@ -671,7 +670,7 @@ public class ConfigBuilderPanel extends JPanel implements  Observer{
             public void actionPerformed(ActionEvent actionEvent) {
                 File file = fileOpenDialog();
                 if (file != null) {
-                    inputQuestionFile.setText(file.getName());
+                    inputQuestionFile.setText(FileUtils.getRelativePath(workingDir, file));
                     Rectangle r = getBounds();
                     displayQuestionnairePanel = new DisplayQuestionnairePanel(null,new Dimension(r.width,r.height));
                     displayQuestionnairePanel.displayQuestions(file);
@@ -1296,8 +1295,8 @@ public class ConfigBuilderPanel extends JPanel implements  Observer{
     private void saveAction(File file) {
         ConfigWriter.writeToFile(file, getConfiguration());
         imageSelectionPanel.writeToFile();
-
-
+        File qFile = new File(workingDir+ File.separator + inputQuestionFile.getText());
+        displayQuestionnairePanel.saveQuestionnaire(qFile);
     }
 
     private TestConfiguration getConfiguration() {

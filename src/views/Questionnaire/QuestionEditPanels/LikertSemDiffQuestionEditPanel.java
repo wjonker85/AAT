@@ -15,10 +15,7 @@ import java.util.Observable;
  * Class used for the likert scale and the semantic differential scale. Basis properties are the same for both.
  */
 public class LikertSemDiffQuestionEditPanel<T extends AbstractQuestion> extends AbstractQuestionEditPanel {
-    private JTextField qLabel;
-    private JTextField question, left, right, size;
-    private String type;
-    private JCheckBox required;
+    private JTextField left, right, size;
     private AbstractScaleQuestion original;
 
     public LikertSemDiffQuestionEditPanel(AbstractScaleQuestion original) {
@@ -40,14 +37,7 @@ public class LikertSemDiffQuestionEditPanel<T extends AbstractQuestion> extends 
         this.add(size);
         size.setPreferredSize(new Dimension(40, 20));
 
-        this.add(new JLabel("Label for analysis: "));
-        qLabel = new JTextField();
-        this.add(qLabel);
-        JLabel reqLabel = new JLabel("Required: ");
-        this.add(reqLabel);
-        required = new JCheckBox();
-        required.setSelected(true);
-        this.add(required);
+       addRequiredFields();
         if (original != null) {
             question.setText(original.getQuestion());
             left.setText(original.getLeft());
@@ -84,11 +74,6 @@ public class LikertSemDiffQuestionEditPanel<T extends AbstractQuestion> extends 
 
     @Override
     public boolean validated() {
-        return false;
-    }
-
-    @Override
-    public void update(Observable observable, Object o) {
-
+        return true;
     }
 }

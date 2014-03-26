@@ -13,9 +13,7 @@ import java.util.Observable;
  * Created by marcel on 3/25/14.
  */
 public class ClosedQuestionEditPanel<T extends AbstractQuestion> extends AbstractQuestionEditPanel {
-    private JTextField question, qLabel;
     private int noChoices = 15;
-    private JCheckBox required;
     ArrayList<JTextField> allChoices;
     private ArrayList<String> currentChoices;
     private JPanel optionsPanel;
@@ -27,19 +25,9 @@ public class ClosedQuestionEditPanel<T extends AbstractQuestion> extends Abstrac
         allChoices = new ArrayList<JTextField>();
         currentChoices = new ArrayList<String>();
         optionsPanel = new JPanel(new SpringLayout());
-        question = new JTextField();
-        question.setPreferredSize(new Dimension(250, 20));
-        this.add(question);
         this.add(new JLabel("Choices: "));
         this.add(optionsPanel);
-        this.add(new JLabel("Label for analysis: "));
-        qLabel = new JTextField();
-        this.add(qLabel);
-        JLabel reqLabel = new JLabel("Required: ");
-        this.add(reqLabel);
-        required = new JCheckBox();
-        required.setSelected(true);
-        this.add(required);
+        addRequiredFields();
         this.original = original;
         if (original != null) {
             question.setText(original.getQuestion());
@@ -120,12 +108,7 @@ public class ClosedQuestionEditPanel<T extends AbstractQuestion> extends Abstrac
 
     @Override
     public boolean validated() {
-        return false;
-    }
-
-    @Override
-    public void update(Observable observable, Object o) {
-
+        return true;
     }
 }
 
