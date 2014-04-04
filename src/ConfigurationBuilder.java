@@ -15,7 +15,6 @@
  *
  */
 
-import com.oyoaha.swing.plaf.oyoaha.OyoahaLookAndFeel;
 import views.ConfigurationBuilder.ConfigBuilderPanel;
 import javax.swing.*;
 import java.awt.*;

@@ -1,12 +1,12 @@
 package views.ConfigurationBuilder;
 
+import AAT.Configuration.TestConfiguration;
+import AAT.Configuration.Validation.FalseConfigException;
 import AAT.Util.ExtensionFileFilter;
 import AAT.Util.FileUtils;
 import AAT.Util.SpringUtilities;
 import AAT.Util.TitledSeparator;
-import AAT.Configuration.Validation.FalseConfigException;
 import Controller.JoystickController;
-import AAT.Configuration.TestConfiguration;
 import IO.ConfigFileReader;
 import IO.ConfigWriter;
 import Model.AATModel;
@@ -21,7 +21,6 @@ import javax.swing.filechooser.FileFilter;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
-import java.nio.file.Path;
 import java.text.NumberFormat;
 import java.util.Observable;
 import java.util.Observer;
@@ -29,7 +28,7 @@ import java.util.Observer;
 /**
  * Created by marcel on 3/16/14.
  */
-public class ConfigBuilderPanel extends JPanel implements  Observer{
+public class ConfigBuilderPanel extends JPanel implements Observer {
 
     private JTextField inputPushTag, inputPullTag, inputAffDir, inputNeutralDir, inputLangFile, inputPrDir, inputQuestionFile, inputPractRepeat;
     private JTextField inputTrials, inputBreak;
@@ -135,7 +134,9 @@ public class ConfigBuilderPanel extends JPanel implements  Observer{
                     model = new AATModel();
                     model.addObserver(getInstance());
                     saveAction(testFile);
+                    if(inputQuestionFile.getText().length()>0) {
                     displayQuestionnairePanel.saveQuestionnaire(new File(inputQuestionFile.getText()));
+                    }
                     model.loadNewAAT(testFile);     //Only start when config is valid
                     joystick = new JoystickController(model);
                     joystick.start(); //Start joystick Thread
@@ -160,7 +161,6 @@ public class ConfigBuilderPanel extends JPanel implements  Observer{
         tryButton.setEnabled(false);
 
 
-
         toolbar.add(newButton);
         toolbar.add(openButton);
         toolbar.add(saveAsButton);
@@ -181,10 +181,9 @@ public class ConfigBuilderPanel extends JPanel implements  Observer{
         tabbedPane.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent changeEvent) {
-                if(tabbedPane.getTitleAt(tabbedPane.getSelectedIndex()).equals("Questionnaire")) {
+                if (tabbedPane.getTitleAt(tabbedPane.getSelectedIndex()).equals("Questionnaire")) {
                     addButton.setEnabled(true);
-                }
-                else {
+                } else {
                     addButton.setEnabled(false);
                 }
 
@@ -201,10 +200,10 @@ public class ConfigBuilderPanel extends JPanel implements  Observer{
         add(tabbedPane);
 
         boolean hasPracticeImages = false;
-        if(!inputBuiltinPractice.isSelected() && inputHasPractice.isSelected())  {
+        if (!inputBuiltinPractice.isSelected() && inputHasPractice.isSelected()) {
             hasPracticeImages = true;
         }
-        imageSelectionPanel = new ImageSelectionPanel(aDir,nDir,pDir,hasPracticeImages,newTest);
+        imageSelectionPanel = new ImageSelectionPanel(aDir, nDir, pDir, hasPracticeImages, newTest);
         JScrollPane contentPane = new JScrollPane(imageSelectionPanel);
         contentPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         contentPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
@@ -221,7 +220,7 @@ public class ConfigBuilderPanel extends JPanel implements  Observer{
         tabbedPane.addTab("Language File", HtmlEditPane);
 
         Rectangle r = this.getBounds();
-        displayQuestionnairePanel = new DisplayQuestionnairePanel(null,new Dimension(r.width,r.height)); //without reference to model.
+        displayQuestionnairePanel = new DisplayQuestionnairePanel(null, new Dimension(r.width, r.height)); //without reference to model.
         questionPane = new JScrollPane(displayQuestionnairePanel);
         tabbedPane.addTab("Questionnaire", questionPane);
 
@@ -303,12 +302,12 @@ public class ConfigBuilderPanel extends JPanel implements  Observer{
                 File file = getDirectory();
                 if (file != null) {
                     aDir = file.getAbsoluteFile();
-                 //   try {
-                        inputAffDir.setText(FileUtils.getRelativePath(workingDir, aDir));
-                  //  } catch (IOException e) {
-                 //       inputAffDir.setText(file.getName());
-                 //   }
-                     imageSelectionPanel.setaDir(aDir);
+                    //   try {
+                    inputAffDir.setText(FileUtils.getRelativePath(workingDir, aDir));
+                    //  } catch (IOException e) {
+                    //       inputAffDir.setText(file.getName());
+                    //   }
+                    imageSelectionPanel.setaDir(aDir);
 
                 } else {
                     inputAffDir.setText("");
@@ -325,13 +324,13 @@ public class ConfigBuilderPanel extends JPanel implements  Observer{
 
                 if (file != null) {
                     nDir = file.getAbsoluteFile();
-                //    try {
-                        inputNeutralDir.setText(FileUtils.getRelativePath(workingDir, nDir));
+                    //    try {
+                    inputNeutralDir.setText(FileUtils.getRelativePath(workingDir, nDir));
 
-                 //   } catch (IOException e) {
-                 //       System.out.println(e.getMessage());
-                  //      inputNeutralDir.setText(file.getName());
-                  //  }
+                    //   } catch (IOException e) {
+                    //       System.out.println(e.getMessage());
+                    //      inputNeutralDir.setText(file.getName());
+                    //  }
 
 
                     System.out.println("Working dir: " + workingDir.getAbsoluteFile());
@@ -482,11 +481,11 @@ public class ConfigBuilderPanel extends JPanel implements  Observer{
                 File file = getDirectory();
                 if (file != null) {
                     pDir = file.getAbsoluteFile();
-                 //   try {
-                        inputPrDir.setText(FileUtils.getRelativePath(workingDir, pDir));
-                 //   } catch (IOException e) {
-                 //       inputPrDir.setText(file.getName());
-                 //   }
+                    //   try {
+                    inputPrDir.setText(FileUtils.getRelativePath(workingDir, pDir));
+                    //   } catch (IOException e) {
+                    //       inputPrDir.setText(file.getName());
+                    //   }
                     imageSelectionPanel.setHasPracticeImages(true);
                     imageSelectionPanel.setpDir(pDir);
                     inputPracticeFill.setEnabled(false);
@@ -672,7 +671,7 @@ public class ConfigBuilderPanel extends JPanel implements  Observer{
                 if (file != null) {
                     inputQuestionFile.setText(FileUtils.getRelativePath(workingDir, file));
                     Rectangle r = getBounds();
-                    displayQuestionnairePanel = new DisplayQuestionnairePanel(null,new Dimension(r.width,r.height));
+                    displayQuestionnairePanel = new DisplayQuestionnairePanel(null, new Dimension(r.width, r.height));
                     displayQuestionnairePanel.displayQuestions(file);
                     questionPane = new JScrollPane((displayQuestionnairePanel));
                     tabbedPane.remove(tabbedPane.indexOfTab("Questionnaire"));
@@ -901,7 +900,7 @@ public class ConfigBuilderPanel extends JPanel implements  Observer{
         inputBuiltinPractice.setEnabled(false);
         //  inputBuiltinPractice.setForeground(Color.RED);
         askBuiltinPractL.setEnabled(false);
-       // askBuiltinPractL.setForeground(UIManager.getColor("Label.disabledForeground"));
+        // askBuiltinPractL.setForeground(UIManager.getColor("Label.disabledForeground"));
         practRepeatValue = inputPractRepeat.getText();
         inputPractRepeat.setText("0");
         inputPractRepeat.setEnabled(false);
@@ -1099,7 +1098,6 @@ public class ConfigBuilderPanel extends JPanel implements  Observer{
     }
 
 
-
     private int createIDValue() {
         if (newTest) {
             return 1;
@@ -1158,10 +1156,10 @@ public class ConfigBuilderPanel extends JPanel implements  Observer{
         inputPullTag.setText(config.getValue("PullTag"));
         inputPushTag.setText(config.getValue("PushTag"));
         inputQuestionFile.setText(config.getValue("Questionnaire"));
-        System.out.println("Q2 File "+inputQuestionFile.getText());
+        System.out.println("Q2 File " + inputQuestionFile.getText());
         Rectangle r = this.getBounds();
-        displayQuestionnairePanel = new DisplayQuestionnairePanel(null,new Dimension(r.width,r.height));
-        displayQuestionnairePanel.displayQuestions(new File(workingDir+File.separator+inputQuestionFile.getText()));
+        displayQuestionnairePanel = new DisplayQuestionnairePanel(null, new Dimension(r.width, r.height));
+        displayQuestionnairePanel.displayQuestions(new File(workingDir + File.separator + inputQuestionFile.getText()));
         questionPane = new JScrollPane((displayQuestionnairePanel));
         tabbedPane.remove(tabbedPane.indexOfTab("Questionnaire"));
         tabbedPane.addTab("Questionnaire", questionPane);
@@ -1295,8 +1293,12 @@ public class ConfigBuilderPanel extends JPanel implements  Observer{
     private void saveAction(File file) {
         ConfigWriter.writeToFile(file, getConfiguration());
         imageSelectionPanel.writeToFile();
-        File qFile = new File(workingDir+ File.separator + inputQuestionFile.getText());
-        displayQuestionnairePanel.saveQuestionnaire(qFile);
+
+        if (inputQuestionFile.getText().length() > 0) {
+            File qFile = new File(workingDir + File.separator + inputQuestionFile.getText());
+            displayQuestionnairePanel.saveQuestionnaire(qFile);
+        }
+
     }
 
     private TestConfiguration getConfiguration() {
@@ -1355,10 +1357,9 @@ public class ConfigBuilderPanel extends JPanel implements  Observer{
     public File createFullPathFile(String file) {
         File f = new File(file);
         if (f.isAbsolute()) {
-                return new File(FileUtils.getRelativePath(workingDir, f));
-        }
-         else {
-            return new File(workingDir+File.separator+file);
+            return new File(FileUtils.getRelativePath(workingDir, f));
+        } else {
+            return new File(workingDir + File.separator + file);
         }
     }
 
