@@ -27,9 +27,10 @@ public class QuestionnaireModel extends Observable {
     }
 
     private void fillQuestionMap() {
-        if(questionMap.size()!=0) {
+        if(questionMap.size()==0) {
             for(int x = 0;x< Types.length;x++) {
                  questionMap.put(Types[x],QuestionClasses[x]);
+                System.out.println("Adding "+Types[x]);
             }
         }
     }
@@ -52,6 +53,7 @@ public class QuestionnaireModel extends Observable {
 
     public void changeQuestionType(AbstractQuestion newQuestion, String to) {
         this.original = newQuestion;
+        System.out.println("TO "+to);
         this.newQuestion = original.convertQuestion(questionMap.get(to).newInstance());
         System.out.println("model changed");
         this.setChanged();

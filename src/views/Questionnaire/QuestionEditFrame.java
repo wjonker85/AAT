@@ -24,12 +24,13 @@ public class QuestionEditFrame extends JFrame {
         setTypePanel.add(typeLabel);
         typeCombo = new JComboBox<String>(questionnaireModel.Types);             //TODO vervangen door visitor
         typeCombo.setSelectedItem(questionnaireModel.getNewQuestion().Accept(new QuestionTypeVisitor()));
+        this.setTitle(questionnaireModel.getNewQuestion().Accept(new QuestionTypeVisitor()));
         editPanel = questionnaireModel.getNewQuestion().Accept(new EditQuestionVisitor());
         this.add(editPanel);
 
 
         setTypePanel.add(typeCombo);
-        JButton setTypeButton = new JButton("Set question type");
+        JButton setTypeButton = new JButton("Change type of question");
         setTypeButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {

@@ -29,6 +29,7 @@ public class OpenQuestion extends AbstractQuestion {
     public <T extends AbstractQuestion> T convertQuestion(T newQuestion) {
         newQuestion.setKey(this.getKey());
         newQuestion.setQuestion(this.getQuestion());
+        newQuestion.setRequired(this.isRequired());
         return newQuestion;
    //     return (T) nq;
       //  return T;

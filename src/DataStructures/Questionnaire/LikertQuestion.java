@@ -26,6 +26,15 @@ public class LikertQuestion extends AbstractScaleQuestion {
 
     @Override
     public <T extends AbstractQuestion> T convertQuestion(T newQuestion) {
-        return null;
+        newQuestion.setKey(this.getKey());
+        newQuestion.setQuestion(this.getQuestion());
+        newQuestion.setRequired(this.isRequired());
+        if(newQuestion instanceof AbstractScaleQuestion)
+        {
+            ((AbstractScaleQuestion) newQuestion).setLeft(this.getLeft());
+            ((AbstractScaleQuestion) newQuestion).setRight(this.getRight());
+            ((AbstractScaleQuestion) newQuestion).setSize(this.getSize());
+        }
+        return newQuestion;
     }
 }

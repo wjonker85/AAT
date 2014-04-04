@@ -26,6 +26,14 @@ public class ClosedButtonQuestion extends AbstractClosedQuestion {
 
     @Override
     public <T extends AbstractQuestion> T convertQuestion(T newQuestion) {
-        return null;
+        newQuestion.setKey(this.getKey());
+        newQuestion.setQuestion(this.getQuestion());
+        newQuestion.setRequired(this.isRequired());
+        if(newQuestion instanceof  AbstractClosedQuestion)   {
+            for(String s : this.getOptions())          {
+                ((AbstractClosedQuestion) newQuestion).addOptions(s);
+            }
+        }
+        return newQuestion;
     }
 }

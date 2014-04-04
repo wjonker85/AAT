@@ -47,6 +47,7 @@ import java.util.*;
  * This is a panel that contains all the additional questions a researcher might be interested in.  These
  * questions come from the language file that is specified in the configuration. These questions are displayed for the
  * actual test is started. But only if there are any.
+ * This panel can also be used for editing questions.
  */
 public class DisplayQuestionnairePanel extends JPanel implements Observer {
 
@@ -132,9 +133,14 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
             buttonPanel.add(submitButton);
         }
 
+        if(!editMode) {
         scrollPane = new JScrollPane(contentPanel,
                 JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
                 JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        }
+        else {
+            scrollPane = new JScrollPane(contentPanel,JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        }
         if (!editMode) {
             scrollPane.setPreferredSize(resolution);
             scrollPane.setMinimumSize(resolution);
@@ -243,9 +249,10 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
             AbstractQuestionPanel q = questionsMap.get(key);
             q.changeLabelSize(maxLabelSize);
         }
-
-        introductionPane.setSelectionStart(0);
-        introductionPane.setSelectionEnd(0);
+        if (!editMode) {
+            introductionPane.setSelectionStart(0);
+            introductionPane.setSelectionEnd(0);
+        }
         this.revalidate();
         this.repaint();
     }
@@ -273,11 +280,10 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
         if (o.toString().equals("submit")) {
 
             System.out.println("Submit");
-          //  questionnaire.getExtraQuestions().remove(questionnaireModel.getPos());
-            if(questionnaireModel.getPos() <questionnaire.getExtraQuestions().size()) {
+            //  questionnaire.getExtraQuestions().remove(questionnaireModel.getPos());
+            if (questionnaireModel.getPos() < questionnaire.getExtraQuestions().size()) {
                 questionnaire.getExtraQuestions().set(questionnaireModel.getPos(), questionnaireModel.getNewQuestion());
-            }
-            else {
+            } else {
                 questionnaire.getExtraQuestions().add(questionnaireModel.getNewQuestion());
             }
             currentEditor.dispose();
@@ -291,29 +297,12 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
         }
 
         if (o.toString().equals("type changed")) {
-
-            System.out.println("type changed");
-            //  questionnaire.getExtraQuestions().remove(questionnaireModel.getPos());
-         //   if(questionnaireModel.getPos() <questionnaire.getExtraQuestions().size()) {
-        //        questionnaire.getExtraQuestions().set(questionnaireModel.getPos(), questionnaireModel.getNewQuestion());
-       //     }
-        //    else {
-        //        questionnaire.getExtraQuestions().add(questionnaireModel.getNewQuestion());
-        //    }
             currentEditor.dispose();
-       //     questionnaireModel = null;
             currentEditor = null;
             currentEditor = questionnaireModel.getEditFrame();
             currentEditor.setEnabled(true);
             currentEditor.setVisible(true);
-
-
-         //   questionsPanel.removeAll();
-         //   displayQuestions(questionnaire);
-          //  revalidate();
-         //   repaint();
         }
-
     }
 
     class MouseActionEditorPane extends JEditorPane implements MouseListener {
