@@ -223,18 +223,9 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
             question.setMaximumSize(new Dimension(screen.width / 3, screen.height));
             question.setMinimumSize(new Dimension(screen.width / 3, 20));
             question.setPreferredSize(new Dimension(screen.width / 3, 20));
-            question.setContentType("text/html");
-
-            HTMLEditorKit kit = new HTMLEditorKit();
-            question.setEditorKit(kit);
-            StyleSheet styleSheet = kit.getStyleSheet();
-            styleSheet.addRule("body {color: white; font-family:times; margin: 0px; background-color: black;font : 11px monaco;}");
-            Document doc = kit.createDefaultDocument();
-
-            question.setDocument(doc);
-            question.setText("<body>" + questionObject.getQuestion() + "</body>");
-            question.setBackground(Color.black);
-            question.setForeground(Color.WHITE);
+            question.setText("<p>" + questionObject.getQuestion() + "</p>");
+//            question.setBackground(Color.black);
+  //          question.setForeground(Color.WHITE);
             questionsPanel.add(question);
             AbstractQuestionPanel newQuestionPanel = questionObject.Accept(new DisplayQuestionnaireVisitor());
             questionsPanel.add(newQuestionPanel);
@@ -314,6 +305,16 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
         private DisplayQuestionnairePanel parent;
 
         public MouseActionEditorPane(boolean editMode, AbstractQuestion question, int pos, DisplayQuestionnairePanel parent) {
+            this.setBackground(Color.BLACK);
+            this.setForeground(Color.white);
+            this.setContentType("text/html");
+
+            HTMLEditorKit kit = new HTMLEditorKit();
+            this.setEditorKit(kit);
+            StyleSheet styleSheet = kit.getStyleSheet();
+            styleSheet.addRule("p {color: white; font-family:times; margin: 0px; background-color: black;font : 11px monaco;}");
+            this.setDocument(kit.createDefaultDocument());
+
             if (editMode) {
                 this.pos = pos;
                 this.parent = parent;

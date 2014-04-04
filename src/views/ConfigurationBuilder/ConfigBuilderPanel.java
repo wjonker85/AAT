@@ -1159,7 +1159,12 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
         System.out.println("Q2 File " + inputQuestionFile.getText());
         Rectangle r = this.getBounds();
         displayQuestionnairePanel = new DisplayQuestionnairePanel(null, new Dimension(r.width, r.height));
+        try {
         displayQuestionnairePanel.displayQuestions(new File(workingDir + File.separator + inputQuestionFile.getText()));
+        }
+        catch (Exception e) {
+            inputQuestionFile.setText(""); //Invalid questionnaire. So clear that input field
+        }
         questionPane = new JScrollPane((displayQuestionnairePanel));
         tabbedPane.remove(tabbedPane.indexOfTab("Questionnaire"));
         tabbedPane.addTab("Questionnaire", questionPane);
