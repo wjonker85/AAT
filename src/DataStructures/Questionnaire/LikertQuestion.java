@@ -18,4 +18,14 @@ public class LikertQuestion extends AbstractScaleQuestion {
     public void Accept(IVoidQuestionVisitor visitor) {
         visitor.Visit(this);
     }
+
+    @Override
+    public AbstractQuestion newInstance() {
+        return new LikertQuestion();
+    }
+
+    @Override
+    public <T extends AbstractQuestion> T convertQuestion(T newQuestion) {
+        return null;
+    }
 }

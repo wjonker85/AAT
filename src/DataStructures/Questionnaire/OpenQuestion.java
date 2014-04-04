@@ -19,4 +19,18 @@ public class OpenQuestion extends AbstractQuestion {
     public void Accept(IVoidQuestionVisitor visitor) {
         visitor.Visit(this);
     }
+
+    @Override
+    public AbstractQuestion newInstance() {
+        return new OpenQuestion();
+    }
+
+    @Override
+    public <T extends AbstractQuestion> T convertQuestion(T newQuestion) {
+        newQuestion.setKey(this.getKey());
+        newQuestion.setQuestion(this.getQuestion());
+        return newQuestion;
+   //     return (T) nq;
+      //  return T;
+    }
 }

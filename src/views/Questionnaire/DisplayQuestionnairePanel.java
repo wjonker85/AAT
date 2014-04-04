@@ -289,6 +289,31 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
             revalidate();
             repaint();
         }
+
+        if (o.toString().equals("type changed")) {
+
+            System.out.println("type changed");
+            //  questionnaire.getExtraQuestions().remove(questionnaireModel.getPos());
+         //   if(questionnaireModel.getPos() <questionnaire.getExtraQuestions().size()) {
+        //        questionnaire.getExtraQuestions().set(questionnaireModel.getPos(), questionnaireModel.getNewQuestion());
+       //     }
+        //    else {
+        //        questionnaire.getExtraQuestions().add(questionnaireModel.getNewQuestion());
+        //    }
+            currentEditor.dispose();
+       //     questionnaireModel = null;
+            currentEditor = null;
+            currentEditor = questionnaireModel.getEditFrame();
+            currentEditor.setEnabled(true);
+            currentEditor.setVisible(true);
+
+
+         //   questionsPanel.removeAll();
+         //   displayQuestions(questionnaire);
+          //  revalidate();
+         //   repaint();
+        }
+
     }
 
     class MouseActionEditorPane extends JEditorPane implements MouseListener {

@@ -18,4 +18,14 @@ public class ClosedButtonQuestion extends AbstractClosedQuestion {
     public void Accept(IVoidQuestionVisitor visitor) {
         visitor.Visit(this);
     }
+
+    @Override
+    public AbstractQuestion newInstance() {
+        return new ClosedButtonQuestion();
+    }
+
+    @Override
+    public <T extends AbstractQuestion> T convertQuestion(T newQuestion) {
+        return null;
+    }
 }

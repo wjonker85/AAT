@@ -17,8 +17,6 @@
 
 package DataStructures.Questionnaire;
 
-import java.util.ArrayList;
-
 /**
  * Created by IntelliJ IDEA.
  * User: marcel
@@ -28,7 +26,7 @@ import java.util.ArrayList;
  * to the screen. The key String is used as a column header for use in a table or CSV file.
  */
 
-public abstract class AbstractQuestion {
+public abstract class AbstractQuestion implements IChangeQuestionType {
 
     private String key;
     private String question;
@@ -65,7 +63,13 @@ public abstract class AbstractQuestion {
     public abstract <T> T Accept(IQuestionVisitor<T> visitor);
 
     public abstract void Accept(IVoidQuestionVisitor visitor);
+
+    public abstract AbstractQuestion newInstance();
+
     }
+
+
+
 
 
 

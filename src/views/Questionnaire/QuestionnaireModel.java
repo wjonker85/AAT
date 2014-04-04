@@ -1,46 +1,70 @@
 package views.Questionnaire;
 
-import DataStructures.Questionnaire.AbstractQuestion;
-import DataStructures.Questionnaire.Questionnaire;
+import DataStructures.Questionnaire.*;
 
-import java.util.Observable;
+import java.util.*;
 
 /**
  * Created by marcel on 3/25/14.
  */
-public class QuestionnaireModel<T extends AbstractQuestion> extends Observable {
+public class QuestionnaireModel extends Observable {
 
-    private T original,newQuestion;
+    private AbstractQuestion original;
+    private AbstractQuestion newQuestion;
     private QuestionEditFrame currentEditFrame;
     private int pos;
+    public static final String[] Types = {"Likert Scale", "Semantic differential", "Closed question (combo-box)", "Closed question (buttons)", "Open question", "Open question with text area"};
+    private static final AbstractQuestion[] QuestionClasses = {new LikertQuestion(),new SemDiffQuestion(),new ClosedComboQuestion(),new ClosedButtonQuestion(),new OpenQuestion(),new OpenTextAreaQuestion() };
 
-    public QuestionnaireModel(T question, int pos)   {
+    private HashMap<String,AbstractQuestion> questionMap;
+
+    public QuestionnaireModel(AbstractQuestion question, int pos) {
         this.original = question;
+        questionMap = new HashMap<String, AbstractQuestion>();
+        fillQuestionMap();
         newQuestion = original;
         this.pos = pos;
     }
 
-    public T getOriginalQuestion() {
+    private void fillQuestionMap() {
+        if(questionMap.size()!=0) {
+            for(int x = 0;x< Types.length;x++) {
+                 questionMap.put(Types[x],QuestionClasses[x]);
+            }
+        }
+    }
+
+    public AbstractQuestion getOriginalQuestion() {
         return original;
     }
 
-    public T getNewQuestion() {
+    public AbstractQuestion getNewQuestion() {
         return newQuestion;
     }
 
-    public void setNewQuestion(T newQuestion) {
-        if(!newQuestion.equals(original)) {
+    public void setNewQuestion(AbstractQuestion newQuestion) {
+        if (!newQuestion.equals(original)) {
             this.newQuestion = newQuestion;
             this.setChanged();
             this.notifyObservers("submit");
         }
     }
 
-    public QuestionEditFrame getEditFrame()
-    {
-         if(currentEditFrame == null) {
-             currentEditFrame = new QuestionEditFrame(this);
-         }
+    public void changeQuestionType(AbstractQuestion newQuestion, String to) {
+        this.original = newQuestion;
+        this.newQuestion = original.convertQuestion(questionMap.get(to).newInstance());
+        System.out.println("model changed");
+        this.setChanged();
+        currentEditFrame.dispose();
+        currentEditFrame = null;
+        this.notifyObservers("type changed");
+
+    }
+
+    public QuestionEditFrame getEditFrame() {
+        if (currentEditFrame == null) {
+            currentEditFrame = new QuestionEditFrame(this);
+        }
         return currentEditFrame;
     }
 
@@ -48,5 +72,5 @@ public class QuestionnaireModel<T extends AbstractQuestion> extends Observable {
         return pos;
     }
 
-   // public QuestionEditFrame changeFrameType(Enum EditFrameType)
+    // public QuestionEditFrame changeFrameType(Enum EditFrameType)
 }

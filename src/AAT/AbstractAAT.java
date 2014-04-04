@@ -64,6 +64,7 @@ public abstract class AbstractAAT {
      */
     public AbstractAAT(TestConfiguration testConfiguration) throws FalseConfigException {
 
+       try {
         this.testConfiguration = testConfiguration;
         System.out.println("TestConfig "+testConfiguration.getPullTag());
     //    System.out.println("bla "+testConfiguration.getNeutralDir().getAbsolutePath());
@@ -86,6 +87,9 @@ public abstract class AbstractAAT {
             questionnaire = XMLReader.getQuestionnaire(testConfiguration.getQuestionnaireFile());
         }
         translations = XMLReader.getTranslations(testConfiguration.getLanguageFile());
+       } catch (Exception e) {
+            throw new FalseConfigException(e.getMessage());
+        }
     }
 
     public TestConfiguration getTestConfiguration() {

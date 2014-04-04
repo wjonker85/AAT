@@ -32,4 +32,14 @@ public class ClosedComboQuestion extends AbstractClosedQuestion {
     public void Accept(IVoidQuestionVisitor visitor) {
         visitor.Visit(this);
     }
+
+    @Override
+    public AbstractQuestion newInstance() {
+        return new ClosedComboQuestion();
+    }
+
+    @Override
+    public <T extends AbstractQuestion> T convertQuestion(T newQuestion) {
+        return null;
+    }
 }

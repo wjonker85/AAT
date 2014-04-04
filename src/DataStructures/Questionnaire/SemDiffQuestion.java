@@ -18,5 +18,15 @@ public class SemDiffQuestion extends AbstractScaleQuestion {
     public void Accept(IVoidQuestionVisitor visitor) {
         visitor.Visit(this);
     }
+
+    @Override
+    public AbstractQuestion newInstance() {
+        return new SemDiffQuestion();
+    }
+
+    @Override
+    public <T extends AbstractQuestion> T convertQuestion(T newQuestion) {
+        return null;
+    }
 }
 
