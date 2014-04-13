@@ -216,16 +216,7 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
         introductionPane.setText(questionnaire.getIntroduction());
         for (int x = 0; x < questionnaire.getExtraQuestions().size(); x++) {
             AbstractQuestion questionObject = questionnaire.getExtraQuestions().get(x);
-            Dimension screen = getToolkit().getScreenSize();
             MouseActionEditorPane question = new MouseActionEditorPane(editMode, questionObject, x, this);
-
-            question.setEditable(false);
-            question.setMaximumSize(new Dimension(screen.width / 3, screen.height));
-            question.setMinimumSize(new Dimension(screen.width / 3, 20));
-            question.setPreferredSize(new Dimension(screen.width / 3, 20));
-            question.setText("<p>" + questionObject.getQuestion() + "</p>");
-//            question.setBackground(Color.black);
-  //          question.setForeground(Color.WHITE);
             questionsPanel.add(question);
             AbstractQuestionPanel newQuestionPanel = questionObject.Accept(new DisplayQuestionnaireVisitor());
             questionsPanel.add(newQuestionPanel);
@@ -265,6 +256,28 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
         return results;
     }
 
+    public void changeQuestionPos(int posFrom, int newPos)  {
+        System.out.println("Change pos from "+posFrom+" to "+newPos);
+        AbstractQuestion q = questionnaire.getExtraQuestions().get(posFrom);
+        if(posFrom<newPos && (newPos+1 <questionnaire.getExtraQuestions().size())) {
+            questionnaire.getExtraQuestions().add(newPos+1,q);
+            questionnaire.getExtraQuestions().remove(posFrom);
+        }
+        else if(posFrom > newPos && (newPos>=0 && posFrom+1 < questionnaire.getExtraQuestions().size())) {
+            questionnaire.getExtraQuestions().add(newPos,q);
+            questionnaire.getExtraQuestions().remove(posFrom+1);
+        }
+
+//        currentEditor.dispose();
+//        questionnaireModel.deleteObservers();
+        questionnaireModel = null;
+        currentEditor = null;
+        questionsPanel.removeAll();
+        displayQuestions(questionnaire);
+        revalidate();
+        repaint();
+    }
+
     @Override
     public void update(Observable observable, Object o) {
         System.out.println("Update");
@@ -296,45 +309,91 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
         }
     }
 
-    class MouseActionEditorPane extends JEditorPane implements MouseListener {
+    class MouseActionEditorPane extends JPanel implements MouseListener {
 
         Border blackBorder = BorderFactory.createLineBorder(Color.BLACK);
         Border redBorder = BorderFactory.createLineBorder(Color.RED, 5);
-        private int pos;
-        private AbstractQuestion question;
-        private DisplayQuestionnairePanel parent;
+        private JPanel buttonPanel;
 
-        public MouseActionEditorPane(boolean editMode, AbstractQuestion question, int pos, DisplayQuestionnairePanel parent) {
+        public MouseActionEditorPane(boolean editMode,final AbstractQuestion question, final int pos, final DisplayQuestionnairePanel parent) {
+            JLayeredPane layers = new JLayeredPane();
             this.setBackground(Color.BLACK);
             this.setForeground(Color.white);
-            this.setContentType("text/html");
-
+            JEditorPane questionPane = new JEditorPane();
+            questionPane.setContentType("text/html");
+            Dimension screen = getToolkit().getScreenSize();
             HTMLEditorKit kit = new HTMLEditorKit();
-            this.setEditorKit(kit);
+            questionPane.setEditorKit(kit);
             StyleSheet styleSheet = kit.getStyleSheet();
             styleSheet.addRule("p {color: white; font-family:times; margin: 0px; background-color: black;font : 11px monaco;}");
-            this.setDocument(kit.createDefaultDocument());
+            questionPane.setDocument(kit.createDefaultDocument());
+            this.setMaximumSize(new Dimension(screen.width / 3, screen.height));
+            this.setMinimumSize(new Dimension(screen.width / 3, 20));
+            this.setPreferredSize(new Dimension(screen.width / 3, 20));
+            layers.setMaximumSize(new Dimension(screen.width / 3, screen.height));
+            layers.setMinimumSize(new Dimension(screen.width / 3, 20));
+            layers.setPreferredSize(new Dimension(screen.width / 3, 20));
+            questionPane.setBackground(Color.BLACK);
+            questionPane.setForeground(Color.white);
+            questionPane.setEditable(false);
+            questionPane.setMaximumSize(new Dimension(screen.width, screen.height));
+            questionPane.setText("<p>" + question.getQuestion() + "</p>");
+            questionPane.setEnabled(true);
+            questionPane.setVisible(true);
+            layers.add(questionPane, JLayeredPane.DEFAULT_LAYER);
+            questionPane.setBounds(5,0,(screen.width/3)-10,20);
+            questionPane.addMouseListener(this);
+            buttonPanel = new JPanel();
+
+            JButton editButton = new JButton("Edit");
+            editButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent actionEvent) {
+                        questionnaireModel = new QuestionnaireModel(question, pos);
+                        questionnaireModel.addObserver(parent);
+                        currentEditor = questionnaireModel.getEditFrame();
+                        currentEditor.setEnabled(true);
+                        currentEditor.setVisible(true);
+                }
+            });
+
+            JButton upButton = new JButton("Up");
+            upButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent actionEvent) {
+                      parent.changeQuestionPos(pos,pos-1);
+                }
+            });
+
+            JButton downButton = new JButton("Down");
+            downButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent actionEvent) {
+                    parent.changeQuestionPos(pos,pos+1);
+                }
+            });
+
+            buttonPanel.add(upButton);
+            buttonPanel.add(downButton);
+            buttonPanel.setEnabled(true);
+            buttonPanel.setVisible(false);
+            layers.add(buttonPanel, JLayeredPane.PALETTE_LAYER);
+            buttonPanel.setBounds((screen.width/3)-180,0,180,20);
+            buttonPanel.addMouseListener(this);
+            editButton.addMouseListener(this);
+            upButton.addMouseListener(this);
+            downButton.addMouseListener(this);
 
             if (editMode) {
-                this.pos = pos;
-                this.parent = parent;
-                this.question = question;
                 addMouseListener(this);
             }
+            this.add(layers);
         }
 
-        @Override
+   //     @Override
         public void mouseClicked(MouseEvent mouseEvent) {
-            if (SwingUtilities.isLeftMouseButton(mouseEvent)) {
-                questionnaireModel = new QuestionnaireModel(question, pos);
-                questionnaireModel.addObserver(parent);
-                currentEditor = questionnaireModel.getEditFrame();
-                currentEditor.setEnabled(true);
-                currentEditor.setVisible(true);
-            } else if (SwingUtilities.isRightMouseButton(mouseEvent)) {
-
             }
-        }
+
 
         @Override
         public void mousePressed(MouseEvent mouseEvent) {
@@ -349,11 +408,14 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
         @Override
         public void mouseEntered(MouseEvent mouseEvent) {
             setBorder(redBorder);
+            buttonPanel.setEnabled(true);
+            buttonPanel.setVisible(true);
         }
 
         @Override
         public void mouseExited(MouseEvent mouseEvent) {
             setBorder(blackBorder);
+            buttonPanel.setVisible(false);
         }
 
     }
