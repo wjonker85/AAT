@@ -64,14 +64,15 @@ public class ConfigurationBuilder {
             public void run() {
                 //Turn off metal's use of bold fonts
                 try {
-                //    UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
+                    UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
                  //   OyoahaLookAndFeel laf = new OyoahaLookAndFeel();
                  //   UIManager.setLookAndFeel(laf);
                  //   UIManager.setLookAndFeel("com.oyoaha.swing.plaf.oyoaha.OyoahaLookAndFeel");
                 }  catch (Exception e) {
                     e.printStackTrace();
                 }
-                UIManager.put("swing.boldMetal", Boolean.FALSE);
+               // UIManager.put("swing.boldMetal", Boolean.FALSE);
+                UIManager.put("Panel.background", Color.white);
                 createAndShowGUI();
             }
         });

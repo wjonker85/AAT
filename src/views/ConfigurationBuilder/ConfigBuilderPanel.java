@@ -68,18 +68,36 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
         newTest = true;
 
         JToolBar toolbar = new JToolBar("Toolbar", JToolBar.HORIZONTAL);
-        final JButton newButton = new JButton(new ImageIcon("document-new.png"));
+        toolbar.setBorder(null);
+    //    toolbar.setOpaque(false);
+        toolbar.setBackground(Color.BLACK);
+        final JButton newButton =  new JButton(new ImageIcon(((new ImageIcon(
+                "icons/document-new128x128.png").getImage()
+                .getScaledInstance(48, 48,
+                        java.awt.Image.SCALE_SMOOTH)))));
         newButton.setToolTipText("Create a new AAT Config file");
         newButton.setPreferredSize(new Dimension(48, 48));
+        newButton.setBorder(null);
+        newButton.setOpaque(false);
 
+        JButton openButton =   new JButton(new ImageIcon(((new ImageIcon(
+                "icons/document-open128x128.png").getImage()
+                .getScaledInstance(48, 48,
+                        java.awt.Image.SCALE_SMOOTH)))));
 
-        JButton openButton = new JButton(new ImageIcon("document-open.png"));
         openButton.setToolTipText("Open an AAT Config file");
         openButton.setPreferredSize(new Dimension(48, 48));
+        openButton.setBorder(null);
+        openButton.setOpaque(false);
 
-        final JButton saveAsButton = new JButton(new ImageIcon("document-save-as.png"));
+        final JButton saveAsButton = new JButton(new ImageIcon(((new ImageIcon(
+                "icons/document-save-as128x128.png").getImage()
+                .getScaledInstance(48, 48,
+                        java.awt.Image.SCALE_SMOOTH)))));
+
         saveAsButton.setPreferredSize(new Dimension(48, 48));
         saveAsButton.setToolTipText("Save AAT Config file as ...");
+        saveAsButton.setOpaque(false);
         saveAsButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -94,12 +112,18 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
                 }
             }
         });
-
+        saveAsButton.setBorder(null);
         saveAsButton.setEnabled(false);
 
-        final JButton saveButton = new JButton(new ImageIcon("document-save.png"));
+        final JButton saveButton = new JButton(new ImageIcon(((new ImageIcon(
+                "icons/document-save128x128.png").getImage()
+                .getScaledInstance(48, 48,
+                        java.awt.Image.SCALE_SMOOTH)))));
+
         saveButton.setPreferredSize(new Dimension(48, 48));
         saveButton.setToolTipText("Save AAT Config file");
+        saveButton.setBorder(null);
+        saveButton.setOpaque(false);
         saveButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -125,7 +149,11 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
 
         saveButton.setEnabled(false);
 
-        final JButton tryButton = new JButton(new ImageIcon("playGray.png"));
+        final JButton tryButton = new JButton(new ImageIcon(((new ImageIcon(
+                "icons/media-playback-start128x128.png").getImage()
+                .getScaledInstance(48, 48,
+                        java.awt.Image.SCALE_SMOOTH)))));
+
         tryButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
@@ -158,7 +186,9 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
         });
         tryButton.setToolTipText("Try the current configuration");
         tryButton.setPreferredSize(new Dimension(48, 48));
+        tryButton.setBorder(null);
         tryButton.setEnabled(false);
+        tryButton.setOpaque(false);
 
 
         toolbar.add(newButton);
@@ -166,14 +196,21 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
         toolbar.add(saveAsButton);
         toolbar.add(saveButton);
         toolbar.add(tryButton);
-        toolbar.add(new JSeparator(SwingConstants.VERTICAL));
-        final JButton addButton = new JButton(new ImageIcon("list-add.png"));
+        toolbar.add(Box.createHorizontalGlue());
+    //    toolbar.add(new JSeparator(SwingConstants.VERTICAL));
+        final JButton addButton =  new JButton(new ImageIcon(((new ImageIcon(
+                "icons/add128x128.png").getImage()
+                .getScaledInstance(48, 48,
+                        java.awt.Image.SCALE_SMOOTH)))));
+                //new JButton(new ImageIcon("list-add.png"));
         addButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 displayQuestionnairePanel.addQuestionAction();
             }
         });
+        addButton.setBorder(null);
+        addButton.setOpaque(false);
         toolbar.add(addButton);
         this.add(toolbar);
 
