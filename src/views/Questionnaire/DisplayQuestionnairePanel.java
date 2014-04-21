@@ -57,7 +57,7 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
     private QuestionnaireModel questionnaireModel;
 
     private JScrollPane scrollPane;
-    private JTextArea introductionPane;
+    private IntroductionEditorPanel introductionPane;
     private Boolean editMode = false;
     private Questionnaire questionnaire;
     private int maxLabelSize = 0;
@@ -65,11 +65,13 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
     private QuestionEditFrame currentEditor = null;
     private Map<String, MouseActionEditorPane> qPanes;
     public int lastEditedPos = -1;
+    public Dimension resolution;
 
     public DisplayQuestionnairePanel(final AATModel model, Dimension resolution) {
         if (model == null) {
             editMode = true;
         }
+        this.resolution = resolution;
         JPanel mainPanel = new JPanel();
         JPanel contentPanel = new JPanel();
         qPanes = new HashMap<String, MouseActionEditorPane>();
@@ -106,14 +108,7 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
         questionnairePanel.setLayout(new BoxLayout(questionnairePanel, BoxLayout.Y_AXIS));
         questionnairePanel.setBackground(Color.black);
         questionnairePanel.setForeground(Color.white);
-        introductionPane = new JTextArea();
-        introductionPane.setBorder(BorderFactory.createLineBorder(Color.black, 10));
-        introductionPane.setLineWrap(true);
-        introductionPane.setWrapStyleWord(true);
-        introductionPane.setForeground(Color.white);
-        introductionPane.setBackground(Color.black);
-        introductionPane.setEditable(false);
-        introductionPane.setFont(new Font("Roman", Font.PLAIN, 24));
+        introductionPane = new IntroductionEditorPanel();
 
         questionnairePanel.add(introductionPane);
         questionnairePanel.add(Box.createVerticalStrut(20)); //small margin
@@ -352,6 +347,58 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
             currentEditor.setVisible(true);
         }
     }
+
+    class IntroductionEditorPanel extends JTextPane implements MouseListener
+    {
+        Border redBorder = BorderFactory.createLineBorder(Color.RED, 2);
+        Border blackBorder = BorderFactory.createLineBorder(Color.black, 0);
+
+        public IntroductionEditorPanel()    {
+
+            setBorder(BorderFactory.createLineBorder(Color.black, 10));
+            this.setContentType("text/html");
+            this.setOpaque(false);
+            this.setBorder(null);
+            HTMLEditorKit kit = new HTMLEditorKit();
+            setEditorKit(kit);
+            StyleSheet styleSheet = kit.getStyleSheet();
+            styleSheet.addRule("h1 {color: white; font-family:times; margin: 0px; background-color: black;font : 24px monaco;}");
+            this.setMinimumSize(new Dimension((int) (resolution.width*0.8),-1));
+            //setLineWrap(true);
+            //setWrapStyleWord(true);
+         //   this.setPreferredSize(new Dimension((int)(resolution.width*0.8),-1));
+          //  setForeground(Color.white);
+          //  setBackground(Color.black);
+            setEditable(false);
+            setFont(new Font("Roman", Font.PLAIN, 24));
+        }
+
+        @Override
+        public void mouseClicked(MouseEvent mouseEvent) {
+
+        }
+
+        @Override
+        public void mousePressed(MouseEvent mouseEvent) {
+
+        }
+
+        @Override
+        public void mouseReleased(MouseEvent mouseEvent) {
+
+        }
+
+        @Override
+        public void mouseEntered(MouseEvent mouseEvent) {
+            setBorder(redBorder);
+        }
+
+        @Override
+        public void mouseExited(MouseEvent mouseEvent) {
+              setBorder(blackBorder);
+        }
+    }
+
 
     class MouseActionEditorPane extends JPanel implements MouseListener {
 

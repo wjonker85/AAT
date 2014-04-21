@@ -37,55 +37,6 @@ public class ConfigurationBuilder {
     private static void createAndShowGUI() {
         //Create and set up the window.
         JFrame frame = new JFrame("AAT Config generator");
-
-             /*
-
-
-
-
-
-
-
-
-
-nimbusSelectedText	#ffffff (255,255,255)
-
-text
-              */
-        //  customizeNimbusLaF();
-        //    UIManager.put("ScrollBar.foreground", Color.decode("#003040"));
-        //       UIManager.put("nimbusAlertYellow", Color.YELLOW);
-
-        //     UIManager.put("info", Color.black);
-        //    UIManager.put("nimbusLightBackground", Color.lightGray);
-        // UIManager.put("nimbusBase",  Color.decode("#ded5dc"));
-        //    UIManager.put("nimbusDisabledText", Color.DARK_GRAY);
-        //       UIManager.put("nimbusSelectedText", Color.WHITE);
-        //   UIManager.put("nimbusFocus", Color.black);
-        //     UIManager.put("nimbusGreen", Color.red);
-        //     UIManager.put("scrollbar", Color.GREEN);
-        //     UIManager.put("nimbusFocus", Color.black);
-        //     UIManager.put("nimbusGreen", Color.GREEN);
-        //     UIManager.put("nimbusInfoBlue", Color.BLUE);
-        //     UIManager.put("nimbusInfoBlue", Color.red);
-        //   UIManager.put("nimbusOrange", Color.RED);
-        //   UIManager.put("nimbusSelectionBackground",Color.red);
-        //    UIManager.put("nimbusRed", Color.RED);
-        //     UIManager.put("nimbusSelectionBackground",
-        //             Color.lightGray);
-
-
-        //   UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
-
-        //   UIManager.put("nimbusBlueGrey", new Color(...));
-
-        //    SwingUtilities.updateComponentTreeUI(frame);
-        //       UIManager.getLookAndFeelDefaults().put("FileChooser.background", fromHex("e36431"));
-        //   SwingUtilities.updateComponentTreeUI( frame );
-        //   OyoahaLookAndFeel laf = new OyoahaLookAndFeel();
-        //   UIManager.setLookAndFeel(laf);
-        //   UIManager.setLookAndFeel("com.oyoaha.swing.plaf.oyoaha.OyoahaLookAndFeel");
-
         int height = (int) java.awt.Toolkit.getDefaultToolkit().getScreenSize().getHeight();
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setPreferredSize(new Dimension(1200,height));
@@ -108,15 +59,11 @@ text
                 UIManager.put("control", Color.decode("#f2f0ee"));
                 UIManager.put("nimbusBlueGrey", Color.decode("#eeece9"));
                 UIManager.put("nimbusSelectionBackground", Color.decode("#f27b4b"));
-                // UIManager.put("swing.boldMetal", Boolean.FALSE);
-                //   UIManager.put("Panel.background", Color.white);
-                //  UIManager.put("control", new Color(...));
                 for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
                     if ("Nimbus".equals(info.getName())) {
                         try {
                             UIManager.setLookAndFeel(info.getClassName());
-                            //   customizeNimbusLaF();
-                            //
+
                             break;
 
                         } catch (Exception e) {

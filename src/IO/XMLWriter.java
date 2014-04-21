@@ -150,10 +150,8 @@ public class XMLWriter {
 
             //Add the introduction.
             Element introduction = doc.createElement("introduction");
-            Text introductionStr = doc.createTextNode(questionnaire.getIntroduction());
-            introduction.appendChild(introductionStr);
             rootElement.appendChild(introduction);
-
+            introduction.appendChild(doc.createCDATASection(questionnaire.getIntroduction()));
 
             for (AbstractQuestion question : questionnaire.getExtraQuestions()) {
                question.Accept(new XmlQuestionnaireBuilder(doc,rootElement));
