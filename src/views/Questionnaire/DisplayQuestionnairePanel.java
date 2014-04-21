@@ -109,7 +109,8 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
         questionnairePanel.setBackground(Color.black);
         questionnairePanel.setForeground(Color.white);
         introductionPane = new IntroductionEditorPanel();
-
+        introductionPane.setText("No questionnaire has been opened or created yet.<br> You can start adding questions by pushing the big cross at the top left corner.<br>" +
+                "Existings questions can be edited, moved or deleted by the menu that shows up when hovering above a question.<br><br> This text can be edited too by pushing the big edit button below.");
         questionnairePanel.add(introductionPane);
         questionnairePanel.add(Box.createVerticalStrut(20)); //small margin
         questionnairePanel.add(questionsPanel);
@@ -224,7 +225,13 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
         qPanes = new HashMap<String, MouseActionEditorPane>();
         System.out.println("No questions " + questionnaire.getExtraQuestions().size());
         int maxLabelWidth = getMaxLabelSize();
-        introductionPane.setText(questionnaire.getIntroduction());
+        if(questionnaire.getIntroduction().length() == 0) {
+            introductionPane.setText("No questionnaire has been opened or created yet.<br> You can start adding questions by pushing the big cross at the top left corner.<br>" +
+                "Existings questions can be edited, moved or deleted by the menu that shows up when hovering above a question.<br><br> This text can be edited too by pushing the big edit button below.");
+        }
+        else {
+            introductionPane.setText(questionnaire.getIntroduction());
+        }
         for (int x = 0; x < questionnaire.getExtraQuestions().size(); x++) {
             AbstractQuestion questionObject = questionnaire.getExtraQuestions().get(x);
             MouseActionEditorPane question = new MouseActionEditorPane(editMode, questionObject, x, this);
