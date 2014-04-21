@@ -34,8 +34,4 @@ public class OpenQuestionPanel extends AbstractQuestionPanel {
     public String getType() {
         return "open";
     }
-
-    @Override
-    public void changeLabelSize(int width) {
-    }
 }

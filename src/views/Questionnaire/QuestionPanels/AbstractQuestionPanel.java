@@ -14,11 +14,8 @@ public abstract class AbstractQuestionPanel extends JPanel {
 
     public JLabel asterisks;
     public boolean isRequired = true;
-    private int maxLabelSize = 0;
-    public JLabel leftLabel;
 
     public AbstractQuestionPanel() {
-        leftLabel = new JLabel("");
         asterisks = new JLabel("*", JLabel.TRAILING);
         asterisks.setFont(new Font("Roman", Font.BOLD, 20));
         asterisks.setForeground(Color.WHITE);
@@ -27,21 +24,6 @@ public abstract class AbstractQuestionPanel extends JPanel {
     public abstract String getValue();
 
     public abstract String getType();
-
-    public void changeLabelSize(int width) {
-        leftLabel.setPreferredSize(new Dimension(width, 20));
-        repaint();
-    }
-
-    public void calculateLabelWidth(JLabel label) {
-        Font labelFont = label.getFont();
-        String labelText = label.getText();
-
-        int stringWidth = label.getFontMetrics(labelFont).stringWidth(labelText);
-        if (stringWidth > maxLabelSize) {
-            maxLabelSize = stringWidth;
-        }
-    }
 
     public void setRequired(Boolean isRequired) {
         this.isRequired = isRequired;

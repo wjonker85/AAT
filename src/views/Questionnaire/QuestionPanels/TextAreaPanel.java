@@ -39,11 +39,4 @@ public class TextAreaPanel extends AbstractQuestionPanel {
     public String getType() {
         return "textArea";
     }
-
-    @Override
-    public void changeLabelSize(int width) {
-
-    }
-
-
 }

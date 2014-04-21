@@ -95,6 +95,7 @@ public class ImageSelectionPanel extends JPanel {
         }
 
         JPanel panel = new JPanel();
+        this.setBorder(BorderFactory.createLineBorder(Color.darkGray,2));
         panel.setLayout(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
         c.fill = GridBagConstraints.HORIZONTAL;
@@ -119,6 +120,7 @@ public class ImageSelectionPanel extends JPanel {
         c.gridy = 1;
         panel.add(aLabel, c);
         tableA = new JTable(new ImageTableModel(imageFilesA, aFiles));
+        tableA.setBackground(Color.decode("#eeece9"));
         tableA.setComponentPopupMenu(new JPopupMenu());
         JScrollPane scrollPaneA = new JScrollPane(tableA);
         tableA.setFillsViewportHeight(true);
@@ -159,6 +161,7 @@ public class ImageSelectionPanel extends JPanel {
         setTableColumnWidths(tableN);
         JScrollPane scrollPaneN = new JScrollPane(tableN);
         tableN.setFillsViewportHeight(true);
+        tableN.setBackground(Color.decode("#eeece9"));
         c.fill = GridBagConstraints.HORIZONTAL;
         c.gridx = 1;
         c.gridy = 2;
@@ -195,6 +198,7 @@ public class ImageSelectionPanel extends JPanel {
         c.gridy = 1;
         panel.add(pLabel, c);
         tableP = new JTable(new ImageTableModel(imageFilesP, nFiles));
+        tableP.setBackground(Color.decode("#eeece9"));
         setTableColumnWidths(tableP);
         scrollPaneP = new JScrollPane(tableP);
         tableP.setFillsViewportHeight(true);
@@ -262,9 +266,9 @@ public class ImageSelectionPanel extends JPanel {
         for (int i = 0; i < 2; i++) {
             column = table.getColumnModel().getColumn(i);
             if (i == 0) {
-                column.setPreferredWidth(300); //third column is bigger
+                column.setPreferredWidth(150); //third column is bigger
             } else {
-                column.setPreferredWidth(20);
+                column.setPreferredWidth(10);
             }
         }
     }

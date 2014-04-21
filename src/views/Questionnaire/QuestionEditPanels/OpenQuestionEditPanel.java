@@ -37,6 +37,8 @@ class OpenQuestionEditPanel<T>  extends AbstractQuestionEditPanel {
         return abstractQuestion;
     }
 
+
+
     @Override
     public boolean validated() {
         return true;

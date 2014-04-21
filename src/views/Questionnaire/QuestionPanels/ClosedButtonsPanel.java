@@ -64,9 +64,4 @@ public class ClosedButtonsPanel extends AbstractQuestionPanel {
     public String getType() {
         return "closed_button";
     }
-
-    @Override
-    public void changeLabelSize(int width) {
-
-    }
 }

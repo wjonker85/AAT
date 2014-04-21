@@ -19,6 +19,7 @@ package views.Questionnaire;
 
 import AAT.Util.SpringUtilities;
 import DataStructures.Questionnaire.AbstractQuestion;
+import DataStructures.Questionnaire.AbstractScaleQuestion;
 import DataStructures.Questionnaire.OpenQuestion;
 import DataStructures.Questionnaire.Questionnaire;
 import IO.XMLReader;
@@ -28,7 +29,6 @@ import views.Questionnaire.QuestionPanels.AbstractQuestionPanel;
 
 import javax.swing.*;
 import javax.swing.border.Border;
-import javax.swing.text.Document;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.StyleSheet;
 import java.awt.*;
@@ -63,7 +63,7 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
     private int maxLabelSize = 0;
     private JScrollBar vertical;
     private QuestionEditFrame currentEditor = null;
-    private Map<String,MouseActionEditorPane> qPanes;
+    private Map<String, MouseActionEditorPane> qPanes;
 
     public DisplayQuestionnairePanel(final AATModel model, Dimension resolution) {
         if (model == null) {
@@ -137,13 +137,12 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
             buttonPanel.add(submitButton);
         }
 
-        if(!editMode) {
-        scrollPane = new JScrollPane(contentPanel,
-                JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-                JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        }
-        else {
-            scrollPane = new JScrollPane(contentPanel,JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        if (!editMode) {
+            scrollPane = new JScrollPane(contentPanel,
+                    JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+                    JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        } else {
+            scrollPane = new JScrollPane(contentPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         }
         vertical = scrollPane.getVerticalScrollBar();
 
@@ -228,30 +227,50 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
         questionsMap = new HashMap<String, AbstractQuestionPanel>();
         qPanes = new HashMap<String, MouseActionEditorPane>();
         System.out.println("No questions " + questionnaire.getExtraQuestions().size());
+        int maxLabelWidth = getMaxLabelSize();
         introductionPane.setText(questionnaire.getIntroduction());
         for (int x = 0; x < questionnaire.getExtraQuestions().size(); x++) {
             AbstractQuestion questionObject = questionnaire.getExtraQuestions().get(x);
             MouseActionEditorPane question = new MouseActionEditorPane(editMode, questionObject, x, this);
             questionsPanel.add(question);
             qPanes.put(questionObject.getKey(), question);
-            AbstractQuestionPanel newQuestionPanel = questionObject.Accept(new DisplayQuestionnaireVisitor());
+            AbstractQuestionPanel newQuestionPanel = questionObject.Accept(new DisplayQuestionnaireVisitor(maxLabelWidth));
             questionsPanel.add(newQuestionPanel);
             questionsMap.put(questionObject.getKey(), newQuestionPanel);
             questionsPanel.setOpaque(true);
         }
+
         SpringUtilities.makeCompactGrid(questionsPanel,
                 questionnaire.getExtraQuestions().size(), 2, //rows, cols
                 6, 6,        //initX, initY
                 6, 6);       //xPad, yPad
-        for (String key : questionsMap.keySet()) {
-            AbstractQuestionPanel q = questionsMap.get(key);
-            q.changeLabelSize(maxLabelSize);
-        }
+
         if (!editMode) {
             introductionPane.setSelectionStart(0);
             introductionPane.setSelectionEnd(0);
         }
     }
+
+
+    private int getMaxLabelSize() {
+        int maxWidth = 0;
+        for (AbstractQuestion q : questionnaire.getExtraQuestions()) {
+            if (q instanceof AbstractScaleQuestion) {
+                String l = ((AbstractScaleQuestion) q).getLeft();
+                JLabel label = new JLabel(l);
+                Font labelFont = label.getFont();
+                String labelText = label.getText();
+                System.out.println("ASDFASDF " + labelText);
+                int stringWidth = label.getFontMetrics(labelFont).stringWidth(labelText);
+                if (stringWidth > maxWidth) {
+                    maxWidth = stringWidth;
+                }
+
+            }
+        }
+        return maxWidth;
+    }
+
 
     /*
    All the components are kept in a hash map, This provides a flexible way to have an unlimited nr of components
@@ -270,16 +289,15 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
         return results;
     }
 
-    public void changeQuestionPos(int posFrom, int newPos)  {
-        System.out.println("Change pos from "+posFrom+" to "+newPos);
+    public void changeQuestionPos(int posFrom, int newPos) {
+        System.out.println("Change pos from " + posFrom + " to " + newPos);
         AbstractQuestion q = questionnaire.getExtraQuestions().get(posFrom);
-        if(posFrom<newPos && (newPos+1 <questionnaire.getExtraQuestions().size())) {
-            questionnaire.getExtraQuestions().add(newPos+1,q);
+        if (posFrom < newPos && (newPos + 1 < questionnaire.getExtraQuestions().size())) {
+            questionnaire.getExtraQuestions().add(newPos + 1, q);
             questionnaire.getExtraQuestions().remove(posFrom);
-        }
-        else if(posFrom > newPos && (newPos>=0 && posFrom+1 < questionnaire.getExtraQuestions().size())) {
-            questionnaire.getExtraQuestions().add(newPos,q);
-            questionnaire.getExtraQuestions().remove(posFrom+1);
+        } else if (posFrom > newPos && (newPos >= 0 && posFrom + 1 < questionnaire.getExtraQuestions().size())) {
+            questionnaire.getExtraQuestions().add(newPos, q);
+            questionnaire.getExtraQuestions().remove(posFrom + 1);
         }
         questionnaireModel = null;
         currentEditor = null;
@@ -330,11 +348,11 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
 
         Border blackBorder = BorderFactory.createLineBorder(Color.BLACK);
         Border redBorder = BorderFactory.createLineBorder(Color.RED, 2);
-        Border greenBorder = BorderFactory.createLineBorder(Color.green,2);
-        private JPanel buttonPanel;
+        Border greenBorder = BorderFactory.createLineBorder(Color.green, 2);
         JEditorPane questionPane;
+        private JPanel buttonPanel;
 
-        public MouseActionEditorPane(boolean editMode,final AbstractQuestion question, final int pos, final DisplayQuestionnairePanel parent) {
+        public MouseActionEditorPane(boolean editMode, final AbstractQuestion question, final int pos, final DisplayQuestionnairePanel parent) {
             JLayeredPane layers = new JLayeredPane();
             this.setBackground(Color.BLACK);
             this.setForeground(Color.white);
@@ -364,7 +382,7 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
             questionPane.addMouseListener(this);
             buttonPanel = new JPanel();
             buttonPanel.setOpaque(false);
-            buttonPanel.setLayout(new BoxLayout(buttonPanel,BoxLayout.X_AXIS));
+            buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
             Color buttonBackColor = Color.BLACK;
 
             JButton editButton = new JButton(new ImageIcon(((new ImageIcon(
@@ -373,19 +391,19 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
                             java.awt.Image.SCALE_SMOOTH)))));
             editButton.setPreferredSize(new Dimension(24, 24));
             editButton.setBackground(buttonBackColor);
-                    //new JButton("document-edit22x22.png");
+            //new JButton("document-edit22x22.png");
             editButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent actionEvent) {
-                        questionnaireModel = new QuestionnaireModel(question, pos);
-                        questionnaireModel.addObserver(parent);
-                        currentEditor = questionnaireModel.getEditFrame();
-                        currentEditor.setEnabled(true);
-                        currentEditor.setVisible(true);
+                    questionnaireModel = new QuestionnaireModel(question, pos);
+                    questionnaireModel.addObserver(parent);
+                    currentEditor = questionnaireModel.getEditFrame();
+                    currentEditor.setEnabled(true);
+                    currentEditor.setVisible(true);
                 }
             });
 
-            JButton upButton =new JButton(new ImageIcon(((new ImageIcon(
+            JButton upButton = new JButton(new ImageIcon(((new ImageIcon(
                     "icons/go-up22x22.png").getImage()
                     .getScaledInstance(22, 22,
                             java.awt.Image.SCALE_SMOOTH)))));
@@ -394,7 +412,7 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
             upButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent actionEvent) {
-                      parent.changeQuestionPos(pos,pos-1);
+                    parent.changeQuestionPos(pos, pos - 1);
                 }
             });
 
@@ -407,10 +425,10 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
             downButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent actionEvent) {
-                    parent.changeQuestionPos(pos,pos+1);
+                    parent.changeQuestionPos(pos, pos + 1);
                 }
             });
-            downButton.setPreferredSize(new Dimension(24,24));
+            downButton.setPreferredSize(new Dimension(24, 24));
 
             JButton addButton = new JButton(new ImageIcon(((new ImageIcon(
                     "icons/add22x22.png").getImage()
@@ -420,11 +438,10 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
             addButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent actionEvent) {
-             //       parent.changeQuestionPos(pos,pos+1);
+                    //       parent.changeQuestionPos(pos,pos+1);
                 }
             });
-            addButton.setPreferredSize(new Dimension(24,24));
-
+            addButton.setPreferredSize(new Dimension(24, 24));
 
 
             JButton delButton = new JButton(new ImageIcon(((new ImageIcon(
@@ -437,7 +454,7 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
                     parent.removeQuestion(pos);
                 }
             });
-            delButton.setPreferredSize(new Dimension(24,24));
+            delButton.setPreferredSize(new Dimension(24, 24));
             delButton.setBackground(buttonBackColor);
 
             buttonPanel.add(editButton);
@@ -445,14 +462,14 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
             buttonPanel.add(downButton);
             buttonPanel.add(addButton);
             buttonPanel.add(delButton);
-         //   buttonPanel.setBackground(Color.darkGray);
-         //   buttonPanel.setBorder(BorderFactory.createLineBorder(Color.blue));
+            //   buttonPanel.setBackground(Color.darkGray);
+            //   buttonPanel.setBorder(BorderFactory.createLineBorder(Color.blue));
             buttonPanel.setEnabled(true);
             buttonPanel.setVisible(false);
             layers.add(buttonPanel, JLayeredPane.PALETTE_LAYER);
-            System.out.println("HJOOPOO "+questionPane.getHeight());
-            buttonPanel.setBounds((screen.width/3)-135,0,125,25);
-         //   buttonPanel.setBounds(10,questionPane.getHeight()-20,125,30);
+            System.out.println("HJOOPOO " + questionPane.getHeight());
+            buttonPanel.setBounds((screen.width / 3) - 135, 0, 125, 25);
+            //   buttonPanel.setBounds(10,questionPane.getHeight()-20,125,30);
             buttonPanel.addMouseListener(this);
             editButton.addMouseListener(this);     //Add the mouselisteners to the buttons for the colored border.
             editButton.setToolTipText("Edit this question");
@@ -471,9 +488,9 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
             this.add(layers);
         }
 
-   //     @Override
+        //     @Override
         public void mouseClicked(MouseEvent mouseEvent) {
-            }
+        }
 
         public void setFocus() {
             questionPane.setSelectionStart(0);

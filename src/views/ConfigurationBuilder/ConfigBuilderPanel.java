@@ -60,7 +60,7 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
 
     public ConfigBuilderPanel() {
         super(new SpringLayout());
-
+        this.setBackground(Color.decode("#eeece9"));
         nDir = new File("");
         aDir = new File("");
         pDir = new File("");
@@ -69,8 +69,9 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
 
         JToolBar toolbar = new JToolBar("Toolbar", JToolBar.HORIZONTAL);
         toolbar.setBorder(null);
-    //    toolbar.setOpaque(false);
-        toolbar.setBackground(Color.BLACK);
+        toolbar.setOpaque(false);
+        toolbar.setFloatable(false);
+        toolbar.setBackground(Color.decode("#eeece9"));
         final JButton newButton =  new JButton(new ImageIcon(((new ImageIcon(
                 "icons/document-new128x128.png").getImage()
                 .getScaledInstance(48, 48,
@@ -214,6 +215,7 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
         toolbar.add(addButton);
         this.add(toolbar);
 
+
         tabbedPane = new JTabbedPane();
         tabbedPane.addChangeListener(new ChangeListener() {
             @Override
@@ -324,13 +326,13 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
 
         inputAffDir = new JTextField();
         inputAffDir.setEditable(false);
-        inputAffDir.setPreferredSize(new Dimension(200, 20));
+        inputAffDir.setPreferredSize(new Dimension(200, 25));
         inputNeutralDir = new JTextField();
         inputNeutralDir.setEditable(false);
-        inputNeutralDir.setPreferredSize(new Dimension(200, 20));
+        inputNeutralDir.setPreferredSize(new Dimension(200, 25));
         inputPrDir = new JTextField("");
         inputPrDir.setEditable(false);
-        inputPrDir.setPreferredSize(new Dimension(200, 20));
+        inputPrDir.setPreferredSize(new Dimension(200, 25));
         affDirPanel.add(inputAffDir);
         affDirPanel.add(affDirButton);
         affDirButton.addActionListener(new ActionListener() {
@@ -389,7 +391,7 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
         JLabel langFL = new JLabel("Select the language xml file");
         inputLangFile = new JTextField();
         inputLangFile.setEditable(false);
-        inputLangFile.setPreferredSize(new Dimension(200, 20));
+        inputLangFile.setPreferredSize(new Dimension(200, 25));
         JButton setLangFile = new JButton("Choose language file");
         setLangFile.addActionListener(new ActionListener() {
             @Override
@@ -424,7 +426,7 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
         JLabel trialsL = new JLabel("Number of trials");
         inputTrials = new JFormattedTextField(NumberFormat.getInstance());
         inputTrials.setText("4");
-        inputTrials.setPreferredSize(new Dimension(50, 20));
+        inputTrials.setPreferredSize(new Dimension(50, 25));
         panel.add(trialsL);
         trialP.add(inputTrials);
         trialP.add(Box.createHorizontalBox());
@@ -434,7 +436,7 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
         JLabel breakL = new JLabel("When will there be a break? Set to 0 when you don't want a break");
         inputBreak = new JFormattedTextField(NumberFormat.getInstance());
         inputBreak.setText("2");
-        inputBreak.setPreferredSize(new Dimension(50, 20));
+        inputBreak.setPreferredSize(new Dimension(50, 25));
         panel.add(breakL);
         breakP.add(inputBreak);
         breakP.add(Box.createHorizontalBox());
@@ -493,7 +495,7 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
         JPanel practFillP = new JPanel(new FlowLayout(FlowLayout.LEFT));
         inputPracticeFill = new JButton();
         inputPracticeFill.setBackground(new Color(prFillColor));
-        inputPracticeFill.setPreferredSize(new Dimension(100, 20));
+        inputPracticeFill.setPreferredSize(new Dimension(100, 25));
         inputPracticeFill.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
@@ -541,7 +543,7 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
         JPanel practP = new JPanel(new FlowLayout(FlowLayout.LEFT));
         inputPractRepeat = new JFormattedTextField(NumberFormat.getInstance());
         inputPractRepeat.setText(practRepeatValue);
-        inputPractRepeat.setPreferredSize(new Dimension(50, 20));
+        inputPractRepeat.setPreferredSize(new Dimension(50, 25));
         panel.add(practL);
         practP.add(inputPractRepeat);
         practP.add(Box.createVerticalBox());
@@ -556,7 +558,7 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
         panel.add(Box.createVerticalStrut(5));
         JLabel coloredBorderL = new JLabel("Do you want to automatically create a colored border around the images?");
         inputColoredBorder = new JCheckBox();
-        inputColoredBorder.setPreferredSize(new Dimension(20, 20));
+        inputColoredBorder.setPreferredSize(new Dimension(25, 25));
         inputColoredBorder.setSelected(true);
 
         panel.add(coloredBorderL);
@@ -573,7 +575,7 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
         JPanel pushColorP = new JPanel(new FlowLayout(FlowLayout.LEFT));
         inputPushColor = new JButton();
         inputPushColor.setBackground(new Color(pushColor));
-        inputPushColor.setPreferredSize(new Dimension(100, 20));
+        inputPushColor.setPreferredSize(new Dimension(100, 25));
         inputPushColor.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
@@ -589,7 +591,7 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
         JPanel pullColorP = new JPanel(new FlowLayout(FlowLayout.LEFT));
         inputPullColor = new JButton();
         inputPullColor.setBackground(new Color(pullColor));
-        inputPullColor.setPreferredSize(new Dimension(100, 20));
+        inputPullColor.setPreferredSize(new Dimension(100, 25));
         inputPullColor.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
@@ -604,7 +606,7 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
         borderSizeL = new JLabel("Set the size of the border");
         JPanel borderSizeP = new JPanel(new FlowLayout(FlowLayout.LEFT));
         inputBorderSize = new JFormattedTextField(NumberFormat.getInstance());
-        inputBorderSize.setPreferredSize(new Dimension(50, 20));
+        inputBorderSize.setPreferredSize(new Dimension(50, 25));
         inputBorderSize.setText("20");
         panel.add(borderSizeL);
         borderSizeP.add(inputBorderSize);
@@ -634,10 +636,10 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
         JPanel pushTP = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JPanel pullTP = new JPanel(new FlowLayout(FlowLayout.LEFT));
         inputPushTag = new JTextField("push");
-        inputPushTag.setPreferredSize(new Dimension(100, 20));
+        inputPushTag.setPreferredSize(new Dimension(100, 25));
         inputPushTag.setEnabled(false);
         inputPullTag = new JTextField("pull");
-        inputPullTag.setPreferredSize(new Dimension(100, 20));
+        inputPullTag.setPreferredSize(new Dimension(100, 25));
         inputPullTag.setEnabled(false);
         panel.add(pullTagL);
         pullTP.add(inputPullTag);
@@ -669,7 +671,7 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
         JPanel comboP = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JLabel displayQL = new JLabel("When do you want to display a Questionnaire?");
         inputQuestions = new JComboBox(new Object[]{"None", "Before", "After"});
-        inputQuestions.setPreferredSize(new Dimension(100, 20));
+        inputQuestions.setPreferredSize(new Dimension(100, 25));
         inputQuestions.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
@@ -694,7 +696,7 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
         selectQL.setEnabled(false);
         JPanel selectQPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         inputQuestionFile = new JTextField();
-        inputQuestionFile.setPreferredSize(new Dimension(200, 20));
+        inputQuestionFile.setPreferredSize(new Dimension(200, 25));
         inputQuestionFile.setEditable(false);
         inputQuestionFile.setEnabled(false);
         selectQButton = new JButton("Choose Questionnaire file");
@@ -724,7 +726,7 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
         inputQuestionFile.setEnabled(false);
         JLabel boxPlotL = new JLabel("Do you want the test to show a BoxPlot at the end?");
         inputBoxplot = new JCheckBox();
-        inputBoxplot.setPreferredSize(new Dimension(20, 20));
+        inputBoxplot.setPreferredSize(new Dimension(25, 25));
         inputBoxplot.setSelected(true);
         panel.add(boxPlotL);
         panel.add(inputBoxplot);
@@ -753,10 +755,10 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
 
         inputTestRatioA = new JFormattedTextField(NumberFormat.getInstance());
         inputTestRatioA.setText("1");
-        inputTestRatioA.setPreferredSize(new Dimension(20, 20));
+        inputTestRatioA.setPreferredSize(new Dimension(25, 25));
         inputTestRatioN = new JFormattedTextField(NumberFormat.getInstance());
         inputTestRatioN.setText("1");
-        inputTestRatioN.setPreferredSize(new Dimension(20, 20));
+        inputTestRatioN.setPreferredSize(new Dimension(25, 25));
         testRatioPanel.add(inputTestRatioA);
         testRatioPanel.add(new JLabel(":"));
         testRatioPanel.add(inputTestRatioN);
@@ -764,10 +766,10 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
 
         inputAffectRatioPull = new JFormattedTextField(NumberFormat.getInstance());
         inputAffectRatioPull.setText("1");
-        inputAffectRatioPull.setPreferredSize(new Dimension(20, 20));
+        inputAffectRatioPull.setPreferredSize(new Dimension(25, 25));
         inputAffectRatioPush = new JFormattedTextField(NumberFormat.getInstance());
         inputAffectRatioPush.setText("1");
-        inputAffectRatioPush.setPreferredSize(new Dimension(20, 20));
+        inputAffectRatioPush.setPreferredSize(new Dimension(25, 25));
         affectRatioP.add(inputAffectRatioPull);
         affectRatioP.add(new JLabel(":"));
         affectRatioP.add(inputAffectRatioPush);
@@ -775,10 +777,10 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
 
         inputNeutralRatioPull = new JFormattedTextField(NumberFormat.getInstance());
         inputNeutralRatioPull.setText("1");
-        inputNeutralRatioPull.setPreferredSize(new Dimension(20, 20));
+        inputNeutralRatioPull.setPreferredSize(new Dimension(25, 25));
         inputNeutralRatioPush = new JFormattedTextField(NumberFormat.getInstance());
         inputNeutralRatioPush.setText("1");
-        inputNeutralRatioPush.setPreferredSize(new Dimension(20, 20));
+        inputNeutralRatioPush.setPreferredSize(new Dimension(25, 25));
         neutralRatioP.add(inputNeutralRatioPull);
         neutralRatioP.add(new JLabel(":"));
         neutralRatioP.add(inputNeutralRatioPush);
@@ -787,7 +789,7 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
         JPanel trialsizeP = new JPanel(new FlowLayout(FlowLayout.LEFT));
         inputTrialSize = new JFormattedTextField(NumberFormat.getInstance());
 
-        inputTrialSize.setPreferredSize(new Dimension(50, 20));
+        inputTrialSize.setPreferredSize(new Dimension(50, 25));
         trialsizeP.add(inputTrialSize);
         trialsizeP.add(Box.createHorizontalBox());
 
@@ -833,10 +835,10 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
         perfPanelR.add(Box.createVerticalStrut(5));
         inputStepSize = new JFormattedTextField(NumberFormat.getInstance());
         inputStepSize.setText("31");
-        inputStepSize.setPreferredSize(new Dimension(50, 15));
+        inputStepSize.setPreferredSize(new Dimension(50, 25));
         inputDataStepSize = new JFormattedTextField(NumberFormat.getInstance());
         inputDataStepSize.setText("9");
-        inputDataStepSize.setPreferredSize(new Dimension(50, 15));
+        inputDataStepSize.setPreferredSize(new Dimension(50, 25));
         JPanel stepSizeP = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JPanel dataStepP = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JLabel stepL = new JLabel("<html>Change in how many steps the image will be resized, has to be an odd number" +
@@ -861,7 +863,7 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
         JPanel imgSizeP = new JPanel(new FlowLayout(FlowLayout.LEFT));
         inputImageSizeP = new JFormattedTextField(NumberFormat.getIntegerInstance());
         inputImageSizeP.setText("50");
-        inputImageSizeP.setPreferredSize(new Dimension(50, 20));
+        inputImageSizeP.setPreferredSize(new Dimension(50, 25));
         perfPanelL.add(imgSizeL);
         imgSizeP.add(inputImageSizeP);
         imgSizeP.add(Box.createHorizontalBox());
@@ -872,7 +874,7 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
         JPanel maxSizeP = new JPanel(new FlowLayout(FlowLayout.LEFT));
         inputMaxSizeP = new JFormattedTextField(NumberFormat.getIntegerInstance());
         inputMaxSizeP.setText("100");
-        inputMaxSizeP.setPreferredSize(new Dimension(50, 20));
+        inputMaxSizeP.setPreferredSize(new Dimension(50, 25));
         maxSizeP.add(inputMaxSizeP);
         maxSizeP.add(Box.createHorizontalBox());
         perfPanelL.add(maxSizeL);
