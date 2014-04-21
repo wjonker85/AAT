@@ -19,6 +19,7 @@ public class ClosedButtonsPanel extends AbstractQuestionPanel {
         this.isRequired = isRequired;
         closedButtons = new ButtonGroup();
         JPanel answerPanel = new JPanel(new SpringLayout());
+        answerPanel.setOpaque(false);
         answerPanel.setBackground(Color.black);
         answerPanel.setForeground(Color.white);
         setLayout(new FlowLayout(FlowLayout.LEFT));

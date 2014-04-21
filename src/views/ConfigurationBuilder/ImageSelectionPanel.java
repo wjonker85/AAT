@@ -100,7 +100,7 @@ public class ImageSelectionPanel extends JPanel {
         GridBagConstraints c = new GridBagConstraints();
         c.fill = GridBagConstraints.HORIZONTAL;
         c.anchor = GridBagConstraints.LINE_START;
-        JLabel title = new JLabel("Please select the neutral and affective images to be included in the test.", SwingConstants.LEFT);
+        JLabel title = new JLabel("Please select the images you want to include in the test.", SwingConstants.LEFT);
         Font f = title.getFont();
 
         title.setFont(new Font(f.getName(), Font.PLAIN, 24));
@@ -112,6 +112,9 @@ public class ImageSelectionPanel extends JPanel {
         c.gridy = 0;
         panel.add(title, c);
         JLabel aLabel = new JLabel("Affective Images");
+        Font f2 = aLabel.getFont();
+
+        aLabel.setFont(new Font(f2.getName(), Font.BOLD, 16));
         c.fill = GridBagConstraints.HORIZONTAL;
         c.gridwidth = 1;
 
@@ -123,6 +126,8 @@ public class ImageSelectionPanel extends JPanel {
         tableA.setBackground(Color.decode("#eeece9"));
         tableA.setComponentPopupMenu(new JPopupMenu());
         JScrollPane scrollPaneA = new JScrollPane(tableA);
+        scrollPaneA.setMaximumSize(new Dimension(350,500));
+        scrollPaneA.setPreferredSize(new Dimension(350,500));
         tableA.setFillsViewportHeight(true);
         c.fill = GridBagConstraints.HORIZONTAL;
         c.gridx = 0;
@@ -152,6 +157,9 @@ public class ImageSelectionPanel extends JPanel {
         panel.add(scrollPaneA, c);
 
         JLabel nLabel = new JLabel("Neutral Images");
+        Font f3 = nLabel.getFont();
+
+        nLabel.setFont(new Font(f3.getName(), Font.BOLD, 16));
         c.fill = GridBagConstraints.HORIZONTAL;
         c.insets = new Insets(70, 0, 0, 0);
         c.gridx = 1;
@@ -160,7 +168,9 @@ public class ImageSelectionPanel extends JPanel {
         tableN = new JTable(new ImageTableModel(imageFilesN, nFiles));
         setTableColumnWidths(tableN);
         JScrollPane scrollPaneN = new JScrollPane(tableN);
-        tableN.setFillsViewportHeight(true);
+        scrollPaneN.setMaximumSize(new Dimension(350,500));
+        scrollPaneN.setPreferredSize(new Dimension(350,500));
+     //   tableN.setFillsViewportHeight(true);
         tableN.setBackground(Color.decode("#eeece9"));
         c.fill = GridBagConstraints.HORIZONTAL;
         c.gridx = 1;
@@ -192,6 +202,9 @@ public class ImageSelectionPanel extends JPanel {
 
         System.out.println("Adding practice table");
         pLabel = new JLabel("Practice Images");
+        Font f4 = pLabel.getFont();
+
+        pLabel.setFont(new Font(f4.getName(), Font.BOLD, 16));
         c.fill = GridBagConstraints.HORIZONTAL;
         c.insets = new Insets(70, 0, 0, 0);
         c.gridx = 2;
@@ -201,6 +214,8 @@ public class ImageSelectionPanel extends JPanel {
         tableP.setBackground(Color.decode("#eeece9"));
         setTableColumnWidths(tableP);
         scrollPaneP = new JScrollPane(tableP);
+        scrollPaneP.setMaximumSize(new Dimension(350,500));
+        scrollPaneP.setPreferredSize(new Dimension(350,500));
         tableP.setFillsViewportHeight(true);
         c.fill = GridBagConstraints.HORIZONTAL;
         c.gridx = 2;

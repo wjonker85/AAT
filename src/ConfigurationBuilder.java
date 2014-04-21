@@ -16,9 +16,9 @@
  */
 
 import views.ConfigurationBuilder.ConfigBuilderPanel;
+
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -37,7 +37,7 @@ public class ConfigurationBuilder {
     private static void createAndShowGUI() {
         //Create and set up the window.
         JFrame frame = new JFrame("AAT Config generator");
-        try {
+
              /*
 
 
@@ -52,57 +52,43 @@ nimbusSelectedText	#ffffff (255,255,255)
 
 text
               */
-            //  customizeNimbusLaF();
-              //    UIManager.put("ScrollBar.foreground", Color.decode("#003040"));
-     //       UIManager.put("nimbusAlertYellow", Color.YELLOW);
-            UIManager.put("nimbusBase",Color.gray);
-            UIManager.put("control", Color.decode("#f2f0ee"));
-            UIManager.put("nimbusBlueGrey",Color.decode("#eeece9"));
-            UIManager.put("nimbusSelectionBackground",Color.decode("#f27b4b"));
-       //     UIManager.put("info", Color.black);
-            UIManager.put("nimbusLightBackground", Color.lightGray);
-           // UIManager.put("nimbusBase",  Color.decode("#ded5dc"));
+        //  customizeNimbusLaF();
+        //    UIManager.put("ScrollBar.foreground", Color.decode("#003040"));
+        //       UIManager.put("nimbusAlertYellow", Color.YELLOW);
 
+        //     UIManager.put("info", Color.black);
+        //    UIManager.put("nimbusLightBackground", Color.lightGray);
+        // UIManager.put("nimbusBase",  Color.decode("#ded5dc"));
         //    UIManager.put("nimbusDisabledText", Color.DARK_GRAY);
-     //       UIManager.put("nimbusSelectedText", Color.WHITE);
-         //   UIManager.put("nimbusFocus", Color.black);
-       //     UIManager.put("nimbusGreen", Color.red);
-       //     UIManager.put("scrollbar", Color.GREEN);
-       //     UIManager.put("nimbusFocus", Color.black);
-       //     UIManager.put("nimbusGreen", Color.GREEN);
-       //     UIManager.put("nimbusInfoBlue", Color.BLUE);
-       //     UIManager.put("nimbusInfoBlue", Color.red);
-         //   UIManager.put("nimbusOrange", Color.RED);
-            UIManager.put("nimbusSelectionBackground",Color.decode("#f27b4b"));
-       //    UIManager.put("nimbusRed", Color.RED);
-       //     UIManager.put("nimbusSelectionBackground",
-       //             Color.lightGray);
+        //       UIManager.put("nimbusSelectedText", Color.WHITE);
+        //   UIManager.put("nimbusFocus", Color.black);
+        //     UIManager.put("nimbusGreen", Color.red);
+        //     UIManager.put("scrollbar", Color.GREEN);
+        //     UIManager.put("nimbusFocus", Color.black);
+        //     UIManager.put("nimbusGreen", Color.GREEN);
+        //     UIManager.put("nimbusInfoBlue", Color.BLUE);
+        //     UIManager.put("nimbusInfoBlue", Color.red);
+        //   UIManager.put("nimbusOrange", Color.RED);
+        //   UIManager.put("nimbusSelectionBackground",Color.red);
+        //    UIManager.put("nimbusRed", Color.RED);
+        //     UIManager.put("nimbusSelectionBackground",
+        //             Color.lightGray);
 
 
-         //   UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
+        //   UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
 
-              //   UIManager.put("nimbusBlueGrey", new Color(...));
-              //  UIManager.put("control", new Color(...));
-            for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    UIManager.setLookAndFeel(info.getClassName());
-                 //   customizeNimbusLaF();
-              //
-                    break;
-                }
-            }
+        //   UIManager.put("nimbusBlueGrey", new Color(...));
+
         //    SwingUtilities.updateComponentTreeUI(frame);
-     //       UIManager.getLookAndFeelDefaults().put("ScrollBar.foreground", fromHex("e36431"));
-         //   SwingUtilities.updateComponentTreeUI( frame );
-            //   OyoahaLookAndFeel laf = new OyoahaLookAndFeel();
-            //   UIManager.setLookAndFeel(laf);
-            //   UIManager.setLookAndFeel("com.oyoaha.swing.plaf.oyoaha.OyoahaLookAndFeel");
-        }  catch (Exception e) {
-            e.printStackTrace();
-        }
+        //       UIManager.getLookAndFeelDefaults().put("FileChooser.background", fromHex("e36431"));
+        //   SwingUtilities.updateComponentTreeUI( frame );
+        //   OyoahaLookAndFeel laf = new OyoahaLookAndFeel();
+        //   UIManager.setLookAndFeel(laf);
+        //   UIManager.setLookAndFeel("com.oyoaha.swing.plaf.oyoaha.OyoahaLookAndFeel");
 
-
+        int height = (int) java.awt.Toolkit.getDefaultToolkit().getScreenSize().getHeight();
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        frame.setPreferredSize(new Dimension(1200,height));
         //Add content to the window.
         frame.add(new ConfigBuilderPanel(), BorderLayout.CENTER);
         //Display the window.
@@ -111,80 +97,6 @@ text
 
     }
 
-    private static void customizeNimbusLaF() {
-     //   UIManager.put("control", Color.BLACK);
-        UIManager.put("nimbusAlertYellow", Color.YELLOW);
-        UIManager.put("nimbusBase", Color.white);
-        UIManager.put("nimbusDisabledText", Color.DARK_GRAY);
-        UIManager.put("nimbusFocus", Color.black);
-        UIManager.put("nimbusGreen", Color.GREEN);
-        UIManager.put("nimbusInfoBlue", Color.BLUE);
-        UIManager.put("nimbusRed", Color.RED);
-        UIManager.put("nimbusSelectionBackground",
-                Color.lightGray);
-
-      //  UIManager.put("background", Color.lightGray);
-      //  UIManager.put("controlDkShadow", Color.darkGray);
-      //  UIManager.put("controlShadow", Color.GRAY);
-       // UIManager.put("desktop", Color.blue);
-     //   UIManager.put("menu", Color.GRAY);
-     //   UIManager.put("nimbusBorder", Color.GRAY);
-    //    UIManager.put("nimbusSelection", Color.blue);
-    //    UIManager.put("textBackground", Color.cyan);
-    //    UIManager.put("textHighlight", Color.cyan);
-    //    UIManager.put("textInactiveText", Color.GRAY);
-
-        // panel
-        UIManager.put("Panel.background", Color.white);
-    //    UIManager.put("Panel.disabled", Color.lightGray);
-        //   UIManager.put( "Panel.font", Color.DEFAULT_FONT );
-    //    UIManager.put("Panel.opaque", true);
-
-        // button
-    //    UIManager.put("Button.background", Color.lightGray);
-    //    UIManager.put("Button.disabled", Color.lightGray);
-        //   UIManager.put( "Button.disabledText", Color.BLUE_MIDDLE );
-        //   UIManager.put( "Button.font", Color.DEFAULT_FONT );
-
-        // menu
-   //     UIManager.put("Menu.background", Color.lightGray);
-   //     UIManager.put("Menu.disabled", Color.lightGray);
-   //     UIManager.put("Menu.disabledText", Color.darkGray);
-        //   UIManager.put( "Menu.font", Color.MENU_FONT );
-    //    UIManager.put("Menu.foreground", Color.BLACK);
-    //    UIManager.put("Menu[Disabled].textForeground",
-     //           Color.GRAY);
-     //   UIManager.put("Menu[Enabled].textForeground", Color.BLACK);
-     //   UIManager.put("MenuBar.background", Color.BLUE);
-    //    UIManager.put("MenuBar.disabled", Color.lightGray);
-        //    UIManager.put( "MenuBar.font", Color.MENU_FONT );
-   //     UIManager.put("MenuBar:Menu[Disabled].textForeground",
-    //            Color.gray);
-    //    UIManager.put("MenuBar:Menu[Enabled].textForeground",
-    //            Color.BLACK);
-    //    UIManager.put("MenuItem.background", Color.lightGray);
-    //    UIManager.put("MenuItem.disabled", Color.lightGray);
-    //    UIManager.put("MenuItem.disabledText", Color.gray);
-        //  UIManager.put( "MenuItem.font", Color.MENU_FONT );
-    //    UIManager.put("MenuItem.foreground", Color.BLACK);
-    //    UIManager.put("MenuItem[Disabled].textForeground",
-    //            Color.gray);
-    //    UIManager.put("MenuItem[Enabled].textForeground",
-    //            Color.BLACK);
-
-        // tree
-    //    UIManager.put("Tree.background", Color.BLACK);
-    //    UIManager.put("TabbedPane.background", Color.WHITE);
-        UIManager.put("ScrollBar.foreground", fromHex("e36431"));
-
-    }
-
-
-
-    private static Color fromHex(String hex) {
-        return Color.decode("#"+hex);
-
-    }
 
     public static void main(String[] args) {
         //Schedule a job for the event dispatch thread:
@@ -192,16 +104,31 @@ text
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 //Turn off metal's use of bold fonts
+                UIManager.put("nimbusBase", Color.gray);
+                UIManager.put("control", Color.decode("#f2f0ee"));
+                UIManager.put("nimbusBlueGrey", Color.decode("#eeece9"));
+                UIManager.put("nimbusSelectionBackground", Color.decode("#f27b4b"));
+                // UIManager.put("swing.boldMetal", Boolean.FALSE);
+                //   UIManager.put("Panel.background", Color.white);
+                //  UIManager.put("control", new Color(...));
+                for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+                    if ("Nimbus".equals(info.getName())) {
+                        try {
+                            UIManager.setLookAndFeel(info.getClassName());
+                            //   customizeNimbusLaF();
+                            //
+                            break;
 
-               // UIManager.put("swing.boldMetal", Boolean.FALSE);
-             //   UIManager.put("Panel.background", Color.white);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
 
+                }
                 createAndShowGUI();
             }
         });
-
-
-        }
     }
+}
 
 

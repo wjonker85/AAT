@@ -19,6 +19,7 @@ public abstract class AbstractQuestionPanel extends JPanel {
         asterisks = new JLabel("*", JLabel.TRAILING);
         asterisks.setFont(new Font("Roman", Font.BOLD, 20));
         asterisks.setForeground(Color.WHITE);
+        setOpaque(false);
     }
 
     public abstract String getValue();

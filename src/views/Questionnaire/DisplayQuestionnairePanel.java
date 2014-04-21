@@ -64,6 +64,7 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
     private JScrollBar vertical;
     private QuestionEditFrame currentEditor = null;
     private Map<String, MouseActionEditorPane> qPanes;
+    public int lastEditedPos = -1;
 
     public DisplayQuestionnairePanel(final AATModel model, Dimension resolution) {
         if (model == null) {
@@ -232,12 +233,19 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
         for (int x = 0; x < questionnaire.getExtraQuestions().size(); x++) {
             AbstractQuestion questionObject = questionnaire.getExtraQuestions().get(x);
             MouseActionEditorPane question = new MouseActionEditorPane(editMode, questionObject, x, this);
+            if(lastEditedPos == x) {
+                question.setLastEdited(true);
+            }
+            else {
+                question.setLastEdited(false);
+            }
             questionsPanel.add(question);
             qPanes.put(questionObject.getKey(), question);
             AbstractQuestionPanel newQuestionPanel = questionObject.Accept(new DisplayQuestionnaireVisitor(maxLabelWidth));
             questionsPanel.add(newQuestionPanel);
             questionsMap.put(questionObject.getKey(), newQuestionPanel);
-            questionsPanel.setOpaque(true);
+            questionsPanel.setOpaque(false);
+            questionsPanel.setBorder(null);
         }
 
         SpringUtilities.makeCompactGrid(questionsPanel,
@@ -299,6 +307,7 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
             questionnaire.getExtraQuestions().add(newPos, q);
             questionnaire.getExtraQuestions().remove(posFrom + 1);
         }
+        lastEditedPos = newPos;
         questionnaireModel = null;
         currentEditor = null;
         questionsPanel.removeAll();
@@ -348,21 +357,27 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
 
         Border blackBorder = BorderFactory.createLineBorder(Color.BLACK);
         Border redBorder = BorderFactory.createLineBorder(Color.RED, 2);
-        Border greenBorder = BorderFactory.createLineBorder(Color.green, 2);
+        Border blueBorder = BorderFactory.createLineBorder(Color.blue, 2);
         JEditorPane questionPane;
         private JPanel buttonPanel;
+        private final int pos;
 
         public MouseActionEditorPane(boolean editMode, final AbstractQuestion question, final int pos, final DisplayQuestionnairePanel parent) {
+            this.pos = pos;
             JLayeredPane layers = new JLayeredPane();
-            this.setBackground(Color.BLACK);
-            this.setForeground(Color.white);
+            layers.setOpaque(false);
+            layers.setBorder(null);
+            this.setBorder(null);
+            this.setOpaque(false);
             questionPane = new JEditorPane();
             questionPane.setContentType("text/html");
+            questionPane.setOpaque(false);
+            questionPane.setBorder(null);
             Dimension screen = getToolkit().getScreenSize();
             HTMLEditorKit kit = new HTMLEditorKit();
             questionPane.setEditorKit(kit);
             StyleSheet styleSheet = kit.getStyleSheet();
-            styleSheet.addRule("p {color: white; font-family:times; margin: 0px; background-color: black;font : 11px monaco;}");
+            styleSheet.addRule("h1 {color: white; font-family:times; margin: 0px; background-color: black;font : 11px monaco;}");
             questionPane.setDocument(kit.createDefaultDocument());
             this.setMaximumSize(new Dimension(screen.width / 3, screen.height));
             this.setMinimumSize(new Dimension(screen.width / 3, 25));
@@ -370,11 +385,10 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
             layers.setMaximumSize(new Dimension(screen.width / 3, screen.height));
             layers.setMinimumSize(new Dimension(screen.width / 3, 25));
             layers.setPreferredSize(new Dimension(screen.width / 3, 25));
-            questionPane.setBackground(Color.BLACK);
-            questionPane.setForeground(Color.white);
             questionPane.setEditable(false);
+            questionPane.setBackground(Color.black);
             questionPane.setMaximumSize(new Dimension(screen.width, screen.height));
-            questionPane.setText("<p>" + question.getQuestion() + "</p>");
+            questionPane.setText("<body bgcolor=\"black\"><h1>" + question.getQuestion() + "</h1></body>");
             questionPane.setEnabled(true);
             questionPane.setVisible(true);
             layers.add(questionPane, JLayeredPane.DEFAULT_LAYER);
@@ -400,6 +414,7 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
                     currentEditor = questionnaireModel.getEditFrame();
                     currentEditor.setEnabled(true);
                     currentEditor.setVisible(true);
+                    lastEditedPos = pos;
                 }
             });
 
@@ -466,6 +481,7 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
             //   buttonPanel.setBorder(BorderFactory.createLineBorder(Color.blue));
             buttonPanel.setEnabled(true);
             buttonPanel.setVisible(false);
+            buttonPanel.setBorder(null);
             layers.add(buttonPanel, JLayeredPane.PALETTE_LAYER);
             System.out.println("HJOOPOO " + questionPane.getHeight());
             buttonPanel.setBounds((screen.width / 3) - 135, 0, 125, 25);
@@ -495,7 +511,6 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
         public void setFocus() {
             questionPane.setSelectionStart(0);
             questionPane.setSelectionEnd(0);
-            setBorder(greenBorder);
         }
 
         @Override
@@ -519,8 +534,19 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
         public void mouseExited(MouseEvent mouseEvent) {
             setBorder(blackBorder);
             buttonPanel.setVisible(false);
+            if(pos == lastEditedPos)  {
+                setBorder(blueBorder);
+            }
         }
 
+        public void setLastEdited(boolean edited) {
+            if(edited) {
+                setBorder(blueBorder);
+            }
+            else {
+                setBorder(null);
+            }
+        }
     }
 }
 

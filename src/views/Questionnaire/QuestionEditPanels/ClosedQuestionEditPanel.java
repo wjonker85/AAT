@@ -69,9 +69,9 @@ public class ClosedQuestionEditPanel<T extends AbstractQuestion> extends Abstrac
             JLabel label = new JLabel("Option " + x + ": ");
             contentPanel.add(label);
             JTextField option = new JTextField();
-            option.setPreferredSize(new Dimension(250, 20));
-            option.setMinimumSize(new Dimension(250, 20));
-            option.setMaximumSize(new Dimension(250, 20));
+            option.setPreferredSize(new Dimension(250, 25));
+            option.setMinimumSize(new Dimension(250, 25));
+            option.setMaximumSize(new Dimension(250, 25));
             contentPanel.add(option);
             allChoices.add(option);
         }

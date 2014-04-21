@@ -24,7 +24,7 @@ public abstract class AbstractQuestionEditPanel<T extends AbstractQuestion> exte
 
     public void addRequiredFields() {
         this.add(new JLabel("Question: "));
-        question.setPreferredSize(new Dimension(250, 20));
+        question.setPreferredSize(new Dimension(250, 25));
         this.add(question);
         this.add(new JLabel("Label for analysis: "));
         this.add(qLabel);

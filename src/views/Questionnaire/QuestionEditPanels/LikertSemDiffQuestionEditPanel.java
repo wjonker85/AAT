@@ -23,19 +23,19 @@ public class LikertSemDiffQuestionEditPanel<T extends AbstractQuestion> extends 
         this.original = original;
         left = new JTextField();
         JLabel leftLabel = new JLabel("Left label: ");
-        left.setPreferredSize(new Dimension(120, 20));
+        left.setPreferredSize(new Dimension(120, 25));
         this.add(leftLabel);
         this.add(left);
         right = new JTextField();
         JLabel rightLabel = new JLabel("Right label: ");
-        right.setPreferredSize(new Dimension(120, 20));
+        right.setPreferredSize(new Dimension(120, 25));
         this.add(rightLabel);
         this.add(right);
         size = new JTextField();
         JLabel sizeLabel = new JLabel("No options: ");
         this.add(sizeLabel);
         this.add(size);
-        size.setPreferredSize(new Dimension(40, 20));
+        size.setPreferredSize(new Dimension(40, 25));
 
        addRequiredFields();
         if (original != null) {

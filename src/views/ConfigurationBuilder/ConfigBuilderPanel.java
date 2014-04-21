@@ -18,6 +18,7 @@ import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileFilter;
+import javax.swing.plaf.nimbus.AbstractRegionPainter;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
@@ -72,31 +73,31 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
         toolbar.setOpaque(false);
         toolbar.setFloatable(false);
         toolbar.setBackground(Color.decode("#eeece9"));
-        final JButton newButton =  new JButton(new ImageIcon(((new ImageIcon(
+        final JButton newButton = new JButton(new ImageIcon(((new ImageIcon(
                 "icons/document-new128x128.png").getImage()
-                .getScaledInstance(48, 48,
+                .getScaledInstance(32, 32,
                         java.awt.Image.SCALE_SMOOTH)))));
         newButton.setToolTipText("Create a new AAT Config file");
-        newButton.setPreferredSize(new Dimension(48, 48));
+        newButton.setPreferredSize(new Dimension(36, 32));
         newButton.setBorder(null);
         newButton.setOpaque(false);
 
-        JButton openButton =   new JButton(new ImageIcon(((new ImageIcon(
+        JButton openButton = new JButton(new ImageIcon(((new ImageIcon(
                 "icons/document-open128x128.png").getImage()
-                .getScaledInstance(48, 48,
+                .getScaledInstance(32, 32,
                         java.awt.Image.SCALE_SMOOTH)))));
 
         openButton.setToolTipText("Open an AAT Config file");
-        openButton.setPreferredSize(new Dimension(48, 48));
+        openButton.setPreferredSize(new Dimension(36, 32));
         openButton.setBorder(null);
         openButton.setOpaque(false);
 
         final JButton saveAsButton = new JButton(new ImageIcon(((new ImageIcon(
                 "icons/document-save-as128x128.png").getImage()
-                .getScaledInstance(48, 48,
+                .getScaledInstance(32, 32,
                         java.awt.Image.SCALE_SMOOTH)))));
 
-        saveAsButton.setPreferredSize(new Dimension(48, 48));
+        saveAsButton.setPreferredSize(new Dimension(36, 32));
         saveAsButton.setToolTipText("Save AAT Config file as ...");
         saveAsButton.setOpaque(false);
         saveAsButton.addActionListener(new ActionListener() {
@@ -118,10 +119,10 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
 
         final JButton saveButton = new JButton(new ImageIcon(((new ImageIcon(
                 "icons/document-save128x128.png").getImage()
-                .getScaledInstance(48, 48,
+                .getScaledInstance(32, 32,
                         java.awt.Image.SCALE_SMOOTH)))));
 
-        saveButton.setPreferredSize(new Dimension(48, 48));
+        saveButton.setPreferredSize(new Dimension(36, 32));
         saveButton.setToolTipText("Save AAT Config file");
         saveButton.setBorder(null);
         saveButton.setOpaque(false);
@@ -152,7 +153,7 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
 
         final JButton tryButton = new JButton(new ImageIcon(((new ImageIcon(
                 "icons/media-playback-start128x128.png").getImage()
-                .getScaledInstance(48, 48,
+                .getScaledInstance(32, 32,
                         java.awt.Image.SCALE_SMOOTH)))));
 
         tryButton.addActionListener(new ActionListener() {
@@ -163,8 +164,8 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
                     model = new AATModel();
                     model.addObserver(getInstance());
                     saveAction(testFile);
-                    if(inputQuestionFile.getText().length()>0) {
-                    displayQuestionnairePanel.saveQuestionnaire(new File(inputQuestionFile.getText()));
+                    if (inputQuestionFile.getText().length() > 0) {
+                        displayQuestionnairePanel.saveQuestionnaire(new File(inputQuestionFile.getText()));
                     }
                     model.loadNewAAT(testFile);     //Only start when config is valid
                     joystick = new JoystickController(model);
@@ -186,7 +187,7 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
             }
         });
         tryButton.setToolTipText("Try the current configuration");
-        tryButton.setPreferredSize(new Dimension(48, 48));
+        tryButton.setPreferredSize(new Dimension(36, 32));
         tryButton.setBorder(null);
         tryButton.setEnabled(false);
         tryButton.setOpaque(false);
@@ -198,12 +199,12 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
         toolbar.add(saveButton);
         toolbar.add(tryButton);
         toolbar.add(Box.createHorizontalGlue());
-    //    toolbar.add(new JSeparator(SwingConstants.VERTICAL));
-        final JButton addButton =  new JButton(new ImageIcon(((new ImageIcon(
+        //    toolbar.add(new JSeparator(SwingConstants.VERTICAL));
+        final JButton addButton = new JButton(new ImageIcon(((new ImageIcon(
                 "icons/add128x128.png").getImage()
-                .getScaledInstance(48, 48,
+                .getScaledInstance(32, 32,
                         java.awt.Image.SCALE_SMOOTH)))));
-                //new JButton(new ImageIcon("list-add.png"));
+        //new JButton(new ImageIcon("list-add.png"));
         addButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
@@ -212,18 +213,20 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
         });
         addButton.setBorder(null);
         addButton.setOpaque(false);
+        addButton.setVisible(false);
+        addButton.setToolTipText("Add a new question to the questionnaire");
         toolbar.add(addButton);
         this.add(toolbar);
 
-
+        //TODO
         tabbedPane = new JTabbedPane();
         tabbedPane.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent changeEvent) {
                 if (tabbedPane.getTitleAt(tabbedPane.getSelectedIndex()).equals("Questionnaire")) {
-                    addButton.setEnabled(true);
+                    addButton.setVisible(true);
                 } else {
-                    addButton.setEnabled(false);
+                    addButton.setVisible(false);
                 }
 
             }
@@ -236,6 +239,36 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
         tabbedPane.addTab("AAT configuration", icon, scrollPane,
                 "Sets the main configuration of the test");
         tabbedPane.setMnemonicAt(0, KeyEvent.VK_1);
+        // UIManager.getLookAndFeelDefaults().put("TabbedPane:TabbedPaneTab[Enabled].backgroundPainter", Painter.);
+        UIDefaults dialogTheme = new UIDefaults();
+        dialogTheme.put("TabbedPane:TabbedPaneTab[Enabled].backgroundPainter", new AbstractRegionPainter() {
+            @Override
+            protected PaintContext getPaintContext() {
+                return null;
+            }
+
+            @Override
+            protected void doPaint(Graphics2D graphics2D, JComponent jComponent, int i, int i2, Object[] objects) {
+                graphics2D.setBackground(Color.black);
+            }
+        });
+        dialogTheme.put("TabbedPane:TabbedPaneTab[Focused+Selected].backgroundPainter", new AbstractRegionPainter() {
+            @Override
+            protected PaintContext getPaintContext() {
+                return null;
+            }
+
+            @Override
+            protected void doPaint(Graphics2D graphics2D, JComponent jComponent, int i, int i2, Object[] objects) {
+                graphics2D.setBackground(Color.red);
+            }
+        });
+        tabbedPane.putClientProperty("Nimbus.Overrides.InheritDefaults", Boolean.TRUE);
+        tabbedPane.putClientProperty("Nimbus.Overrides", dialogTheme);
+
+
+        SwingUtilities.updateComponentTreeUI(tabbedPane);
+
         add(tabbedPane);
 
         boolean hasPracticeImages = false;
@@ -472,8 +505,10 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
         askPractP.add(Box.createVerticalBox());
         panel.add(askPractP);
 
+
         askBuiltinPractL = new JLabel("<html>Do you want the test to self-generate practice images? <br>" +
                 "Needs colored borders to be enabled</html>");
+        askBuiltinPractL.setOpaque(true);
         JPanel askBuitltinPractP = new JPanel(new FlowLayout(FlowLayout.LEFT));
         inputBuiltinPractice = new JCheckBox();
         inputBuiltinPractice.setSelected(true);
@@ -1039,8 +1074,9 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
 
     //File dialog to select a file to be opened
     public File fileOpenDialog() {
-
+        UIManager.getLookAndFeelDefaults().put("FileChooser.background", Color.white);
         JFileChooser fc = new JFileChooser();
+        SwingUtilities.updateComponentTreeUI(fc);
         fc.setCurrentDirectory(workingDir);
         File file = null;
         FileFilter filter1 = new ExtensionFileFilter("XML File", new String[]{"XML", "xm;"});
@@ -1199,9 +1235,8 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
         Rectangle r = this.getBounds();
         displayQuestionnairePanel = new DisplayQuestionnairePanel(null, new Dimension(r.width, r.height));
         try {
-        displayQuestionnairePanel.displayQuestions(new File(workingDir + File.separator + inputQuestionFile.getText()));
-        }
-        catch (Exception e) {
+            displayQuestionnairePanel.displayQuestions(new File(workingDir + File.separator + inputQuestionFile.getText()));
+        } catch (Exception e) {
             inputQuestionFile.setText(""); //Invalid questionnaire. So clear that input field
         }
         questionPane = new JScrollPane((displayQuestionnairePanel));

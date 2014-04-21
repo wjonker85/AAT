@@ -13,7 +13,7 @@ public class OpenQuestionPanel extends AbstractQuestionPanel {
     public OpenQuestionPanel(boolean isRequired) {
         super();
         this.isRequired = isRequired;
-        textInput = new JTextField(10);
+        textInput = new JTextField(30);
         setLayout(new FlowLayout(FlowLayout.LEFT));
         setBackground(Color.black);
         setForeground(Color.white);
