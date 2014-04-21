@@ -249,8 +249,7 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
                 6, 6);       //xPad, yPad
 
         if (!editMode) {
-            introductionPane.setSelectionStart(0);
-            introductionPane.setSelectionEnd(0);
+            introductionPane.grabFocus();
         }
     }
 
@@ -318,6 +317,12 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
         displayQuestions(questionnaire);
     }
 
+    public void ChangeIntroduction(String intro) {
+        introductionPane.setText(intro);
+        questionnaire.setIntroduction(intro);
+        introductionPane.requestFocus();
+    }
+
     @Override
     public void update(Observable observable, Object o) {
         System.out.println("Update");
@@ -348,29 +353,91 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
         }
     }
 
-    class IntroductionEditorPanel extends JTextPane implements MouseListener
+    public DisplayQuestionnairePanel getInstance() {
+        return this;
+    }
+
+    class IntroductionEditorPanel extends JPanel implements MouseListener
     {
         Border redBorder = BorderFactory.createLineBorder(Color.RED, 2);
         Border blackBorder = BorderFactory.createLineBorder(Color.black, 0);
+        private JEditorPane editor;
+        private JPanel buttonPanel;
 
         public IntroductionEditorPanel()    {
-
+            editor = new JEditorPane();
+            editor.setBorder(null);
+            editor.setBackground(Color.black);
+            this.setLayout(new BoxLayout(this,BoxLayout.Y_AXIS));
+            this.setBackground(Color.BLACK);
+            JLayeredPane layers = new JLayeredPane();
+            layers.setOpaque(false);
+            layers.setBorder(null);
+            layers.setLayout(new BoxLayout(layers,BoxLayout.Y_AXIS));
+            this.setBorder(null);
+            this.setOpaque(false);
             setBorder(BorderFactory.createLineBorder(Color.black, 10));
-            this.setContentType("text/html");
+            editor.setContentType("text/html");
             this.setOpaque(false);
             this.setBorder(null);
             HTMLEditorKit kit = new HTMLEditorKit();
-            setEditorKit(kit);
+            editor.setEditorKit(kit);
+            System.out.println("POPE "+editor.getHeight());
             StyleSheet styleSheet = kit.getStyleSheet();
-            styleSheet.addRule("h1 {color: white; font-family:times; margin: 0px; background-color: black;font : 24px monaco;}");
-            this.setMinimumSize(new Dimension((int) (resolution.width*0.8),-1));
-            //setLineWrap(true);
-            //setWrapStyleWord(true);
-         //   this.setPreferredSize(new Dimension((int)(resolution.width*0.8),-1));
-          //  setForeground(Color.white);
-          //  setBackground(Color.black);
-            setEditable(false);
-            setFont(new Font("Roman", Font.PLAIN, 24));
+            styleSheet.addRule("h2 {color: white; font-family:times; margin: 0px; background-color: black;font : 24px monaco;}");
+            editor.setDocument(kit.createDefaultDocument());
+            Dimension screen = getToolkit().getScreenSize();
+            editor.setMinimumSize(new Dimension((int) (resolution.width * 0.8), -1));
+            layers.setBackground(Color.BLACK);
+
+          //  setFont(new Font("Roman", Font.PLAIN, 24));
+            layers.add(editor, JLayeredPane.DEFAULT_LAYER);
+            layers.setBorder(null);
+            if(editMode) {
+                editor.addMouseListener(this);
+                editor.setMaximumSize(new Dimension(1000, 900));
+                buttonPanel = new JPanel();
+                buttonPanel.setOpaque(false);
+                buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
+                Color buttonBackColor = Color.BLACK;
+
+                JButton editButton = new JButton(new ImageIcon(((new ImageIcon(
+                        "icons/document-edit128x128.png").getImage()
+                        .getScaledInstance(64, 64,
+                                java.awt.Image.SCALE_SMOOTH)))));
+                editButton.setPreferredSize(new Dimension(64, 64));
+                editButton.setBackground(buttonBackColor);
+                //new JButton("document-edit22x22.png");
+                editButton.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent actionEvent) {
+                        IntroductionHTMLEditor htmlEditor = new IntroductionHTMLEditor(getInstance());
+                        htmlEditor.Show(editor.getText());
+                    }
+                });
+
+                buttonPanel.add(editButton);
+                layers.add(buttonPanel, JLayeredPane.PALETTE_LAYER);
+                buttonPanel.setBounds((screen.width / 3) - 135, 0, 125, 25);
+                buttonPanel.addMouseListener(this);
+                buttonPanel.setEnabled(true);
+                buttonPanel.setVisible(false);
+                buttonPanel.setBorder(null);
+                layers.add(buttonPanel, JLayeredPane.PALETTE_LAYER);
+                buttonPanel.setBounds(0, 0, 125, 64);
+                buttonPanel.addMouseListener(this);
+                editButton.addMouseListener(this);
+            }
+
+            this.add(layers);
+        }
+
+        public void setText(String text) {
+            editor.setText("<body bgcolor=\"black\"><h2>" + text + "</h2></body>");
+            editor.setEditable(false);
+            System.out.println(editor.getText());
+            revalidate();
+            repaint();
         }
 
         @Override
@@ -391,11 +458,14 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
         @Override
         public void mouseEntered(MouseEvent mouseEvent) {
             setBorder(redBorder);
+            buttonPanel.setEnabled(true);
+            buttonPanel.setVisible(true);
         }
 
         @Override
         public void mouseExited(MouseEvent mouseEvent) {
               setBorder(blackBorder);
+            buttonPanel.setVisible(false);
         }
     }
 
@@ -441,112 +511,112 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
             layers.add(questionPane, JLayeredPane.DEFAULT_LAYER);
             questionPane.setBounds(5, 0, (screen.width / 3) - 10, 20);
             questionPane.addMouseListener(this);
-            buttonPanel = new JPanel();
-            buttonPanel.setOpaque(false);
-            buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
-            Color buttonBackColor = Color.BLACK;
-
-            JButton editButton = new JButton(new ImageIcon(((new ImageIcon(
-                    "icons/document-edit22x22.png").getImage()
-                    .getScaledInstance(22, 22,
-                            java.awt.Image.SCALE_SMOOTH)))));
-            editButton.setPreferredSize(new Dimension(24, 24));
-            editButton.setBackground(buttonBackColor);
-            //new JButton("document-edit22x22.png");
-            editButton.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent actionEvent) {
-                    questionnaireModel = new QuestionnaireModel(question, pos);
-                    questionnaireModel.addObserver(parent);
-                    currentEditor = questionnaireModel.getEditFrame();
-                    currentEditor.setEnabled(true);
-                    currentEditor.setVisible(true);
-                    lastEditedPos = pos;
-                }
-            });
-
-            JButton upButton = new JButton(new ImageIcon(((new ImageIcon(
-                    "icons/go-up22x22.png").getImage()
-                    .getScaledInstance(22, 22,
-                            java.awt.Image.SCALE_SMOOTH)))));
-            upButton.setPreferredSize(new Dimension(24, 24));
-            upButton.setBackground(buttonBackColor);
-            upButton.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent actionEvent) {
-                    parent.changeQuestionPos(pos, pos - 1);
-                }
-            });
-
-
-            JButton downButton = new JButton(new ImageIcon(((new ImageIcon(
-                    "icons/go-down22x22.png").getImage()
-                    .getScaledInstance(22, 22,
-                            java.awt.Image.SCALE_SMOOTH)))));
-            downButton.setBackground(buttonBackColor);
-            downButton.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent actionEvent) {
-                    parent.changeQuestionPos(pos, pos + 1);
-                }
-            });
-            downButton.setPreferredSize(new Dimension(24, 24));
-
-            JButton addButton = new JButton(new ImageIcon(((new ImageIcon(
-                    "icons/add22x22.png").getImage()
-                    .getScaledInstance(22, 22,
-                            java.awt.Image.SCALE_SMOOTH)))));
-            addButton.setBackground(buttonBackColor);
-            addButton.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent actionEvent) {
-                    //       parent.changeQuestionPos(pos,pos+1);
-                }
-            });
-            addButton.setPreferredSize(new Dimension(24, 24));
-
-
-            JButton delButton = new JButton(new ImageIcon(((new ImageIcon(
-                    "icons/delete22x22.png").getImage()
-                    .getScaledInstance(22, 22,
-                            java.awt.Image.SCALE_SMOOTH)))));
-            delButton.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent actionEvent) {
-                    parent.removeQuestion(pos);
-                }
-            });
-            delButton.setPreferredSize(new Dimension(24, 24));
-            delButton.setBackground(buttonBackColor);
-
-            buttonPanel.add(editButton);
-            buttonPanel.add(upButton);
-            buttonPanel.add(downButton);
-            buttonPanel.add(addButton);
-            buttonPanel.add(delButton);
-            //   buttonPanel.setBackground(Color.darkGray);
-            //   buttonPanel.setBorder(BorderFactory.createLineBorder(Color.blue));
-            buttonPanel.setEnabled(true);
-            buttonPanel.setVisible(false);
-            buttonPanel.setBorder(null);
-            layers.add(buttonPanel, JLayeredPane.PALETTE_LAYER);
-            System.out.println("HJOOPOO " + questionPane.getHeight());
-            buttonPanel.setBounds((screen.width / 3) - 135, 0, 125, 25);
-            //   buttonPanel.setBounds(10,questionPane.getHeight()-20,125,30);
-            buttonPanel.addMouseListener(this);
-            editButton.addMouseListener(this);     //Add the mouselisteners to the buttons for the colored border.
-            editButton.setToolTipText("Edit this question");
-            upButton.addMouseListener(this);
-            upButton.setToolTipText("Move this question one level up");
-            downButton.addMouseListener(this);
-            downButton.setToolTipText("Move this question one level down");
-            delButton.addMouseListener(this);
-            delButton.setToolTipText("Delete this question");
-            addButton.addMouseListener(this);
-            addButton.setToolTipText("Add a new question after this one");
 
             if (editMode) {
                 addMouseListener(this);
+                buttonPanel = new JPanel();
+                buttonPanel.setOpaque(false);
+                buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
+                Color buttonBackColor = Color.BLACK;
+
+                JButton editButton = new JButton(new ImageIcon(((new ImageIcon(
+                        "icons/document-edit22x22.png").getImage()
+                        .getScaledInstance(22, 22,
+                                java.awt.Image.SCALE_SMOOTH)))));
+                editButton.setPreferredSize(new Dimension(24, 24));
+                editButton.setBackground(buttonBackColor);
+                //new JButton("document-edit22x22.png");
+                editButton.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent actionEvent) {
+                        questionnaireModel = new QuestionnaireModel(question, pos);
+                        questionnaireModel.addObserver(parent);
+                        currentEditor = questionnaireModel.getEditFrame();
+                        currentEditor.setEnabled(true);
+                        currentEditor.setVisible(true);
+                        lastEditedPos = pos;
+                    }
+                });
+
+                JButton upButton = new JButton(new ImageIcon(((new ImageIcon(
+                        "icons/go-up22x22.png").getImage()
+                        .getScaledInstance(22, 22,
+                                java.awt.Image.SCALE_SMOOTH)))));
+                upButton.setPreferredSize(new Dimension(24, 24));
+                upButton.setBackground(buttonBackColor);
+                upButton.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent actionEvent) {
+                        parent.changeQuestionPos(pos, pos - 1);
+                    }
+                });
+
+
+                JButton downButton = new JButton(new ImageIcon(((new ImageIcon(
+                        "icons/go-down22x22.png").getImage()
+                        .getScaledInstance(22, 22,
+                                java.awt.Image.SCALE_SMOOTH)))));
+                downButton.setBackground(buttonBackColor);
+                downButton.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent actionEvent) {
+                        parent.changeQuestionPos(pos, pos + 1);
+                    }
+                });
+                downButton.setPreferredSize(new Dimension(24, 24));
+
+                JButton addButton = new JButton(new ImageIcon(((new ImageIcon(
+                        "icons/add22x22.png").getImage()
+                        .getScaledInstance(22, 22,
+                                java.awt.Image.SCALE_SMOOTH)))));
+                addButton.setBackground(buttonBackColor);
+                addButton.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent actionEvent) {
+                        //       parent.changeQuestionPos(pos,pos+1);
+                    }
+                });
+                addButton.setPreferredSize(new Dimension(24, 24));
+
+
+                JButton delButton = new JButton(new ImageIcon(((new ImageIcon(
+                        "icons/delete22x22.png").getImage()
+                        .getScaledInstance(22, 22,
+                                java.awt.Image.SCALE_SMOOTH)))));
+                delButton.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent actionEvent) {
+                        parent.removeQuestion(pos);
+                    }
+                });
+                delButton.setPreferredSize(new Dimension(24, 24));
+                delButton.setBackground(buttonBackColor);
+
+                buttonPanel.add(editButton);
+                buttonPanel.add(upButton);
+                buttonPanel.add(downButton);
+                buttonPanel.add(addButton);
+                buttonPanel.add(delButton);
+                //   buttonPanel.setBackground(Color.darkGray);
+                //   buttonPanel.setBorder(BorderFactory.createLineBorder(Color.blue));
+                buttonPanel.setEnabled(true);
+                buttonPanel.setVisible(false);
+                buttonPanel.setBorder(null);
+                layers.add(buttonPanel, JLayeredPane.PALETTE_LAYER);
+                buttonPanel.setBounds((screen.width / 3) - 135, 0, 125, 25);
+                //   buttonPanel.setBounds(10,questionPane.getHeight()-20,125,30);
+                buttonPanel.addMouseListener(this);
+                editButton.addMouseListener(this);     //Add the mouselisteners to the buttons for the colored border.
+                editButton.setToolTipText("Edit this question");
+                upButton.addMouseListener(this);
+                upButton.setToolTipText("Move this question one level up");
+                downButton.addMouseListener(this);
+                downButton.setToolTipText("Move this question one level down");
+                delButton.addMouseListener(this);
+                delButton.setToolTipText("Delete this question");
+                addButton.addMouseListener(this);
+                addButton.setToolTipText("Add a new question after this one");
+
             }
             this.add(layers);
         }

@@ -745,7 +745,7 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
                 if (file != null) {
                     inputQuestionFile.setText(FileUtils.getRelativePath(workingDir, file));
                     Rectangle r = getBounds();
-                    displayQuestionnairePanel = new DisplayQuestionnairePanel(null, new Dimension(r.width, r.height));
+                    displayQuestionnairePanel = new DisplayQuestionnairePanel(null, new Dimension(1200, r.height));
                     displayQuestionnairePanel.displayQuestions(file);
                     questionPane = new JScrollPane((displayQuestionnairePanel));
                     tabbedPane.remove(tabbedPane.indexOfTab("Questionnaire"));
