@@ -7,6 +7,7 @@ import AAT.Util.FileUtils;
 import AAT.Util.SpringUtilities;
 import AAT.Util.TitledSeparator;
 import Controller.JoystickController;
+import DataStructures.QuestionnaireTemplate;
 import IO.ConfigFileReader;
 import IO.ConfigWriter;
 import Model.AATModel;
@@ -746,7 +747,12 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
                     inputQuestionFile.setText(FileUtils.getRelativePath(workingDir, file));
                     Rectangle r = getBounds();
                     displayQuestionnairePanel = new DisplayQuestionnairePanel(null, new Dimension(1200, r.height));
-                    displayQuestionnairePanel.displayQuestions(file);
+                    try {
+                        displayQuestionnairePanel.displayQuestions(file);
+                    }
+                    catch (Exception e) {
+                        displayQuestionnairePanel.displayQuestions(QuestionnaireTemplate.getTemplate());
+                    }
                     questionPane = new JScrollPane((displayQuestionnairePanel));
                     tabbedPane.remove(tabbedPane.indexOfTab("Questionnaire"));
                     tabbedPane.addTab("Questionnaire", questionPane);
@@ -967,6 +973,7 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
                 6, 6,        //initX, initY
                 6, 6);       //xPad, yPad
         //   return scrollPane;
+
         return panel;
     }
 

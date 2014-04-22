@@ -52,10 +52,11 @@ import java.util.*;
 public class DisplayQuestionnairePanel extends JPanel implements Observer {
 
 
+    public int lastEditedPos = -1;
+    public Dimension resolution;
     private JPanel questionsPanel;
     private Map<String, AbstractQuestionPanel> questionsMap = new HashMap<String, AbstractQuestionPanel>();
     private QuestionnaireModel questionnaireModel;
-
     private JScrollPane scrollPane;
     private IntroductionEditorPanel introductionPane;
     private Boolean editMode = false;
@@ -64,8 +65,6 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
     private JScrollBar vertical;
     private QuestionEditFrame currentEditor = null;
     private Map<String, MouseActionEditorPane> qPanes;
-    public int lastEditedPos = -1;
-    public Dimension resolution;
 
     public DisplayQuestionnairePanel(final AATModel model, Dimension resolution) {
         if (model == null) {
@@ -81,7 +80,7 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
         contentPanel.setForeground(Color.white);
         mainPanel.setBackground(Color.black);
         mainPanel.setForeground(Color.white);
-        mainPanel.setLayout(new FlowLayout(FlowLayout.CENTER));    //TODO even naar kijken
+        mainPanel.setLayout(new FlowLayout(FlowLayout.LEFT));    //TODO even naar kijken
         this.setLayout(new GridBagLayout());
         this.setBackground(Color.black);
         this.setForeground(Color.white);
@@ -109,11 +108,10 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
         questionnairePanel.setBackground(Color.black);
         questionnairePanel.setForeground(Color.white);
         introductionPane = new IntroductionEditorPanel();
-        introductionPane.setText("No questionnaire has been opened or created yet.<br> You can start adding questions by pushing the big cross at the top left corner.<br>" +
-                "Existings questions can be edited, moved or deleted by the menu that shows up when hovering above a question.<br><br> This text can be edited too by pushing the big edit button below.");
         questionnairePanel.add(introductionPane);
         questionnairePanel.add(Box.createVerticalStrut(20)); //small margin
         questionnairePanel.add(questionsPanel);
+        questionnairePanel.add(Box.createVerticalStrut(40)); //small margin
         contentPanel.add(questionnairePanel);
 
         if (model != null) {
@@ -165,6 +163,7 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
 
             this.add(contentPanel, new GridBagConstraints());
         }
+        revalidate();
     }
 
 
@@ -225,20 +224,14 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
         qPanes = new HashMap<String, MouseActionEditorPane>();
         System.out.println("No questions " + questionnaire.getExtraQuestions().size());
         int maxLabelWidth = getMaxLabelSize();
-        if(questionnaire.getIntroduction().length() == 0) {
-            introductionPane.setText("No questionnaire has been opened or created yet.<br> You can start adding questions by pushing the big cross at the top left corner.<br>" +
-                "Existings questions can be edited, moved or deleted by the menu that shows up when hovering above a question.<br><br> This text can be edited too by pushing the big edit button below.");
-        }
-        else {
-            introductionPane.setText(questionnaire.getIntroduction());
-        }
+        introductionPane.setText(questionnaire.getIntroduction());
+
         for (int x = 0; x < questionnaire.getExtraQuestions().size(); x++) {
             AbstractQuestion questionObject = questionnaire.getExtraQuestions().get(x);
             MouseActionEditorPane question = new MouseActionEditorPane(editMode, questionObject, x, this);
-            if(lastEditedPos == x) {
+            if (lastEditedPos == x) {
                 question.setLastEdited(true);
-            }
-            else {
+            } else {
                 question.setLastEdited(false);
             }
             questionsPanel.add(question);
@@ -364,23 +357,22 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
         return this;
     }
 
-    class IntroductionEditorPanel extends JPanel implements MouseListener
-    {
+    class IntroductionEditorPanel extends JPanel implements MouseListener {
         Border redBorder = BorderFactory.createLineBorder(Color.RED, 2);
         Border blackBorder = BorderFactory.createLineBorder(Color.black, 0);
         private JEditorPane editor;
         private JPanel buttonPanel;
 
-        public IntroductionEditorPanel()    {
+        public IntroductionEditorPanel() {
             editor = new JEditorPane();
             editor.setBorder(null);
             editor.setBackground(Color.black);
-            this.setLayout(new BoxLayout(this,BoxLayout.Y_AXIS));
+            this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
             this.setBackground(Color.BLACK);
             JLayeredPane layers = new JLayeredPane();
             layers.setOpaque(false);
             layers.setBorder(null);
-            layers.setLayout(new BoxLayout(layers,BoxLayout.Y_AXIS));
+            layers.setLayout(new BoxLayout(layers, BoxLayout.Y_AXIS));
             this.setBorder(null);
             this.setOpaque(false);
             setBorder(BorderFactory.createLineBorder(Color.black, 10));
@@ -389,20 +381,20 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
             this.setBorder(null);
             HTMLEditorKit kit = new HTMLEditorKit();
             editor.setEditorKit(kit);
-            System.out.println("POPE "+editor.getHeight());
+            System.out.println("POPE " + editor.getHeight());
             StyleSheet styleSheet = kit.getStyleSheet();
             styleSheet.addRule("h2 {color: white; font-family:times; margin: 0px; background-color: black;font : 24px monaco;}");
             editor.setDocument(kit.createDefaultDocument());
             Dimension screen = getToolkit().getScreenSize();
-            editor.setMinimumSize(new Dimension((int) (resolution.width * 0.8), -1));
+            editor.setMinimumSize(new Dimension((int) (resolution.width * 0.6), 40));
             layers.setBackground(Color.BLACK);
 
-          //  setFont(new Font("Roman", Font.PLAIN, 24));
+            //  setFont(new Font("Roman", Font.PLAIN, 24));
             layers.add(editor, JLayeredPane.DEFAULT_LAYER);
             layers.setBorder(null);
-            if(editMode) {
+            if (editMode) {
                 editor.addMouseListener(this);
-                editor.setMaximumSize(new Dimension(1000, 900));
+                editor.setMaximumSize(new Dimension((int) (resolution.width*0.6), 900));
                 buttonPanel = new JPanel();
                 buttonPanel.setOpaque(false);
                 buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
@@ -437,10 +429,13 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
             }
 
             this.add(layers);
+            revalidate();
+
         }
 
         public void setText(String text) {
-            editor.setText("<body bgcolor=\"black\"><h2>" + text + "</h2></body>");
+        //    editor.setText("<body bgcolor=\"black\"><h2>" + text + "</h2></body>");
+            editor.setText("<body bgcolor=\"black\">" + text + "</body>");
             editor.setEditable(false);
             System.out.println(editor.getText());
             revalidate();
@@ -471,20 +466,21 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
 
         @Override
         public void mouseExited(MouseEvent mouseEvent) {
-              setBorder(blackBorder);
+            setBorder(blackBorder);
             buttonPanel.setVisible(false);
+            buttonPanel.setEnabled(false);
         }
     }
 
 
     class MouseActionEditorPane extends JPanel implements MouseListener {
 
+        private final int pos;
         Border blackBorder = BorderFactory.createLineBorder(Color.BLACK);
         Border redBorder = BorderFactory.createLineBorder(Color.RED, 2);
         Border blueBorder = BorderFactory.createLineBorder(Color.blue, 2);
         JEditorPane questionPane;
         private JPanel buttonPanel;
-        private final int pos;
 
         public MouseActionEditorPane(boolean editMode, final AbstractQuestion question, final int pos, final DisplayQuestionnairePanel parent) {
             this.pos = pos;
@@ -658,16 +654,15 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
         public void mouseExited(MouseEvent mouseEvent) {
             setBorder(blackBorder);
             buttonPanel.setVisible(false);
-            if(pos == lastEditedPos)  {
+            if (pos == lastEditedPos) {
                 setBorder(blueBorder);
             }
         }
 
         public void setLastEdited(boolean edited) {
-            if(edited) {
+            if (edited) {
                 setBorder(blueBorder);
-            }
-            else {
+            } else {
                 setBorder(null);
             }
         }
