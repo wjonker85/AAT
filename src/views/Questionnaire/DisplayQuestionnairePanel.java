@@ -61,7 +61,6 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
     private IntroductionEditorPanel introductionPane;
     private Boolean editMode = false;
     private Questionnaire questionnaire;
-    private int maxLabelSize = 0;
     private JScrollBar vertical;
     private QuestionEditFrame currentEditor = null;
     private Map<String, MouseActionEditorPane> qPanes;
@@ -84,18 +83,6 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
         this.setLayout(new GridBagLayout());
         this.setBackground(Color.black);
         this.setForeground(Color.white);
-
-        if (editMode) {
-            JPanel addButtonPanel = new JPanel();
-            JButton button = new JButton("Add question");
-            addButtonPanel.add(button);
-            button.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent actionEvent) {
-                    addQuestionAction();
-                }
-            });
-        }
 
         questionsPanel = new JPanel(new SpringLayout());
         JPanel submitPanel = new JPanel();
@@ -182,6 +169,20 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
             JOptionPane.showConfirmDialog(null, "There is already another question editor open, please close that one first.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
+
+    public void insertQuestionAt(int pos) {
+        OpenQuestion openQuestion = new OpenQuestion();
+        if (currentEditor == null) {
+            questionnaireModel = new QuestionnaireModel(openQuestion, pos);
+            questionnaireModel.addObserver(this);
+            currentEditor = questionnaireModel.getEditFrame();
+            currentEditor.setEnabled(true);
+            currentEditor.setVisible(true);
+        } else {
+            JOptionPane.showConfirmDialog(null, "There is already another question editor open, please close that one first.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
 
     private boolean checkAnswered() {
         int count = 0;
@@ -294,14 +295,22 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
     public void changeQuestionPos(int posFrom, int newPos) {
         System.out.println("Change pos from " + posFrom + " to " + newPos);
         AbstractQuestion q = questionnaire.getExtraQuestions().get(posFrom);
-        if (posFrom < newPos && (newPos + 1 < questionnaire.getExtraQuestions().size())) {
+        if (posFrom < newPos && (newPos < questionnaire.getExtraQuestions().size())) {
             questionnaire.getExtraQuestions().add(newPos + 1, q);
             questionnaire.getExtraQuestions().remove(posFrom);
-        } else if (posFrom > newPos && (newPos >= 0 && posFrom + 1 < questionnaire.getExtraQuestions().size())) {
+            lastEditedPos = newPos;
+        } else if (posFrom > newPos && (newPos >= 0)) {
             questionnaire.getExtraQuestions().add(newPos, q);
             questionnaire.getExtraQuestions().remove(posFrom + 1);
+            lastEditedPos = newPos;
         }
-        lastEditedPos = newPos;
+        else {
+            lastEditedPos = posFrom;
+        }
+
+        if (lastEditedPos < 0) {
+            lastEditedPos = 0;
+        }
         questionnaireModel = null;
         currentEditor = null;
         questionsPanel.removeAll();
@@ -326,25 +335,27 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
     @Override
     public void update(Observable observable, Object o) {
         System.out.println("Update");
-        if (o.toString().equals("submit")) {
+        if (o.toString().equals("submit") || o.toString().equals("insert")) {
 
             System.out.println("Submit");
-            //  questionnaire.getExtraQuestions().remove(questionnaireModel.getPos());
             if (questionnaireModel.getPos() < questionnaire.getExtraQuestions().size()) {
-                questionnaire.getExtraQuestions().set(questionnaireModel.getPos(), questionnaireModel.getNewQuestion());
+                if (o.toString().equals("submit")) {
+                    questionnaire.getExtraQuestions().set(questionnaireModel.getPos(), questionnaireModel.getNewQuestion());
+                } else {
+                    questionnaire.getExtraQuestions().add(questionnaireModel.getPos(), questionnaireModel.getNewQuestion());
+                }
             } else {
                 questionnaire.getExtraQuestions().add(questionnaireModel.getNewQuestion());
             }
+            lastEditedPos = questionnaireModel.getPos();
             currentEditor.dispose();
             questionnaireModel.deleteObservers();
             questionnaireModel = null;
             currentEditor = null;
             questionsPanel.removeAll();
             displayQuestions(questionnaire);
-            qPanes.get(questionnaire.getExtraQuestions().get(questionnaireModel.getPos()).getKey()).setFocus();
-        }
-
-        if (o.toString().equals("type changed")) {
+//            qPanes.get(questionnaire.getExtraQuestions().get(questionnaireModel.getPos()).getKey()).setFocus();
+        } else if (o.toString().equals("type changed")) {
             currentEditor.dispose();
             currentEditor = null;
             currentEditor = questionnaireModel.getEditFrame();
@@ -394,7 +405,7 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
             layers.setBorder(null);
             if (editMode) {
                 editor.addMouseListener(this);
-                editor.setMaximumSize(new Dimension((int) (resolution.width*0.6), 900));
+                editor.setMaximumSize(new Dimension((int) (resolution.width * 0.6), 900));
                 buttonPanel = new JPanel();
                 buttonPanel.setOpaque(false);
                 buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
@@ -402,9 +413,9 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
 
                 JButton editButton = new JButton(new ImageIcon(((new ImageIcon(
                         "icons/document-edit128x128.png").getImage()
-                        .getScaledInstance(64, 64,
+                        .getScaledInstance(48, 48,
                                 java.awt.Image.SCALE_SMOOTH)))));
-                editButton.setPreferredSize(new Dimension(64, 64));
+                editButton.setPreferredSize(new Dimension(48, 48));
                 editButton.setBackground(buttonBackColor);
                 //new JButton("document-edit22x22.png");
                 editButton.addActionListener(new ActionListener() {
@@ -417,7 +428,7 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
 
                 buttonPanel.add(editButton);
                 layers.add(buttonPanel, JLayeredPane.PALETTE_LAYER);
-                buttonPanel.setBounds((screen.width / 3) - 135, 0, 125, 25);
+                buttonPanel.setBounds((screen.width / 3) - 135, 0, 0, 25);
                 buttonPanel.addMouseListener(this);
                 buttonPanel.setEnabled(true);
                 buttonPanel.setVisible(false);
@@ -434,7 +445,7 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
         }
 
         public void setText(String text) {
-        //    editor.setText("<body bgcolor=\"black\"><h2>" + text + "</h2></body>");
+            //    editor.setText("<body bgcolor=\"black\"><h2>" + text + "</h2></body>");
             editor.setText("<body bgcolor=\"black\">" + text + "</body>");
             editor.setEditable(false);
             System.out.println(editor.getText());
@@ -576,7 +587,7 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
                 addButton.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent actionEvent) {
-                        //       parent.changeQuestionPos(pos,pos+1);
+                        parent.insertQuestionAt(pos + 1); //Add question after this one
                     }
                 });
                 addButton.setPreferredSize(new Dimension(24, 24));
@@ -600,8 +611,6 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
                 buttonPanel.add(downButton);
                 buttonPanel.add(addButton);
                 buttonPanel.add(delButton);
-                //   buttonPanel.setBackground(Color.darkGray);
-                //   buttonPanel.setBorder(BorderFactory.createLineBorder(Color.blue));
                 buttonPanel.setEnabled(true);
                 buttonPanel.setVisible(false);
                 buttonPanel.setBorder(null);

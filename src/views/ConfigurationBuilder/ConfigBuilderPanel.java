@@ -19,7 +19,6 @@ import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileFilter;
-import javax.swing.plaf.nimbus.AbstractRegionPainter;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
@@ -237,38 +236,10 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
         mainPanel.setEnabled(false);
         mainPanel.setVisible(false);
         JScrollPane scrollPane = new JScrollPane(mainPanel);
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
         tabbedPane.addTab("AAT configuration", icon, scrollPane,
                 "Sets the main configuration of the test");
         tabbedPane.setMnemonicAt(0, KeyEvent.VK_1);
-        // UIManager.getLookAndFeelDefaults().put("TabbedPane:TabbedPaneTab[Enabled].backgroundPainter", Painter.);
-        UIDefaults dialogTheme = new UIDefaults();
-        dialogTheme.put("TabbedPane:TabbedPaneTab[Enabled].backgroundPainter", new AbstractRegionPainter() {
-            @Override
-            protected PaintContext getPaintContext() {
-                return null;
-            }
-
-            @Override
-            protected void doPaint(Graphics2D graphics2D, JComponent jComponent, int i, int i2, Object[] objects) {
-                graphics2D.setBackground(Color.black);
-            }
-        });
-        dialogTheme.put("TabbedPane:TabbedPaneTab[Focused+Selected].backgroundPainter", new AbstractRegionPainter() {
-            @Override
-            protected PaintContext getPaintContext() {
-                return null;
-            }
-
-            @Override
-            protected void doPaint(Graphics2D graphics2D, JComponent jComponent, int i, int i2, Object[] objects) {
-                graphics2D.setBackground(Color.red);
-            }
-        });
-        tabbedPane.putClientProperty("Nimbus.Overrides.InheritDefaults", Boolean.TRUE);
-        tabbedPane.putClientProperty("Nimbus.Overrides", dialogTheme);
-
-
-        SwingUtilities.updateComponentTreeUI(tabbedPane);
 
         add(tabbedPane);
 
@@ -278,24 +249,27 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
         }
         imageSelectionPanel = new ImageSelectionPanel(aDir, nDir, pDir, hasPracticeImages, newTest);
         JScrollPane contentPane = new JScrollPane(imageSelectionPanel);
+        contentPane.getVerticalScrollBar().setUnitIncrement(16);
         contentPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         contentPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
-        //   JPanel images = createImageListTable(getImages(new File("/home/marcel/AAT/AAT/images/Affective/")),getImages(new File("/home/marcel/AAT/AAT/images/Neutral/")));
 
         tabbedPane.addTab("Images", contentPane);
 
         htmlEditPanel = new HTMLEditPanel();
 
         JScrollPane HtmlEditPane = new JScrollPane((htmlEditPanel));
+        HtmlEditPane.getVerticalScrollBar().setUnitIncrement(16);
         HtmlEditPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         HtmlEditPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
 
         tabbedPane.addTab("Language File", HtmlEditPane);
-
+        tabbedPane.setEnabledAt(tabbedPane.indexOfTab("Language File"), false);
         Rectangle r = this.getBounds();
         displayQuestionnairePanel = new DisplayQuestionnairePanel(null, new Dimension(r.width, r.height)); //without reference to model.
         questionPane = new JScrollPane(displayQuestionnairePanel);
+        questionPane.getVerticalScrollBar().setUnitIncrement(16);
         tabbedPane.addTab("Questionnaire", questionPane);
+        tabbedPane.setEnabledAt(tabbedPane.indexOfTab("Questionnaire"), false);
 
         SpringUtilities.makeCompactGrid(this,
                 2, 1, //rows, cols
@@ -375,12 +349,13 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
                 File file = getDirectory();
                 if (file != null) {
                     aDir = file.getAbsoluteFile();
+                    imageSelectionPanel.setaDir(aDir);
                     //   try {
                     inputAffDir.setText(FileUtils.getRelativePath(workingDir, aDir));
                     //  } catch (IOException e) {
                     //       inputAffDir.setText(file.getName());
                     //   }
-                    imageSelectionPanel.setaDir(aDir);
+
 
                 } else {
                     inputAffDir.setText("");
@@ -397,20 +372,13 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
 
                 if (file != null) {
                     nDir = file.getAbsoluteFile();
-                    //    try {
+                    imageSelectionPanel.setnDir(nDir);
                     inputNeutralDir.setText(FileUtils.getRelativePath(workingDir, nDir));
-
-                    //   } catch (IOException e) {
-                    //       System.out.println(e.getMessage());
-                    //      inputNeutralDir.setText(file.getName());
-                    //  }
-
-
                     System.out.println("Working dir: " + workingDir.getAbsoluteFile());
                     System.out.println("neutral dir: " + nDir.getAbsoluteFile());
                     System.out.println("Relative path: ");
 
-                    imageSelectionPanel.setnDir(nDir);
+
                 } else {
                     inputNeutralDir.setText("");
                 }
@@ -430,23 +398,14 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
         setLangFile.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                File file = fileOpenDialog();
+                File file = newOrExistingFileDialog("Enter a new filename or choose an existing language file");
                 if (file != null) {
-                    if (file.exists()) {
+                    tabbedPane.setEnabledAt(tabbedPane.indexOfTab("Language File"), true);
                         inputLangFile.setText(file.getName());
                         htmlEditPanel.setDocument(file);
-                    } else {
-                        int reply = JOptionPane.showConfirmDialog(null, "Do you want to create the file: " + file.getName() + " ?", "Create new language file", JOptionPane.YES_NO_OPTION);
-                        if (reply == JOptionPane.YES_OPTION) {
-                            inputLangFile.setText(file.getName());
-                            htmlEditPanel.setDocument(file);
-                        } else {
-                            inputLangFile.setText("");
-                            System.exit(0);
-                        }
-                    }
                 } else {
                     inputLangFile.setText("");
+                    tabbedPane.setEnabledAt(tabbedPane.indexOfTab("Language File"), false);
                 }
             }
         });
@@ -712,9 +671,11 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 if (inputQuestions.getSelectedItem().equals("None")) {
+                    tabbedPane.setEnabledAt(tabbedPane.indexOfTab("Questionnaire"), false);
                     inputQuestionFile.setEnabled(false);
                     selectQButton.setEnabled(false);
                     selectQL.setEnabled(false);
+                    displayQuestionnairePanel = null;
 
                 } else {
                     selectQL.setEnabled(true);
@@ -742,18 +703,19 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
         selectQButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                File file = fileOpenDialog();
+                File file = newOrExistingFileDialog("Enter a new filename or choose an existing questionnaire file");
                 if (file != null) {
                     inputQuestionFile.setText(FileUtils.getRelativePath(workingDir, file));
                     Rectangle r = getBounds();
+                    tabbedPane.setEnabledAt(tabbedPane.indexOfTab("Questionnaire"), true);
                     displayQuestionnairePanel = new DisplayQuestionnairePanel(null, new Dimension(1200, r.height));
                     try {
                         displayQuestionnairePanel.displayQuestions(file);
-                    }
-                    catch (Exception e) {
+                    } catch (Exception e) {
                         displayQuestionnairePanel.displayQuestions(QuestionnaireTemplate.getTemplate());
                     }
                     questionPane = new JScrollPane((displayQuestionnairePanel));
+                    questionPane.getVerticalScrollBar().setUnitIncrement(16);
                     tabbedPane.remove(tabbedPane.indexOfTab("Questionnaire"));
                     tabbedPane.addTab("Questionnaire", questionPane);
 
@@ -1079,34 +1041,13 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
         disableBuiltinPracticeAction();
     }
 
-    //File dialog to select a file to be opened
-    public File fileOpenDialog() {
-        UIManager.getLookAndFeelDefaults().put("FileChooser.background", Color.white);
-        JFileChooser fc = new JFileChooser();
-        SwingUtilities.updateComponentTreeUI(fc);
-        fc.setCurrentDirectory(workingDir);
-        File file = null;
-        FileFilter filter1 = new ExtensionFileFilter("XML File", new String[]{"XML", "xm;"});
-        fc.setFileFilter(filter1);
-        int returnVal = fc.showOpenDialog(this);
-
-        if (returnVal == JFileChooser.APPROVE_OPTION) {
-            file = fc.getSelectedFile();
-        }
-        if (file != null) {
-            return file;
-        } else {
-            return null;
-        }
-    }
 
     public File ConfigOpenDialog() {
 
         JFileChooser fc = new JFileChooser();
         fc.setCurrentDirectory(workingDir);
         File file = null;
-        //   FileFilter filter1 = new ExtensionFileFilter("XML File", new String[]{"XML", "xm;"});
-        //   fc.setFileFilter(filter1);
+
         int returnVal = fc.showOpenDialog(this);
 
         if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -1140,11 +1081,53 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
         return chooser.getSelectedFile();
     }
 
+
+    public File newOrExistingFileDialog(String title) {
+        JFileChooser fc = new JFileChooser(workingDir) {
+            @Override
+            public void approveSelection() {
+
+                File f = getSelectedFile();
+
+                if (!f.exists()) {
+                    workingDir = f.getParentFile();
+                    int result = JOptionPane.showConfirmDialog(this, "The filename you entered doesn't exist, do you want this file to be created?", "Not existing file", JOptionPane.YES_NO_CANCEL_OPTION);
+                    switch (result) {
+                        case JOptionPane.YES_OPTION:
+                            super.approveSelection();
+                            return;
+                        case JOptionPane.NO_OPTION:
+                            return;
+                        case JOptionPane.CANCEL_OPTION:
+                            super.cancelSelection();
+                            return;
+                    }
+                }
+                super.approveSelection();
+            }
+        };
+        fc.setDialogTitle(title);
+        fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        FileFilter filter1 = new ExtensionFileFilter("XML File", new String[]{"XML", "xml;"});
+        fc.setFileFilter(filter1);
+        int returnVal = fc.showOpenDialog(this);
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            File f = fc.getSelectedFile();
+            String suffix = f.getAbsolutePath().substring(f.getAbsolutePath().length()-4);
+            if(!suffix.equalsIgnoreCase(".xml")) {
+                f = new File(f.getAbsolutePath()+".xml");
+            }
+            return f;
+        } else {
+            return null;
+        }
+    }
+
+
     public File fileSaveDialog(String file) {
         File export = new File(file);
         JFileChooser fc = new JFileChooser(workingDir) {
             @Override
-
             public void approveSelection() {
 
                 File f = getSelectedFile();
@@ -1166,8 +1149,6 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
             }
         };
         fc.setSelectedFile(export);
-        //   FileFilter filter1 = new ExtensionFileFilter("CSV File", new String[]{"CSV", "csv"});
-        //   fc.setFileFilter(filter1);
         int returnVal = fc.showSaveDialog(this);
         if (returnVal == JFileChooser.APPROVE_OPTION)
 
@@ -1226,6 +1207,9 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
             inputDataStepSize.setText("9");
         }
         inputLangFile.setText(config.getValue("LanguageFile"));
+        if(inputLangFile.getText().length()>0) {
+            tabbedPane.setEnabledAt(tabbedPane.indexOfTab("Language File"), true);
+        }
         File langFile = new File(workingDir.getAbsoluteFile() + File.separator + inputLangFile.getText() + File.separator);
         htmlEditPanel.setDocument(langFile);
         inputNeutralDir.setText(config.getValue("NeutralDir"));
@@ -1237,20 +1221,6 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
 
         inputPullTag.setText(config.getValue("PullTag"));
         inputPushTag.setText(config.getValue("PushTag"));
-        inputQuestionFile.setText(config.getValue("Questionnaire"));
-        System.out.println("Q2 File " + inputQuestionFile.getText());
-        Rectangle r = this.getBounds();
-        displayQuestionnairePanel = new DisplayQuestionnairePanel(null, new Dimension(r.width, r.height));
-        try {
-            displayQuestionnairePanel.displayQuestions(new File(workingDir + File.separator + inputQuestionFile.getText()));
-        } catch (Exception e) {
-            inputQuestionFile.setText(""); //Invalid questionnaire. So clear that input field
-        }
-        questionPane = new JScrollPane((displayQuestionnairePanel));
-        tabbedPane.remove(tabbedPane.indexOfTab("Questionnaire"));
-        tabbedPane.addTab("Questionnaire", questionPane);
-        revalidate();
-        repaint();
         inputStepSize.setText(config.getValue("StepSize"));
 
         if (config.getValue("MaxSizePerc").equals("")) {
@@ -1284,6 +1254,21 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
 
         } else {
             selectQL.setEnabled(true);
+            inputQuestionFile.setText(config.getValue("Questionnaire"));
+            Rectangle r = this.getBounds();
+            displayQuestionnairePanel = new DisplayQuestionnairePanel(null, new Dimension(r.width, r.height));
+            try {
+                displayQuestionnairePanel.displayQuestions(new File(workingDir + File.separator + inputQuestionFile.getText()));
+            } catch (Exception e) {
+                inputQuestionFile.setText(""); //Invalid questionnaire. So clear that input field
+                tabbedPane.setEnabledAt(tabbedPane.indexOfTab("Questionnaire"), false);
+            }
+            questionPane = new JScrollPane((displayQuestionnairePanel));
+            questionPane.getVerticalScrollBar().setUnitIncrement(16);
+            tabbedPane.remove(tabbedPane.indexOfTab("Questionnaire"));
+            tabbedPane.addTab("Questionnaire", questionPane);
+            revalidate();
+            repaint();
         }
         String showBoxPlot = config.getValue("ShowBoxPlot");
         if (showBoxPlot.equals("True")) {
@@ -1401,8 +1386,13 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
         if (inputBoxplot.isSelected()) {
             configuration.setShowBoxPlot(true);
         }
-        configuration.setDisplayQuestions(inputQuestions.getSelectedItem().toString());
-        configuration.setQuestionnaireFile(createFullPathFile(inputQuestionFile.getText()));
+        if(inputQuestionFile.getText().length() >0) {
+            configuration.setDisplayQuestions(inputQuestions.getSelectedItem().toString());
+            configuration.setQuestionnaireFile(createFullPathFile(inputQuestionFile.getText()));
+        }
+        else {
+            configuration.setDisplayQuestions("None");
+        }
         configuration.setLanguageFile(createFullPathFile(inputLangFile.getText()));
         if (inputColoredBorder.isSelected()) {
             configuration.setColoredBorders(true);
@@ -1441,12 +1431,15 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
     //TODO add  "PlotType"
 
     public File createFullPathFile(String file) {
-        File f = new File(file);
-        if (f.isAbsolute()) {
-            return new File(FileUtils.getRelativePath(workingDir, f));
-        } else {
-            return new File(workingDir + File.separator + file);
+        if(file.length()>0) {
+            File f = new File(file);
+            if (f.isAbsolute()) {
+                return new File(FileUtils.getRelativePath(workingDir, f));
+            } else {
+                return new File(workingDir + File.separator + file);
+            }
         }
+        else return new File("");
     }
 
 

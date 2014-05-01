@@ -109,36 +109,6 @@ public abstract class AbstractAAT {
 
     public abstract ArrayList<AATImage> createRandomListNoBorders();
 
-    public boolean imageComplete(File neutral, File affective) {
-        int aCount = 0;
-        int nCount = 0;
-
-        ArrayList<File> aDisk = FileUtils.getImages(affective);
-        ArrayList<File> nDisk = FileUtils.getImages(neutral);
-        ArrayList<String> aFiles = XMLReader.getIncludedFiles(affective);
-        ArrayList<String> nFiles = XMLReader.getIncludedFiles(neutral);
-        for (File f : aDisk) {
-            System.out.println("Looking for " + f.getName());
-            if (aFiles.contains(f.getName())) {
-                aCount++;
-            }
-
-        }
-        for (File f : nDisk) {
-            System.out.println("Looking for " + f.getName());
-            if (nFiles.contains(f.getName())) {
-                nCount++;
-            }
-
-            System.out.println("Counted A " + aCount + " disk " + aFiles.size() + "Counted N " + nCount + " disk " + nFiles.size());
-        }
-        if (nCount == nFiles.size() && aCount == aFiles.size()) {
-            return true;
-        }
-
-        return false;
-    }
-
     public String getTranslation(String element) {
         return translations.get(element);
     }

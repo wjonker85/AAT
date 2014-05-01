@@ -291,7 +291,7 @@ public class ImageSelectionPanel extends JPanel {
     private void refreshTables() {
         ArrayList<File> imageFilesA = getImages(aDir);
         ArrayList<File> imageFilesN = getImages(nDir);
-
+        System.out.println("REFRESH "+aDir.getAbsolutePath());
         ArrayList<String> aFiles = reader.getIncludedFiles(aDir);  //These lists contain the files that were specified for this test.
         ArrayList<String> nFiles = reader.getIncludedFiles(nDir);
 

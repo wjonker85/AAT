@@ -116,7 +116,7 @@ public class XMLReader {
                     if (type.equalsIgnoreCase("closed_combo")) {
                         newQuestion = new ClosedComboQuestion();
 
-                    } else if (type.equalsIgnoreCase("closed_buttons")) {
+                    } else if (type.equalsIgnoreCase("closed_button")) {
                         newQuestion = new ClosedButtonQuestion();
                     }
                     if (newQuestion != null) {
@@ -188,6 +188,7 @@ public class XMLReader {
 
         try {
             File xmlFile = new File(dir.getAbsoluteFile() + File.separator + "included.xml");
+            System.out.println("XMLFILE "+xmlFile.getAbsolutePath());
             if (!xmlFile.exists()) {        //Create the included.xml files when they are not present. Done for backwards compatibility with older versions of the test.
                 System.out.println("Included.xml doesn't exist, creating one.");
                 XMLWriter.writeXMLImagesList(dir);

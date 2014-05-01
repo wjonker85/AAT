@@ -49,17 +49,17 @@ public class QuestionEditFrame extends JFrame {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 System.out.println("OK button pressed");
-                //  if (editPanel.validated() && editPanel.getQuestion().getKey().length() > 0 && editPanel.getQuestion().getQuestion().length() > 0) {
+                if (editPanel.getQuestion().getKey().length() > 0 && editPanel.getQuestion().getQuestion().length() > 0) {
                 System.out.println(questionnaireModel.getPos() + " " + questionnaireModel.countObservers());
                 questionnaireModel.setNewQuestion(editPanel.getQuestion());
 
-                //   } else if (editPanel.getQuestion().getKey().length() == 0) {
-                ///        JOptionPane.showConfirmDialog(null, "Question label needs to be set.", "Validation Error", JOptionPane.ERROR_MESSAGE);
-                //   } else {
-                //        if (editPanel.getQuestion().getQuestion().length() == 0) {
-                //           JOptionPane.showConfirmDialog(null, "Question is empty.", "Validation Error", JOptionPane.ERROR_MESSAGE);
-                //       }
-                // }
+                   } else if (editPanel.getQuestion().getKey().length() == 0) {
+                        JOptionPane.showMessageDialog(null, "Question label needs to be set.", "Validation Error", JOptionPane.ERROR_MESSAGE);
+                   } else {
+                        if (editPanel.getQuestion().getQuestion().length() == 0) {
+                           JOptionPane.showMessageDialog(null, "Question is empty.", "Validation Error", JOptionPane.ERROR_MESSAGE);
+                       }
+                 }
             }
         });
         buttonPanel.add(okButton);

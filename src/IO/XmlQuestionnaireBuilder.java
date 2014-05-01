@@ -27,6 +27,7 @@ public class XmlQuestionnaireBuilder implements IVoidQuestionVisitor {
             Element optionNode = doc.createElement("option");
             Text optionNodeTxt = doc.createTextNode(option);
             optionNode.appendChild(optionNodeTxt);
+            questionNode.appendChild(optionNode);
         }
         addkeyToElement(question,questionNode);
     }
@@ -98,7 +99,7 @@ public class XmlQuestionnaireBuilder implements IVoidQuestionVisitor {
     @Override
     public void Visit(OpenTextAreaQuestion question) {
         Element questionNode = this.createBaseElement(question);
-        questionNode.setAttribute("type","testArea");
+        questionNode.setAttribute("type","textArea");
         addkeyToElement(question,questionNode);
 
     }

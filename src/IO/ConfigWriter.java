@@ -169,11 +169,15 @@ public class ConfigWriter {
         pw.println();
         pw.println();
         System.out.println("WORKING "+configuration.getWorkingDir()+" "+configuration.getAffectiveDir());
-        pw.write("AffectiveDir " + FileUtils.getRelativePath(configuration.getWorkingDir(),configuration.getAffectiveDir()));
+        if(configuration.getAffectiveDir().exists()) {
+            pw.write("AffectiveDir " + FileUtils.getRelativePath(configuration.getWorkingDir(), configuration.getAffectiveDir()));
+        }
         pw.println();
-        pw.write("NeutralDir " + FileUtils.getRelativePath(configuration.getWorkingDir(),configuration.getNeutralDir()));
+        if(configuration.getNeutralDir().exists()) {
+            pw.write("NeutralDir " + FileUtils.getRelativePath(configuration.getWorkingDir(), configuration.getNeutralDir()));
+        }
         pw.println();
-        if (configuration.getPracticeDir().length() > 0) {
+        if (configuration.getPracticeDir().exists()) {
             pw.write("PracticeDir " + FileUtils.getRelativePath(configuration.getWorkingDir(),configuration.getPracticeDir()));
             pw.println();
         } else {

@@ -13,6 +13,7 @@ public class QuestionnaireModel extends Observable {
     private AbstractQuestion newQuestion;
     private QuestionEditFrame currentEditFrame;
     private int pos;
+    private boolean insert = false;
     public static final String[] Types = {"Likert Scale", "Semantic differential", "Closed question (combo-box)", "Closed question (buttons)", "Open question", "Open question with text area"};
     private static final AbstractQuestion[] QuestionClasses = {new LikertQuestion(),new SemDiffQuestion(),new ClosedComboQuestion(),new ClosedButtonQuestion(),new OpenQuestion(),new OpenTextAreaQuestion() };
 
@@ -35,6 +36,10 @@ public class QuestionnaireModel extends Observable {
         }
     }
 
+    public void setInsertMode(boolean insert) {
+        this.insert = insert;
+    }
+
     public AbstractQuestion getOriginalQuestion() {
         return original;
     }
@@ -44,10 +49,17 @@ public class QuestionnaireModel extends Observable {
     }
 
     public void setNewQuestion(AbstractQuestion newQuestion) {
-        if (!newQuestion.equals(original)) {
+        if(!insert) {
+            if (!newQuestion.equals(original)) {
+                this.newQuestion = newQuestion;
+                this.setChanged();
+                this.notifyObservers("submit");
+            }
+        }
+        else {
             this.newQuestion = newQuestion;
             this.setChanged();
-            this.notifyObservers("submit");
+            this.notifyObservers("insert");
         }
     }
 
