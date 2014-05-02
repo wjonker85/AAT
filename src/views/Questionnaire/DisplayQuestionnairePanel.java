@@ -318,8 +318,11 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
     }
 
     public void ChangeIntroduction(String intro) {
-        introductionPane.setText(intro);
         questionnaire.setIntroduction(intro);
+        questionnaireModel = null;
+        currentEditor = null;
+        questionsPanel.removeAll();
+        displayQuestions(questionnaire);
         introductionPane.requestFocus();
     }
 
@@ -345,7 +348,7 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
             currentEditor = null;
             questionsPanel.removeAll();
             displayQuestions(questionnaire);
-//            qPanes.get(questionnaire.getExtraQuestions().get(questionnaireModel.getPos()).getKey()).setFocus();
+
         } else if (o.toString().equals("type changed")) {
             currentEditor.dispose();
             currentEditor = null;
@@ -386,16 +389,15 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
             StyleSheet styleSheet = kit.getStyleSheet();
             styleSheet.addRule("h2 {color: white; font-family:times; margin: 0px; background-color: black;font : 24px monaco;}");
             editor.setDocument(kit.createDefaultDocument());
-            Dimension screen = getToolkit().getScreenSize();
-            editor.setMinimumSize(new Dimension((int) (resolution.width * 0.6), 40));
+            editor.setMinimumSize(new Dimension((int) (resolution.width * 0.6), 50));
+       //     editor.setPreferredSize(new Dimension((int) (resolution.width * 0.6), 96));
             layers.setBackground(Color.BLACK);
 
-            //  setFont(new Font("Roman", Font.PLAIN, 24));
             layers.add(editor, JLayeredPane.DEFAULT_LAYER);
             layers.setBorder(null);
             if (editMode) {
                 editor.addMouseListener(this);
-                editor.setMaximumSize(new Dimension((int) (resolution.width * 0.6), 900));
+                editor.setMaximumSize(new Dimension((int) (resolution.width * 0.6), 1100));
                 buttonPanel = new JPanel();
                 buttonPanel.setOpaque(false);
                 buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
@@ -407,7 +409,6 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
                                 java.awt.Image.SCALE_SMOOTH)))));
                 editButton.setPreferredSize(new Dimension(48, 48));
                 editButton.setBackground(buttonBackColor);
-                //new JButton("document-edit22x22.png");
                 editButton.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent actionEvent) {
@@ -417,30 +418,21 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
                 });
 
                 buttonPanel.add(editButton);
-                layers.add(buttonPanel, JLayeredPane.PALETTE_LAYER);
-                buttonPanel.setBounds((screen.width / 3) - 135, 0, 0, 25);
                 buttonPanel.addMouseListener(this);
                 buttonPanel.setEnabled(true);
                 buttonPanel.setVisible(false);
                 buttonPanel.setBorder(null);
+                buttonPanel.setBounds(editor.getWidth()-60, 48, 48, 48);
                 layers.add(buttonPanel, JLayeredPane.PALETTE_LAYER);
-                buttonPanel.setBounds(0, 0, 125, 64);
-                buttonPanel.addMouseListener(this);
+                 layers.addMouseListener(this);
                 editButton.addMouseListener(this);
             }
-
             this.add(layers);
-            revalidate();
-
         }
 
         public void setText(String text) {
-            //    editor.setText("<body bgcolor=\"black\"><h2>" + text + "</h2></body>");
             editor.setText("<body bgcolor=\"black\">" + text + "</body>");
             editor.setEditable(false);
-            System.out.println(editor.getText());
-            revalidate();
-            repaint();
         }
 
         @Override
