@@ -2,8 +2,6 @@ package views.Questionnaire.QuestionEditPanels;
 
 import DataStructures.Questionnaire.*;
 
-import javax.swing.*;
-
 /**
  * Created by marcel on 3/25/14.
  */

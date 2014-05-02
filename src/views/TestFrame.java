@@ -54,7 +54,7 @@ public class TestFrame extends JFrame implements Observer {
         cl = new CardLayout();
         displayPanel = new JPanel(cl);
         Dimension screen = getToolkit().getScreenSize();
-        questionsView = new DisplayQuestionnairePanel(model,new Dimension((int) (0.8 * screen.width), (int) (0.75 * screen.height)));
+        questionsView = new DisplayQuestionnairePanel(model, new Dimension((int) (0.8 * screen.width), (int) (0.75 * screen.height)));
         aatView = new AATView(model);
         boxPlot = new BoxPlot(model);
         plotPanel = new PlotPanel(model);
@@ -138,11 +138,10 @@ public class TestFrame extends JFrame implements Observer {
                 } catch (Exception e) {
                     System.out.println("Error: Boxplot cannot be shown");
                 }
-            }
-            else {
+            } else {
                 setCursor(Cursor.getDefaultCursor());
                 plotPanel.displayPlot(true);
-                cl.show(displayPanel,"plot");
+                cl.show(displayPanel, "plot");
             }
         }
 

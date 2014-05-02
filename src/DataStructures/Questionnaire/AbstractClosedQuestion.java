@@ -9,7 +9,7 @@ public abstract class AbstractClosedQuestion extends AbstractQuestion {
 
     private ArrayList<String> options;
 
-    public AbstractClosedQuestion()   {
+    public AbstractClosedQuestion() {
         options = new ArrayList<String>();
     }
 

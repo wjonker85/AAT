@@ -13,7 +13,7 @@ public class SemDiffPanel extends AbstractQuestionPanel {
     private int size;
 
 
-    public SemDiffPanel(int size, String left,int leftLabelWidth, String right, boolean isRequired) {
+    public SemDiffPanel(int size, String left, int leftLabelWidth, String right, boolean isRequired) {
         super();
         this.isRequired = isRequired;
         this.size = size;
@@ -26,7 +26,7 @@ public class SemDiffPanel extends AbstractQuestionPanel {
         buttonPanel.setBackground(Color.black);
         JLabel leftLabel = new JLabel(left, JLabel.RIGHT);
         leftLabel.setForeground(Color.WHITE);
-        leftLabel.setPreferredSize(new Dimension(leftLabelWidth,20));
+        leftLabel.setPreferredSize(new Dimension(leftLabelWidth, 20));
         leftLabel.setBackground(Color.black);
 
         this.add(leftLabel);

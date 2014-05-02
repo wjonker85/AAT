@@ -6,7 +6,7 @@ import DataStructures.Questionnaire.*;
  * Created by marcel on 4/4/14.
  * Visitor which gives the translation used in the selection combo box.
  */
-public class QuestionTypeVisitor implements IQuestionVisitor<String>{
+public class QuestionTypeVisitor implements IQuestionVisitor<String> {
     @Override
     public String Visit(ClosedButtonQuestion question) {
         return "Closed question (buttons)";

@@ -60,7 +60,7 @@ public class AATImage {
         }
 
         name = imageFile.getName();
-        System.out.println("Adding image 1 "+imageFile.getAbsoluteFile());
+        System.out.println("Adding image 1 " + imageFile.getAbsoluteFile());
         this.image = loadImage(imageFile, newAAT.getTestConfiguration().getImageSizePerc());
     }
 
@@ -73,12 +73,11 @@ public class AATImage {
             borderColor = new Color(intValue);
             borderWidth = newAAT.getTestConfiguration().getBorderWidth();
             name = imageFile.getName() + "_" + repeat;
-        }
-        else {
+        } else {
             name = imageFile.getName();
         }
 
-        System.out.println("Adding image 2 "+name);
+        System.out.println("Adding image 2 " + name);
         this.image = loadImage(imageFile, newAAT.getTestConfiguration().getImageSizePerc());
 
 

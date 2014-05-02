@@ -4,7 +4,10 @@ import AAT.Configuration.TestConfiguration;
 import IO.ConfigFileReader;
 
 import javax.swing.*;
-import java.io.*;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -29,9 +32,8 @@ public class AATValidator {
         try {
             testConfigurationMap = createValidatedConfigMap(config);
             testConfigurationMap.isValidated();
-        }
-        catch (FalseConfigException e) {
-            JOptionPane.showMessageDialog(null,e.getMessage(),"Configuration Error2",JOptionPane.ERROR_MESSAGE);
+        } catch (FalseConfigException e) {
+            JOptionPane.showMessageDialog(null, e.getMessage(), "Configuration Error2", JOptionPane.ERROR_MESSAGE);
             return null;
         }
         return ConfigurationFiller.fillTestConfiguration(testConfigurationMap);
@@ -49,16 +51,16 @@ public class AATValidator {
 
         //Set these to default values. Can be left empty in the configuration file
         String defaultRatio = "1:1";
-        testConfigurationMap.GetSetConfigOption("PracticeDir",new File(""));
-        testConfigurationMap.GetSetConfigOption("PullTag","");
-        testConfigurationMap.GetSetConfigOption("PushTag","");
-        testConfigurationMap.GetSetConfigOption("Questionnaire",new File(""));
-        testConfigurationMap.GetSetConfigOption("AffectRatio",defaultRatio);
+        testConfigurationMap.GetSetConfigOption("PracticeDir", new File(""));
+        testConfigurationMap.GetSetConfigOption("PullTag", "");
+        testConfigurationMap.GetSetConfigOption("PushTag", "");
+        testConfigurationMap.GetSetConfigOption("Questionnaire", new File(""));
+        testConfigurationMap.GetSetConfigOption("AffectRatio", defaultRatio);
         testConfigurationMap.GetSetConfigOption("NeutralRatio", defaultRatio);
         testConfigurationMap.GetSetConfigOption("TestRatio", defaultRatio);
         testConfigurationMap.GetSetConfigOption("TrialSize", -1);
         testConfigurationMap.GetSetConfigOption("MaxSizePerc", 100);
-        testConfigurationMap.GetSetConfigOption("ImageSizePerc",50);
+        testConfigurationMap.GetSetConfigOption("ImageSizePerc", 50);
 
         //Check for the ID value
         String idValue = "1";
@@ -102,7 +104,7 @@ public class AATValidator {
                 }
             }
         });
-        if(!displayQuestions.getValue().equals("None")) {
+        if (!displayQuestions.getValue().equals("None")) {
             TestConfigurationOption<File> questionnaireFile = testConfigurationMap.GetSetConfigOption("Questionnaire", createFullPathFile(configFileReader.getValue("Questionnaire")));
             questionnaireFile.addValidator(new FileExistsValidator("Questionnaire"));
         }
@@ -169,7 +171,6 @@ public class AATValidator {
         }
 
 
-
         //--------------------- Advanced options  ----------------------------------------------------------------------------------------
         testConfigurationMap.GetSetConfigOption("PlotType", configFileReader.getPlotType(configFileReader.getValue("PlotType")));
         if (!configFileReader.getValue("AffectRatio").equals("")) {
@@ -178,7 +179,7 @@ public class AATValidator {
         }
 
         if (!configFileReader.getValue("NeutralRatio").equals("")) {
-           TestConfigurationOption<String> neutralRatio =  testConfigurationMap.GetSetConfigOption("NeutralRatio",configFileReader.getValue("NeutralRatio"));
+            TestConfigurationOption<String> neutralRatio = testConfigurationMap.GetSetConfigOption("NeutralRatio", configFileReader.getValue("NeutralRatio"));
             neutralRatio.addValidator(new RatioValidator("NeutralRatio"));
         }
 
@@ -270,12 +271,11 @@ public class AATValidator {
     }
 
     public static File createFullPathFile(String file) {
-        System.out.println("Test "+file);
+        System.out.println("Test " + file);
         File f = new File(file);
-        if(f.isAbsolute()) {
+        if (f.isAbsolute()) {
             return f;
-        }
-        else {
+        } else {
             return new File(workingDir + File.separator + file);
         }
     }
@@ -299,7 +299,7 @@ class ImageDirectoryValidator implements IConfigValidator<File> {
     }
 }
 
-class RatioValidator implements  IConfigValidator<String> {
+class RatioValidator implements IConfigValidator<String> {
 
     private String label;
 
@@ -311,28 +311,26 @@ class RatioValidator implements  IConfigValidator<String> {
     public void validate(String s) throws FalseConfigException {
         String[] splitted = s.split(":");
         boolean valid = true;
-        if(!s.contains(":")) {
+        if (!s.contains(":")) {
             valid = false;
         }
-        if(splitted.length>2) {
+        if (splitted.length > 2) {
             valid = false;
         }
         try {
             Integer.parseInt(splitted[0]);
 
-        }
-        catch(Exception e) {
+        } catch (Exception e) {
             valid = false;
         }
         try {
             Integer.parseInt(splitted[1]);
 
-        }
-        catch(Exception e) {
+        } catch (Exception e) {
             valid = false;
         }
-        if(!valid) {
-            throw new FalseConfigException("The ratio for "+label +" is not in a correct format "+s);
+        if (!valid) {
+            throw new FalseConfigException("The ratio for " + label + " is not in a correct format " + s);
         }
     }
 }
@@ -413,7 +411,7 @@ class FileExistsValidator implements IConfigValidator<File> {
 
     @Override
     public void validate(File file) throws FalseConfigException {
-        System.out.println("Validating file "+file.getName());
+        System.out.println("Validating file " + file.getName());
         if (file.getName().length() == 0 || !file.exists() || file.isDirectory()) {
             throw new FalseConfigException(type + " is not configured properly.");
         }

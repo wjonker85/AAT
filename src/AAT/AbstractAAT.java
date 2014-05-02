@@ -18,11 +18,10 @@
 package AAT;
 
 
-import AAT.Util.FileUtils;
+import AAT.Configuration.TestConfiguration;
 import AAT.Configuration.Validation.FalseConfigException;
 import DataStructures.AATImage;
 import DataStructures.Questionnaire.Questionnaire;
-import AAT.Configuration.TestConfiguration;
 import IO.XMLReader;
 
 import java.io.File;
@@ -64,30 +63,30 @@ public abstract class AbstractAAT {
      */
     public AbstractAAT(TestConfiguration testConfiguration) throws FalseConfigException {
 
-       try {
-        this.testConfiguration = testConfiguration;
-        System.out.println("TestConfig "+testConfiguration.getPullTag());
-    //    System.out.println("bla "+testConfiguration.getNeutralDir().getAbsolutePath());
-        neutralImages = XMLReader.getIncludedFilesF(testConfiguration.getNeutralDir());
-        if (neutralImages.size() == 0) {
-            throw new FalseConfigException("Neutral images directory contains no images");
-        }
-        //    affectiveImages = getImages(affectiveDir);
-        affectiveImages = XMLReader.getIncludedFilesF(testConfiguration.getAffectiveDir());
-        if (affectiveImages.size() == 0) {
-            throw new FalseConfigException("Affective images directory contains no images");
-        }
-        if (testConfiguration.getPracticeDir().exists()) {
-            practiceImages = XMLReader.getIncludedFilesF(testConfiguration.getPracticeDir());
-        }
-        a_pushPerc = getPercentage(testConfiguration.getAffectRatio(), "Affect");
-        n_pushPerc = getPercentage(testConfiguration.getNeutralRatio(), "Neutral");
-        affectPerc = getPercentage(testConfiguration.getTestRatio(), "Test");
-        if (testConfiguration.getQuestionnaireFile().exists()) {
-            questionnaire = XMLReader.getQuestionnaire(testConfiguration.getQuestionnaireFile());
-        }
-        translations = XMLReader.getTranslations(testConfiguration.getLanguageFile());
-       } catch (Exception e) {
+        try {
+            this.testConfiguration = testConfiguration;
+            System.out.println("TestConfig " + testConfiguration.getPullTag());
+            //    System.out.println("bla "+testConfiguration.getNeutralDir().getAbsolutePath());
+            neutralImages = XMLReader.getIncludedFilesF(testConfiguration.getNeutralDir());
+            if (neutralImages.size() == 0) {
+                throw new FalseConfigException("Neutral images directory contains no images");
+            }
+            //    affectiveImages = getImages(affectiveDir);
+            affectiveImages = XMLReader.getIncludedFilesF(testConfiguration.getAffectiveDir());
+            if (affectiveImages.size() == 0) {
+                throw new FalseConfigException("Affective images directory contains no images");
+            }
+            if (testConfiguration.getPracticeDir().exists()) {
+                practiceImages = XMLReader.getIncludedFilesF(testConfiguration.getPracticeDir());
+            }
+            a_pushPerc = getPercentage(testConfiguration.getAffectRatio(), "Affect");
+            n_pushPerc = getPercentage(testConfiguration.getNeutralRatio(), "Neutral");
+            affectPerc = getPercentage(testConfiguration.getTestRatio(), "Test");
+            if (testConfiguration.getQuestionnaireFile().exists()) {
+                questionnaire = XMLReader.getQuestionnaire(testConfiguration.getQuestionnaireFile());
+            }
+            translations = XMLReader.getTranslations(testConfiguration.getLanguageFile());
+        } catch (Exception e) {
             throw new FalseConfigException(e.getMessage());
         }
     }

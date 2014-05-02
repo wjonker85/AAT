@@ -10,65 +10,65 @@ import java.util.HashMap;
  */
 public class TestConfigurationMap<TKey> {
 
-        private HashMap<TKey, TestConfigurationOption<String>> StringOptions;
-        private HashMap<TKey, TestConfigurationOption<Integer>> IntegerOptions;
-        private HashMap<TKey, TestConfigurationOption<Boolean>> BoolOptions;
-        private HashMap<TKey,TestConfigurationOption<File>> FileOptions;
+    private HashMap<TKey, TestConfigurationOption<String>> StringOptions;
+    private HashMap<TKey, TestConfigurationOption<Integer>> IntegerOptions;
+    private HashMap<TKey, TestConfigurationOption<Boolean>> BoolOptions;
+    private HashMap<TKey, TestConfigurationOption<File>> FileOptions;
 
-        public TestConfigurationMap() {
-            StringOptions = new HashMap<TKey, TestConfigurationOption<String>>();
-            IntegerOptions = new HashMap<TKey, TestConfigurationOption<Integer>>();
-            BoolOptions = new HashMap<TKey, TestConfigurationOption<Boolean>>();
-            FileOptions = new HashMap<TKey, TestConfigurationOption<File>>();
+    public TestConfigurationMap() {
+        StringOptions = new HashMap<TKey, TestConfigurationOption<String>>();
+        IntegerOptions = new HashMap<TKey, TestConfigurationOption<Integer>>();
+        BoolOptions = new HashMap<TKey, TestConfigurationOption<Boolean>>();
+        FileOptions = new HashMap<TKey, TestConfigurationOption<File>>();
+    }
+
+    public TestConfigurationOption<String> GetSetConfigOption(TKey key, String value) throws FalseConfigException {
+        TestConfigurationOption<String> option = new TestConfigurationOption<String>(value);
+        System.out.println("Adding or getting config option " + key + " with value " + String.valueOf(value));
+        if (!contains(key)) {
+            StringOptions.put(key, option);
+        } else if (StringOptions.containsKey(key)) {
+            option = StringOptions.get(key);
+            option.setValue(value);
+        } else {
+            throw new FalseConfigException(String.valueOf(key) + " already exists as a different data type");
         }
+        return option;
 
-        public TestConfigurationOption<String> GetSetConfigOption(TKey key, String value) throws FalseConfigException {
-            TestConfigurationOption<String> option = new TestConfigurationOption<String>(value);
-            System.out.println("Adding or getting config option "+key+" with value "+String.valueOf(value));
-            if (!contains(key)) {
-                StringOptions.put(key, option);
-            } else if (StringOptions.containsKey(key)) {
-                option = StringOptions.get(key);
-                option.setValue(value);
-            } else {
-                throw new FalseConfigException(String.valueOf(key) + " already exists as a different data type");
-            }
-            return option;
+    }
 
+    public TestConfigurationOption<Integer> GetSetConfigOption(TKey key, int value) throws FalseConfigException {
+        TestConfigurationOption<Integer> option = new TestConfigurationOption<Integer>(value);
+        System.out.println("Adding or getting config option " + key + " with value " + String.valueOf(value));
+        if (!contains(key)) {
+            IntegerOptions.put(key, option);
+        } else if (IntegerOptions.containsKey(key)) {
+            option = IntegerOptions.get(key);
+            option.setValue(value);
+        } else {
+            throw new FalseConfigException(String.valueOf(key) + " already exists as a different data type");
         }
+        return option;
+    }
 
-        public TestConfigurationOption<Integer> GetSetConfigOption(TKey key, int value) throws FalseConfigException {
-            TestConfigurationOption<Integer> option = new TestConfigurationOption<Integer>(value);
-            System.out.println("Adding or getting config option "+key+" with value "+String.valueOf(value));
-            if (!contains(key)) {
-                IntegerOptions.put(key, option);
-            } else if (IntegerOptions.containsKey(key)) {
-                option = IntegerOptions.get(key);
-                option.setValue(value);
-            } else {
-                throw new FalseConfigException(String.valueOf(key) + " already exists as a different data type");
-            }
-            return option;
+    public TestConfigurationOption<Boolean> GetSetConfigOption(TKey key, boolean value) throws FalseConfigException {
+        TestConfigurationOption<Boolean> option = new TestConfigurationOption<Boolean>(value);
+        System.out.println("Adding or getting config option " + key + " with value " + String.valueOf(value));
+        if (!contains(key)) {
+            BoolOptions.put(key, option);
+        } else if (BoolOptions.containsKey(key)) {
+            option = BoolOptions.get(key);
+            option.setValue(value);
+
+        } else {
+            throw new FalseConfigException(String.valueOf(key) + " already exists as a different data type");
         }
-
-        public TestConfigurationOption<Boolean> GetSetConfigOption(TKey key, boolean value) throws FalseConfigException {
-            TestConfigurationOption<Boolean> option = new TestConfigurationOption<Boolean>(value);
-            System.out.println("Adding or getting config option "+key+" with value "+String.valueOf(value));
-            if (!contains(key)) {
-                BoolOptions.put(key, option);
-            } else if (BoolOptions.containsKey(key)) {
-                option = BoolOptions.get(key);
-                option.setValue(value);
-
-            } else {
-                throw new FalseConfigException(String.valueOf(key) + " already exists as a different data type");
-            }
-            return option;
-        }
+        return option;
+    }
 
     public TestConfigurationOption<File> GetSetConfigOption(TKey key, File value) throws FalseConfigException {
         TestConfigurationOption<File> option = new TestConfigurationOption<File>(value);
-        System.out.println("Adding or getting config option "+key+" with value "+String.valueOf(value));
+        System.out.println("Adding or getting config option " + key + " with value " + String.valueOf(value));
         if (!contains(key)) {
             FileOptions.put(key, option);
         } else if (FileOptions.containsKey(key)) {
@@ -89,55 +89,48 @@ public class TestConfigurationMap<TKey> {
         }
     }
 
-    public int getIntValue(TKey key) throws FalseConfigException{
-         if(IntegerOptions.containsKey(key)) {
-             return IntegerOptions.get(key).getValue();
-         }
-        else {
-             throw new FalseConfigException(String.valueOf(key) + " not found.");
-         }
+    public int getIntValue(TKey key) throws FalseConfigException {
+        if (IntegerOptions.containsKey(key)) {
+            return IntegerOptions.get(key).getValue();
+        } else {
+            throw new FalseConfigException(String.valueOf(key) + " not found.");
+        }
     }
 
-    public String getStringValue(TKey key) throws FalseConfigException{
-        if(StringOptions.containsKey(key)) {
+    public String getStringValue(TKey key) throws FalseConfigException {
+        if (StringOptions.containsKey(key)) {
             return StringOptions.get(key).getValue();
-        }
-        else {
+        } else {
             throw new FalseConfigException(String.valueOf(key) + " not found.");
         }
     }
 
-    public File getFileValue(TKey key) throws FalseConfigException{
-        if(FileOptions.containsKey(key)) {
-            System.out.println(key+" "+FileOptions.get(key).getValue());
+    public File getFileValue(TKey key) throws FalseConfigException {
+        if (FileOptions.containsKey(key)) {
+            System.out.println(key + " " + FileOptions.get(key).getValue());
             return FileOptions.get(key).getValue();
-        }
-        else {
+        } else {
             throw new FalseConfigException(String.valueOf(key) + " not found.");
         }
     }
 
-    public boolean getBooleanValue(TKey key) throws FalseConfigException{
-        if(BoolOptions.containsKey(key)) {
+    public boolean getBooleanValue(TKey key) throws FalseConfigException {
+        if (BoolOptions.containsKey(key)) {
             return BoolOptions.get(key).getValue();
-        }
-        else {
+        } else {
             throw new FalseConfigException(String.valueOf(key) + " not found.");
         }
     }
 
     public TestConfigurationOption<Object> getConfigOption(TKey key) {
-        if(this.contains(key)) {
-            if(BoolOptions.containsKey(key)) {
+        if (this.contains(key)) {
+            if (BoolOptions.containsKey(key)) {
                 return new TestConfigurationOption<Object>(BoolOptions.get(key).getValue());
-            }
-            else if(FileOptions.containsKey(key)) {
+            } else if (FileOptions.containsKey(key)) {
                 return new TestConfigurationOption<Object>(FileOptions.get(key).getValue());
-            }
-            else if(StringOptions.containsKey(key)) {
+            } else if (StringOptions.containsKey(key)) {
                 return new TestConfigurationOption<Object>(StringOptions.get(key).getValue());
-            }
-            else if(IntegerOptions.containsKey(key)) {
+            } else if (IntegerOptions.containsKey(key)) {
                 return new TestConfigurationOption<Object>(IntegerOptions.get(key).getValue());
             }
         }
@@ -145,7 +138,7 @@ public class TestConfigurationMap<TKey> {
     }
 
     public int getSize() {
-        return IntegerOptions.size() + StringOptions.size() + BoolOptions.size()+ FileOptions.size();
+        return IntegerOptions.size() + StringOptions.size() + BoolOptions.size() + FileOptions.size();
     }
 
     public boolean isValidated() throws FalseConfigException {
@@ -157,7 +150,7 @@ public class TestConfigurationMap<TKey> {
                 } catch (FalseConfigException e) {
                     throw e;
                 }
-                System.out.println("Config option "+option.getValue()+" validated OK");
+                System.out.println("Config option " + option.getValue() + " validated OK");
             }
         }
 
@@ -168,7 +161,7 @@ public class TestConfigurationMap<TKey> {
                 } catch (FalseConfigException e) {
                     throw e;
                 }
-                System.out.println("Config option "+option.getValue()+" validated OK");
+                System.out.println("Config option " + option.getValue() + " validated OK");
             }
         }
         for (TestConfigurationOption<Boolean> option : BoolOptions.values()) {
@@ -179,7 +172,7 @@ public class TestConfigurationMap<TKey> {
                 } catch (FalseConfigException e) {
                     throw e;
                 }
-                System.out.println("Config option "+option.getValue()+" validated OK");
+                System.out.println("Config option " + option.getValue() + " validated OK");
             }
 
         }
@@ -191,7 +184,7 @@ public class TestConfigurationMap<TKey> {
                 } catch (FalseConfigException e) {
                     throw e;
                 }
-                System.out.println("Config option "+option.getValue()+" validated OK");
+                System.out.println("Config option " + option.getValue() + " validated OK");
             }
         }
         return true;      //When no exception is thrown, test configuration is valid and loading can continue.
@@ -214,7 +207,7 @@ class TestConfigurationOption<TValue> implements IConfigOption<TValue> {
     @Override
     public void setValue(TValue value) {
         this.value = value;
-     }
+    }
 
     @Override
     public void addValidator(IConfigValidator<TValue> validator) {

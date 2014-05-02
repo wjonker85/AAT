@@ -11,7 +11,7 @@ public class LikertPanel extends AbstractQuestionPanel {
 
     private ButtonGroup likertScale;
 
-    public LikertPanel(int size, String left,int leftLabelWidth, String right, boolean isRequired) {
+    public LikertPanel(int size, String left, int leftLabelWidth, String right, boolean isRequired) {
         super();
         this.isRequired = isRequired;
         setLayout(new FlowLayout(FlowLayout.LEFT));
@@ -21,9 +21,9 @@ public class LikertPanel extends AbstractQuestionPanel {
         JLabel leftLabel = new JLabel(left, JLabel.RIGHT);
         leftLabel.setForeground(Color.WHITE);
         leftLabel.setBackground(Color.black);
-        leftLabel.setPreferredSize(new Dimension(leftLabelWidth,20));
+        leftLabel.setPreferredSize(new Dimension(leftLabelWidth, 20));
         this.add(leftLabel);
-        System.out.println("LEFFFT "+left+" "+leftLabel.getWidth());
+        System.out.println("LEFFFT " + left + " " + leftLabel.getWidth());
         this.add(Box.createHorizontalStrut(20));//20px margin
         likertScale = new ButtonGroup();
         JPanel buttonPanel = new JPanel(new GridLayout(2, size, 20, 0));

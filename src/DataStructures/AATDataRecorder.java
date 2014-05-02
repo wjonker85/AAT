@@ -70,11 +70,11 @@ public class AATDataRecorder {
         this.trials = newAAT.getTestConfiguration().getTrials();
 
         affLabel = newAAT.getTestConfiguration().getAffectiveDir().getName();
-        if(affLabel.contains(File.separator)) {
+        if (affLabel.contains(File.separator)) {
             affLabel = affLabel.substring(affLabel.lastIndexOf(File.separator));      //Only the last directory name for the affective category.
         }
         neutLabel = newAAT.getTestConfiguration().getNeutralDir().getName();
-        if(neutLabel.contains(File.separator)) {
+        if (neutLabel.contains(File.separator)) {
             neutLabel = neutLabel.substring(neutLabel.lastIndexOf(File.separator));
         }
         DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
@@ -91,19 +91,20 @@ public class AATDataRecorder {
             checkAndFixOldData(doc);
             if (!hasTestID(newAAT.getTestConfiguration().getTestID())) {
                 System.out.println("Test id not present in the data file, adding required test data to the data file");
-                addTestMetaData(newAAT.getTestConfiguration().getTestID(), trials, newAAT.centerPos(), newAAT.getTestConfiguration().getPullTag(), newAAT.getTestConfiguration().getPushTag(), affLabel, neutLabel, "Created on " + dateString,newAAT.getTestConfiguration().getColoredBorders()); //Add the current test_id and used image files to the data.xml file.
+                addTestMetaData(newAAT.getTestConfiguration().getTestID(), trials, newAAT.centerPos(), newAAT.getTestConfiguration().getPullTag(), newAAT.getTestConfiguration().getPushTag(), affLabel, neutLabel, "Created on " + dateString, newAAT.getTestConfiguration().getColoredBorders()); //Add the current test_id and used image files to the data.xml file.
             }
         } else {
             createXMLDOC();
             System.out.println("New data file created, adding test data");
-            addTestMetaData(newAAT.getTestConfiguration().getTestID(),trials, newAAT.centerPos(), newAAT.getTestConfiguration().getPullTag(), newAAT.getTestConfiguration().getPushTag(), affLabel, neutLabel, "Created on " + dateString,newAAT.getTestConfiguration().getColoredBorders());
+            addTestMetaData(newAAT.getTestConfiguration().getTestID(), trials, newAAT.centerPos(), newAAT.getTestConfiguration().getPullTag(), newAAT.getTestConfiguration().getPushTag(), affLabel, neutLabel, "Created on " + dateString, newAAT.getTestConfiguration().getColoredBorders());
         }
-      //  model.setDataLoaded();
+        //  model.setDataLoaded();
     }
 
     /**
      * This constructor can be used to create an instance of the AATDataRecorder object based on a data xml file. This is different from the other constructor
      * which uses the data belonging to a current loaded AAT.
+     *
      * @param dataFile
      * @param model
      */
@@ -143,7 +144,7 @@ public class AATDataRecorder {
                     trials = Integer.parseInt(test.getAttribute("trials"));
                     borders = Boolean.parseBoolean(test.getAttribute("generatedBorders"));
 
-                    metaData = new TestMetaData(test_id, trials, doc, labelA, labelN, pushTag, pullTag, centerPos,borders);
+                    metaData = new TestMetaData(test_id, trials, doc, labelA, labelN, pushTag, pullTag, centerPos, borders);
 
                 }
             }
@@ -178,6 +179,7 @@ public class AATDataRecorder {
 
     /**
      * Return the highest available test_id value
+     *
      * @return
      */
     public int getHighestTestID() {
@@ -221,7 +223,7 @@ public class AATDataRecorder {
         test.setAttribute("labelA", affLabel);
         test.setAttribute("labelN", neutLabel);
         test.setAttribute("centerPos", String.valueOf(centerPos));
-        test.setAttribute("generatedBorders",String.valueOf(borders));
+        test.setAttribute("generatedBorders", String.valueOf(borders));
         Element commentElement = doc.createElement("comment");
         Text commentValue = doc.createTextNode(comment);
         commentElement.appendChild(commentValue);
@@ -422,16 +424,15 @@ public class AATDataRecorder {
         for (int x = 0; x < participantsList.getLength(); x++) {
             Element participant = (Element) participantsList.item(x);
             if (!participant.hasAttribute("test_id")) {
-           //     System.out.println("Old version detected, first add test id 0 to the participants.");
+                //     System.out.println("Old version detected, first add test id 0 to the participants.");
                 upgrade = true;
                 participant.setAttribute("test_id", "-1");
             }
         }
         if (upgrade) {
-            LabelInputFrame labelFrame = new LabelInputFrame(getLabels(doc),getDirLabels(), this);
+            LabelInputFrame labelFrame = new LabelInputFrame(getLabels(doc), getDirLabels(), this);
             labelFrame.display();
-        }
-        else if(externalData) {
+        } else if (externalData) {
             model.setExportDocument(doc);
             model.setExportAATDataRecorder(this);
             model.setExport_idNoNotify(getHighestTestID());
@@ -443,10 +444,11 @@ public class AATDataRecorder {
     /**
      * Find the labels used for the pull and push images. Collects the tags used from the data file and adds them to an array.
      * Assumes that the push reaction is faster than the pull reaction.
+     *
      * @return
      */
     private String[] getDirLabels() {
-       String[] result = new String[2];
+        String[] result = new String[2];
         HashMap<String, imageObject> tagsMap = findTags(doc);
         //First find the two most used tags.
         imageObject largest = new imageObject();
@@ -490,15 +492,16 @@ public class AATDataRecorder {
     private void FixOldData() {
         NodeList participantsList = doc.getElementsByTagName("participant");
         System.out.println("Pull tag set to: " + pullTagOldData + " Push tag set to: " + pushTagOldData);
-        addUpgradeTestMetaData(doc, -1, getCenterPos(doc), pullTagOldData, pushTagOldData, getNoTrials(doc, -1), "Backed up data containing " + participantsList.getLength() + " participants.",oldTestHasColoredBorders());
-       if(externalData) {        //When this class is used for loading a separate data file, then notify the observers that the upgrade is ready.
-        model.setDataLoadedExport();
-       }
+        addUpgradeTestMetaData(doc, -1, getCenterPos(doc), pullTagOldData, pushTagOldData, getNoTrials(doc, -1), "Backed up data containing " + participantsList.getLength() + " participants.", oldTestHasColoredBorders());
+        if (externalData) {        //When this class is used for loading a separate data file, then notify the observers that the upgrade is ready.
+            model.setDataLoadedExport();
+        }
     }
 
 
     /**
      * Check whether the old test uses auto-generated colored borders or a different type of pull and push stimulus
+     *
      * @return true for auto generated colored borders in the old test data.
      */
     private boolean oldTestHasColoredBorders() {
@@ -517,24 +520,26 @@ public class AATDataRecorder {
                     NodeList imgNameList = image.getElementsByTagName("imageName");
                     Node imgNameNode = imgNameList.item(0).getFirstChild();
                     String imgName = imgNameNode.getNodeValue();
-                    if(imgName.contains(pullTagOldData)) {
+                    if (imgName.contains(pullTagOldData)) {
                         pushCount++;
                     }
-                    if(imgName.contains(pushTagOldData)) {
+                    if (imgName.contains(pushTagOldData)) {
                         pullCount++;
                     }
 
                 }
             }
-           if(pushCount >0 && pullCount >0) {      //both tags are found in the image file names, so assuming colored borders is not used
+            if (pushCount > 0 && pullCount > 0) {      //both tags are found in the image file names, so assuming colored borders is not used
                 return false;
-           }
+            }
         }
 
-            return true;        //When direction tags are not found, the test must have self generated colored borders.
+        return true;        //When direction tags are not found, the test must have self generated colored borders.
     }
+
     /**
      * Find the joysticks center position.
+     *
      * @param doc
      * @return
      */
@@ -591,7 +596,7 @@ public class AATDataRecorder {
                 for (int i = 0; i < imageList.getLength(); i++) {
                     Element image = (Element) imageList.item(i);
                     NodeList labelList = image.getElementsByTagName("type");
-                  //  System.out.println("Types " + labelList.getLength());
+                    //  System.out.println("Types " + labelList.getLength());
                     Node labelNode = labelList.item(0).getFirstChild();
                     String label = labelNode.getNodeValue();
                     if (!label.equalsIgnoreCase("practice")) {       //practice is ignored.
@@ -723,7 +728,7 @@ public class AATDataRecorder {
         test.setAttribute("labelA", affLabelOldData);
         test.setAttribute("labelN", neutLabelOldData);
         test.setAttribute("centerPos", String.valueOf(centerPos));
-        test.setAttribute("generatedBorders",String.valueOf(borders));
+        test.setAttribute("generatedBorders", String.valueOf(borders));
 
         Element commentElement = doc.createElement("comment");
         Text commentValue = doc.createTextNode(comment);
@@ -786,9 +791,9 @@ public class AATDataRecorder {
         for (int x = 0; x < participantsList.getLength(); x++) {
             Element participant = (Element) participantsList.item(x);
             if (participant.getAttribute("test_id").equalsIgnoreCase((String.valueOf(test_id)))) {
-            //    System.out.println("Collecting images for participant " + participant.getAttribute("id"));
+                //    System.out.println("Collecting images for participant " + participant.getAttribute("id"));
                 NodeList imageList = participant.getElementsByTagName("image");
-            //    System.out.println("Found " + imageList.getLength() + " " + "images");
+                //    System.out.println("Found " + imageList.getLength() + " " + "images");
                 for (int i = 0; i < imageList.getLength(); i++) {
                     Element image = (Element) imageList.item(i);
                     NodeList nameList = image.getElementsByTagName("imageName");
@@ -798,12 +803,12 @@ public class AATDataRecorder {
                     NodeList typeList = image.getElementsByTagName("type");
                     Node typeNode = typeList.item(0).getFirstChild();
                     String typeValue = typeNode.getNodeValue();
-                //    System.out.println("Found image " + imageName + " " + typeValue);
+                    //    System.out.println("Found image " + imageName + " " + typeValue);
                     if (typeValue.equalsIgnoreCase(imgType)) {
                         if (!unique.contains(imageName)) {
                             result.add(new File(imageName));
                             unique.add(imageName);
-                      //      System.out.println("Upgrading datafile: adding " + imageName);
+                            //      System.out.println("Upgrading datafile: adding " + imageName);
                         }
                     }
 
@@ -830,8 +835,8 @@ public class AATDataRecorder {
             }
         }
         ArrayList<File> practiceList = collectAllImages(doc, AATImage.PRACTICE, -1);
-        if(practiceList.size()>0) {
-            max = max -1; //Remove 1 trial because the first was a practice trial.
+        if (practiceList.size() > 0) {
+            max = max - 1; //Remove 1 trial because the first was a practice trial.
         }
         return max;
     }

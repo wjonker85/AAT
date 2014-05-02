@@ -4,15 +4,13 @@ import DataStructures.Questionnaire.AbstractQuestion;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.Observable;
-import java.util.Observer;
 
 /**
  * Created by marcel on 3/25/14.
  */
 public abstract class AbstractQuestionEditPanel<T extends AbstractQuestion> extends JPanel {
 
-    public JTextField question,qLabel;
+    public JTextField question, qLabel;
     public JCheckBox required;
 
     public AbstractQuestionEditPanel() {

@@ -5,6 +5,6 @@ package AAT.Configuration.Validation;
  */
 
 public interface IConfigValidator<TValue> {
-    public void validate (TValue value) throws FalseConfigException;
+    public void validate(TValue value) throws FalseConfigException;
 }
 

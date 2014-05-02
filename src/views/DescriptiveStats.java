@@ -106,7 +106,8 @@ public class DescriptiveStats extends PApplet {
                             "Not enough measurements in every category to calculate all the values the boxplot needs,\n" +
                             "Click on ok, then press the joystick button to finish the test.",
                     "Boxplot error",
-                    JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.ERROR_MESSAGE
+            );
         }
         return newArray[n];
     }

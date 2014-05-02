@@ -17,9 +17,9 @@
 
 package AAT;
 
+import AAT.Configuration.TestConfiguration;
 import AAT.Configuration.Validation.FalseConfigException;
 import DataStructures.AATImage;
-import AAT.Configuration.TestConfiguration;
 
 import java.awt.*;
 import java.io.File;
@@ -40,7 +40,6 @@ public class HighMemoryAAT extends AbstractAAT {
 
     /**
      * @param testConfiguration The configuration file for the test
-     *
      */
     public HighMemoryAAT(TestConfiguration testConfiguration) throws FalseConfigException {
         super(testConfiguration);
@@ -61,8 +60,8 @@ public class HighMemoryAAT extends AbstractAAT {
             if (getTestConfiguration().getColoredBorders()) {
 
                 for (int x = 0; x < size; x++) {
-                      for(File image : getPracticeImages()) {
-                  //  for (File image : FileUtils.getImages(practiceDir)) {
+                    for (File image : getPracticeImages()) {
+                        //  for (File image : FileUtils.getImages(practiceDir)) {
                         AATImage pull = new AATImage(image, AATImage.PULL, this, x); //Add push and pull version
                         AATImage push = new AATImage(image, AATImage.PUSH, this, x);
                         list.add(pull);
@@ -73,8 +72,8 @@ public class HighMemoryAAT extends AbstractAAT {
                 //TODO: PracticeRepeat
 
                 for (int x = 0; x < getTestConfiguration().getPracticeRepeat(); x++) {
-                    for(File image : getPracticeImages()) {
-                 //   for (File image : FileUtils.getImages(practiceDir)) {
+                    for (File image : getPracticeImages()) {
+                        //   for (File image : FileUtils.getImages(practiceDir)) {
                         if (image.getName().contains(getTestConfiguration().getPullTag())) {
                             AATImage pull = new AATImage(image, AATImage.PULL, this, x); //Two instances for every image
                             list.add(pull);
@@ -116,7 +115,7 @@ public class HighMemoryAAT extends AbstractAAT {
      */
     public ArrayList<AATImage> createRandomListBorders() {
         ArrayList<AATImage> randomList = new ArrayList<AATImage>();
-        int trialSize =   getTestConfiguration().getTrialSize();
+        int trialSize = getTestConfiguration().getTrialSize();
         if (trialSize <= 0) {  //not set in the config
             trialSize = (getNeutralImages().size() + getAffectiveImages().size()) * 2;
         }

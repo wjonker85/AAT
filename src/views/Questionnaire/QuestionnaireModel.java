@@ -2,7 +2,8 @@ package views.Questionnaire;
 
 import DataStructures.Questionnaire.*;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Observable;
 
 /**
  * Created by marcel on 3/25/14.
@@ -15,9 +16,9 @@ public class QuestionnaireModel extends Observable {
     private int pos;
     private boolean insert = false;
     public static final String[] Types = {"Likert Scale", "Semantic differential", "Closed question (combo-box)", "Closed question (buttons)", "Open question", "Open question with text area"};
-    private static final AbstractQuestion[] QuestionClasses = {new LikertQuestion(),new SemDiffQuestion(),new ClosedComboQuestion(),new ClosedButtonQuestion(),new OpenQuestion(),new OpenTextAreaQuestion() };
+    private static final AbstractQuestion[] QuestionClasses = {new LikertQuestion(), new SemDiffQuestion(), new ClosedComboQuestion(), new ClosedButtonQuestion(), new OpenQuestion(), new OpenTextAreaQuestion()};
 
-    private HashMap<String,AbstractQuestion> questionMap;
+    private HashMap<String, AbstractQuestion> questionMap;
 
     public QuestionnaireModel(AbstractQuestion question, int pos) {
         this.original = question;
@@ -28,10 +29,10 @@ public class QuestionnaireModel extends Observable {
     }
 
     private void fillQuestionMap() {
-        if(questionMap.size()==0) {
-            for(int x = 0;x< Types.length;x++) {
-                 questionMap.put(Types[x],QuestionClasses[x]);
-                System.out.println("Adding "+Types[x]);
+        if (questionMap.size() == 0) {
+            for (int x = 0; x < Types.length; x++) {
+                questionMap.put(Types[x], QuestionClasses[x]);
+                System.out.println("Adding " + Types[x]);
             }
         }
     }
@@ -49,14 +50,13 @@ public class QuestionnaireModel extends Observable {
     }
 
     public void setNewQuestion(AbstractQuestion newQuestion) {
-        if(!insert) {
+        if (!insert) {
             if (!newQuestion.equals(original)) {
                 this.newQuestion = newQuestion;
                 this.setChanged();
                 this.notifyObservers("submit");
             }
-        }
-        else {
+        } else {
             this.newQuestion = newQuestion;
             this.setChanged();
             this.notifyObservers("insert");
@@ -65,7 +65,7 @@ public class QuestionnaireModel extends Observable {
 
     public void changeQuestionType(AbstractQuestion newQuestion, String to) {
         this.original = newQuestion;
-        System.out.println("TO "+to);
+        System.out.println("TO " + to);
         this.newQuestion = original.convertQuestion(questionMap.get(to).newInstance());
         System.out.println("model changed");
         this.setChanged();

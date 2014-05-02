@@ -17,9 +17,10 @@
 
 package views;
 
-import AAT.Util.SpringUtilities;
 import AAT.Configuration.TestMetaData;
+import AAT.Util.SpringUtilities;
 import IO.DataExporter;
+
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 import java.awt.event.ActionEvent;
@@ -46,7 +47,7 @@ public class ExportDataDialog extends JFrame {
         this.setName("Export Data");
         this.setTitle("Export Data - options");
         int test_id = metaData.getExport_id();
-        System.out.println("Using test id "+test_id);
+        System.out.println("Using test id " + test_id);
         this.metaData = metaData;
 
         JPanel mainPanel = new JPanel();
@@ -236,8 +237,6 @@ public class ExportDataDialog extends JFrame {
             super(error);
         }
     }
-
-
 
 
 }

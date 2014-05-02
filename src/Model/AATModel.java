@@ -18,9 +18,9 @@
 package Model;
 
 import AAT.AbstractAAT;
-import AAT.HighMemoryAAT;
 import AAT.Configuration.Validation.AATValidator;
 import AAT.Configuration.Validation.FalseConfigException;
+import AAT.HighMemoryAAT;
 import DataStructures.AATDataRecorder;
 import DataStructures.AATImage;
 import DataStructures.ParticipantData;
@@ -104,10 +104,10 @@ public class AATModel extends Observable {
 //------------------------------initialise AAT --------------------------------------------------
 
     //Load a new AAT from file
-    public void loadNewAAT(File configFile) throws FalseConfigException  {
-            newAAT = new HighMemoryAAT(AATValidator.validatedTestConfiguration(configFile));
-            AATDataRecorder = new AATDataRecorder(newAAT, this);
-   }
+    public void loadNewAAT(File configFile) throws FalseConfigException {
+        newAAT = new HighMemoryAAT(AATValidator.validatedTestConfiguration(configFile));
+        AATDataRecorder = new AATDataRecorder(newAAT, this);
+    }
 
     //Starts a new instance of the AAT. With no. times it has to repeat and when there will be a break.
     public void startTest(boolean saveData) {
@@ -134,7 +134,7 @@ public class AATModel extends Observable {
         run = 0;
         int id = AATDataRecorder.getHighestID();
         id++;          //new higher id
-        newParticipant = new ParticipantData(id,newAAT.getTestConfiguration().getTestID());
+        newParticipant = new ParticipantData(id, newAAT.getTestConfiguration().getTestID());
 
         if (newAAT.getTestConfiguration().getDisplayQuestions().equals("Before")) {
             testStatus = AATModel.TEST_WAIT_FOR_QUESTIONS;
@@ -159,10 +159,9 @@ public class AATModel extends Observable {
     public void setExport_id(int id, boolean current) {
         this.export_id = id;
         this.setChanged();
-        if(current) {
-        notifyObservers("Export");
-        }
-        else {
+        if (current) {
+            notifyObservers("Export");
+        } else {
             notifyObservers("Export_foreign");
         }
     }
@@ -176,7 +175,7 @@ public class AATModel extends Observable {
     }
 
     public void setExport_idNoNotify(int id) {
-           this.export_id = id;
+        this.export_id = id;
     }
 
     public void setDataLoadedExport() {
@@ -185,7 +184,7 @@ public class AATModel extends Observable {
     }
 
     public Document getExportDocument() {
-           return exportDocument;
+        return exportDocument;
     }
 
     public void setExportDocument(Document doc) {
@@ -293,7 +292,7 @@ public class AATModel extends Observable {
 
     /**
      * @return an integer from 1 to stepSize, which determines how much larger or smaller the picture
-     *         has to be shown on the screen
+     * has to be shown on the screen
      */
     public int getPictureSize() {
         return resize;
@@ -429,7 +428,7 @@ public class AATModel extends Observable {
 
 
             case AATModel.TEST_SHOW_FINISHED:
-                                  //TODO niet op boolean boxplot, maar op plot type.
+                //TODO niet op boolean boxplot, maar op plot type.
                 if (newAAT.getTestConfiguration().getShowBoxPlot()) {
                     testStatus = AATModel.TEST_SHOW_RESULTS;
                     this.setChanged();

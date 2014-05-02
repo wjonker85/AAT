@@ -1,5 +1,6 @@
 package views;
 
+import AAT.Configuration.LanguageFileTemplate;
 import net.atlanticbb.tantlinger.shef.HTMLEditorPane;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -18,6 +19,8 @@ import java.io.File;
 
 /**
  * Created by marcel on 2/16/14.
+ * This is panel belonging to the configurationbuilder that shows server html editor components. These components can be used to change all the
+ * texts that are shown to a participant during the taking of an AAT.
  */
 public class HTMLEditPanel extends JPanel {
 
@@ -26,8 +29,6 @@ public class HTMLEditPanel extends JPanel {
 
     public HTMLEditPanel() {
 
-        //  JPanel content = new JPanel();
-        // content.setPreferredSize(new Dimension(600,600));
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
         editorStart = new HTMLEditorPane();
@@ -46,8 +47,7 @@ public class HTMLEditPanel extends JPanel {
         editorFinish.setPreferredSize(new Dimension(800, 400));
         editorFinish.setMaximumSize(new Dimension(800, 400));
         editorFinish.setBackground(Color.decode("#eeece9"));
-        //    JLabel intro = new JLabel("<html><br><center>Introduction Text (Shown before practice, only when practice is enabled).</center><br></html>");
-        //    intro.setLayout(new BorderLayout());
+
         JLabel intro = new JLabel("Introduction Text (Shown before practice, only when practice is enabled).");
         intro.setAlignmentX(Component.CENTER_ALIGNMENT);
         Font f = intro.getFont();
@@ -84,13 +84,6 @@ public class HTMLEditPanel extends JPanel {
         editorBreak.setEnabled(false);
         editorStart.setEnabled(false);
         editorFinish.setEnabled(false);
-        //  this.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        //   this.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
-        //      System.out.println(content.getWidth());
-
-        //   this.add(content);
-
-
     }
 
     private void setEditorIntroText(String text) {
@@ -121,16 +114,18 @@ public class HTMLEditPanel extends JPanel {
 
     }
 
-    public void disableAll() {
-        editorIntro.setEnabled(false);
-        editorBreak.setEnabled(false);
-        editorStart.setEnabled(false);
-        editorFinish.setEnabled(false);
-        repaint();
+    //Fill the html editors with template texts when a user has selected a new file.
+    public void setTemplateText() {
+          setEditorStartText(LanguageFileTemplate.getEditorStartText());
+        setEditorIntroText(LanguageFileTemplate.getEditorIntroText());
+        setEditorFinishText(LanguageFileTemplate.getEditorFinishText());
+        setEditorBreakText(LanguageFileTemplate.getEditorBreakText());
     }
 
-
     public boolean setDocument(File file) {
+        if(!file.exists()) {
+            return false;
+        }
         this.fileName = file;
         String intro, start, breakT, finish;
         try {
@@ -140,10 +135,6 @@ public class HTMLEditPanel extends JPanel {
             doc.getDocumentElement().normalize();
             NodeList nList = doc.getElementsByTagName("languageFile");
             for (int x = 0; x < nList.getLength(); x++) {
-                //      introduction
-                //            start
-                //          break
-                //                finished
                 Element lang = (Element) nList.item(x);
                 NodeList introL = lang.getElementsByTagName("introduction");
                 NodeList startL = lang.getElementsByTagName("start");
@@ -165,11 +156,7 @@ public class HTMLEditPanel extends JPanel {
                 finish = finishN.getNodeValue();
                 finish = finish.replaceAll("(\r\n|\n)", "<br />");
                 this.setEditorFinishText(finish);
-
-
             }
-
-
             return true;
         } catch (Exception e) {
             return false;
@@ -178,16 +165,12 @@ public class HTMLEditPanel extends JPanel {
 
 
     public void save() {
-
         writeToFile();
-
     }
 
     private void writeToFile() {
 
         try {
-            //   TableModel modelA = tableA.getModel();
-            //  TableModel modelN = tableN.getModel();
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
 
@@ -217,12 +200,8 @@ public class HTMLEditPanel extends JPanel {
 
             transformer.transform(source, result);
             System.out.println("Saved to " + fileName.getAbsoluteFile());
-            // Output to console for testing
-            // StreamResult result = new StreamResult(System.out);
-
-
         } catch (Exception e) {
-
+            e.printStackTrace();
         }
 
     }

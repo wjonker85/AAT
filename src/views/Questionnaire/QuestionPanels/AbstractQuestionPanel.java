@@ -1,10 +1,7 @@
 package views.Questionnaire.QuestionPanels;
 
-import AAT.Util.SpringUtilities;
-
 import javax.swing.*;
 import java.awt.*;
-import java.util.Enumeration;
 
 /**
  * Created by marcel on 3/16/14.

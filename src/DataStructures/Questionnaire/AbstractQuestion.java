@@ -66,7 +66,7 @@ public abstract class AbstractQuestion implements IChangeQuestionType {
 
     public abstract AbstractQuestion newInstance();
 
-    }
+}
 
 
 

@@ -23,7 +23,7 @@ public class TestConfiguration {
     private Boolean practiceFill = false;
     private String practiceFillColor = "";
     private String pullTag = "", pushTag = "";
-    private File neutralDir,affectiveDir, practiceDir;
+    private File neutralDir, affectiveDir, practiceDir;
     private File questionnaireFile;
     private File languageFile;
     private int stepSize, dataSteps, maxSizePerc, imageSizePerc;
@@ -200,7 +200,7 @@ public class TestConfiguration {
     }
 
     public File getLanguageFile() {
-        return  languageFile;
+        return languageFile;
     }
 
     public void setLanguageFile(File languageFile) {

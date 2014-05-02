@@ -10,7 +10,6 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
-import Model.AATModel;
 
 
 /**
@@ -22,7 +21,7 @@ public class SelectTestRevision extends JFrame {
     private JTable table;
     private boolean current;
 
-    public SelectTestRevision(HashMap<String, String> testData, int current_id, AATModel AATmodel,boolean current) {
+    public SelectTestRevision(HashMap<String, String> testData, int current_id, AATModel AATmodel, boolean current) {
 
         this.setName("Test revisions");
         this.setTitle("Export Data - test selection");
@@ -43,7 +42,7 @@ public class SelectTestRevision extends JFrame {
         c.gridwidth = 2;
         c.gridx = 0;
         c.gridy = 0;
-        mainPanel.add(title,c);
+        mainPanel.add(title, c);
 
         c.fill = GridBagConstraints.HORIZONTAL;
         c.gridwidth = 2;
@@ -51,7 +50,7 @@ public class SelectTestRevision extends JFrame {
         c.insets = new Insets(20, 10, 0, 0);
         c.gridx = 0;
         c.gridy = 1;
-        mainPanel.add(createRevisionTable(testData, current_id),c);
+        mainPanel.add(createRevisionTable(testData, current_id), c);
 
 
         JButton OkButton = new JButton("OK");
@@ -78,7 +77,7 @@ public class SelectTestRevision extends JFrame {
         c.gridy = 2;
         buttonPanel.add(OkButton);
         buttonPanel.add(CancelButton, c);
-        mainPanel.add(buttonPanel,c);
+        mainPanel.add(buttonPanel, c);
         this.getContentPane().add(mainPanel);
         setContentPane(mainPanel);
         pack();
@@ -90,10 +89,10 @@ public class SelectTestRevision extends JFrame {
 
     private void okAction() {
         TableModel model = table.getModel();
-        for(int x= 0;x<model.getRowCount();x++) {
-            Boolean b = (Boolean) model.getValueAt(x,2);
-            if(b) {
-                AATmodel.setExport_id(Integer.parseInt(model.getValueAt(x,0).toString()),current);
+        for (int x = 0; x < model.getRowCount(); x++) {
+            Boolean b = (Boolean) model.getValueAt(x, 2);
+            if (b) {
+                AATmodel.setExport_id(Integer.parseInt(model.getValueAt(x, 0).toString()), current);
                 this.dispose();
                 return;
             }
@@ -115,9 +114,9 @@ public class SelectTestRevision extends JFrame {
                 column.setPreferredWidth(20);
             }
         }
-     //   table.getColumnModel().getColumn(0).setPreferredWidth(27);
-      //  table.getColumnModel().getColumn(2).setPreferredWidth(27);
-      //  table.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
+        //   table.getColumnModel().getColumn(0).setPreferredWidth(27);
+        //  table.getColumnModel().getColumn(2).setPreferredWidth(27);
+        //  table.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
         JScrollPane scrollPane = new JScrollPane(table);
         tablePanel.add(scrollPane);
         return tablePanel;
@@ -138,7 +137,7 @@ class RevisionTableModel extends AbstractTableModel {
 
         for (String s : input.keySet()) {
             data[x][0] = s;
-            System.out.println("Test ID "+s+" "+current_id);
+            System.out.println("Test ID " + s + " " + current_id);
             int id = Integer.parseInt(s);
 
             if (id == current_id) {
@@ -197,10 +196,10 @@ class RevisionTableModel extends AbstractTableModel {
     }
 
     private int findTrue() {
-        for(int x = 0;x<data.length;x++) {
+        for (int x = 0; x < data.length; x++) {
             Boolean b = (Boolean) data[x][2];
-            if(b) {
-                System.out.println("Row "+x);
+            if (b) {
+                System.out.println("Row " + x);
                 return x;
             }
         }
@@ -210,20 +209,19 @@ class RevisionTableModel extends AbstractTableModel {
 
     public void setValueAt(Object value, int row, int col) {
         int pos = findTrue();
-        if(col == 2) {
-           Boolean b = Boolean.parseBoolean(value.toString());
-            if(b) {
-                System.out.println("Change "+row);
+        if (col == 2) {
+            Boolean b = Boolean.parseBoolean(value.toString());
+            if (b) {
+                System.out.println("Change " + row);
                 data[pos][2] = new Boolean(false);
-             //   setValueAt( new Boolean(false),findTrue(),2);
+                //   setValueAt( new Boolean(false),findTrue(),2);
                 data[row][col] = value;
             }
-        }
-        else {
-        data[row][col] = value;
+        } else {
+            data[row][col] = value;
         }
         fireTableCellUpdated(row, col);
-        fireTableCellUpdated(pos,2);
+        fireTableCellUpdated(pos, 2);
     }
 }
 

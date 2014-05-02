@@ -23,24 +23,31 @@ import static IO.XMLReader.getIncludedFiles;
  */
 public class ImageSelectionPanel extends JPanel {
 
+    private static final String IMAGE_PATTERN =
+            "([^\\s]+(\\.(?i)(jpeg|jpg|png|gif|bmp))$)";
+    /**
+     * Filter so that only the image files in a directory will be selected
+     */
+    java.io.FileFilter extensionFilter = new java.io.FileFilter() {
+        public boolean accept(File file) {
+            Matcher matcher = pattern.matcher(file.getName());
+            return matcher.matches();
+        }
+    };
     private XMLReader reader;
     private JTable tableA, tableN, tableP;
-    private File nDir = null ,aDir = null ,pDir = null;
+    private File nDir = null, aDir = null, pDir = null;
     private boolean newTest;
     private JLabel pLabel;
     private JScrollPane scrollPaneP;
     //regex for extension filtering
     private Pattern pattern;
 
-    private static final String IMAGE_PATTERN =
-            "([^\\s]+(\\.(?i)(jpeg|jpg|png|gif|bmp))$)";
-
-
     public ImageSelectionPanel() {
         reader = new XMLReader();
         pattern = Pattern.compile(IMAGE_PATTERN); //create regex
         JPanel panel = new JPanel();
-        this.setBorder(BorderFactory.createLineBorder(Color.darkGray,2));
+        this.setBorder(BorderFactory.createLineBorder(Color.darkGray, 2));
         panel.setLayout(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
         c.fill = GridBagConstraints.HORIZONTAL;
@@ -71,8 +78,8 @@ public class ImageSelectionPanel extends JPanel {
         tableA.setFillsViewportHeight(true);
 
         JScrollPane scrollPaneA = new JScrollPane(tableA);
-        scrollPaneA.setMaximumSize(new Dimension(350,500));
-        scrollPaneA.setPreferredSize(new Dimension(350,500));
+        scrollPaneA.setMaximumSize(new Dimension(350, 500));
+        scrollPaneA.setPreferredSize(new Dimension(350, 500));
 
         c.fill = GridBagConstraints.HORIZONTAL;
         c.gridx = 0;
@@ -116,8 +123,8 @@ public class ImageSelectionPanel extends JPanel {
         tableN.setBackground(Color.decode("#eeece9"));
         setTableColumnWidths(tableN);
         JScrollPane scrollPaneN = new JScrollPane(tableN);
-        scrollPaneN.setMaximumSize(new Dimension(350,500));
-        scrollPaneN.setPreferredSize(new Dimension(350,500));
+        scrollPaneN.setMaximumSize(new Dimension(350, 500));
+        scrollPaneN.setPreferredSize(new Dimension(350, 500));
 
         c.fill = GridBagConstraints.HORIZONTAL;
         c.gridx = 1;
@@ -160,8 +167,8 @@ public class ImageSelectionPanel extends JPanel {
         setTableColumnWidths(tableP);
 
         scrollPaneP = new JScrollPane(tableP);
-        scrollPaneP.setMaximumSize(new Dimension(350,500));
-        scrollPaneP.setPreferredSize(new Dimension(350,500));
+        scrollPaneP.setMaximumSize(new Dimension(350, 500));
+        scrollPaneP.setPreferredSize(new Dimension(350, 500));
         tableP.setFillsViewportHeight(true);
 
         c.fill = GridBagConstraints.HORIZONTAL;
@@ -197,9 +204,10 @@ public class ImageSelectionPanel extends JPanel {
 
     /**
      * Refresh the image data for the two or three tables with image files
-     * @param nDir  neutral images
-     * @param aDir  affective images
-     * @param pDir  practice images
+     *
+     * @param nDir neutral images
+     * @param aDir affective images
+     * @param pDir practice images
      */
     public void updateTableData(File nDir, File aDir, File pDir, boolean newTest) {
         this.nDir = nDir;
@@ -209,7 +217,6 @@ public class ImageSelectionPanel extends JPanel {
         refreshTables();
     }
 
-
     /**
      * Loads all image files in a given directory. Extension filter with regular expression.
      *
@@ -217,7 +224,7 @@ public class ImageSelectionPanel extends JPanel {
      * @return ArrayList<File> with all image files in a directory
      */
     public ArrayList<File> getImages(File dir) {
-        if(dir!=null) {
+        if (dir != null) {
             if (dir.length() > 0) {
                 if (dir.exists()) {
                     File[] files = dir.listFiles(extensionFilter);
@@ -229,26 +236,16 @@ public class ImageSelectionPanel extends JPanel {
         return new ArrayList<File>();
     }
 
-
-    /**
-     * Filter so that only the image files in a directory will be selected
-     */
-    java.io.FileFilter extensionFilter = new java.io.FileFilter() {
-        public boolean accept(File file) {
-            Matcher matcher = pattern.matcher(file.getName());
-            return matcher.matches();
-        }
-    };
-
-
     private void setTableColumnWidths(JTable table) {
-        TableColumn column;
-        for (int i = 0; i < 2; i++) {
-            column = table.getColumnModel().getColumn(i);
-            if (i == 0) {
-                column.setPreferredWidth(150); //third column is bigger
-            } else {
-                column.setPreferredWidth(10);
+        if (table.getRowCount() > 0) {
+            TableColumn column;
+            for (int i = 0; i < 2; i++) {
+                column = table.getColumnModel().getColumn(i);
+                if (i == 0) {
+                    column.setPreferredWidth(150); //third column is bigger
+                } else {
+                    column.setPreferredWidth(10);
+                }
             }
         }
     }
@@ -260,7 +257,7 @@ public class ImageSelectionPanel extends JPanel {
     private void refreshTables() {
         ArrayList<File> imageFilesA = getImages(aDir);
         ArrayList<File> imageFilesN = getImages(nDir);
-        System.out.println("REFRESH "+aDir.getAbsolutePath());
+        System.out.println("REFRESH " + aDir.getAbsolutePath());
         ArrayList<String> aFiles = getIncludedFiles(aDir);  //These lists contain the files that were specified for this test.
         ArrayList<String> nFiles = getIncludedFiles(nDir);
 
@@ -272,7 +269,7 @@ public class ImageSelectionPanel extends JPanel {
         tableN.repaint();
 
 
-        if (pDir !=null) {          //Add the images when a practice dir is selected
+        if (pDir != null) {          //Add the images when a practice dir is selected
             ArrayList<File> imageFilesP = getImages(pDir);
             ArrayList<String> pFiles = getIncludedFiles(pDir);
             tableP.setModel(new ImageTableModel(imageFilesP, pFiles));
@@ -293,11 +290,18 @@ public class ImageSelectionPanel extends JPanel {
         table.setModel(model);
     }
 
+    public void writeToFile() {
+        XMLWriter.writeXMLImagesList(tableA.getModel(), tableN.getModel(), tableP.getModel(), aDir, nDir, pDir);
+    }
 
     //Table model for the two JTables that contain the image files. This model contains the data that is displayed.
     //When it is the first time a test is created all image files in a directory are added. When it is a modification of an existing test
     //then only the already included images are selected.
     class ImageTableModel extends AbstractTableModel {
+
+        private String[] columnNames = {"Image File",
+                "Included"};
+        private Object[][] data;
 
         public ImageTableModel(ArrayList<File> imageFiles, ArrayList<String> includedFiles) {
             data = new Object[imageFiles.size()][2];
@@ -318,12 +322,6 @@ public class ImageSelectionPanel extends JPanel {
 
 
         }
-
-        private String[] columnNames = {"Image File",
-                "Included"};
-
-        private Object[][] data;
-
 
         public int getColumnCount() {
             return columnNames.length;
@@ -361,10 +359,5 @@ public class ImageSelectionPanel extends JPanel {
             data[row][col] = value;
             fireTableCellUpdated(row, col);
         }
-    }
-
-    public void writeToFile()
-    {
-        XMLWriter.writeXMLImagesList(tableA.getModel(), tableN.getModel(), tableP.getModel(), aDir, nDir, pDir);
     }
 }

@@ -303,8 +303,7 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
             questionnaire.getExtraQuestions().add(newPos, q);
             questionnaire.getExtraQuestions().remove(posFrom + 1);
             lastEditedPos = newPos;
-        }
-        else {
+        } else {
             lastEditedPos = posFrom;
         }
 

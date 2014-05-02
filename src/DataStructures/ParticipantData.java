@@ -34,7 +34,7 @@ public class ParticipantData {
     //  private ArrayList<ImageMeasureData> allImageMeasures;  //Every single measure has a different measure object.
     private HashMap<String, String> questionData = null;
     private HashMap<Integer, ArrayList<ImageMeasureData>> allMeasures;   //Records a list per trial
-    private int id,test_id;
+    private int id, test_id;
     ArrayList<ImageMeasureData> currentTrialMeasure;
 
     //Constructor creates a empty arrayList of MeasureObjects.
@@ -74,7 +74,10 @@ public class ParticipantData {
         return id;
     }
 
-    public int getTestID() { return test_id; }
+    public int getTestID() {
+        return test_id;
+    }
+
     /**
      * Creates an array with the values for a given direction and type. For all trials combined. Needed to show
      * the boxplot at the end of the test

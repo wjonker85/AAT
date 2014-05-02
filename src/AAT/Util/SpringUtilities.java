@@ -126,11 +126,13 @@ public class SpringUtilities {
         pCons.setConstraint(SpringLayout.SOUTH,
                 Spring.sum(
                         Spring.constant(yPad),
-                        lastCons.getConstraint(SpringLayout.SOUTH)));
+                        lastCons.getConstraint(SpringLayout.SOUTH))
+        );
         pCons.setConstraint(SpringLayout.EAST,
                 Spring.sum(
                         Spring.constant(xPad),
-                        lastCons.getConstraint(SpringLayout.EAST)));
+                        lastCons.getConstraint(SpringLayout.EAST))
+        );
     }
 
     /* Used by makeCompactGrid. */
@@ -177,7 +179,8 @@ public class SpringUtilities {
             for (int r = 0; r < rows; r++) {
                 width = Spring.max(width,
                         getConstraintsForCell(r, c, parent, cols).
-                                getWidth());
+                                getWidth()
+                );
             }
             for (int r = 0; r < rows; r++) {
                 SpringLayout.Constraints constraints =
@@ -195,7 +198,8 @@ public class SpringUtilities {
             for (int c = 0; c < cols; c++) {
                 height = Spring.max(height,
                         getConstraintsForCell(r, c, parent, cols).
-                                getHeight());
+                                getHeight()
+                );
             }
             for (int c = 0; c < cols; c++) {
                 SpringLayout.Constraints constraints =

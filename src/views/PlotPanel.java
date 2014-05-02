@@ -28,8 +28,8 @@ public class PlotPanel extends JPanel {
     public PlotPanel(AATModel model) {
         this.model = model;
         mainPanel = new JPanel();
-     //   mainPanel.setBackground(Color.black);
-     //   mainPanel.setForeground(Color.white);
+        //   mainPanel.setBackground(Color.black);
+        //   mainPanel.setForeground(Color.white);
         mainPanel.setLayout(new FlowLayout(FlowLayout.CENTER));    //TODO even naar kijken
         mainPanel.setPreferredSize(new Dimension(1000, 800));
         Dimension screen = getToolkit().getScreenSize();
@@ -49,9 +49,9 @@ public class PlotPanel extends JPanel {
         plot.getPointRenderer(data).setColor(color);
         plot.getLineRenderer(data).setColor(color);
         iPanel = new InteractivePanel(plot);
-       // iPanel.setPreferredSize(new Dimension(800, 600));
-       // iPanel.setVisible(true);
-       // iPanel.setEnabled(true);
+        // iPanel.setPreferredSize(new Dimension(800, 600));
+        // iPanel.setVisible(true);
+        // iPanel.setEnabled(true);
         mainPanel.add(iPanel);
         this.add(mainPanel);
     }
@@ -66,10 +66,10 @@ public class PlotPanel extends JPanel {
             data.add(x, (double) array1[x]);
             System.out.println("x " + x + " y " + array1[x] + " " + data.getRowCount());
         }
-     //    plot.remove(data);
+        //    plot.remove(data);
 
         plot.add(data);
-              mainPanel.revalidate();
+        mainPanel.revalidate();
 
         iPanel.setMinimumSize(new Dimension(800, 600));
         iPanel.setPreferredSize(new Dimension(800, 600));
@@ -77,19 +77,19 @@ public class PlotPanel extends JPanel {
         iPanel.revalidate();
         iPanel.repaint();
         mainPanel.repaint();
-         repaint();
-     //   return plotPanel;
+        repaint();
+        //   return plotPanel;
     }
 
     public void displayPlot(boolean show) {
         if (show) {
-          createLinePlot();
+            createLinePlot();
             //     mainPanel.removeAll();
             //    mainPanel.repaint();
-         //   mainPanel.add(createLinePlot());
-         //   mainPanel.revalidate();
-         //   mainPanel.getRootPane().revalidate();
-         //   this.getRootPane().revalidate();
+            //   mainPanel.add(createLinePlot());
+            //   mainPanel.revalidate();
+            //   mainPanel.getRootPane().revalidate();
+            //   this.getRootPane().revalidate();
             repaint();
         } else {
             mainPanel.removeAll();

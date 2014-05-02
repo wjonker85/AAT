@@ -3,8 +3,6 @@ package views.Questionnaire;
 import DataStructures.Questionnaire.*;
 import views.Questionnaire.QuestionPanels.*;
 
-import javax.swing.*;
-
 /**
  * Created by marcel on 3/25/14.
  */
@@ -13,7 +11,7 @@ public class DisplayQuestionnaireVisitor implements IQuestionVisitor<AbstractQue
     private int leftLabelWidth;
 
     public DisplayQuestionnaireVisitor(int leftLabelWidth) {
-         this.leftLabelWidth = leftLabelWidth;
+        this.leftLabelWidth = leftLabelWidth;
     }
 
     @Override
@@ -28,12 +26,12 @@ public class DisplayQuestionnaireVisitor implements IQuestionVisitor<AbstractQue
 
     @Override
     public AbstractQuestionPanel Visit(LikertQuestion question) {
-       return new LikertPanel(question.getSize(), question.getLeft(),leftLabelWidth, question.getRight(), question.isRequired());
+        return new LikertPanel(question.getSize(), question.getLeft(), leftLabelWidth, question.getRight(), question.isRequired());
     }
 
     @Override
     public AbstractQuestionPanel Visit(SemDiffQuestion question) {
-       return new SemDiffPanel(question.getSize(), question.getLeft(),leftLabelWidth, question.getRight(), question.isRequired());
+        return new SemDiffPanel(question.getSize(), question.getLeft(), leftLabelWidth, question.getRight(), question.isRequired());
     }
 
     @Override

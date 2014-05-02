@@ -399,8 +399,10 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
                 File file = newOrExistingFileDialog("Enter a new filename or choose an existing language file");
                 if (file != null) {
                     tabbedPane.setEnabledAt(tabbedPane.indexOfTab("Language File"), true);
-                        inputLangFile.setText(file.getName());
-                        htmlEditPanel.setDocument(file);
+                    inputLangFile.setText(file.getName());
+                    if(!htmlEditPanel.setDocument(file)) {
+                        htmlEditPanel.setTemplateText();  //Language file does not exist or is corrupt. Now set a default text in the html editors.
+                    }
                 } else {
                     inputLangFile.setText("");
                     tabbedPane.setEnabledAt(tabbedPane.indexOfTab("Language File"), false);
@@ -935,7 +937,7 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
 //region actions
 
     private void updateDataTablesAction() {
-        imageSelectionPanel.updateTableData(nDir,aDir,pDir,newTest);
+        imageSelectionPanel.updateTableData(nDir, aDir, pDir, newTest);
     }
 
     private void disablePracticeAction() {
@@ -952,7 +954,7 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
         prDirL.setEnabled(false);
         prDirButton.setEnabled(false);
         practL.setEnabled(false);
-        if(pDir!=null) {
+        if (pDir != null) {
             pDir = null;
             updateDataTablesAction();
         }
@@ -1112,9 +1114,9 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
         int returnVal = fc.showOpenDialog(this);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File f = fc.getSelectedFile();
-            String suffix = f.getAbsolutePath().substring(f.getAbsolutePath().length()-4);
-            if(!suffix.equalsIgnoreCase(".xml")) {
-                f = new File(f.getAbsolutePath()+".xml");
+            String suffix = f.getAbsolutePath().substring(f.getAbsolutePath().length() - 4);
+            if (!suffix.equalsIgnoreCase(".xml")) {
+                f = new File(f.getAbsolutePath() + ".xml");
             }
             return f;
         } else {
@@ -1164,6 +1166,7 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
     /**
      * Update the id value for a config everytime something gets changed. This id file is then used to be saved together with
      * the test data to make sure a test doesn't get corrupted because of changes made between giving this test to subjects.
+     *
      * @return
      */
     private int createIDValue() {
@@ -1210,7 +1213,7 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
             inputDataStepSize.setText("9");
         }
         inputLangFile.setText(config.getValue("LanguageFile"));
-        if(inputLangFile.getText().length()>0) {
+        if (inputLangFile.getText().length() > 0) {
             tabbedPane.setEnabledAt(tabbedPane.indexOfTab("Language File"), true);
         }
         File langFile = new File(workingDir.getAbsoluteFile() + File.separator + inputLangFile.getText() + File.separator);
@@ -1383,11 +1386,10 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
         if (inputBoxplot.isSelected()) {
             configuration.setShowBoxPlot(true);
         }
-        if(inputQuestionFile.getText().length() >0) {
+        if (inputQuestionFile.getText().length() > 0) {
             configuration.setDisplayQuestions(inputQuestions.getSelectedItem().toString());
             configuration.setQuestionnaireFile(createFullPathFile(inputQuestionFile.getText()));
-        }
-        else {
+        } else {
             configuration.setDisplayQuestions("None");
         }
         configuration.setLanguageFile(createFullPathFile(inputLangFile.getText()));
@@ -1428,15 +1430,14 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
     //TODO add  "PlotType"
 
     public File createFullPathFile(String file) {
-        if(file.length()>0) {
+        if (file.length() > 0) {
             File f = new File(file);
             if (f.isAbsolute()) {
                 return new File(FileUtils.getRelativePath(workingDir, f));
             } else {
                 return new File(workingDir + File.separator + file);
             }
-        }
-        else return new File("");
+        } else return new File("");
     }
 
 

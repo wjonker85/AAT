@@ -15,10 +15,10 @@ import java.awt.event.ItemListener;
 public class LabelInputFrame extends JFrame {
 
     private AATDataRecorder AATDataRecorder;
-    private JComboBox<String> affBox,pullBox;
-    private JTextField neutField,pushField;
+    private JComboBox<String> affBox, pullBox;
+    private JTextField neutField, pushField;
 
-    public LabelInputFrame(final String[] typeLabels,final String[] dirLabels, final AATDataRecorder AATDataRecorder) {
+    public LabelInputFrame(final String[] typeLabels, final String[] dirLabels, final AATDataRecorder AATDataRecorder) {
         super("Upgrading old test data");
         this.AATDataRecorder = AATDataRecorder;
 
@@ -141,7 +141,6 @@ public class LabelInputFrame extends JFrame {
         });
 
 
-
         JButton okButton = new JButton("Ok");
         okButton.addActionListener(new ActionListener() {
             @Override
@@ -174,7 +173,7 @@ public class LabelInputFrame extends JFrame {
 
 
     private void okAction() {
-        AATDataRecorder.continueUpgrade(affBox.getSelectedItem().toString(), neutField.getText(),pullBox.getSelectedItem().toString(),pushField.getText());
+        AATDataRecorder.continueUpgrade(affBox.getSelectedItem().toString(), neutField.getText(), pullBox.getSelectedItem().toString(), pushField.getText());
         //     AATDataRecorder.affLabelOldData = affBox.getSelectedItem().toString();
         //     AATDataRecorder.neutLabelOldData = neutField.getText();
         this.dispose();

@@ -27,6 +27,7 @@ public class Questionnaire {
     public void setIntroduction(String introduction) {
         this.introduction = introduction;
     }
+
     /**
      * In the language file it is possible to add extra questions that are asked to the participant before the
      * real test is started.

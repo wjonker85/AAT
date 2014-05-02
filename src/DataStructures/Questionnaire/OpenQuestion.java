@@ -31,7 +31,7 @@ public class OpenQuestion extends AbstractQuestion {
         newQuestion.setQuestion(this.getQuestion());
         newQuestion.setRequired(this.isRequired());
         return newQuestion;
-   //     return (T) nq;
-      //  return T;
+        //     return (T) nq;
+        //  return T;
     }
 }

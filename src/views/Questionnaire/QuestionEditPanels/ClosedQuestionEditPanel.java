@@ -1,13 +1,14 @@
 package views.Questionnaire.QuestionEditPanels;
 
 import AAT.Util.SpringUtilities;
-import DataStructures.Questionnaire.*;
-import views.Questionnaire.QuestionnaireModel;
+import DataStructures.Questionnaire.AbstractClosedQuestion;
+import DataStructures.Questionnaire.AbstractQuestion;
+import DataStructures.Questionnaire.ClosedButtonQuestion;
+import DataStructures.Questionnaire.ClosedComboQuestion;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.Observable;
 
 /**
  * Created by marcel on 3/25/14.
@@ -85,10 +86,9 @@ public class ClosedQuestionEditPanel<T extends AbstractQuestion> extends Abstrac
     @Override
     public T getQuestion() {
         AbstractClosedQuestion abstractQuestion = null;
-        if(original instanceof ClosedComboQuestion) {
+        if (original instanceof ClosedComboQuestion) {
             abstractQuestion = new ClosedComboQuestion();
-        }
-        else if(original instanceof ClosedButtonQuestion) {
+        } else if (original instanceof ClosedButtonQuestion) {
             abstractQuestion = new ClosedButtonQuestion();
         }
         abstractQuestion.setKey(qLabel.getText());

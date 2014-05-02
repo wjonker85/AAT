@@ -6,7 +6,6 @@ import DataStructures.Questionnaire.Questionnaire;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Text;
 
 import javax.swing.table.TableModel;
 import javax.xml.parsers.DocumentBuilder;
@@ -138,7 +137,7 @@ public class XMLWriter {
 
 
     public static void writeXMLQuestionnaire(File file, Questionnaire questionnaire) {
-      System.out.println("Saving questionnaire to "+file.getAbsolutePath());
+        System.out.println("Saving questionnaire to " + file.getAbsolutePath());
         try {
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
@@ -154,7 +153,7 @@ public class XMLWriter {
             introduction.appendChild(doc.createCDATASection(questionnaire.getIntroduction()));
 
             for (AbstractQuestion question : questionnaire.getExtraQuestions()) {
-               question.Accept(new XmlQuestionnaireBuilder(doc,rootElement));
+                question.Accept(new XmlQuestionnaireBuilder(doc, rootElement));
             }
             // write the content into xml file
             TransformerFactory transformerFactory = TransformerFactory.newInstance();

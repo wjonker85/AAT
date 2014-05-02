@@ -40,7 +40,7 @@ public class ConfigFileReader {
     private Map<String, String> testOptions = new HashMap<String, String>();
     private File testConfig;
 
-    String[] plotTypes = { "boxplot","2dline" };
+    String[] plotTypes = {"boxplot", "2dline"};
 
     //All the configuration options
     public static String[] options = {
@@ -108,7 +108,7 @@ public class ConfigFileReader {
                             for (Map.Entry<String, String> entry : testOptions.entrySet()) {
                                 if (entry.getKey().equals(token)) {
                                     int pos = strLine.indexOf("#");
-                                    String s = strLine.substring(token.length(),pos == -1 ? strLine.length() : pos);
+                                    String s = strLine.substring(token.length(), pos == -1 ? strLine.length() : pos);
                                     entry.setValue(s.trim());
                                     strLine = null;
                                     break;
@@ -126,8 +126,8 @@ public class ConfigFileReader {
 
     //Check whether a given plot type is valid.
     public String getPlotType(String input) {
-        for(String s : plotTypes ) {
-            if(input.trim().equalsIgnoreCase(s)) {
+        for (String s : plotTypes) {
+            if (input.trim().equalsIgnoreCase(s)) {
                 return s;
             }
         }

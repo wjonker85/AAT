@@ -5,13 +5,11 @@ import DataStructures.Questionnaire.AbstractQuestion;
 import DataStructures.Questionnaire.OpenQuestion;
 
 import javax.swing.*;
-import java.awt.*;
-import java.util.Observable;
 
 /**
  * Created by marcel on 3/25/14.
  */
-class OpenQuestionEditPanel<T>  extends AbstractQuestionEditPanel {
+class OpenQuestionEditPanel<T> extends AbstractQuestionEditPanel {
 
     public OpenQuestionEditPanel(AbstractQuestion original) {
         this.setLayout(new SpringLayout());
@@ -36,7 +34,6 @@ class OpenQuestionEditPanel<T>  extends AbstractQuestionEditPanel {
         abstractQuestion.setRequired(required.isSelected());
         return abstractQuestion;
     }
-
 
 
     @Override

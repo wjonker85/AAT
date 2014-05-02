@@ -39,7 +39,7 @@ public class ConfigurationBuilder {
         JFrame frame = new JFrame("AAT Config generator");
         int height = (int) java.awt.Toolkit.getDefaultToolkit().getScreenSize().getHeight();
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        frame.setPreferredSize(new Dimension(1200,height));
+        frame.setPreferredSize(new Dimension(1200, height));
         //Add content to the window.
         frame.add(new ConfigBuilderPanel(), BorderLayout.CENTER);
         //Display the window.

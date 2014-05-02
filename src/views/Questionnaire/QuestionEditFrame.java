@@ -6,7 +6,6 @@ import views.Questionnaire.QuestionEditPanels.EditQuestionVisitor;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.HashMap;
 
 /**
  * Created by marcel on 3/16/14.
@@ -35,7 +34,7 @@ public class QuestionEditFrame extends JFrame {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 System.out.println("Change question type");
-                questionnaireModel.changeQuestionType(editPanel.getQuestion(),typeCombo.getSelectedItem().toString());
+                questionnaireModel.changeQuestionType(editPanel.getQuestion(), typeCombo.getSelectedItem().toString());
             }
         });
         setTypePanel.add(setTypeButton);
@@ -50,16 +49,16 @@ public class QuestionEditFrame extends JFrame {
             public void actionPerformed(ActionEvent actionEvent) {
                 System.out.println("OK button pressed");
                 if (editPanel.getQuestion().getKey().length() > 0 && editPanel.getQuestion().getQuestion().length() > 0) {
-                System.out.println(questionnaireModel.getPos() + " " + questionnaireModel.countObservers());
-                questionnaireModel.setNewQuestion(editPanel.getQuestion());
+                    System.out.println(questionnaireModel.getPos() + " " + questionnaireModel.countObservers());
+                    questionnaireModel.setNewQuestion(editPanel.getQuestion());
 
-                   } else if (editPanel.getQuestion().getKey().length() == 0) {
-                        JOptionPane.showMessageDialog(null, "Question label needs to be set.", "Validation Error", JOptionPane.ERROR_MESSAGE);
-                   } else {
-                        if (editPanel.getQuestion().getQuestion().length() == 0) {
-                           JOptionPane.showMessageDialog(null, "Question is empty.", "Validation Error", JOptionPane.ERROR_MESSAGE);
-                       }
-                 }
+                } else if (editPanel.getQuestion().getKey().length() == 0) {
+                    JOptionPane.showMessageDialog(null, "Question label needs to be set.", "Validation Error", JOptionPane.ERROR_MESSAGE);
+                } else {
+                    if (editPanel.getQuestion().getQuestion().length() == 0) {
+                        JOptionPane.showMessageDialog(null, "Question is empty.", "Validation Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
             }
         });
         buttonPanel.add(okButton);

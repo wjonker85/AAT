@@ -38,10 +38,9 @@ public class ConfigurationFiller {
             testConfiguration.setMaxSizePerc(validatedConfiguration.getIntValue("MaxSizePerc"));
             testConfiguration.setImageSizePerc(validatedConfiguration.getIntValue("ImageSizePerc"));
             testConfiguration.setTestID(validatedConfiguration.getIntValue("ID"));
-            if(testConfiguration.getPracticeDir().length() >0 || testConfiguration.getPracticeFillColor().length() > 0) {
+            if (testConfiguration.getPracticeDir().length() > 0 || testConfiguration.getPracticeFillColor().length() > 0) {
                 testConfiguration.setHasPractice(true);
-            }
-            else {
+            } else {
                 testConfiguration.setHasPractice(false);
             }
             //    testConfiguration.setHasPractice( boolean hasPractice);
@@ -49,7 +48,7 @@ public class ConfigurationFiller {
             testConfiguration.setDataFile(validatedConfiguration.getFileValue("DataFile"));
             testConfiguration.setWorkingDir(validatedConfiguration.getFileValue("WorkingDir"));
         } catch (FalseConfigException e) {
-              e.printStackTrace();
+            e.printStackTrace();
         }
         return testConfiguration;
     }

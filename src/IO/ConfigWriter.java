@@ -1,7 +1,7 @@
 package IO;
 
-import AAT.Util.FileUtils;
 import AAT.Configuration.TestConfiguration;
+import AAT.Util.FileUtils;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -116,10 +116,10 @@ public class ConfigWriter {
         pw.write("ColoredBorders " + hasBorders);
         pw.println();
         if (configuration.getColoredBorders()) {
-            String pullHex = configuration.getPullColor().substring(2,configuration.getPullColor().length());
-           // System.out.println(pullHex);
+            String pullHex = configuration.getPullColor().substring(2, configuration.getPullColor().length());
+            // System.out.println(pullHex);
             System.out.println(configuration.getPushColor());
-            String pushHex = configuration.getPushColor().substring(2,configuration.getPushColor().length());
+            String pushHex = configuration.getPushColor().substring(2, configuration.getPushColor().length());
             pw.write("BorderColorPush " + pushHex.toUpperCase());
             pw.println();
             pw.write("BorderColorPull " + pullHex.toUpperCase());
@@ -168,17 +168,17 @@ public class ConfigWriter {
         pw.write(dirHeader);
         pw.println();
         pw.println();
-        System.out.println("WORKING "+configuration.getWorkingDir()+" "+configuration.getAffectiveDir());
-        if(configuration.getAffectiveDir().exists()) {
+        System.out.println("WORKING " + configuration.getWorkingDir() + " " + configuration.getAffectiveDir());
+        if (configuration.getAffectiveDir().exists()) {
             pw.write("AffectiveDir " + FileUtils.getRelativePath(configuration.getWorkingDir(), configuration.getAffectiveDir()));
         }
         pw.println();
-        if(configuration.getNeutralDir().exists()) {
+        if (configuration.getNeutralDir().exists()) {
             pw.write("NeutralDir " + FileUtils.getRelativePath(configuration.getWorkingDir(), configuration.getNeutralDir()));
         }
         pw.println();
         if (configuration.getPracticeDir().exists()) {
-            pw.write("PracticeDir " + FileUtils.getRelativePath(configuration.getWorkingDir(),configuration.getPracticeDir()));
+            pw.write("PracticeDir " + FileUtils.getRelativePath(configuration.getWorkingDir(), configuration.getPracticeDir()));
             pw.println();
         } else {
             pw.write("# PracticeDir practice");
@@ -193,7 +193,7 @@ public class ConfigWriter {
         pw.write(languageHeader);
         pw.println();
         pw.println();
-        pw.write("LanguageFile " + FileUtils.getRelativePath(configuration.getWorkingDir(),configuration.getLanguageFile()));
+        pw.write("LanguageFile " + FileUtils.getRelativePath(configuration.getWorkingDir(), configuration.getLanguageFile()));
         pw.println();
         pw.println();
         pw.write(questionHeader);
@@ -204,7 +204,7 @@ public class ConfigWriter {
             pw.println();
         } else {
             if (configuration.getQuestionnaireFile().getName().length() > 0) {
-                pw.write("Questionnaire " + FileUtils.getRelativePath(configuration.getWorkingDir(),configuration.getQuestionnaireFile()));
+                pw.write("Questionnaire " + FileUtils.getRelativePath(configuration.getWorkingDir(), configuration.getQuestionnaireFile()));
             } else {
                 pw.write("#Questionnaire ");
             }

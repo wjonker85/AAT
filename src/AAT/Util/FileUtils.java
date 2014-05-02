@@ -59,7 +59,7 @@ public class FileUtils {
      */
 
     public static String getRelativePath(File base, File name) {
-        if(base!=null && name!=null) {
+        if (base != null && name != null) {
             File parent = base.getParentFile();
             if (name.getName().length() > 0) {
                 try {
@@ -75,7 +75,7 @@ public class FileUtils {
                         return (".." + File.separator + getRelativePath(parent, name));
                     }
                 } catch (Exception e) {
-                   return name.getAbsolutePath();
+                    return name.getAbsolutePath();
                 }
             }
         }

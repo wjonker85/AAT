@@ -7,19 +7,19 @@ import java.util.ArrayList;
 
 /**
  * Created by marcel on 1/29/14.
- *
+ * <p/>
  * This data structure contains all the import variables that are needed to correctly interpret the data coming from the data.xml file.
  */
 public class TestMetaData {
 
     private int export_id, trials, centerpos;
-    private String afflabel,neutLabel,pushTag,pullTag;
+    private String afflabel, neutLabel, pushTag, pullTag;
     private Document data;
-    private ArrayList<File> neutralImages,affectiveImages,practiceImages;
+    private ArrayList<File> neutralImages, affectiveImages, practiceImages;
     private boolean coloredBorders;
 
     public TestMetaData(int export_id
-            ,int trials
+            , int trials
             , Document data
             , String affLabel
             , String neutLabel
@@ -27,9 +27,8 @@ public class TestMetaData {
             , String pullTag
             , int centerpos
             , boolean coloredBorders
-          )
-    {
-         this.export_id = export_id;
+    ) {
+        this.export_id = export_id;
         this.trials = trials;
         this.data = data;
         this.afflabel = affLabel;
@@ -41,7 +40,9 @@ public class TestMetaData {
     }
 
 
-    public int getTrials() { return trials;}
+    public int getTrials() {
+        return trials;
+    }
 
     public int getExport_id() {
         return export_id;
@@ -76,29 +77,24 @@ public class TestMetaData {
         return centerpos;
     }
 
-    public void setNeutralImages(ArrayList<File> neutralImages)
-    {
+    public void setNeutralImages(ArrayList<File> neutralImages) {
         this.neutralImages = neutralImages;
     }
 
-    public ArrayList<File> getNeutralImages()
-    {
+    public ArrayList<File> getNeutralImages() {
         return neutralImages;
     }
 
-    public void setAffectiveImages(ArrayList<File> affectiveImages)
-    {
+    public void setAffectiveImages(ArrayList<File> affectiveImages) {
         this.affectiveImages = affectiveImages;
     }
 
 
-    public ArrayList<File> getAffectiveImages()
-    {
+    public ArrayList<File> getAffectiveImages() {
         return affectiveImages;
     }
 
-    public void setPracticeImages(ArrayList<File> practiceImages)
-    {
+    public void setPracticeImages(ArrayList<File> practiceImages) {
         this.practiceImages = practiceImages;
     }
 

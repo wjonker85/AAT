@@ -11,12 +11,12 @@ public class QuestionnaireTemplate {
 
     public static Questionnaire getTemplate() {
         String introduction =
-        "<body bgcolor=\"black\">"
-        +"<h2 bgcolor=\"black\">"
-          +"Example questionaire "
-           +     "</h2>";
+                "<body bgcolor=\"black\">"
+                        + "<h2 bgcolor=\"black\">"
+                        + "Example questionaire "
+                        + "</h2>";
 
-        ArrayList<AbstractQuestion> qList= new ArrayList<AbstractQuestion>();
+        ArrayList<AbstractQuestion> qList = new ArrayList<AbstractQuestion>();
         OpenQuestion openQuestion = new OpenQuestion();
         openQuestion.setKey("open");
         openQuestion.setQuestion("Example open question, questions with an asterisk are required questions");
@@ -63,7 +63,7 @@ public class QuestionnaireTemplate {
         textAreaQuestion.setQuestion("Use a textarea to leave a comment");
         qList.add(textAreaQuestion);
 
-        Questionnaire q = new Questionnaire(qList,introduction);
+        Questionnaire q = new Questionnaire(qList, introduction);
         return q;
     }
 }

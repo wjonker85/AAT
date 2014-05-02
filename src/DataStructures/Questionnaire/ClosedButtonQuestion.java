@@ -29,8 +29,8 @@ public class ClosedButtonQuestion extends AbstractClosedQuestion {
         newQuestion.setKey(this.getKey());
         newQuestion.setQuestion(this.getQuestion());
         newQuestion.setRequired(this.isRequired());
-        if(newQuestion instanceof  AbstractClosedQuestion)   {
-            for(String s : this.getOptions())          {
+        if (newQuestion instanceof AbstractClosedQuestion) {
+            for (String s : this.getOptions()) {
                 ((AbstractClosedQuestion) newQuestion).addOptions(s);
             }
         }
