@@ -117,16 +117,13 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
             buttonPanel.add(submitButton);
         }
 
-        JScrollPane scrollPane = null;
-        if (!editMode) {
-            scrollPane = new JScrollPane(contentPanel,
-                    JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-                    JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        }
-        assert scrollPane != null;
-        JScrollBar vertical = scrollPane.getVerticalScrollBar();
+        JScrollPane scrollPane = new JScrollPane(contentPanel,
+
+                JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+                JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
         if (!editMode) {
+            JScrollBar vertical = scrollPane.getVerticalScrollBar();
             scrollPane.setPreferredSize(resolution);
             scrollPane.setMinimumSize(resolution);
             scrollPane.setMaximumSize(resolution);
@@ -386,7 +383,6 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
             this.setBorder(null);
             HTMLEditorKit kit = new HTMLEditorKit();
             editor.setEditorKit(kit);
-            System.out.println("POPE " + editor.getHeight());
             StyleSheet styleSheet = kit.getStyleSheet();
             styleSheet.addRule("h2 {color: white; font-family:times; margin: 0px; background-color: black;font : 24px monaco;}");
             editor.setDocument(kit.createDefaultDocument());

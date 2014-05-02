@@ -109,10 +109,9 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
             public void actionPerformed(ActionEvent e) {
                 File file = fileSaveDialog("AATConfig");
                 if (file != null) {
-                    saveAction(file);
                     currentConfig = file;
                     workingDir = file.getParentFile();
-                    htmlEditPanel.save();
+                    saveAction(file);
                     JOptionPane.showMessageDialog(null,
                             "AAT Config file saved.");
                 }
@@ -140,16 +139,13 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
                 } else {
                     File file = fileSaveDialog("AATConfig");
                     if (file != null) {
-                        saveAction(file);
                         currentConfig = file;
                         workingDir = file.getParentFile();
+                        saveAction(file);
                         JOptionPane.showMessageDialog(null,
                                 "AAT Config file saved.");
                     }
-
-
                 }
-                htmlEditPanel.save();  //Save the language file.
             }
         });
 
@@ -1361,7 +1357,10 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
             File qFile = new File(workingDir + File.separator + inputQuestionFile.getText());
             displayQuestionnairePanel.saveQuestionnaire(qFile);
         }
-
+        if(inputLangFile.getText().length()>0) {
+            File lFile = new File(workingDir + File.separator + inputLangFile.getText());
+            htmlEditPanel.save(lFile);
+        }
     }
 
     private TestConfiguration getConfiguration() {

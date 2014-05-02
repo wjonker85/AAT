@@ -22,7 +22,6 @@ import java.io.File;
 public class HTMLEditPanel extends JPanel {
 
     private HTMLEditorPane editorStart, editorIntro, editorBreak, editorFinish;
-    private File fileName = new File("");
 
     public HTMLEditPanel() {
 
@@ -123,7 +122,7 @@ public class HTMLEditPanel extends JPanel {
         if (!file.exists()) {
             return false;
         }
-        this.fileName = file;
+
         String intro, start, breakT, finish;
         try {
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -161,8 +160,8 @@ public class HTMLEditPanel extends JPanel {
     }
 
 
-    public void save() {
-        XMLWriter.writeLanguageFile(fileName, editorIntro.getText(), editorStart.getText(), editorBreak.getText(), editorFinish.getText());
+    public void save(File file) {
+        XMLWriter.writeLanguageFile(file, editorIntro.getText(), editorStart.getText(), editorBreak.getText(), editorFinish.getText());
     }
 }
 
