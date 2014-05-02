@@ -7,7 +7,6 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.io.FileFilter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.regex.Matcher;
@@ -15,6 +14,7 @@ import java.util.regex.Pattern;
 
 /**
  * Created by marcel on 1/19/14.
+ * Different helper methods to deal with files. Read images from disk or get the relative path compared to the current working directory.
  */
 
 
@@ -23,14 +23,12 @@ public class FileUtils {
 
     private static final String IMAGE_PATTERN =
             "([^\\s]+(\\.(?i)(jpeg|jpg|png|gif|bmp))$)";
-    //regex for extension filtering
-    private static Pattern pattern;
     /**
      * Filter so that only the image files in a directory will be selected
      */
     static FileFilter extensionFilter = new FileFilter() {
         public boolean accept(File file) {
-            pattern = Pattern.compile(IMAGE_PATTERN); //create regex
+            Pattern pattern = Pattern.compile(IMAGE_PATTERN);
             Matcher matcher = pattern.matcher(file.getName());
             return matcher.matches();
         }
@@ -54,8 +52,6 @@ public class FileUtils {
      * @param base File that is the base for the result
      * @param name File to be "relativized"
      * @return the relative name
-     * @throws IOException if files have no common sub-directories, i.e. at best share the
-     *                     root prefix "/" or "C:\"
      */
 
     public static String getRelativePath(File base, File name) {

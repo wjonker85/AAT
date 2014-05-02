@@ -10,7 +10,6 @@ public class TestConfiguration {
     private int trials, breakAfter, practiceRepeat;
     private String displayQuestions = "";
     private File workingDir;
-    private boolean hasQuestionnaire = false;
     private String AffectRatio = "";
     private String NeutralRatio = "";
     private String TestRatio = "";
@@ -255,14 +254,6 @@ public class TestConfiguration {
         this.hasPractice = hasPractice;
     }
 
-    public boolean getHasQuestionnaire() {
-        return hasQuestionnaire;
-    }
-
-    public void setHasQuestionnaire(boolean hasQuestionnaire) {
-        this.hasQuestionnaire = hasQuestionnaire;
-    }
-
     public File getDataFile() {
         return dataFile;
     }
@@ -281,7 +272,7 @@ public class TestConfiguration {
 
     public void setPlotType(String plotType) {
         this.plotType = plotType;
-    }
+    }           //TODO deze moet nog gedaan worden
 
     public String getPlotType() {
         return plotType;

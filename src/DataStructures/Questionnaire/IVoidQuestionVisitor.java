@@ -2,6 +2,7 @@ package DataStructures.Questionnaire;
 
 /**
  * Created by marcel on 3/25/14.
+ * Visitor pattern for the questionnaire, but without a return type
  */
 public interface IVoidQuestionVisitor {
     public void Visit(ClosedButtonQuestion question);

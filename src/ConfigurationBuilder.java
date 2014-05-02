@@ -63,7 +63,6 @@ public class ConfigurationBuilder {
                     if ("Nimbus".equals(info.getName())) {
                         try {
                             UIManager.setLookAndFeel(info.getClassName());
-
                             break;
 
                         } catch (Exception e) {

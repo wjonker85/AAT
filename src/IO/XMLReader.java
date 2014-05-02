@@ -57,6 +57,7 @@ public class XMLReader {
             e.printStackTrace();
         }
         for (String option : options) {
+            assert doc != null;
             translations.put(option, getValue(option, doc.getDocumentElement()));
         }
         return translations;
@@ -83,17 +84,14 @@ public class XMLReader {
         NodeList introductionList = allQuestions.getElementsByTagName("introduction");
         Node introductionNode = introductionList.item(0);
         Node introductionText = introductionNode.getFirstChild();
-        String introduction = introductionText.getNodeValue();
-        return introduction;
+        return introductionText.getNodeValue();
     }
 
 
     private static ArrayList<AbstractQuestion> readQuestions(Document doc) {
         ArrayList<AbstractQuestion> allQuestionsList = new ArrayList<AbstractQuestion>();
-        String key = "";
-        String question = "";
-        Boolean required = true;
-        String type = "";
+        Boolean required;
+        String type;
 
         try {
             NodeList questions = doc.getElementsByTagName("questionnaire");
@@ -158,6 +156,7 @@ public class XMLReader {
                         newQuestion = sq;
                     }
 
+                    assert newQuestion != null;
                     newQuestion.setQuestion(getValue("text", element));
                     newQuestion.setKey(getValue("key", element));
                     newQuestion.setRequired(required);
@@ -209,7 +208,7 @@ public class XMLReader {
                 }
             }
         } catch (Exception e) {
-            System.out.println(e.getStackTrace());
+            e.printStackTrace();
         }
         return files;
     }

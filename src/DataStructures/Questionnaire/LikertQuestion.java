@@ -2,6 +2,7 @@ package DataStructures.Questionnaire;
 
 /**
  * Created by marcel on 3/25/14.
+ * Likert scale question
  */
 public class LikertQuestion extends AbstractScaleQuestion {
 

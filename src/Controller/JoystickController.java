@@ -43,13 +43,11 @@ public class JoystickController extends Thread implements Observer {
 
     private static final int DELAY = 10;  // ms  (polling interval)
     private int stepSizeDisplay;
-    private int stepSizeData = 9;
     private AATModel model;
     private Component yAxis;
     private Component trigger;
     private Controller joyStick;
     private boolean stopThread = false;
-    private float delta = 0.001f;
     private boolean doTrigger = true;
 
 
@@ -102,10 +100,10 @@ public class JoystickController extends Thread implements Observer {
 
     //Search all attached controllers and returns the first joystick found
     private Controller findJoystick(Controller[] controllers) {
-        for (int x = 0; x < controllers.length; x++) {
-            if (controllers[x].getType().equals(Controller.Type.STICK)) {
-                System.out.println("Controller.JoystickController found " + controllers[x].getName());
-                return controllers[x];
+        for (Controller controller : controllers) {
+            if (controller.getType().equals(Controller.Type.STICK)) {
+                System.out.println("Controller.JoystickController found " + controller.getName());
+                return controller;
             }
         }
         return null;
@@ -125,25 +123,20 @@ public class JoystickController extends Thread implements Observer {
     private void pollController(Controller c) {
         float prevYValue = 0.0f;
         float yAxisValue;
-        float prevTrigger = 0.0f;
         boolean pollIsValid;  // new
 
         //       int i = 1;   // used to format the output
         while (!stopThread) {
             try {
                 Thread.sleep(DELAY);      // wait a while
-            } catch (Exception ex) {
+            } catch (Exception ignored) {
             }
 
             pollIsValid = c.poll(); // update the controller's components
             if (pollIsValid) {
                 if (doTrigger) {
-                    if (trigger.getPollData() == 0 && prevTrigger != 0f) {
-                        prevTrigger = 0f;
-                    }
-                    if (trigger.getPollData() == 1 && prevTrigger != 1.0f) {   // only changes
+                    if (trigger.getPollData() == 1) {   // only changes
                         model.triggerPressed(); //Notify model that the trigger button is pressed.
-                        prevTrigger = 1.0f;
                         //   } else if (trigger.getPollData() == 0) {   // reset prevTrigger
                         //       prevTrigger = 0f;
                     }
@@ -151,8 +144,10 @@ public class JoystickController extends Thread implements Observer {
                     yAxisValue = yAxis.getPollData();
                     if (yAxisValue != prevYValue) {  // value has changed
                         if (yAxisValue == 1 || yAxisValue == -1) {
-                            model.maxPullorPush((int) convertValue2(yAxisValue, stepSizeData));
+                            int stepSizeData = 9;
+                            model.maxPullorPush(convertValue2(yAxisValue, stepSizeData));
                         } else {
+                            int stepSizeData = 9;
                             model.changeYaxis(convertValue2(yAxisValue, stepSizeData), convertValue2(yAxisValue, stepSizeDisplay));
                             prevYValue = yAxisValue;
                         }
@@ -170,12 +165,14 @@ public class JoystickController extends Thread implements Observer {
         int returnValue = 0;
         int middlePos = (NoSteps + 1) / 2;
         float steps = NoSteps - middlePos;
-        float increment = (float) (1 / steps);
+        float increment =  (1 / steps);
         if (value > 0) {                                           //Correct for small joystick error, otherwise it will not reach the end
             //with large stepsizes
+            float delta = 0.001f;
             returnValue = (int) ((value / increment) + delta);
         }
         if (value < 0) {
+            float delta = 0.001f;
             returnValue = (int) ((value / increment) - delta);
         }
         if (value == 0) {

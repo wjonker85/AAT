@@ -41,7 +41,7 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
     private JButton inputPushColor, inputPullColor, inputPracticeFill, selectQButton;
     private JTextField inputBorderSize;
     private JTextField inputStepSize, inputDataStepSize;
-    private JComboBox inputQuestions;
+    private JComboBox<Object> inputQuestions;
     private JCheckBox inputBoxplot, inputColoredBorder, inputHasPractice, inputBuiltinPractice;
     private int pullColor, pushColor, prFillColor;
     private File workingDir = new File("");
@@ -235,22 +235,17 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
 
             }
         });
-        ImageIcon icon = null;
         final JPanel mainPanel = createMainPanel();
         mainPanel.setEnabled(false);
         mainPanel.setVisible(false);
         JScrollPane scrollPane = new JScrollPane(mainPanel);
         scrollPane.getVerticalScrollBar().setUnitIncrement(16);
-        tabbedPane.addTab("AAT configuration", icon, scrollPane,
+        tabbedPane.addTab("AAT configuration", null, scrollPane,
                 "Sets the main configuration of the test");
         tabbedPane.setMnemonicAt(0, KeyEvent.VK_1);
 
         add(tabbedPane);
 
-        boolean hasPracticeImages = false;
-        if (!inputBuiltinPractice.isSelected() && inputHasPractice.isSelected()) {
-            hasPracticeImages = true;
-        }
         imageSelectionPanel = new ImageSelectionPanel();
         JScrollPane contentPane = new JScrollPane(imageSelectionPanel);
         contentPane.getVerticalScrollBar().setUnitIncrement(16);
@@ -400,7 +395,7 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
                 if (file != null) {
                     tabbedPane.setEnabledAt(tabbedPane.indexOfTab("Language File"), true);
                     inputLangFile.setText(file.getName());
-                    if(!htmlEditPanel.setDocument(file)) {
+                    if (!htmlEditPanel.setDocument(file)) {
                         htmlEditPanel.setTemplateText();  //Language file does not exist or is corrupt. Now set a default text in the html editors.
                     }
                 } else {
@@ -434,8 +429,6 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
         breakP.add(inputBreak);
         breakP.add(Box.createHorizontalBox());
         panel.add(breakP);
-        //TODO
-
         panel.add(Box.createVerticalStrut(10));
         panel.add(Box.createVerticalStrut(10));
         panel.add(new TitledSeparator("Practice options", 0));
@@ -661,7 +654,7 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
 
         JPanel comboP = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JLabel displayQL = new JLabel("When do you want to display a Questionnaire?");
-        inputQuestions = new JComboBox(new Object[]{"None", "Before", "After"});
+        inputQuestions = new JComboBox<Object>(new Object[]{"None", "Before", "After"});
         inputQuestions.setPreferredSize(new Dimension(100, 25));
         inputQuestions.addActionListener(new ActionListener() {
             @Override
@@ -1167,7 +1160,7 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
      * Update the id value for a config everytime something gets changed. This id file is then used to be saved together with
      * the test data to make sure a test doesn't get corrupted because of changes made between giving this test to subjects.
      *
-     * @return
+     * @return new id value
      */
     private int createIDValue() {
         if (newTest) {
@@ -1187,7 +1180,7 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
      * @param file the config file.
      */
     private void LoadConfig(File file) {
-        boolean hasPractice = true, builtinPractice = true, hasColoredBorders = true;
+        boolean hasPractice, builtinPractice, hasColoredBorders;
         newTest = false;
         workingDir = file.getParentFile();
         ConfigFileReader config = new ConfigFileReader(file);
@@ -1308,7 +1301,6 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
         if (config.getValue("PracticeFillColor").length() == 6) {
             inputPracticeFill.setBackground(getColor(config.getValue("PracticeFillColor")));
             inputPracticeFill.setEnabled(true);
-//TODO nog  even kijken of dit werkt
             builtinPractice = true;
         } else {
             builtinPractice = false;

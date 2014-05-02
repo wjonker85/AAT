@@ -41,25 +41,6 @@ public class TitledSeparator extends JPanel {
     // the label for the title
     private JLabel mTitleLabel;
 
-    // the default position if no one is supplied
-    private static final int DEFAULT_POS = 7;
-
-    /**
-     * Create a new title separator with a empty title.
-     */
-    public TitledSeparator() {
-        this("", DEFAULT_POS);
-    }
-
-    /**
-     * Create a new title separator with the handed title.
-     *
-     * @param pTitle the title text
-     */
-    public TitledSeparator(String pTitle) {
-        this(pTitle, DEFAULT_POS);
-    }
-
     /**
      * Create a new title separator with the handed title and position.
      *

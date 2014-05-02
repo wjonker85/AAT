@@ -8,6 +8,7 @@ import javax.swing.*;
 
 /**
  * Created by marcel on 3/25/14.
+ * Editor panel for an open question
  */
 class OpenQuestionEditPanel<T> extends AbstractQuestionEditPanel {
 

@@ -14,6 +14,7 @@ import java.util.Set;
 
 /**
  * Created by marcel on 2/16/14.
+ * Should be the panel that displays a plot a the end of the test.
  */
 public class PlotPanel extends JPanel {
 
@@ -49,9 +50,6 @@ public class PlotPanel extends JPanel {
         plot.getPointRenderer(data).setColor(color);
         plot.getLineRenderer(data).setColor(color);
         iPanel = new InteractivePanel(plot);
-        // iPanel.setPreferredSize(new Dimension(800, 600));
-        // iPanel.setVisible(true);
-        // iPanel.setEnabled(true);
         mainPanel.add(iPanel);
         this.add(mainPanel);
     }
@@ -66,8 +64,6 @@ public class PlotPanel extends JPanel {
             data.add(x, (double) array1[x]);
             System.out.println("x " + x + " y " + array1[x] + " " + data.getRowCount());
         }
-        //    plot.remove(data);
-
         plot.add(data);
         mainPanel.revalidate();
 

@@ -10,6 +10,9 @@ import java.io.PrintWriter;
 
 /**
  * Created by marcel on 3/16/14.
+ * This class contains the functionality to write the configuration file. It is called from the configuration builder. The configuration is a simple
+ * text file containing all the variables set in the configuration builder. Advanced users could also edit the config file directly. For them comment is
+ * added to the file too, so that all the options have a small explanantion.
  */
 public class ConfigWriter {
 

@@ -7,6 +7,8 @@ import org.w3c.dom.Text;
 
 /**
  * Created by marcel on 3/25/14.
+ * This class is an implementation of the questionVisitor. This builds an xml document from the questionnaire that was assembled using
+ * the configuration builder
  */
 public class XmlQuestionnaireBuilder implements IVoidQuestionVisitor {
 

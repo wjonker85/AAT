@@ -93,14 +93,11 @@ public class HighMemoryAAT extends AbstractAAT {
                 c = Color.gray;
             }
 
-            int i = 0;
             for (int x = 0; x < size; x++) {
                 AATImage pull = new AATImage(AATImage.PULL, c, x, this);
                 list.add(pull);
-                i++;
                 AATImage push = new AATImage(AATImage.PUSH, c, x, this);
                 list.add(push);
-                i++;
             }
         }
         Collections.shuffle(list); //randomise the list.
@@ -135,10 +132,10 @@ public class HighMemoryAAT extends AbstractAAT {
     /**
      * Create a list with different push/pull percentages
      *
-     * @param n
-     * @param pushPerc
-     * @param fileList
-     * @return
+     * @param n  Number of images
+     * @param pushPerc Percentage push in the images list
+     * @param fileList List of files to select from
+     * @return new image list with the correct pull/push ratio
      */
     public ArrayList<AATImage> createList(int n, int pushPerc, ArrayList<File> fileList, int type) {
         Collections.shuffle(fileList);

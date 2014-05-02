@@ -83,25 +83,14 @@ public class DataExporter {
         writeMeasuresToCSV(doc, file, String.valueOf(export_id), includePractice, metaData);
         MessageDialog.getInstance().showMessage();
     }
-//
-//    public static void exportMeasurementsAnova(File file, int minRTime, int maxRTime, int errorPerc, boolean includePractice, boolean removeCenter) {
-//        Document doc = createCopiedDocument(model.getAATDataRecorder().getDocument());
-//        doc = testIDFilter(doc, String.valueOf(model.getExport_id()));
-//        if (!includePractice) {
-//            doc = removePractice(doc);
-//        }
-//        HashMap<String, Integer> errors = errorPercentages(doc, model, minRTime, maxRTime);
-//        doc = checkValues(doc, model, minRTime, maxRTime, removeCenter);
-//        doc = removeParticipants(doc, errors, errorPerc);
-//        writeMeasuresAnovaToCSV(doc, file);
-//        MessageDialog.getInstance().showMessage();
-//    }
 
     /**
      * Returns a hashmap containing all the different test versions available in the data file.
+     * Each time the configuration for a test is altered, taking a new AAT will create a new revision
+     * these revisions need to be exported seperately, because they can have different datastructures e.g. different number of images or trials
      *
-     * @param
-     * @return
+     * @param  doc Data document
+     * @return  Get all test revisions present in the data file
      */
     public static HashMap<String, String> getTestRevisions(Document doc) {
         HashMap<String, String> result = new HashMap<String, String>();
@@ -188,9 +177,9 @@ public class DataExporter {
     /**
      * Filter the participant data based on test id.
      *
-     * @param doc
-     * @param test_id
-     * @return
+     * @param doc  Data document
+     * @param test_id  test id value
+     * @return  Document that only contains the test data specified for a given test id
      */
     private static Document testIDFilter(Document doc, String test_id) {
         NodeList participantsList = doc.getElementsByTagName("participant");
@@ -389,64 +378,8 @@ public class DataExporter {
         }
     }
 
-    private static void writeMeasuresAnovaToCSV(Document doc, File file) {
-        HashMap<String, Integer> variableMap = createVariableMapAnova(doc); //create a map containing variable names and position
-        //    System.out.println("Variablemap " + variableMap.size());
-        try {
-            writeDataToCSVFile(createDataTableAnova(doc, variableMap), file);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private static String[][] createDataTableAnova(Document doc, HashMap<String, Integer> variableMap) {
-        int columns = variableMap.size() + 3; //data +3 extra variables
-        NodeList participantList = doc.getElementsByTagName("participant");
-        int rows = participantList.getLength() + 1;  //Total rows + header
-        String[][] tableData = new String[rows][columns];
-        tableData[0][0] = "id";
-        tableData[0][columns - 2] = "Type";
-        tableData[0][columns - 1] = "Direction";
-
-        for (String key : variableMap.keySet()) {    //create first row
-            int pos = variableMap.get(key);
-            pos++; //shift 1 to the right for the id column;
-            System.out.println(key + " " + pos);
-            tableData[0][pos] = key;
-        }
-        for (int x = 0; x < participantList.getLength(); x++) {
-            Element participant = (Element) participantList.item(x);
-            tableData[x + 1][0] = participant.getAttribute("id");
-            NodeList trialList = participant.getElementsByTagName("trial");
-            for (int n = 0; n < trialList.getLength(); n++) {
-                Element trial = (Element) trialList.item(n);
-                NodeList imageList = trial.getElementsByTagName("image");
-                for (int i = 0; i < imageList.getLength(); i++) {
-                    Element image = (Element) imageList.item(i);
-                    NodeList nameList = image.getElementsByTagName("imageName");
-                    Node imageNameNode = nameList.item(0).getFirstChild();
-                    String imageName = imageNameNode.getNodeValue();
-                    String variableName = n + "_" + imageName; //Trial nr + imageName
-                    NodeList rTimeList = image.getElementsByTagName("reactionTime");
-                    Node rTimeNode = rTimeList.item(0).getFirstChild();
-                    String reactionTime = rTimeNode.getNodeValue();
-                    int pos = variableMap.get(variableName);
-                    pos++; //Shift 1 to the right
-                    tableData[x + 1][pos] = reactionTime;
-                    NodeList typeList = image.getElementsByTagName("type");
-                    Node type = typeList.item(0).getFirstChild();
-                    NodeList directionList = image.getElementsByTagName("direction");
-                    Node direction = directionList.item(0).getFirstChild();
-                    tableData[x + 1][columns - 2] = type.getNodeValue();
-                    tableData[x + 1][columns - 1] = direction.getNodeValue();
-                }
-            }
-        }
-        return tableData;
-    }
-
     private static String[][] createDataTable(Document doc, TestMetaData metaData, HashMap<String, Integer> variableMap, boolean includePractice) {
-        int columns = variableMap.size() + 1; //TODO was +1
+        int columns = variableMap.size() + 1;
         NodeList participantList = doc.getElementsByTagName("participant");
 
         int rows = participantList.getLength() + 1;
@@ -489,7 +422,6 @@ public class DataExporter {
                     String reactionTime = rTimeNode.getNodeValue();
                     System.out.println("Image " + imageName + " reaction time " + reactionTime);
                     int pos = variableMap.get(imageName);
-                    //    System.out.println("TEST " + pos);
                     pos++; //Shift 1 to the right
                     tableData[x + 1][pos] = reactionTime;
                 }
@@ -498,52 +430,9 @@ public class DataExporter {
         return tableData;
     }
 
-    /**
-     * Create a differen variableMap, this one only contains the image names
-     *
-     * @param doc
-     * @return
-     */
-    private static HashMap<String, Integer> createVariableMapAnova(Document doc) {
-        HashMap<String, Integer> outputData = new HashMap<String, Integer>();
-        try {
-            NodeList participantsList = doc.getElementsByTagName("participant");
-            Element firstParticipant = (Element) participantsList.item(0);
-            NodeList trialList = firstParticipant.getElementsByTagName("trial");
-            for (int x = 0; x < trialList.getLength(); x++) {
-                Element trial = (Element) trialList.item(x);
-                NodeList imageList = trial.getElementsByTagName("image");
-
-                for (int i = 0; i < imageList.getLength(); i++) {
-                    Element image = (Element) imageList.item(i);
-                    int count = i + (x * (imageList.getLength() / 2)); //Half the size push and pull not counted
-
-                    NodeList nameList = image.getElementsByTagName("imageName");
-                    Node imageNameNode = nameList.item(0).getFirstChild();
-                    String imageName = imageNameNode.getNodeValue();
-                    String variableName = x + "_" + imageName; //Trial nr + imageName
-                    //     System.out.println("Adding variable " + variableName);
-                    if (!outputData.containsKey(variableName)) {
-                        outputData.put(variableName, count);
-                    }
-                }
-            }
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(null,
-                    "Problem exporting measures, possible that all the measures contain too much mistakes",
-                    "Configuration error",
-                    JOptionPane.ERROR_MESSAGE);
-            System.out.println("Problem exporting measures, possible that all the measures contain too much mistakes");
-        }
-        return correctValues(outputData);
-
-    }
-
 
     private static HashMap<String, Integer> createVariableMap(Document doc, String export_id, boolean includePractice, boolean borders) {
         HashMap<String, Integer> outputData = new HashMap<String, Integer>();
-        //     try {
-
         NodeList testList = doc.getElementsByTagName("test");
         for (int x = 0; x < testList.getLength(); x++) {
             Element testElement = (Element) testList.item(x);
@@ -552,9 +441,9 @@ public class DataExporter {
             String pushTag = testElement.getAttribute("pushTag");
             String labelA = testElement.getAttribute("labelA");
             String labelN = testElement.getAttribute("labelN");
-            //     System.out.println("Test ID "+test_id+" compare "+export_id);
+
             int trials = Integer.parseInt(testElement.getAttribute("trials"));
-            System.out.println("No Trials " + trials);
+
             if (test_id.equalsIgnoreCase(export_id)) {       //Add the two directions of each image to the variableMap
                 int practiceCount = 0;
                 if (includePractice) {
@@ -566,12 +455,11 @@ public class DataExporter {
                     hasPractice = true; //Practice images were added
                 }
                 if (borders) {               //When the test features auto-generated borders, add each variable twice for the pull and push category.
-                    addToVariableMap(outputData, testElement, pullTag, labelA, labelN, practiceCount, trials, includePractice, hasPractice);
-                    //      System.out.println("Output Size "+outputData.size());
-                    addToVariableMap(outputData, testElement, pushTag, labelA, labelN, outputData.size(), trials, includePractice, hasPractice);
+                    addToVariableMap(outputData, testElement, pullTag, labelA, labelN, practiceCount, trials, hasPractice);
+                    addToVariableMap(outputData, testElement, pushTag, labelA, labelN, outputData.size(), trials, hasPractice);
                 } else {
                     //Do not specify the tag, So all images are added only once. Their filenames already contain the pull and push tags.
-                    addToVariableMap(outputData, testElement, "", labelA, labelN, practiceCount, trials, includePractice, hasPractice);
+                    addToVariableMap(outputData, testElement, "", labelA, labelN, practiceCount, trials, hasPractice);
                 }
             }
         }
@@ -627,38 +515,30 @@ public class DataExporter {
 
     /**
      * Append variable name to the variableMap.
-     *
-     * @param testElement
-     * @param tag
-     * @param startCount
+     *  @param testElement Measured image
+     * @param tag push or pull
+     * @param startCount first joystick position
      */
-    private static void addToVariableMap(HashMap<String, Integer> map, Element testElement, String tag, String labelA, String labelN, int startCount, int trials, boolean includePractice, boolean hasPractice) {
+    private static void addToVariableMap(HashMap<String, Integer> map, Element testElement, String tag, String labelA, String labelN, int startCount, int trials, boolean hasPractice) {
 
 
         for (int y = 0; y < trials; y++) {
             NodeList imageList = testElement.getElementsByTagName("image");
-
-
-            //   System.out.println("No. images in the test: "+imageList.getLength());
             int z = 0;  //Seperate counter because of the possible removement of the practice images.
             int totalImages = countImages(imageList, false);
             for (int i = 0; i < imageList.getLength(); i++) {
                 Element image = (Element) imageList.item(i);
                 String typeAttr = image.getAttribute("type");
 
-                if (Integer.parseInt(typeAttr) == AATImage.PRACTICE) {
-                    //       remove the practice images. Regardless of the includePractice boolean. Practice images are treated different.
-                } else {
+                if (Integer.parseInt(typeAttr) != AATImage.PRACTICE) {
                     int count = startCount + z + (y * totalImages);
-                    String variableName = "";
+                    String variableName;
                     if (hasPractice) {
                         int y2 = y + 1;
                         variableName = y2 + "_" + createVariableName(image, tag, labelA, labelN);
                     } else {
                         variableName = y + "_" + createVariableName(image, tag, labelA, labelN);
                     }
-
-                    System.out.println("Adding variable " + variableName + " at position " + count);
                     map.put(variableName, count);
                     z++;
                 }
@@ -682,26 +562,6 @@ public class DataExporter {
             }
             return imageList.getLength() - count; //Corect for the practice images;
         }
-        //       return 0;
-    }
-    //  } catch (Exception e) {
-    //    JOptionPane.showMessageDialog(null,
-    //           "Problem exporting measures, possible that all the measures contain too much mistakes",
-    //           "Configuration error",
-    //           JOptionPane.ERROR_MESSAGE);
-    // System.out.println(e.getMessage()+"\n"+e.getStackTrace());
-    //    System.out.println("Problem exporting measures, possible that all the measures contain too much mistakes");
-    //    }
-
-
-    private static HashMap<String, Integer> correctValues(HashMap<String, Integer> map) {
-        HashMap<String, Integer> newMap = new HashMap<String, Integer>();
-        int x = 0;
-        for (String key : map.keySet()) {
-            newMap.put(key, x);
-            x++;
-        }
-        return newMap;
     }
 
 
@@ -709,10 +569,10 @@ public class DataExporter {
      * Construct the variable name, based on the information coming from the data.xml.
      * This should match the variable name that was created based on the metadata.
      *
-     * @param image
-     * @param labelA
-     * @param labelN
-     * @return
+     * @param image image name
+     * @param labelA affective label
+     * @param labelN neutral label
+     * @return The name for the variable that will be placed in the output file
      */
     private static String createVariableName(Element image, String labelA, String labelN) {
         NodeList directionList = image.getElementsByTagName("direction");
@@ -732,8 +592,7 @@ public class DataExporter {
             typeValue = "_" + type.getNodeValue();
         }
 
-        String variableName = imageName + typeValue + dirValue;
-        return variableName;
+        return imageName + typeValue + dirValue;
     }
 
 

@@ -5,6 +5,8 @@ import views.Questionnaire.QuestionPanels.*;
 
 /**
  * Created by marcel on 3/25/14.
+ * Another implementation of the question visitor. This one returns the correct display panel for each type of question
+ * that can be present in the questionnaire
  */
 public class DisplayQuestionnaireVisitor implements IQuestionVisitor<AbstractQuestionPanel> {
 

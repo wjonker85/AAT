@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 /**
  * Created by marcel on 3/25/14.
+ * Abstract super class for an closed question.
  */
 public abstract class AbstractClosedQuestion extends AbstractQuestion {
 

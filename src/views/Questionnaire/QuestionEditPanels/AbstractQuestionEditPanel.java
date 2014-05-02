@@ -7,6 +7,7 @@ import java.awt.*;
 
 /**
  * Created by marcel on 3/25/14.
+ * Super class for a question editor
  */
 public abstract class AbstractQuestionEditPanel<T extends AbstractQuestion> extends JPanel {
 
@@ -35,5 +36,5 @@ public abstract class AbstractQuestionEditPanel<T extends AbstractQuestion> exte
 
     public abstract T getQuestion();
 
-    public abstract boolean validated();
+    public abstract boolean validated();    //TODO unused, but might be implemented later
 }

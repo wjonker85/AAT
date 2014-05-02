@@ -14,6 +14,8 @@ import java.util.HashMap;
 
 /**
  * Created by marcel on 1/19/14.
+ * This frame shows the different revisions that could be available in the testdata. When there is only one revision, then this frame will never show up. When there
+ * are more, a user is asked to choose between them. Only one revision at a time can be used to export data from
  */
 public class SelectTestRevision extends JFrame {
 
@@ -105,7 +107,7 @@ public class SelectTestRevision extends JFrame {
         JPanel tablePanel = new JPanel();
         //    scrollPane.setHorizontalScrollBarPolicy(Scroll);
         table = new JTable(new RevisionTableModel(testData, current_id));
-        TableColumn column = null;
+        TableColumn column;
         for (int i = 0; i < 3; i++) {
             column = table.getColumnModel().getColumn(i);
             if (i == 1) {
@@ -142,10 +144,10 @@ class RevisionTableModel extends AbstractTableModel {
 
             if (id == current_id) {
                 data[x][1] = "(Current) " + input.get(s);
-                data[x][2] = new Boolean(true);
+                data[x][2] = Boolean.TRUE;
             } else {
                 data[x][1] = input.get(s);
-                data[x][2] = new Boolean(false);
+                data[x][2] = Boolean.FALSE;
             }
             x++;
         }
@@ -188,11 +190,7 @@ class RevisionTableModel extends AbstractTableModel {
     public boolean isCellEditable(int row, int col) {
         //Note that the data/cell address is constant,
         //no matter where the cell appears onscreen.
-        if (col == 2) {
-            return true;
-        } else {
-            return false;
-        }
+        return col == 2;
     }
 
     private int findTrue() {
@@ -213,7 +211,7 @@ class RevisionTableModel extends AbstractTableModel {
             Boolean b = Boolean.parseBoolean(value.toString());
             if (b) {
                 System.out.println("Change " + row);
-                data[pos][2] = new Boolean(false);
+                data[pos][2] = false;
                 //   setValueAt( new Boolean(false),findTrue(),2);
                 data[row][col] = value;
             }

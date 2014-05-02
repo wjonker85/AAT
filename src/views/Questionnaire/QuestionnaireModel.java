@@ -7,6 +7,8 @@ import java.util.Observable;
 
 /**
  * Created by marcel on 3/25/14.
+ * A model that is given to the different question edit panels. This model contains the original question as wel as the changed values and the position of the question
+ * in the list. It uses a model view controller construction, so that views can listen to changes in this model.
  */
 public class QuestionnaireModel extends Observable {
 
@@ -14,7 +16,6 @@ public class QuestionnaireModel extends Observable {
     private AbstractQuestion newQuestion;
     private QuestionEditFrame currentEditFrame;
     private int pos;
-    private boolean insert = false;
     public static final String[] Types = {"Likert Scale", "Semantic differential", "Closed question (combo-box)", "Closed question (buttons)", "Open question", "Open question with text area"};
     private static final AbstractQuestion[] QuestionClasses = {new LikertQuestion(), new SemDiffQuestion(), new ClosedComboQuestion(), new ClosedButtonQuestion(), new OpenQuestion(), new OpenTextAreaQuestion()};
 
@@ -37,29 +38,15 @@ public class QuestionnaireModel extends Observable {
         }
     }
 
-    public void setInsertMode(boolean insert) {
-        this.insert = insert;
-    }
-
-    public AbstractQuestion getOriginalQuestion() {
-        return original;
-    }
-
     public AbstractQuestion getNewQuestion() {
         return newQuestion;
     }
 
     public void setNewQuestion(AbstractQuestion newQuestion) {
-        if (!insert) {
-            if (!newQuestion.equals(original)) {
-                this.newQuestion = newQuestion;
-                this.setChanged();
-                this.notifyObservers("submit");
-            }
-        } else {
+        if (!newQuestion.equals(original)) {
             this.newQuestion = newQuestion;
             this.setChanged();
-            this.notifyObservers("insert");
+            this.notifyObservers("submit");
         }
     }
 
@@ -86,5 +73,4 @@ public class QuestionnaireModel extends Observable {
         return pos;
     }
 
-    // public QuestionEditFrame changeFrameType(Enum EditFrameType)
 }

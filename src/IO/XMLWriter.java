@@ -21,15 +21,14 @@ import java.io.File;
 import java.util.ArrayList;
 
 /**
- * Created by marcel on 1/19/14.
+ * This class contains several static methods for the writing of xml files. The included.xml files, which contain the files that should be included in the AAT.
+ * The questionnaire file and the language file.
  */
 public class XMLWriter {
 
 
-    public static void writeXMLImagesList(TableModel modelA, TableModel modelN, TableModel modelP, File aDir, File nDir, File pDir) {
+    public static boolean writeXMLImagesList(TableModel modelA, TableModel modelN, TableModel modelP, File aDir, File nDir, File pDir) {
         try {
-            //   TableModel modelA = tableA.getModel();
-            //  TableModel modelN = tableN.getModel();
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
 
@@ -119,20 +118,16 @@ public class XMLWriter {
                 transformer.setOutputProperty(OutputKeys.INDENT, "yes");
                 source = new DOMSource(doc);
                 result = new StreamResult(new File(pDir.getAbsolutePath() + File.separator + "included.xml"));
-
-                // Output to console for testing
-                // StreamResult result = new StreamResult(System.out);
-
                 transformer.transform(source, result);
             }
-
-            System.out.println("File saved!");
-
         } catch (ParserConfigurationException pce) {
             pce.printStackTrace();
         } catch (TransformerException tfe) {
             tfe.printStackTrace();
+        } catch (NullPointerException npe) {
+            return false;
         }
+         return true;
     }
 
 
@@ -219,5 +214,43 @@ public class XMLWriter {
         }
     }
 
+
+    public static void writeLanguageFile(File fileName, String introText, String startText, String breakText, String finishedText) {
+
+        try {
+            DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+
+            // root elements
+            Document doc = docBuilder.newDocument();
+            Element rootElement = doc.createElement("languageFile");
+            doc.appendChild(rootElement);
+
+            Element intro = doc.createElement("introduction");
+            rootElement.appendChild(intro);
+            intro.appendChild(doc.createCDATASection(introText));
+            Element start = doc.createElement("start");
+            rootElement.appendChild(start);
+            start.appendChild(doc.createCDATASection(startText));
+            Element breakE = doc.createElement("break");
+            rootElement.appendChild(breakE);
+            breakE.appendChild(doc.createCDATASection(breakText));
+            Element finished = doc.createElement("finished");
+            rootElement.appendChild(finished);
+            finished.appendChild(doc.createCDATASection(finishedText));
+
+            // write the content into xml file
+            TransformerFactory transformerFactory = TransformerFactory.newInstance();
+            Transformer transformer = transformerFactory.newTransformer();
+            DOMSource source = new DOMSource(doc);
+            StreamResult result = new StreamResult(fileName);
+
+            transformer.transform(source, result);
+            System.out.println("Language file saved to " + fileName.getAbsoluteFile());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
 
 }

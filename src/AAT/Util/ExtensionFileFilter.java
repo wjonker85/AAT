@@ -4,6 +4,7 @@ import java.io.File;
 
 /**
  * Created by marcel on 1/29/14.
+ * Helper class that can be used to filter file lists based on their file extension
  */
 
 //filter voor de file extensions. Komt ook van het internet. Wordt nu gebruik om .input en csv bestanden te filteren.

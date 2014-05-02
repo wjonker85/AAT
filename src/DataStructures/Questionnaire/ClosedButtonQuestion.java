@@ -2,6 +2,7 @@ package DataStructures.Questionnaire;
 
 /**
  * Created by marcel on 3/25/14.
+ * Closed question with buttons
  */
 public class ClosedButtonQuestion extends AbstractClosedQuestion {
 

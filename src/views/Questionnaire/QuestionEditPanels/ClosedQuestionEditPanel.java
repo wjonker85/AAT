@@ -12,12 +12,11 @@ import java.util.ArrayList;
 
 /**
  * Created by marcel on 3/25/14.
+ * Edit for a closed type of question
  */
 public class ClosedQuestionEditPanel<T extends AbstractQuestion> extends AbstractQuestionEditPanel {
-    private int noChoices = 15;
     ArrayList<JTextField> allChoices;
     private ArrayList<String> currentChoices;
-    private JPanel optionsPanel;
     private AbstractClosedQuestion original;
 
 
@@ -25,7 +24,7 @@ public class ClosedQuestionEditPanel<T extends AbstractQuestion> extends Abstrac
         super();
         allChoices = new ArrayList<JTextField>();
         currentChoices = new ArrayList<String>();
-        optionsPanel = new JPanel(new SpringLayout());
+        JPanel optionsPanel = new JPanel(new SpringLayout());
         this.add(new JLabel("Choices: "));
         this.add(optionsPanel);
         addRequiredFields();
@@ -66,6 +65,7 @@ public class ClosedQuestionEditPanel<T extends AbstractQuestion> extends Abstrac
 
         contentPanel.removeAll();
         allChoices.clear();
+        int noChoices = 15;
         for (int x = 0; x < noChoices; x++) {
             JLabel label = new JLabel("Option " + x + ": ");
             contentPanel.add(label);
@@ -91,6 +91,7 @@ public class ClosedQuestionEditPanel<T extends AbstractQuestion> extends Abstrac
         } else if (original instanceof ClosedButtonQuestion) {
             abstractQuestion = new ClosedButtonQuestion();
         }
+        assert abstractQuestion != null;
         abstractQuestion.setKey(qLabel.getText());
         abstractQuestion.setQuestion(question.getText());
         abstractQuestion.setRequired(required.isSelected());

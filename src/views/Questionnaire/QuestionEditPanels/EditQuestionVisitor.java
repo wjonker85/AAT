@@ -4,6 +4,7 @@ import DataStructures.Questionnaire.*;
 
 /**
  * Created by marcel on 3/25/14.
+ * Implementation of the Questionvisitor that returns the correct question edit panel
  */
 public class EditQuestionVisitor implements IQuestionVisitor<AbstractQuestionEditPanel> {
     @Override

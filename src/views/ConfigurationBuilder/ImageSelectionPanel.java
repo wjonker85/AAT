@@ -1,6 +1,5 @@
 package views.ConfigurationBuilder;
 
-import IO.XMLReader;
 import IO.XMLWriter;
 
 import javax.swing.*;
@@ -20,6 +19,12 @@ import static IO.XMLReader.getIncludedFiles;
 
 /**
  * Created by marcel on 3/16/14.
+ * This is a panel that is shown in the configuration builder. It consists of two or three tables (depending on whether there are practice images).
+ * The tables show the available image files in the directories that were selected. When this is the first time a AATConfig file is being created all images
+ * are selected. When the AATConfig is saved, a included.xml file is written in the image directories containing all the files that are selected to be included in the AAT
+ * <p/>
+ * When an existing AATConfig is opened, these included.xml files are read and the images that are present there will be selected. It will load all images in the selected
+ * directories, but will only have the checkbox checked when they are present in the included.xml file.
  */
 public class ImageSelectionPanel extends JPanel {
 
@@ -34,7 +39,6 @@ public class ImageSelectionPanel extends JPanel {
             return matcher.matches();
         }
     };
-    private XMLReader reader;
     private JTable tableA, tableN, tableP;
     private File nDir = null, aDir = null, pDir = null;
     private boolean newTest;
@@ -44,7 +48,6 @@ public class ImageSelectionPanel extends JPanel {
     private Pattern pattern;
 
     public ImageSelectionPanel() {
-        reader = new XMLReader();
         pattern = Pattern.compile(IMAGE_PATTERN); //create regex
         JPanel panel = new JPanel();
         this.setBorder(BorderFactory.createLineBorder(Color.darkGray, 2));

@@ -7,6 +7,12 @@ import java.util.HashMap;
 
 /**
  * Created by marcel on 3/16/14.
+ * This is a map structure that can contain all the different variables that can be set for the configuration of the test
+ * These variables can be either String, Integer, Boolean or File datatypes. Each config option can also have it's own validator
+ * attached to it.
+ *
+ * The structure makes it ease to easy add different options to the the test and have them validated. The AAT can only be started when all the
+ * validators that are assigned to the variables have returned true. Otherwise an exception is thrown with a messing telling the user about the problem.
  */
 public class TestConfigurationMap<TKey> {
 
@@ -82,11 +88,7 @@ public class TestConfigurationMap<TKey> {
     }
 
     public boolean contains(TKey key) {
-        if (StringOptions.containsKey(key) || IntegerOptions.containsKey(key) || BoolOptions.containsKey(key) || FileOptions.containsKey(key)) {
-            return true;
-        } else {
-            return false;
-        }
+        return StringOptions.containsKey(key) || IntegerOptions.containsKey(key) || BoolOptions.containsKey(key) || FileOptions.containsKey(key);
     }
 
     public int getIntValue(TKey key) throws FalseConfigException {
@@ -122,21 +124,6 @@ public class TestConfigurationMap<TKey> {
         }
     }
 
-    public TestConfigurationOption<Object> getConfigOption(TKey key) {
-        if (this.contains(key)) {
-            if (BoolOptions.containsKey(key)) {
-                return new TestConfigurationOption<Object>(BoolOptions.get(key).getValue());
-            } else if (FileOptions.containsKey(key)) {
-                return new TestConfigurationOption<Object>(FileOptions.get(key).getValue());
-            } else if (StringOptions.containsKey(key)) {
-                return new TestConfigurationOption<Object>(StringOptions.get(key).getValue());
-            } else if (IntegerOptions.containsKey(key)) {
-                return new TestConfigurationOption<Object>(IntegerOptions.get(key).getValue());
-            }
-        }
-        return null;
-    }
-
     public int getSize() {
         return IntegerOptions.size() + StringOptions.size() + BoolOptions.size() + FileOptions.size();
     }
@@ -145,45 +132,28 @@ public class TestConfigurationMap<TKey> {
         for (TestConfigurationOption<String> option : StringOptions.values()) {
             if (option.getValidator() != null) {
 
-                try {
-                    option.getValidator().validate(option.getValue());
-                } catch (FalseConfigException e) {
-                    throw e;
-                }
+                option.getValidator().validate(option.getValue());
                 System.out.println("Config option " + option.getValue() + " validated OK");
             }
         }
 
         for (TestConfigurationOption<Integer> option : IntegerOptions.values()) {
             if (option.getValidator() != null) {
-                try {
-                    option.getValidator().validate(option.getValue());
-                } catch (FalseConfigException e) {
-                    throw e;
-                }
+                option.getValidator().validate(option.getValue());
                 System.out.println("Config option " + option.getValue() + " validated OK");
             }
         }
         for (TestConfigurationOption<Boolean> option : BoolOptions.values()) {
             if (option.getValidator() != null) {
 
-                try {
-                    option.getValidator().validate(option.getValue());
-                } catch (FalseConfigException e) {
-                    throw e;
-                }
+                option.getValidator().validate(option.getValue());
                 System.out.println("Config option " + option.getValue() + " validated OK");
             }
-
         }
         for (TestConfigurationOption<File> option : FileOptions.values()) {
             if (option.getValidator() != null) {
 
-                try {
-                    option.getValidator().validate(option.getValue());
-                } catch (FalseConfigException e) {
-                    throw e;
-                }
+                option.getValidator().validate(option.getValue());
                 System.out.println("Config option " + option.getValue() + " validated OK");
             }
         }
@@ -209,7 +179,6 @@ class TestConfigurationOption<TValue> implements IConfigOption<TValue> {
         this.value = value;
     }
 
-    @Override
     public void addValidator(IConfigValidator<TValue> validator) {
         this.validator = validator;
     }

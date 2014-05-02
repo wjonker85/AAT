@@ -21,7 +21,7 @@ public class QuestionEditFrame extends JFrame {
         JPanel setTypePanel = new JPanel();
         JLabel typeLabel = new JLabel("Type of question: ");
         setTypePanel.add(typeLabel);
-        typeCombo = new JComboBox<String>(questionnaireModel.Types);             //TODO vervangen door visitor
+        typeCombo = new JComboBox<String>(QuestionnaireModel.Types);
         typeCombo.setSelectedItem(questionnaireModel.getNewQuestion().Accept(new QuestionTypeVisitor()));
         this.setTitle(questionnaireModel.getNewQuestion().Accept(new QuestionTypeVisitor()));
         editPanel = questionnaireModel.getNewQuestion().Accept(new EditQuestionVisitor());

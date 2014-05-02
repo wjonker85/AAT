@@ -2,6 +2,7 @@ package views.Questionnaire.QuestionEditPanels;
 
 /**
  * Created by marcel on 3/25/14.
+ * lass used for the likert scale and the semantic differential scale. Basis properties are the same for both.
  */
 
 import AAT.Util.SpringUtilities;
@@ -13,9 +14,6 @@ import DataStructures.Questionnaire.SemDiffQuestion;
 import javax.swing.*;
 import java.awt.*;
 
-/**
- * Class used for the likert scale and the semantic differential scale. Basis properties are the same for both.
- */
 public class LikertSemDiffQuestionEditPanel<T extends AbstractQuestion> extends AbstractQuestionEditPanel {
     private JTextField left, right, size;
     private AbstractScaleQuestion original;
@@ -64,6 +62,7 @@ public class LikertSemDiffQuestionEditPanel<T extends AbstractQuestion> extends 
         } else if (original instanceof SemDiffQuestion) {
             abstractQuestion = new SemDiffQuestion();
         }
+        assert abstractQuestion != null;
         abstractQuestion.setKey(qLabel.getText());
         abstractQuestion.setQuestion(question.getText());
         abstractQuestion.setLeft(left.getText());

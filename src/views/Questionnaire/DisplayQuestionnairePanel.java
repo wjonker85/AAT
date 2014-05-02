@@ -57,11 +57,9 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
     private JPanel questionsPanel;
     private Map<String, AbstractQuestionPanel> questionsMap = new HashMap<String, AbstractQuestionPanel>();
     private QuestionnaireModel questionnaireModel;
-    private JScrollPane scrollPane;
     private IntroductionEditorPanel introductionPane;
     private Boolean editMode = false;
     private Questionnaire questionnaire;
-    private JScrollBar vertical;
     private QuestionEditFrame currentEditor = null;
     private Map<String, MouseActionEditorPane> qPanes;
 
@@ -119,14 +117,14 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
             buttonPanel.add(submitButton);
         }
 
+        JScrollPane scrollPane = null;
         if (!editMode) {
             scrollPane = new JScrollPane(contentPanel,
                     JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
                     JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        } else {
-            scrollPane = new JScrollPane(contentPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         }
-        vertical = scrollPane.getVerticalScrollBar();
+        assert scrollPane != null;
+        JScrollBar vertical = scrollPane.getVerticalScrollBar();
 
         if (!editMode) {
             scrollPane.setPreferredSize(resolution);
@@ -166,7 +164,7 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
             currentEditor.setEnabled(true);
             currentEditor.setVisible(true);
         } else {
-            JOptionPane.showConfirmDialog(null, "There is already another question editor open, please close that one first.", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, "There is already another question editor open, please close that one first.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -179,7 +177,7 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
             currentEditor.setEnabled(true);
             currentEditor.setVisible(true);
         } else {
-            JOptionPane.showConfirmDialog(null, "There is already another question editor open, please close that one first.", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, "There is already another question editor open, please close that one first.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -195,10 +193,7 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
                 q.changeAsteriskColor(Color.white);  //Change red ones back to white when already answered.
             }
         }
-        if (count > 0) {
-            return false;
-        }
-        return true;
+        return count <= 0;
     }
 
 

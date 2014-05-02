@@ -13,6 +13,9 @@ import java.util.regex.Pattern;
 
 /**
  * Created by marcel on 3/16/14.
+ * This class  is used to read all the configuration options from the AAT config file and validate whether the structure of this file is correct
+ * and all the values are correctly assigned. When no exception is thrown, the configuration is fine and the AAT can begin. When an exception is thrown, a user will receive
+ * an information message telling them what is wrong.
  */
 public class AATValidator {
 
@@ -20,9 +23,9 @@ public class AATValidator {
      * Constructor Loads all the configuration data from the config file and the language file specified in that config
      * Checks the config file for validity and throws a FalseConfigException when the config contains errors.
      *
-     * @param config The config file
+     *
      * @throws FalseConfigException When there are mistakes in the config file
-     * <p/>
+     *
      */
 
     public static File workingDir;
@@ -33,7 +36,7 @@ public class AATValidator {
             testConfigurationMap = createValidatedConfigMap(config);
             testConfigurationMap.isValidated();
         } catch (FalseConfigException e) {
-            JOptionPane.showMessageDialog(null, e.getMessage(), "Configuration Error2", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, e.getMessage(), "Configuration Error", JOptionPane.ERROR_MESSAGE);
             return null;
         }
         return ConfigurationFiller.fillTestConfiguration(testConfigurationMap);
@@ -63,10 +66,8 @@ public class AATValidator {
         testConfigurationMap.GetSetConfigOption("ImageSizePerc", 50);
 
         //Check for the ID value
-        String idValue = "1";
         Boolean newID = true;
         if (configFileReader.getValue("ID").length() > 0) {
-            idValue = configFileReader.getValue("ID");
             newID = false;
         }
 
@@ -74,7 +75,7 @@ public class AATValidator {
             addNewIDToConfigFile(config);
         }
 
-        TestConfigurationOption<Integer> id = testConfigurationMap.GetSetConfigOption("ID", parseIntWithException("ID", configFileReader.getValue("ID")));
+        testConfigurationMap.GetSetConfigOption("ID", parseIntWithException("ID", configFileReader.getValue("ID")));
 
         //Specify the data file
         String datFile = configFileReader.getValue("DataFile");
@@ -152,7 +153,7 @@ public class AATValidator {
             if (!testConfigurationMap.contains("practiceDir")) {
                 if (coloredBorders.getValue()) {
                     System.out.println("Practice with colored borders");
-                    TestConfigurationOption practiceFillColor = testConfigurationMap.GetSetConfigOption("PracticeFillColor", configFileReader.getValue("PracticeFillColor"));
+                    TestConfigurationOption<String> practiceFillColor = testConfigurationMap.GetSetConfigOption("PracticeFillColor", configFileReader.getValue("PracticeFillColor"));
                     practiceFillColor.addValidator(new ColorValidator("Practice fill color"));
                 } else {
                     throw new FalseConfigException("When practiceDir isn't set, ColoredBorder has to be set to True \n" +
@@ -193,7 +194,7 @@ public class AATValidator {
         }
 
         if (!configFileReader.getValue("MaxSizePerc").equals("")) {
-            TestConfigurationOption<Integer> imageSizePerc = testConfigurationMap.GetSetConfigOption("MaxSizePerc", parseIntWithException("MaxSizePerc", configFileReader.getValue("MaxSizePerc")));
+            testConfigurationMap.GetSetConfigOption("MaxSizePerc", parseIntWithException("MaxSizePerc", configFileReader.getValue("MaxSizePerc")));
         }
 
         if (!configFileReader.getValue("ImageSizePerc").equals("")) {
@@ -203,7 +204,7 @@ public class AATValidator {
         //Set some performance options.
         TestConfigurationOption<Integer> stepSize = testConfigurationMap.GetSetConfigOption("StepSize", parseIntWithException("StepSize", configFileReader.getValue("StepSize")));
         stepSize.addValidator(new NumberValidator("StepSize", 0, 101, true));
-        TestConfigurationOption<Integer> dataSteps = testConfigurationMap.GetSetConfigOption("DataSteps", parseIntWithException("DataSteps", configFileReader.getValue("DataSteps")));
+        testConfigurationMap.GetSetConfigOption("DataSteps", parseIntWithException("DataSteps", configFileReader.getValue("DataSteps")));
         stepSize.addValidator(new NumberValidator("DataSteps", 0, 101, true));
 
         return testConfigurationMap;
@@ -235,30 +236,6 @@ public class AATValidator {
         }
     }
 
-
-    private static int getPercentage(String ratio, String s) throws FalseConfigException {
-        if (!ratio.contains(":")) {
-            throw new FalseConfigException(s + " is not a correct ratio");
-        }
-
-        String[] str = ratio.split(":");
-        if (str.length != 2) {
-            throw new FalseConfigException(s + " is not a correct ratio");
-        }
-        float first, second;
-        try {
-            first = Integer.parseInt(str[0]);
-            second = Integer.parseInt(str[1]);
-        } catch (Exception e) {
-            throw new FalseConfigException(s + " is not a correct ratio");
-        }
-        if (first == 0) {
-            return 0;
-        }
-        int total = (int) (first + second);
-        return (int) ((first / total) * 100f);
-
-    }
 
     public static int parseIntWithException(String label, String value) throws FalseConfigException {
         int returnValue;
@@ -387,7 +364,7 @@ class NumberValidator implements IConfigValidator<Integer> {
 
     @Override
     public void validate(Integer integer) throws FalseConfigException {
-        int value = integer.intValue();
+        int value = integer;
         if (max == -1) max = value + 1;
         if (value < min || value > max) {
             throw new FalseConfigException("Value " + value + " for property " + label + " is set either too large or too small.");

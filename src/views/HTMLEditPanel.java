@@ -1,6 +1,7 @@
 package views;
 
 import AAT.Configuration.LanguageFileTemplate;
+import IO.XMLWriter;
 import net.atlanticbb.tantlinger.shef.HTMLEditorPane;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -10,16 +11,12 @@ import org.w3c.dom.NodeList;
 import javax.swing.*;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 import java.awt.*;
 import java.io.File;
 
 /**
  * Created by marcel on 2/16/14.
- * This is panel belonging to the configurationbuilder that shows server html editor components. These components can be used to change all the
+ * This is panel belonging to the configuration builder that shows server html editor components. These components can be used to change all the
  * texts that are shown to a participant during the taking of an AAT.
  */
 public class HTMLEditPanel extends JPanel {
@@ -116,14 +113,14 @@ public class HTMLEditPanel extends JPanel {
 
     //Fill the html editors with template texts when a user has selected a new file.
     public void setTemplateText() {
-          setEditorStartText(LanguageFileTemplate.getEditorStartText());
+        setEditorStartText(LanguageFileTemplate.getEditorStartText());
         setEditorIntroText(LanguageFileTemplate.getEditorIntroText());
         setEditorFinishText(LanguageFileTemplate.getEditorFinishText());
         setEditorBreakText(LanguageFileTemplate.getEditorBreakText());
     }
 
     public boolean setDocument(File file) {
-        if(!file.exists()) {
+        if (!file.exists()) {
             return false;
         }
         this.fileName = file;
@@ -165,45 +162,7 @@ public class HTMLEditPanel extends JPanel {
 
 
     public void save() {
-        writeToFile();
-    }
-
-    private void writeToFile() {
-
-        try {
-            DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-
-            // root elements
-            Document doc = docBuilder.newDocument();
-            Element rootElement = doc.createElement("languageFile");
-            doc.appendChild(rootElement);
-
-            Element intro = doc.createElement("introduction");
-            rootElement.appendChild(intro);
-            intro.appendChild(doc.createCDATASection(editorIntro.getText()));
-            Element start = doc.createElement("start");
-            rootElement.appendChild(start);
-            start.appendChild(doc.createCDATASection(editorStart.getText()));
-            Element breakE = doc.createElement("break");
-            rootElement.appendChild(breakE);
-            breakE.appendChild(doc.createCDATASection(editorBreak.getText()));
-            Element finished = doc.createElement("finished");
-            rootElement.appendChild(finished);
-            finished.appendChild(doc.createCDATASection(editorFinish.getText()));
-
-            // write the content into xml file
-            TransformerFactory transformerFactory = TransformerFactory.newInstance();
-            Transformer transformer = transformerFactory.newTransformer();
-            DOMSource source = new DOMSource(doc);
-            StreamResult result = new StreamResult(fileName);
-
-            transformer.transform(source, result);
-            System.out.println("Saved to " + fileName.getAbsoluteFile());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
+        XMLWriter.writeLanguageFile(fileName, editorIntro.getText(), editorStart.getText(), editorBreak.getText(), editorFinish.getText());
     }
 }
 

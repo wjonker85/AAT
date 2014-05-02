@@ -2,9 +2,6 @@ package AAT.Configuration;
 
 import org.w3c.dom.Document;
 
-import java.io.File;
-import java.util.ArrayList;
-
 /**
  * Created by marcel on 1/29/14.
  * <p/>
@@ -15,7 +12,6 @@ public class TestMetaData {
     private int export_id, trials, centerpos;
     private String afflabel, neutLabel, pushTag, pullTag;
     private Document data;
-    private ArrayList<File> neutralImages, affectiveImages, practiceImages;
     private boolean coloredBorders;
 
     public TestMetaData(int export_id
@@ -71,35 +67,6 @@ public class TestMetaData {
 
     public String getPullTag() {
         return pullTag;
-    }
-
-    public int getCenterpos() {
-        return centerpos;
-    }
-
-    public void setNeutralImages(ArrayList<File> neutralImages) {
-        this.neutralImages = neutralImages;
-    }
-
-    public ArrayList<File> getNeutralImages() {
-        return neutralImages;
-    }
-
-    public void setAffectiveImages(ArrayList<File> affectiveImages) {
-        this.affectiveImages = affectiveImages;
-    }
-
-
-    public ArrayList<File> getAffectiveImages() {
-        return affectiveImages;
-    }
-
-    public void setPracticeImages(ArrayList<File> practiceImages) {
-        this.practiceImages = practiceImages;
-    }
-
-    public ArrayList<File> getPracticeImages() {
-        return practiceImages;
     }
 
     public boolean hasColoredBorders() {

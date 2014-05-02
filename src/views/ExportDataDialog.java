@@ -40,16 +40,11 @@ public class ExportDataDialog extends JFrame {
     private JTextField minRTime, maxRtime, errorPerc;
     private JCheckBox removeFalseCenter, practiceCheck;
     private int min, max, perc = 10;
-    private TestMetaData metaData;
 
     public ExportDataDialog(final TestMetaData metaData) {
 
         this.setName("Export Data");
         this.setTitle("Export Data - options");
-        int test_id = metaData.getExport_id();
-        System.out.println("Using test id " + test_id);
-        this.metaData = metaData;
-
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 

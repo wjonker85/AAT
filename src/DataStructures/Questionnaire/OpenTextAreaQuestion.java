@@ -2,6 +2,7 @@ package DataStructures.Questionnaire;
 
 /**
  * Created by marcel on 3/25/14.
+ * Open question with a text area
  */
 
 public class OpenTextAreaQuestion extends AbstractQuestion {

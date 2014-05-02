@@ -65,7 +65,6 @@ public class AAT_Main extends JFrame implements Observer {
     private JoystickController joystick;
     private TestFrame testFrame;
     private AATDataRecorder inputAATDataRecorder;
-    private int foreign_id;
 
     //Build the user interface
     public AAT_Main() {
@@ -241,7 +240,21 @@ public class AAT_Main extends JFrame implements Observer {
     public static void main(String[] args) {
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                UIManager.put("swing.boldMetal", Boolean.FALSE);
+                UIManager.put("control", Color.decode("#f2f0ee"));
+                UIManager.put("nimbusBlueGrey", Color.decode("#eeece9"));
+                UIManager.put("nimbusSelectionBackground", Color.decode("#f27b4b"));
+                for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+                    if ("Nimbus".equals(info.getName())) {
+                        try {
+                            UIManager.setLookAndFeel(info.getClassName());
+                            break;
+
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                }
                 new AAT_Main().setVisible(true);
             }
         });
@@ -300,9 +313,6 @@ public class AAT_Main extends JFrame implements Observer {
             } else {
                 System.out.println("Single set of data found for id " + model.getExport_id());
                 model.setExport_id(model.getExport_id(), false);        //Set export ID and notify observers
-
-                //       ExportDataDialog export = new ExportDataDialog(inputAATDataRecorder.getTestMetaData(inputAATDataRecorder.getHighestTestID()));
-                //       export.setVisible(true);
             }
         }
 

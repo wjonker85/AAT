@@ -6,6 +6,7 @@ import java.util.ArrayList;
 
 /**
  * Created by marcel on 4/22/14.
+ * This files contains a template questionnaire. It has an introduction text and an example of each of the possible types of questions
  */
 public class QuestionnaireTemplate {
 
@@ -63,7 +64,6 @@ public class QuestionnaireTemplate {
         textAreaQuestion.setQuestion("Use a textarea to leave a comment");
         qList.add(textAreaQuestion);
 
-        Questionnaire q = new Questionnaire(qList, introduction);
-        return q;
+        return new Questionnaire(qList, introduction);
     }
 }

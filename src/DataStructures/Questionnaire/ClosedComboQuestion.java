@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 /**
  * Created by marcel on 3/25/14.
+ * Closed question with a combobox
  */
 
 public class ClosedComboQuestion extends AbstractClosedQuestion {

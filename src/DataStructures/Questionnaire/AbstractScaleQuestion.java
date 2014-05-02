@@ -2,6 +2,7 @@ package DataStructures.Questionnaire;
 
 /**
  * Created by marcel on 3/25/14.
+ * Abstract super class for a scale type question. (Likert of Semantic differential)
  */
 public abstract class AbstractScaleQuestion extends AbstractQuestion {
 

@@ -9,6 +9,7 @@ import java.awt.event.ActionListener;
 
 /**
  * Created by marcel on 4/22/14.
+ * Frame that contains an html editor. With this editor it is possible to change the introduction text of the questionnaire
  */
 public class IntroductionHTMLEditor extends JFrame {
 

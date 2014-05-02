@@ -2,6 +2,7 @@ package DataStructures.Questionnaire;
 
 /**
  * Created by marcel on 3/25/14.
+ * Visitor pattern for questionnaire.
  */
 public interface IQuestionVisitor<TObject> {
 

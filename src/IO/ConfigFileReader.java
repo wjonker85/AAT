@@ -107,6 +107,7 @@ public class ConfigFileReader {
                         if (testOptions.containsKey(token)) {
                             for (Map.Entry<String, String> entry : testOptions.entrySet()) {
                                 if (entry.getKey().equals(token)) {
+                                    assert strLine != null;
                                     int pos = strLine.indexOf("#");
                                     String s = strLine.substring(token.length(), pos == -1 ? strLine.length() : pos);
                                     entry.setValue(s.trim());
