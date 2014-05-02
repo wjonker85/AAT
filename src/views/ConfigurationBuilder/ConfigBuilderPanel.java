@@ -28,6 +28,10 @@ import java.util.Observer;
 
 /**
  * Created by marcel on 3/16/14.
+ * This is the main interface for the configuration builder. It consists of all the different options that can be set. It is set up in such a way that it is
+ * extremely easy for students to quickly create an Approach Avoidance Task. For most cases it is just a matter of selecting the directories containing the images
+ * and select the right images.
+ * When something more advanced is needed, this configuration builder offers the possibility to change all the texts, create a questionaire, change ratio's etc.
  */
 public class ConfigBuilderPanel extends JPanel implements Observer {
 
@@ -247,7 +251,7 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
         if (!inputBuiltinPractice.isSelected() && inputHasPractice.isSelected()) {
             hasPracticeImages = true;
         }
-        imageSelectionPanel = new ImageSelectionPanel(aDir, nDir, pDir, hasPracticeImages, newTest);
+        imageSelectionPanel = new ImageSelectionPanel();
         JScrollPane contentPane = new JScrollPane(imageSelectionPanel);
         contentPane.getVerticalScrollBar().setUnitIncrement(16);
         contentPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
@@ -349,17 +353,12 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
                 File file = getDirectory();
                 if (file != null) {
                     aDir = file.getAbsoluteFile();
-                    imageSelectionPanel.setaDir(aDir);
-                    //   try {
                     inputAffDir.setText(FileUtils.getRelativePath(workingDir, aDir));
-                    //  } catch (IOException e) {
-                    //       inputAffDir.setText(file.getName());
-                    //   }
-
-
                 } else {
                     inputAffDir.setText("");
+                    aDir = null;
                 }
+                updateDataTablesAction();
             }
         });
 
@@ -372,16 +371,15 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
 
                 if (file != null) {
                     nDir = file.getAbsoluteFile();
-                    imageSelectionPanel.setnDir(nDir);
                     inputNeutralDir.setText(FileUtils.getRelativePath(workingDir, nDir));
                     System.out.println("Working dir: " + workingDir.getAbsoluteFile());
                     System.out.println("neutral dir: " + nDir.getAbsoluteFile());
                     System.out.println("Relative path: ");
-
-
                 } else {
                     inputNeutralDir.setText("");
+                    nDir = null;
                 }
+                updateDataTablesAction();
             }
         });
 
@@ -515,20 +513,16 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
                 File file = getDirectory();
                 if (file != null) {
                     pDir = file.getAbsoluteFile();
-                    //   try {
                     inputPrDir.setText(FileUtils.getRelativePath(workingDir, pDir));
-                    //   } catch (IOException e) {
-                    //       inputPrDir.setText(file.getName());
-                    //   }
-                    imageSelectionPanel.setHasPracticeImages(true);
-                    imageSelectionPanel.setpDir(pDir);
                     inputPracticeFill.setEnabled(false);
                     inputPracticeFill.setBackground(Color.lightGray);
                 } else {
                     inputNeutralDir.setText("");
                     inputPracticeFill.setEnabled(true);
                     inputPracticeFill.setBackground(new Color(prFillColor));
+                    pDir = null;
                 }
+                updateDataTablesAction();
             }
         });
         panel.add(prDirL);
@@ -938,12 +932,15 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
 
         return panel;
     }
+//region actions
+
+    private void updateDataTablesAction() {
+        imageSelectionPanel.updateTableData(nDir,aDir,pDir,newTest);
+    }
 
     private void disablePracticeAction() {
         inputBuiltinPractice.setEnabled(false);
-        //  inputBuiltinPractice.setForeground(Color.RED);
         askBuiltinPractL.setEnabled(false);
-        // askBuiltinPractL.setForeground(UIManager.getColor("Label.disabledForeground"));
         practRepeatValue = inputPractRepeat.getText();
         inputPractRepeat.setText("0");
         inputPractRepeat.setEnabled(false);
@@ -952,10 +949,13 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
         practFillL.setEnabled(false);
         inputPrDir.setText("");
         inputPrDir.setEnabled(false);
-        imageSelectionPanel.setHasPracticeImages(false);
         prDirL.setEnabled(false);
         prDirButton.setEnabled(false);
         practL.setEnabled(false);
+        if(pDir!=null) {
+            pDir = null;
+            updateDataTablesAction();
+        }
     }
 
     private void enablePracticeAction() {
@@ -972,11 +972,9 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
         practL.setEnabled(true);
         prDirL.setEnabled(true);
         if (inputBuiltinPractice.isSelected()) {
-            imageSelectionPanel.setHasPracticeImages(false);
             enableBuiltinPracticeAction();
         } else {
             disableBuiltinPracticeAction();
-            imageSelectionPanel.setHasPracticeImages(true);
         }
     }
 
@@ -1040,8 +1038,9 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
         inputBuiltinPractice.setSelected(false);
         disableBuiltinPracticeAction();
     }
+    //endregion
 
-
+    //region File choosers
     public File ConfigOpenDialog() {
 
         JFileChooser fc = new JFileChooser();
@@ -1159,8 +1158,14 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
         }
         return export;
     }
+    //endregion
 
 
+    /**
+     * Update the id value for a config everytime something gets changed. This id file is then used to be saved together with
+     * the test data to make sure a test doesn't get corrupted because of changes made between giving this test to subjects.
+     * @return
+     */
     private int createIDValue() {
         if (newTest) {
             return 1;
@@ -1199,8 +1204,6 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
         inputBorderSize.setText(config.getValue("BorderWidth"));
         inputAffDir.setText(config.getValue("AffectiveDir"));
         aDir = new File(workingDir.getAbsoluteFile() + File.separator + inputAffDir.getText() + File.separator);
-        imageSelectionPanel.setaDir(aDir);
-        //TODO eigenlijk zou dit hardcoded images niet moeten.
         inputBreak.setText(config.getValue("BreakAfter"));
         inputDataStepSize.setText(config.getValue("DataSteps"));
         if (inputDataStepSize.getText().equals("")) {
@@ -1214,10 +1217,6 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
         htmlEditPanel.setDocument(langFile);
         inputNeutralDir.setText(config.getValue("NeutralDir"));
         nDir = new File(workingDir.getAbsoluteFile() + File.separator + inputNeutralDir.getText() + File.separator);
-        imageSelectionPanel.setnDir(nDir);
-        //TODO eigenlijk zou dit hardcoded images niet moeten.
-
-        System.out.println(nDir.getAbsolutePath());
 
         inputPullTag.setText(config.getValue("PullTag"));
         inputPushTag.setText(config.getValue("PushTag"));
@@ -1343,11 +1342,9 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
             inputPrDir.setForeground(Color.black);
             inputPrDir.setText(config.getValue("PracticeDir"));
             pDir = new File(workingDir.getAbsoluteFile() + File.separator + inputPrDir.getText() + File.separator);
-            imageSelectionPanel.setpDir(pDir);
-            //TODO hier aanpassen
-
             System.out.println("Practice directory found at " + pDir.getAbsoluteFile());
         }
+        updateDataTablesAction(); //Load the image tables with data.
     }
 
 
