@@ -29,13 +29,11 @@ import views.Questionnaire.QuestionPanels.AbstractQuestionPanel;
 
 import javax.swing.*;
 import javax.swing.border.Border;
+import javax.swing.text.*;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.StyleSheet;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
+import java.awt.event.*;
 import java.io.File;
 import java.util.*;
 
@@ -99,30 +97,13 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
         questionnairePanel.add(Box.createVerticalStrut(40)); //small margin
         contentPanel.add(questionnairePanel);
 
-        if (model != null) {
-            JButton submitButton = new JButton("Submit");
-            JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-            submitButton.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent actionEvent) {
-                    if (checkAnswered()) {
-                        model.addExtraQuestions(getResults());
-                        setVisible(false);
-                    } else {
-                        repaint();
-                    }
-                }
-            });
-            buttonPanel.setBackground(Color.black);
-            buttonPanel.setForeground(Color.white);
-            buttonPanel.add(submitButton);
-        }
-
-        JScrollPane scrollPane = new JScrollPane(contentPanel,
-
-                JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-                JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-
         if (!editMode) {
+
+
+            JScrollPane scrollPane = new JScrollPane(contentPanel,
+
+                    JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+                    JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
             JScrollBar vertical = scrollPane.getVerticalScrollBar();
             scrollPane.setPreferredSize(resolution);
             scrollPane.setMinimumSize(resolution);
@@ -134,18 +115,32 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
             InputMap im = vertical.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
             im.put(KeyStroke.getKeyStroke("DOWN"), "positiveUnitIncrement");
             im.put(KeyStroke.getKeyStroke("UP"), "negativeUnitIncrement");
+
+            JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+            buttonPanel.setBackground(Color.black);
+            buttonPanel.setForeground(Color.white);
+
+            JButton submitButton = new JButton("Submit");
+
+            submitButton.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent actionEvent) {
+                    if (checkAnswered()) {
+                        if (model != null) {
+                            model.collectQuestionnaireAnswers(getResults());
+                        }
+                        setVisible(false);
+                    } else {
+                        repaint();
+                    }
+                }
+            });
+            buttonPanel.add(submitButton);
+            contentPanel.add(buttonPanel);
             this.add(scrollPane, new GridBagConstraints());
         } else {
-            scrollPane.setPreferredSize(resolution);
-            scrollPane.setMinimumSize(resolution);
-            scrollPane.setMaximumSize(resolution);
-            scrollPane.setBorder(BorderFactory.createEmptyBorder());
-            scrollPane.setBackground(Color.black);
-            scrollPane.setForeground(Color.white);
-
             this.add(contentPanel, new GridBagConstraints());
         }
-        revalidate();
+        //   revalidate();
     }
 
 
@@ -255,7 +250,6 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
                 JLabel label = new JLabel(l);
                 Font labelFont = label.getFont();
                 String labelText = label.getText();
-                System.out.println("ASDFASDF " + labelText);
                 int stringWidth = label.getFontMetrics(labelFont).stringWidth(labelText);
                 if (stringWidth > maxWidth) {
                     maxWidth = stringWidth;
@@ -285,7 +279,6 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
     }
 
     public void changeQuestionPos(int posFrom, int newPos) {
-        System.out.println("Change pos from " + posFrom + " to " + newPos);
         AbstractQuestion q = questionnaire.getExtraQuestions().get(posFrom);
         if (posFrom < newPos && (newPos < questionnaire.getExtraQuestions().size())) {
             questionnaire.getExtraQuestions().add(newPos + 1, q);
@@ -328,10 +321,7 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
 
     @Override
     public void update(Observable observable, Object o) {
-        System.out.println("Update");
         if (o.toString().equals("submit") || o.toString().equals("insert")) {
-
-            System.out.println("Submit");
             if (questionnaireModel.getPos() < questionnaire.getExtraQuestions().size()) {
                 if (o.toString().equals("submit")) {
                     questionnaire.getExtraQuestions().set(questionnaireModel.getPos(), questionnaireModel.getNewQuestion());
@@ -362,6 +352,8 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
         return this;
     }
 
+
+
     class IntroductionEditorPanel extends JPanel implements MouseListener {
         Border redBorder = BorderFactory.createLineBorder(Color.RED, 2);
         Border blackBorder = BorderFactory.createLineBorder(Color.black, 0);
@@ -369,40 +361,39 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
         private JPanel buttonPanel;
 
         public IntroductionEditorPanel() {
+            JPanel content = new JPanel();
+            content.setLayout(new BoxLayout(content,BoxLayout.Y_AXIS));
+            content.setBackground(Color.black);
+            this.setBorder(null);
+            this.setLayout(new BoxLayout(this,BoxLayout.Y_AXIS));
+            this.setBackground(Color.black);
             editor = new JEditorPane();
-            editor.setBorder(null);
             editor.setBackground(Color.black);
-            this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+            editor.setForeground(Color.white);
             this.setBackground(Color.BLACK);
-            JLayeredPane layers = new JLayeredPane();
-            layers.setOpaque(false);
-            layers.setBorder(null);
-            layers.setLayout(new BoxLayout(layers, BoxLayout.Y_AXIS));
-            this.setBorder(null);
-            this.setOpaque(false);
-            setBorder(BorderFactory.createLineBorder(Color.black, 10));
             editor.setContentType("text/html");
-            this.setOpaque(false);
-            this.setBorder(null);
             HTMLEditorKit kit = new HTMLEditorKit();
-            editor.setEditorKit(kit);
+            StyledDocument doc = (StyledDocument) kit.createDefaultDocument();
+            editor.setDocument(doc);
+
             StyleSheet styleSheet = kit.getStyleSheet();
             styleSheet.addRule("h2 {color: white; font-family:times; margin: 0px; background-color: black;font : 24px monaco;}");
-            editor.setDocument(kit.createDefaultDocument());
-            editor.setMinimumSize(new Dimension((int) (resolution.width * 0.6), 50));
-       //     editor.setPreferredSize(new Dimension((int) (resolution.width * 0.6), 96));
-            layers.setBackground(Color.BLACK);
+            styleSheet.addRule("body {color:white; font-family:times; margin: 1px; background-color: black :font 24px monaco;}");
+            styleSheet.addRule("h1 {color:white;background-color: black}");
+            styleSheet.addRule("h3 {color:white; background-color: black}");
+            styleSheet.addRule("p {color:white;background-color: black}");
+            editor.setEditorKit(kit);
+            editor.setBorder(null);
+            editor.setMinimumSize(new Dimension((int) (resolution.width * 0.8), 50));
+            editor.setPreferredSize(new Dimension((int) (resolution.width * 0.8), 1200));
+            editor.setMaximumSize(new Dimension((int) (resolution.width * 0.8), 2000));
 
-            layers.add(editor, JLayeredPane.DEFAULT_LAYER);
-            layers.setBorder(null);
             if (editMode) {
                 editor.addMouseListener(this);
-                editor.setMaximumSize(new Dimension((int) (resolution.width * 0.6), 1100));
                 buttonPanel = new JPanel();
-                buttonPanel.setOpaque(false);
+                buttonPanel.setBackground(Color.black);
                 buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
                 Color buttonBackColor = Color.BLACK;
-
                 JButton editButton = new JButton(new ImageIcon(((new ImageIcon(
                         "icons/document-edit128x128.png").getImage()
                         .getScaledInstance(48, 48,
@@ -416,24 +407,53 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
                         htmlEditor.Show(editor.getText());
                     }
                 });
-
                 buttonPanel.add(editButton);
                 buttonPanel.addMouseListener(this);
                 buttonPanel.setEnabled(true);
-                buttonPanel.setVisible(false);
-                buttonPanel.setBorder(null);
-                buttonPanel.setBounds(editor.getWidth()-60, 48, 48, 48);
-                layers.add(buttonPanel, JLayeredPane.PALETTE_LAYER);
-                 layers.addMouseListener(this);
+                buttonPanel.setVisible(true);
+                buttonPanel.setOpaque(false);
                 editButton.addMouseListener(this);
+                content.add(buttonPanel);
             }
-            this.add(layers);
+            content.add(editor);
+
+            JScrollPane scrollPane = new JScrollPane(content,JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+          scrollPane.setBackground(Color.black);
+            scrollPane.setPreferredSize(new Dimension((int) (resolution.width * 0.6), 400));
+            scrollPane.addMouseListener(this);
+            scrollPane.setBorder(null);
+         if(editMode) {
+             scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+         }
+            this.add(scrollPane);
+          revalidate();
+            JViewport jv = scrollPane.getViewport();
+            jv.setViewPosition(new Point(0,0));
+            // repaint();
+        }
+        public void setText(String text) {
+            editor.setBackground(Color.black);
+            if(!text.contains("<body>")) {
+                text = "<body><h2>"+text+"</h2></body>";
+            }
+
+            HTMLEditorKit kit = new HTMLEditorKit();
+            editor.setEditorKit(kit);
+            StyleSheet styleSheet = kit.getStyleSheet();
+            styleSheet.addRule("h2 {color: white; font-family:times; margin: 0px; background-color: black;font : 24px monaco;}");
+            styleSheet.addRule("body {color:white; font-family:times; margin: 1px; background-color: black :font 24px monaco;}");
+            styleSheet.addRule("h1 {color:white;background-color: black}");
+            styleSheet.addRule("h3 {color:white; background-color: black}");
+            styleSheet.addRule("p {color:white;background-color: black}");
+            editor.setBackground(new java.awt.Color(0,0,0,0));
+            editor.setText(text);
+            editor.setEditable(false);
+            revalidate();
+            repaint();
+
         }
 
-        public void setText(String text) {
-            editor.setText("<body bgcolor=\"black\">" + text + "</body>");
-            editor.setEditable(false);
-        }
+
 
         @Override
         public void mouseClicked(MouseEvent mouseEvent) {
@@ -453,15 +473,15 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
         @Override
         public void mouseEntered(MouseEvent mouseEvent) {
             setBorder(redBorder);
-            buttonPanel.setEnabled(true);
-            buttonPanel.setVisible(true);
+        //    buttonPanel.setEnabled(true);
+       //     buttonPanel.setVisible(true);
         }
 
         @Override
         public void mouseExited(MouseEvent mouseEvent) {
             setBorder(blackBorder);
-            buttonPanel.setVisible(false);
-            buttonPanel.setEnabled(false);
+        //    buttonPanel.setVisible(false);
+        //    buttonPanel.setEnabled(false);
         }
     }
 

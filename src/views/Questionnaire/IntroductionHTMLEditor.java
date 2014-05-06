@@ -20,6 +20,7 @@ public class IntroductionHTMLEditor extends JFrame {
         content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
 
         htmlEditorPane = new HTMLEditorPane();
+        htmlEditorPane.setBackground(Color.black);
         htmlEditorPane.setPreferredSize(new Dimension(800, 400));
         htmlEditorPane.setMaximumSize(new Dimension(800, 400));
         content.setPreferredSize(new Dimension(800, 400));
@@ -63,7 +64,7 @@ public class IntroductionHTMLEditor extends JFrame {
         this.setEnabled(true);
         this.setVisible(true);
         this.setTitle("Change introduction text");
-        htmlEditorPane.setText(text);
+        htmlEditorPane.setText("<body>"+text+"</body>");
         this.setPreferredSize(new Dimension(800, 800));
     }
 

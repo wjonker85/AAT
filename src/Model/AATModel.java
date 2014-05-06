@@ -465,7 +465,7 @@ public class AATModel extends Observable {
      *
      * @param extraQuestions The answers to the extra questions. The hashmap contains the key and the answer
      */
-    public void addExtraQuestions(HashMap<String, String> extraQuestions) {
+    public void collectQuestionnaireAnswers(HashMap<String, String> extraQuestions) {
         this.newParticipant.addQuestionData(extraQuestions);
         this.setChanged();
         if (newAAT.getTestConfiguration().getDisplayQuestions().equals("After")) {
