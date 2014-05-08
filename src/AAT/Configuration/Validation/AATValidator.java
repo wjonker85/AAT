@@ -55,8 +55,8 @@ public class AATValidator {
         //Set these to default values. Can be left empty in the configuration file
         String defaultRatio = "1:1";
         testConfigurationMap.GetSetConfigOption("PracticeDir", new File(""));
-        testConfigurationMap.GetSetConfigOption("PullTag", "");
-        testConfigurationMap.GetSetConfigOption("PushTag", "");
+        testConfigurationMap.GetSetConfigOption("PullTag", "pull");
+        testConfigurationMap.GetSetConfigOption("PushTag", "push");
         testConfigurationMap.GetSetConfigOption("Questionnaire", new File(""));
         testConfigurationMap.GetSetConfigOption("AffectRatio", defaultRatio);
         testConfigurationMap.GetSetConfigOption("NeutralRatio", defaultRatio);

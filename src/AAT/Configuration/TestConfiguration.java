@@ -21,7 +21,7 @@ public class TestConfiguration {
     private int borderWidth;
     private Boolean practiceFill = false;
     private String practiceFillColor = "";
-    private String pullTag = "", pushTag = "";
+    private String pullTag = "pull", pushTag = "push";
     private File neutralDir, affectiveDir, practiceDir;
     private File questionnaireFile;
     private File languageFile;
