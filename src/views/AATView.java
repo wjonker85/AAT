@@ -56,6 +56,7 @@ public class AATView extends JPanel implements Observer {
     private boolean showInfo = true;
     private String displayText = "";
     private JEditorPane textPane;
+    private JScrollPane scrollPane;
     private Dimension screen;
 
     /**
@@ -63,43 +64,50 @@ public class AATView extends JPanel implements Observer {
      */
     public AATView(AATModel model) {
         screen = this.getToolkit().getScreenSize();
-        this.setLayout(null);
+        this.setLayout(new GridBagLayout());
         this.setPreferredSize(screen);
         this.setMinimumSize(screen);
         this.model = model;
-        this.setBackground(Color.black);
+        this.setBackground(new java.awt.Color(0, 0, 0, 0));
+        this.setBorder(null);
+
         textPane = new JEditorPane();
-        this.add(textPane);
-        textPane.setBounds(100, 100, screen.width - 100, screen.height - 100);
+        scrollPane = new JScrollPane(textPane,JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.setPreferredSize(new Dimension((int)(0.8 * screen.width),(int)(0.7 *screen.height)));
+        this.add(scrollPane);
+        scrollPane.setOpaque(false);
         textPane.setEditable(false);
+        scrollPane.setBorder(null);
+        textPane.setBorder(null);
         centerPoint = Math.round(model.getTest().getTestConfiguration().getStepSize() / 2);      //eerst centerPoint begint op stepStart.
         inputY = centerPoint; //Start in the center
         displayText = model.getTest().getTranslation("introduction"); //Test starts with an introduction tekst.
     }
 
-    /**
-     * De draw functie, omdat framerate(24) is wordt deze functie 24x per seconden doorlopen tijdens AAT
-     */
-    // public void draw() {
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);    // paints background
 
         if (!blackScreen) {
-            textPane.setVisible(false);
+            scrollPane.setVisible(false);
             imageShow(g);                                    // Geef AAT weer
         } else {
             if (showInfo) {
                 textPane.setContentType("text/html");
+                textPane.setBackground(new java.awt.Color(0, 0, 0, 0));
                 HTMLEditorKit kit = new HTMLEditorKit();
                 textPane.setEditorKit(kit);
                 StyleSheet styleSheet = kit.getStyleSheet();
-                styleSheet.addRule("body {color: white; font-family:times; margin: 0px; background-color: black;font : 30px monaco;}");
+                styleSheet.addRule("body {color: white; font-family:times; margin: 0px; background-color: black;font : 24px monaco;}");
+                styleSheet.addRule("h2 {color: white; font-family:times; margin: 0px; background-color: black;font : 24px monaco;}");
+                styleSheet.addRule("h1 {color:white;background-color: black}");
+                styleSheet.addRule("h3 {color:white; background-color: black}");
+                styleSheet.addRule("p {color:white;background-color: black}");
                 Document doc = kit.createDefaultDocument();
                 textPane.setDocument(doc);
                 infoShow(displayText);                          // Geef instructie tekst weer
             } else {
-                textPane.setVisible(false);
+                scrollPane.setVisible(false);
                 this.setBackground(new Color(0));
             }
         }
@@ -113,12 +121,17 @@ public class AATView extends JPanel implements Observer {
      * @param infoText bevat de waarde van displayText, en is de instructietekst welke op het scherm wordt getoond
      */
     private void infoShow(String infoText) {
-        textPane.setVisible(true);
+        scrollPane.setVisible(true);
         this.setBackground(Color.black);   //Background to black
         this.setForeground(Color.white);    //ForeGround to white
         textPane.setBackground(new Color(0));
-        infoText = infoText.replaceAll("(\r\n|\r|\n|\n\r)", "<br>");
-        textPane.setText("<body>" + infoText + "</body>");
+        if (!infoText.contains("<body>")) {
+            if(!infoText.contains("<") && !infoText.contains(">")) {
+                infoText = infoText.replaceAll("(\r\n|\r|\n|\n\r)", "<br>");            //probably no html content at al, so replace newline with <br>
+            }
+            infoText = "<body><h2>" + infoText + "</h2></body>";
+        }
+        textPane.setText(infoText);
         textPane.setEditable(false);
     }
 

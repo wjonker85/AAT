@@ -80,12 +80,6 @@ public class PlotPanel extends JPanel {
     public void displayPlot(boolean show) {
         if (show) {
             createLinePlot();
-            //     mainPanel.removeAll();
-            //    mainPanel.repaint();
-            //   mainPanel.add(createLinePlot());
-            //   mainPanel.revalidate();
-            //   mainPanel.getRootPane().revalidate();
-            //   this.getRootPane().revalidate();
             repaint();
         } else {
             mainPanel.removeAll();

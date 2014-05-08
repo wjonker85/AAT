@@ -63,13 +63,12 @@ public class TestFrame extends JFrame implements Observer {
         displayPanel.add(aatView, "aat");
         displayPanel.add(boxPlot, "boxPlot");
         displayPanel.add(plotPanel, "plot");
+        displayPanel.setBackground(new Color(0,0,0,0));
         //  resultsView = new BoxPlot()
 
         this.setLayout(new GridBagLayout());
         this.setBackground(Color.black);
         this.getContentPane().setBackground(Color.black);
-        //   this.getContentPane().add(qPanel, new GridBagConstraints());
-        //   this.getContentPane().setLayout(new GridBagLayout());
         this.getContentPane().add(displayPanel, new GridBagConstraints());
         setExtendedState(Frame.MAXIMIZED_BOTH);
         setUndecorated(true);
@@ -104,9 +103,6 @@ public class TestFrame extends JFrame implements Observer {
         this.setVisible(false);
         this.setEnabled(false);
         this.dispose();
-        //   this.setVisible(false);
-        //  this.setEnabled(false);
-        //  model.clearAll();
     }
 
     /*
@@ -133,7 +129,8 @@ public class TestFrame extends JFrame implements Observer {
             if (model.getTest().getTestConfiguration().getPlotType().equalsIgnoreCase("boxplot")) {
                 boxPlot.init();
                 try {
-                    boxPlot.display(true);
+                   // boxPlot.display(true);
+                    cl.show(displayPanel, "plot");
                     cl.show(displayPanel, "boxPlot");
                 } catch (Exception e) {
                     System.out.println("Error: Boxplot cannot be shown");

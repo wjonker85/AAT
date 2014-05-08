@@ -100,7 +100,7 @@ public class AATValidator {
         displayQuestions.addValidator(new IConfigValidator<String>() {
             @Override
             public void validate(String s) throws FalseConfigException {
-                if (!(s.equalsIgnoreCase("Before") || s.equalsIgnoreCase("Afters") || s.equalsIgnoreCase("None"))) {
+                if (!(s.equalsIgnoreCase("Before") || s.equalsIgnoreCase("After") || s.equalsIgnoreCase("None"))) {
                     throw new FalseConfigException("DisplayQuestions should be either Before, After or None");
                 }
             }

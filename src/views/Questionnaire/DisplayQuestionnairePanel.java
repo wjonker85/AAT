@@ -390,7 +390,6 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
             editor.setMaximumSize(new Dimension((int) (resolution.width * 0.8), 2000));
 
             if (editMode) {
-             //   editor.setPreferredSize(new Dimension((int) (resolution.width * 0.8), 1200));
                 editor.addMouseListener(this);
                 buttonPanel = new JPanel();
                 buttonPanel.setBackground(Color.black);
@@ -421,12 +420,8 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
 
             JScrollPane scrollPane = new JScrollPane(content, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
             scrollPane.setBackground(Color.black);
-         //   scrollPane.setMaximumSize(new Dimension((int) (resolution.width * 0.6), 400));
-
             scrollPane.setBorder(null);
             if (editMode) {
-          //      scrollPane.setPreferredSize(new Dimension((int) (resolution.width * 0.6), 400));
-             //   JScrollPane scrollPane = new JScrollPane(content, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
                 scrollPane.addMouseListener(this);
                 scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
             }
