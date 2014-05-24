@@ -30,7 +30,6 @@ public class BarChart extends JPanel {
     public BarChart(AATModel model) {
         super(new GridBagLayout());
         this.model = model;
-        this.setOpaque(false);
         Dimension screen = getToolkit().getScreenSize();
         setPreferredSize(new Dimension(screen.width, screen.height));
         setBackground(Color.black);
