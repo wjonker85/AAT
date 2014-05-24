@@ -162,16 +162,6 @@ public class AATValidator {
             }
         }
 
-        String hasBoxplot = configFileReader.getValue("ShowBoxPlot");
-        if (hasBoxplot.equalsIgnoreCase("True")) {
-            testConfigurationMap.GetSetConfigOption("ShowBoxPlot", true);
-        } else if (hasBoxplot.equalsIgnoreCase("False")) {
-            testConfigurationMap.GetSetConfigOption("ShowBoxPlot", false);
-        } else {
-            throw new FalseConfigException("ShowBoxPlot should be either True or False");
-        }
-
-
         //--------------------- Advanced options  ----------------------------------------------------------------------------------------
         testConfigurationMap.GetSetConfigOption("PlotType", configFileReader.getPlotType(configFileReader.getValue("PlotType")));
         if (!configFileReader.getValue("AffectRatio").equals("")) {

@@ -34,7 +34,8 @@ public class ConfigWriter {
                 "# PracticeRepeat - How many practice images are needed at the beginning of the test. The total number of images\n" +
                 "# \t\t   Shown is twice this amount. (Every image has a pull and push variant). Comment this or set to 0 when you don't want a practice.\n" +
                 "# DisplayQuestions - Should the questions be asked Before or After the test. Set to None for no questions\n" +
-                "# ShowBoxPlot - Set this to True when you want to display a boxplot showing the results, otherwise set to False\n";
+                "# PlotType - The type of plot used to show the results when a participant finished the test. Leave empty or commented when you don't \n" +
+                "#want to display results afterwards\n";
         String ratioHeader = "#The next two options are only needed when you want to change the ratio push/pull in the two conditions (push:pull). Default is 50% push and 50% #pull 1:1 ratio.\n";
         String testRatioHeader = "#This option specifies the ratio of Affective vs Neutral images (Affect:Neutral). Default is a 1:1 ratio. \n";
         String NoImagesHeader = "#This option sets the number of images shown in each trial. Normally this options doesnt need to be set. Only needed when you change the ratio('s)\n" +
@@ -75,15 +76,7 @@ public class ConfigWriter {
         pw.println();
         pw.write("DisplayQuestions " + configuration.getDisplayQuestions());
         pw.println();
-        String boxPlot = "False";
-        String plotType = "";
-        if (configuration.getShowBoxPlot()) {
-            boxPlot = "True";
-            plotType = "boxplot";
-        }
-        pw.write("ShowBoxPlot " + boxPlot);
-        pw.println();
-        pw.write("PlotType " + plotType);
+        pw.write("PlotType " + configuration.getPlotType());
         pw.println();
         pw.write(ratioHeader);
         pw.println();

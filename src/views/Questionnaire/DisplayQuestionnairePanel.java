@@ -363,10 +363,13 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
 
         public IntroductionEditorPanel() {
             JPanel content = new JPanel();
-            content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
+            content.setLayout(new BoxLayout(content, BoxLayout.PAGE_AXIS));
+          //  content.setLayout(new GridBagLayout());
             content.setBackground(Color.black);
             this.setBorder(null);
-            this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        //    this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
+       //     this.setLayout(new FlowLayout(FlowLayout.LEFT));
+         //   this.setLayout(new GridBagLayout());
             this.setBackground(Color.black);
             editor = new JEditorPane();
             editor.setBackground(Color.black);
@@ -376,7 +379,7 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
             HTMLEditorKit kit = new HTMLEditorKit();
             StyledDocument doc = (StyledDocument) kit.createDefaultDocument();
             editor.setDocument(doc);
-            this.setMinimumSize(new Dimension((int) (0.9*resolution.width),50));
+            this.setMinimumSize(new Dimension((int) (0.9 * resolution.width), 50));
             this.setMaximumSize(new Dimension((int) (0.9*resolution.width),resolution.height));
             StyleSheet styleSheet = kit.getStyleSheet();
             styleSheet.addRule("h2 {color: white; font-family:times; margin: 0px; background-color: black;font : 24px monaco;}");

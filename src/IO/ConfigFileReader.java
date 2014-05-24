@@ -64,7 +64,6 @@ public class ConfigFileReader {
             "PullTag",
             "PushTag",
             "DisplayQuestions",
-            "ShowBoxPlot",
             "Questionnaire",
             "AffectRatio",
             "NeutralRatio",

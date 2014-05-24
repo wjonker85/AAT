@@ -28,7 +28,7 @@ public class TestConfiguration {
     private int stepSize, dataSteps, maxSizePerc, imageSizePerc;
     private File dataFile;
     private int testID;
-    private String plotType = "BoxPlot";
+    private String plotType = "";
 
     public int getTrials() {
         return trials;
@@ -100,14 +100,6 @@ public class TestConfiguration {
 
     public void setColoredBorders(Boolean coloredBorders) {
         this.coloredBorders = coloredBorders;
-    }
-
-    public Boolean getShowBoxPlot() {
-        return showBoxPlot;
-    }
-
-    public void setShowBoxPlot(Boolean showBoxPlot) {
-        this.showBoxPlot = showBoxPlot;
     }
 
     public String getPullColor() {
@@ -272,7 +264,7 @@ public class TestConfiguration {
 
     public void setPlotType(String plotType) {
         this.plotType = plotType;
-    }           //TODO deze moet nog gedaan worden
+    }
 
     public String getPlotType() {
         return plotType;

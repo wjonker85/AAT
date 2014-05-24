@@ -42,7 +42,8 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
     private JTextField inputBorderSize;
     private JTextField inputStepSize, inputDataStepSize;
     private JComboBox<Object> inputQuestions;
-    private JCheckBox inputBoxplot, inputColoredBorder, inputHasPractice, inputBuiltinPractice;
+    private JComboBox<Object> inputPlotType;
+    private JCheckBox inputColoredBorder, inputHasPractice, inputBuiltinPractice;
     private int pullColor, pushColor, prFillColor;
     private File workingDir = new File("");
     private File nDir, aDir, pDir;
@@ -643,7 +644,7 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
 
         panel.add(Box.createVerticalStrut(10));
         panel.add(Box.createVerticalStrut(10));
-        panel.add(new TitledSeparator("Boxplot & Questionnaire", 0));
+        panel.add(new TitledSeparator("Questionnaire & Display results", 0));
         panel.add(new TitledSeparator("", -1));
         panel.add(Box.createVerticalStrut(5));
         panel.add(Box.createVerticalStrut(5));
@@ -711,14 +712,16 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
         });
         panel.add(selectQL);
         panel.add(selectQPanel);
+        JPanel plotComboPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         inputQuestionFile.setEnabled(false);
-        JLabel boxPlotL = new JLabel("Do you want the test to show a BoxPlot at the end?");
-        inputBoxplot = new JCheckBox();
-        inputBoxplot.setPreferredSize(new Dimension(25, 25));
-        inputBoxplot.setSelected(true);
-        panel.add(boxPlotL);
-        panel.add(inputBoxplot);
-
+        JLabel graphL = new JLabel("<html>Do you want display a graph showing the participants result?<br>" +
+                "Choose the desired graph type or leave empty if you don't want to display the results.");
+        Object[] plotOptions = {"","Barchart","Boxplot"};
+        inputPlotType = new JComboBox<Object>(plotOptions);
+        inputPlotType.setPreferredSize(new Dimension(100, 25));
+        panel.add(graphL);
+        plotComboPanel.add(inputPlotType);
+        panel.add(plotComboPanel);
         panel.add(Box.createVerticalStrut(10));
         panel.add(Box.createVerticalStrut(10));
         panel.add(new TitledSeparator("Advanced Options", 0));
@@ -1261,12 +1264,8 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
             revalidate();
             repaint();
         }
-        String showBoxPlot = config.getValue("ShowBoxPlot");
-        if (showBoxPlot.equals("True")) {
-            inputBoxplot.setSelected(true);
-        } else {
-            inputBoxplot.setSelected(false);
-        }
+        String plotType = config.getValue("PlotType");
+        inputPlotType.setSelectedItem(plotType);
         if (config.getValue("AffectRatio").contains(":")) {
             inputAffectRatioPush.setText(getRatio(config.getValue("AffectRatio"))[0]);
             inputAffectRatioPull.setText(getRatio(config.getValue("AffectRatio"))[1]);
@@ -1374,8 +1373,9 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
         configuration.setTrials(Integer.parseInt(inputTrials.getText()));
         configuration.setBreakAfter(Integer.parseInt(inputBreak.getText()));
         configuration.setPracticeRepeat(Integer.parseInt(inputPractRepeat.getText()));
-        if (inputBoxplot.isSelected()) {
-            configuration.setShowBoxPlot(true);
+        String plot = inputPlotType.getSelectedItem().toString();
+        if (plot.length()>0) {
+            configuration.setPlotType(plot);
         }
         if (inputQuestionFile.getText().length() > 0) {
             configuration.setDisplayQuestions(inputQuestions.getSelectedItem().toString());

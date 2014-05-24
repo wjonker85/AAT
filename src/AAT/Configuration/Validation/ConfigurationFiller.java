@@ -10,7 +10,6 @@ public class ConfigurationFiller {
     public static TestConfiguration fillTestConfiguration(TestConfigurationMap<String> validatedConfiguration) {
         TestConfiguration testConfiguration = new TestConfiguration();
         try {
-            System.out.println("HIERRRRR");
             testConfiguration.setTrials(validatedConfiguration.getIntValue("Trials"));
             testConfiguration.setBreakAfter(validatedConfiguration.getIntValue("BreakAfter"));
             testConfiguration.setPracticeRepeat(validatedConfiguration.getIntValue("PracticeRepeat"));
@@ -20,7 +19,6 @@ public class ConfigurationFiller {
             testConfiguration.setTestRatio(validatedConfiguration.getStringValue("TestRatio"));
             testConfiguration.setTrialSize(validatedConfiguration.getIntValue("TrialSize"));
             testConfiguration.setColoredBorders(validatedConfiguration.getBooleanValue("ColoredBorders"));
-            testConfiguration.setShowBoxPlot(validatedConfiguration.getBooleanValue("ShowBoxPlot"));
             testConfiguration.setPullColor(validatedConfiguration.getStringValue("BorderColorPull"));
             testConfiguration.setPushColor(validatedConfiguration.getStringValue("BorderColorPush"));
             testConfiguration.setBorderWidth(validatedConfiguration.getIntValue("BorderWidth"));
@@ -38,6 +36,7 @@ public class ConfigurationFiller {
             testConfiguration.setMaxSizePerc(validatedConfiguration.getIntValue("MaxSizePerc"));
             testConfiguration.setImageSizePerc(validatedConfiguration.getIntValue("ImageSizePerc"));
             testConfiguration.setTestID(validatedConfiguration.getIntValue("ID"));
+            testConfiguration.setPlotType(validatedConfiguration.getStringValue("PlotType"));
             if (testConfiguration.getPracticeDir().length() > 0 || testConfiguration.getPracticeFillColor().length() > 0) {
                 testConfiguration.setHasPractice(true);
             } else {

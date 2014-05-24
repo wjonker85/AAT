@@ -429,7 +429,7 @@ public class AATModel extends Observable {
 
             case AATModel.TEST_SHOW_FINISHED:
                 //TODO niet op boolean boxplot, maar op plot type.
-                if (newAAT.getTestConfiguration().getShowBoxPlot()) {
+                if (newAAT.getTestConfiguration().getPlotType().length()>0) {
                     testStatus = AATModel.TEST_SHOW_RESULTS;
                     this.setChanged();
                     this.notifyObservers("Display results");
