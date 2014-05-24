@@ -29,12 +29,11 @@ public class BarChart extends JPanel {
 
     public BarChart(AATModel model) {
         super(new GridBagLayout());
-      //  super(new BoxLayout(this,BoxLayout.Y_AXIS));
         this.model = model;
+        this.setOpaque(false);
         Dimension screen = getToolkit().getScreenSize();
         setPreferredSize(new Dimension(screen.width, screen.height));
-        setBackground(Color.black);
-        setForeground(Color.white);
+        setBackground(Color.white);
         this.model = model;
         mainPanel = new JPanel(new BorderLayout());
         mainPanel.setBackground(Color.white);
@@ -42,22 +41,22 @@ public class BarChart extends JPanel {
         this.add(mainPanel);
     }
 
-    private void addToData(DataTable data, HashMap<String, float[]> results, int pos) {
+    private void addToData(DataTable data, HashMap<String, float[]> results, double pos) {
         for (String key : results.keySet()) {
             DesciptiveStatistics stats = Stats.getDescriptiveStatistics(key, results.get(key));
-            data.add(pos, stats.getMean(), stats.getlabel());
+            data.add(pos, stats.getMean(), key);
         }
     }
 
 
     private void createBarChart() {
         // Create new bar plot
-        DataTable affective = new DataTable(Integer.class, Float.class, String.class);
-        addToData(affective, model.getResultsPerCondition(AATImage.AFFECTIVE, AATImage.PULL), 1);
-        addToData(affective, model.getResultsPerCondition(AATImage.AFFECTIVE, AATImage.PUSH), 4);
-        DataTable neutral = new DataTable(Integer.class, Float.class, String.class);
-        addToData(neutral, model.getResultsPerCondition(AATImage.NEUTRAL, AATImage.PULL), 2);
-        addToData(neutral, model.getResultsPerCondition(AATImage.NEUTRAL, AATImage.PUSH), 5);
+        DataTable affective = new DataTable(Double.class, Float.class, String.class);
+        addToData(affective, model.getResultsPerCondition(AATImage.AFFECTIVE, AATImage.PULL), 0.1);
+        addToData(affective, model.getResultsPerCondition(AATImage.AFFECTIVE, AATImage.PUSH), 0.4);
+        DataTable neutral = new DataTable(Double.class, Float.class, String.class);
+        addToData(neutral, model.getResultsPerCondition(AATImage.NEUTRAL, AATImage.PULL), 0.2);
+        addToData(neutral, model.getResultsPerCondition(AATImage.NEUTRAL, AATImage.PUSH), 0.5);
 
         BarPlot plot = new BarPlot(affective, neutral);
 
@@ -109,6 +108,7 @@ public class BarChart extends JPanel {
 
         plot.getAxisRenderer(BarPlot.AXIS_X).setLabel("Condition");
         plot.getAxisRenderer(BarPlot.AXIS_Y).setLabel("Mean RTime(ms)");
+        plot.getAxisRenderer(BarPlot.AXIS_X).setTicksVisible(false);
         // Add plot to Swing component
         mainPanel.add(new InteractivePanel(plot), BorderLayout.CENTER);
     }
