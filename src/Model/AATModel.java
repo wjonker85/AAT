@@ -370,7 +370,7 @@ public class AATModel extends Observable {
                 results.put(pull + " & " + nDir, newParticipant.getMeasures(AATImage.PULL, AATImage.NEUTRAL));
             }
             else if (direction == AATImage.PUSH) {
-                    results.put(pull + " & " + aDir, newParticipant.getMeasures(AATImage.PUSH, AATImage.NEUTRAL));
+                    results.put(push + " & " + nDir, newParticipant.getMeasures(AATImage.PUSH, AATImage.NEUTRAL));
                 }
             }
         return results;
