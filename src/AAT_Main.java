@@ -20,9 +20,9 @@ import Controller.JoystickController;
 import DataStructures.AATDataRecorder;
 import IO.DataExporter;
 import Model.AATModel;
-import views.ExportDataDialog;
-import views.SelectTestRevision;
-import views.TestFrame;
+import Views.TestUpgrade.ExportDataDialog;
+import Views.Export.SelectTestRevision;
+import Views.AAT.TestFrame;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;

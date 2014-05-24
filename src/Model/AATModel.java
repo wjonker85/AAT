@@ -39,7 +39,7 @@ import java.util.Observable;
  * Date: 10/4/11
  * Time: 3:12 PM
  * This model does all the logic for the AAT. It uses the Model-View-Controller pattern. So it does the communication between
- * the controllers and the views. Controllers are the joystick and the user input from the main Frame. Views are the test view and
+ * the controllers and the Views. Controllers are the joystick and the user input from the main Frame. Views are the test view and
  * results view.
  * <p/>
  * When a picture has to be pulled or pushed all joystick movements are recorded with their corresponding reaction times.
@@ -428,7 +428,6 @@ public class AATModel extends Observable {
 
 
             case AATModel.TEST_SHOW_FINISHED:
-                //TODO niet op boolean boxplot, maar op plot type.
                 if (newAAT.getTestConfiguration().getPlotType().length()>0) {
                     testStatus = AATModel.TEST_SHOW_RESULTS;
                     this.setChanged();
@@ -461,7 +460,7 @@ public class AATModel extends Observable {
 
     /**
      * This method is called when the participant has answered the optional questions. The answers are added to
-     * the participants data file and the views are notified that the AAT can be started
+     * the participants data file and the Views are notified that the AAT can be started
      *
      * @param extraQuestions The answers to the extra questions. The hashmap contains the key and the answer
      */

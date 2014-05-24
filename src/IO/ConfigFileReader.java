@@ -40,8 +40,6 @@ public class ConfigFileReader {
     private Map<String, String> testOptions = new HashMap<String, String>();
     private File testConfig;
 
-    String[] plotTypes = {"boxplot", "2dline"};
-
     //All the configuration options
     public static String[] options = {
             "ColoredBorders",
@@ -122,16 +120,6 @@ public class ConfigFileReader {
         } catch (Exception e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
-    }
-
-    //Check whether a given plot type is valid.
-    public String getPlotType(String input) {
-        for (String s : plotTypes) {
-            if (input.trim().equalsIgnoreCase(s)) {
-                return s;
-            }
-        }
-        return "";
     }
 
     public String getValue(String key) {

@@ -23,7 +23,7 @@ import AAT.Util.FileUtils;
 import Model.AATModel;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
-import views.TestUpgrade.LabelInputFrame;
+import Views.TestUpgrade.LabelInputFrame;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;

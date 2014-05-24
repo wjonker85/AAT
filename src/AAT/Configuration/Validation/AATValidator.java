@@ -163,7 +163,7 @@ public class AATValidator {
         }
 
         //--------------------- Advanced options  ----------------------------------------------------------------------------------------
-        testConfigurationMap.GetSetConfigOption("PlotType", configFileReader.getPlotType(configFileReader.getValue("PlotType")));
+        testConfigurationMap.GetSetConfigOption("PlotType", configFileReader.getValue("PlotType"));
         if (!configFileReader.getValue("AffectRatio").equals("")) {
             TestConfigurationOption<String> affectRatio = testConfigurationMap.GetSetConfigOption("AffectRatio", configFileReader.getValue("AffectRatio"));
             affectRatio.addValidator(new RatioValidator("AffectRatio"));

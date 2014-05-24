@@ -15,7 +15,7 @@
  *
  */
 
-import views.ConfigurationBuilder.ConfigBuilderPanel;
+import Views.ConfigurationBuilder.ConfigBuilderPanel;
 
 import javax.swing.*;
 import java.awt.*;
