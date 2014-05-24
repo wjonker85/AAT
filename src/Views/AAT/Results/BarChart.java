@@ -33,7 +33,8 @@ public class BarChart extends JPanel {
         this.setOpaque(false);
         Dimension screen = getToolkit().getScreenSize();
         setPreferredSize(new Dimension(screen.width, screen.height));
-        setBackground(Color.white);
+        setBackground(Color.black);
+        setForeground(Color.white);
         this.model = model;
         mainPanel = new JPanel(new BorderLayout());
         mainPanel.setBackground(Color.white);
