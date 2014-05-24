@@ -1,6 +1,7 @@
 package Views.AAT.Results;
 
 import AAT.Util.Stats;
+import DataStructures.AATImage;
 import DataStructures.DesciptiveStatistics;
 import Model.AATModel;
 import de.erichseifert.gral.data.DataTable;
@@ -10,8 +11,12 @@ import de.erichseifert.gral.plots.lines.DefaultLineRenderer2D;
 import de.erichseifert.gral.plots.lines.LineRenderer;
 import de.erichseifert.gral.plots.points.PointRenderer;
 import de.erichseifert.gral.ui.InteractivePanel;
+import de.erichseifert.gral.util.GraphicsUtils;
+import de.erichseifert.gral.util.Insets2D;
+import de.erichseifert.gral.util.Location;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import java.awt.*;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -24,65 +29,96 @@ import java.util.Set;
 public class BarChart extends JPanel {
 
     private AATModel model;
-   // JPanel mainPanel;
-  //  XYPlot plot;
-    DataTable data;
-    InteractivePanel iPanel;
+    JPanel mainPanel;
+    private final Color COLORA = Color.red;
+    private final Color COLORN = Color.blue;
+
 
     public BarChart(AATModel model) {
         super(new BorderLayout());
+        this.model = model;
         Dimension screen = getToolkit().getScreenSize();
         setPreferredSize(new Dimension(screen.width,screen.height));
-        setBackground(Color.WHITE);
+        setBackground(Color.black);
+        setForeground(Color.white);
         this.model = model;
-     //   mainPanel = new JPanel();
-     //   mainPanel.setBackground(Color.black);
-     //   mainPanel.setForeground(Color.white);
-//        mainPanel.setLayout(new BoxLayout(mainPanel,BoxLayout.Y_AXIS));    //TODO even naar kijken
-    //    setSize(800,800);
-//        mainPanel.setPreferredSize(new Dimension(1000, 800));
-  //      mainPanel.setSize(800,800);
-    //    Dimension screen = getToolkit().getScreenSize();
-    //    this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-   //     this.setLayout(new GridBagLayout());
-   //     this.setBackground(Color.black);
-  //      this.setForeground(Color.white);
-  //      this.setPreferredSize(new Dimension(screen.width / 2, screen.height));
-  //      this.setMaximumSize(new Dimension(screen.width / 2, screen.height));
-       // this.add(mainPanel);
+           mainPanel = new JPanel(new BorderLayout());
+           mainPanel.setBackground(Color.white);
+         this.add(mainPanel, BorderLayout.CENTER);
     }
 
-    private void createBarChart() {
-        this.removeAll();
-        data = new DataTable(String.class, Float.class);
-        HashMap<String,float[]> results = model.getResultsPerCondition();
+    private void addToData(DataTable data,HashMap<String,float[]> results,int pos)   {
         for(String key : results.keySet()) {
             DesciptiveStatistics stats = Stats.getDescriptiveStatistics(key,results.get(key));
-            data.add(stats.getlabel(),stats.getMean());
+            data.add(pos,stats.getMean(),stats.getlabel());
         }
-        BarPlot plot = new BarPlot(data);
-        iPanel = new InteractivePanel(plot);
-        PointRenderer barRenderer = plot.getPointRenderer(data);
-        barRenderer.setColor(Color.RED);
-        this.add(iPanel,BorderLayout.CENTER);
-
-
-  //      iPanel.setPreferredSize(new Dimension(500,500));
-   //     iPanel.setMinimumSize(new Dimension(500,500));
-
-
-
-  //      revalidate();
     }
 
-    protected JFrame showInFrame() {
-                     JFrame frame = new JFrame("test");
-                frame.getContentPane().add(this, BorderLayout.CENTER);
-                     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                   frame.setSize(getPreferredSize());
-                      frame.setVisible(true);
-                    return frame;
-        }
+
+    private void createBarChart() {
+        // Create new bar plot
+        DataTable affective = new DataTable(Double.class,Float.class,String.class);
+        addToData(affective,model.getResultsPerCondition(AATImage.AFFECTIVE,AATImage.PULL),1);
+        addToData(affective,model.getResultsPerCondition(AATImage.AFFECTIVE,AATImage.PUSH),4);
+        DataTable neutral = new DataTable(Double.class,Float.class,String.class);
+        addToData(affective,model.getResultsPerCondition(AATImage.NEUTRAL,AATImage.PULL),2);
+        addToData(affective,model.getResultsPerCondition(AATImage.NEUTRAL,AATImage.PUSH),5);
+
+        BarPlot plot = new BarPlot(affective,neutral);
+
+        // Format plot
+        plot.setInsets(new Insets2D.Double(40.0, 40.0, 40.0, 40.0));
+        plot.setBarWidth(0.075);
+
+        // Format bars
+        BarPlot.BarRenderer pointRendererA = (BarPlot.BarRenderer) plot.getPointRenderer(affective);
+        pointRendererA.setColor(
+                new LinearGradientPaint(0f,0f, 0f,1f,
+                        new float[] { 0.0f, 1.0f },
+                        new Color[] { COLORA, GraphicsUtils.deriveBrighter(COLORA) }
+                )
+        );
+        pointRendererA.setBorderStroke(new BasicStroke(3f));
+        pointRendererA.setBorderColor(
+                new LinearGradientPaint(0f,0f, 0f,1f,
+                        new float[] { 0.0f, 1.0f },
+                        new Color[] { GraphicsUtils.deriveBrighter(COLORA), COLORA }
+                )
+        );
+        pointRendererA.setValueVisible(true);
+        pointRendererA.setValueColumn(2);
+        pointRendererA.setValueLocation(Location.CENTER);
+        pointRendererA.setValueColor(GraphicsUtils.deriveDarker(COLORA));
+        pointRendererA.setValueFont(Font.decode(null).deriveFont(Font.BOLD));
+
+        // Format bars
+        BarPlot.BarRenderer pointRendererN = (BarPlot.BarRenderer) plot.getPointRenderer(affective);
+        pointRendererN.setColor(
+                new LinearGradientPaint(0f,0f, 0f,1f,
+                        new float[] { 0.0f, 1.0f },
+                        new Color[] { COLORN, GraphicsUtils.deriveBrighter(COLORN) }
+                )
+        );
+        pointRendererN.setBorderStroke(new BasicStroke(3f));
+        pointRendererN.setBorderColor(
+                new LinearGradientPaint(0f,0f, 0f,1f,
+                        new float[] { 0.0f, 1.0f },
+                        new Color[] { GraphicsUtils.deriveBrighter(COLORN), COLORN }
+                )
+        );
+        pointRendererN.setValueVisible(true);
+        pointRendererN.setValueColumn(2);
+        pointRendererN.setValueLocation(Location.CENTER);
+        pointRendererN.setValueColor(GraphicsUtils.deriveDarker(COLORN));
+        pointRendererN.setValueFont(Font.decode(null).deriveFont(Font.BOLD));
+
+        // Add plot to Swing component
+        mainPanel.add(new InteractivePanel(plot), BorderLayout.CENTER);
+
+
+    }
+
+
 
 
     public void displayPlot(boolean show) {
@@ -90,7 +126,7 @@ public class BarChart extends JPanel {
             createBarChart();
             repaint();
         } else {
-        //    mainPanel.removeAll();
+
             repaint();
         }
     }
