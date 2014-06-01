@@ -6,17 +6,15 @@ import de.erichseifert.gral.data.Column;
 import de.erichseifert.gral.data.DataSource;
 import de.erichseifert.gral.data.DataTable;
 import de.erichseifert.gral.data.statistics.Statistics;
-import de.erichseifert.gral.plots.*;
-import de.erichseifert.gral.plots.BoxPlot;
+import de.erichseifert.gral.plots.BarPlot;
+import de.erichseifert.gral.plots.XYPlot;
 import de.erichseifert.gral.plots.XYPlot.XYNavigationDirection;
 import de.erichseifert.gral.plots.axes.Axis;
-import de.erichseifert.gral.plots.axes.AxisRenderer;
 import de.erichseifert.gral.ui.InteractivePanel;
 import de.erichseifert.gral.util.Insets2D;
 import de.erichseifert.vectorgraphics2d.util.DataUtils;
 
 import javax.swing.*;
-import javax.swing.border.Border;
 import java.awt.*;
 import java.util.HashMap;
 import java.util.List;
@@ -28,10 +26,6 @@ public class BoxPlotResults extends JPanel {
 
 
     private AATModel model;
-    JPanel mainPanel;
-    private final Color COLORA = Color.red;
-    private final Color COLORB = Color.blue;
-
 
     public BoxPlotResults(AATModel model) {
         super(new BorderLayout());
@@ -70,9 +64,9 @@ public class BoxPlotResults extends JPanel {
         boxRenderer.setWhiskerStroke(stroke);
         boxRenderer.setBoxBorderStroke(stroke);
         plot.setPointRenderer(source, boxRenderer);
-         de.erichseifert.gral.plots.BoxPlot.BoxWhiskerRenderer pointRenderer =
-             (de.erichseifert.gral.plots.BoxPlot.BoxWhiskerRenderer)
-                   plot.getPointRenderer(source);
+        de.erichseifert.gral.plots.BoxPlot.BoxWhiskerRenderer pointRenderer =
+                (de.erichseifert.gral.plots.BoxPlot.BoxWhiskerRenderer)
+                        plot.getPointRenderer(source);
         pointRenderer.setBoxBorderColor(color);
         pointRenderer.setWhiskerColor(color);
         pointRenderer.setCenterBarColor(color);
@@ -83,7 +77,7 @@ public class BoxPlotResults extends JPanel {
     }
 
 
-    public void autoScaleAxis(String axisName,XYPlot plot) {
+    public void autoScaleAxis(String axisName, XYPlot plot) {
 
         Axis axis = plot.getAxis(axisName);
         if (axis == null || !axis.isAutoscaled()) {
@@ -113,7 +107,7 @@ public class BoxPlotResults extends JPanel {
             max = Math.max(max, data.getColumn(maxColumnIndex)
                     .getStatistics(Statistics.MAX));
         }
-        double spacing = (isXAxis) ? 0.5 : 0.05*(max - min);
+        double spacing = (isXAxis) ? 0.5 : 0.05 * (max - min);
         axis.setRange(min - spacing, max + spacing);
     }
 
@@ -126,20 +120,20 @@ public class BoxPlotResults extends JPanel {
 
         XYPlot plot = new XYPlot(affectivePull, neutralPull, affectivePush, neutralPush);
         // Format plot
-        plot.setInsets(new Insets2D.Double(20.0, 50.0, 40.0, 20.0));
+        plot.setInsets(new Insets2D.Double(20.0, 60.0, 40.0, 20.0));
         changeRenderer(Color.red, affectivePull, plot);
         changeRenderer(Color.blue, affectivePush, plot);
         changeRenderer(Color.red, neutralPull, plot);
         changeRenderer(Color.blue, neutralPush, plot);
         ((XYPlot.XYPlotArea2D) plot.getPlotArea()).setMajorGridX(false);
-        autoScaleAxis(XYPlot.AXIS_X,plot);
-        autoScaleAxis(XYPlot.AXIS_Y,plot);
+        autoScaleAxis(XYPlot.AXIS_X, plot);
+        autoScaleAxis(XYPlot.AXIS_Y, plot);
         plot.getNavigator().setDirection(XYNavigationDirection.VERTICAL);
         plot.getTitle().setText("Boxplot results(ms) for the four conditions");
         // Format axes
         plot.getAxisRenderer(de.erichseifert.gral.plots.BoxPlot.AXIS_X).setCustomTicks(
                 DataUtils.map(
-                        new Double[]{1.0, 2.0, 3.0,4.0},
+                        new Double[]{1.0, 2.0, 3.0, 4.0},
                         new String[]{model.getLabelPerCondition(AATImage.AFFECTIVE, AATImage.PULL)
                                 , model.getLabelPerCondition(AATImage.NEUTRAL, AATImage.PULL)
                                 , model.getLabelPerCondition(AATImage.AFFECTIVE, AATImage.PUSH)
@@ -147,13 +141,12 @@ public class BoxPlotResults extends JPanel {
                         }
                 )
         );
-
+        plot.getAxisRenderer(XYPlot.AXIS_Y).setLabel("Reaction Time(ms)");
         // Add plot to Swing component
         InteractivePanel panel = new InteractivePanel(plot);
 
         this.add(panel, BorderLayout.CENTER);
     }
-
 
 
 }
