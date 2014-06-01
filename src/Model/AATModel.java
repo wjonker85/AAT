@@ -28,9 +28,7 @@ import org.w3c.dom.Document;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Observable;
+import java.util.*;
 
 
 /**
@@ -348,6 +346,18 @@ public class AATModel extends Observable {
         results.put(push + " & " + nDir, newParticipant.getMeasures(AATImage.PUSH, AATImage.NEUTRAL));
         results.put(push + " & " + aDir, newParticipant.getMeasures(AATImage.PUSH, AATImage.AFFECTIVE));
         return results;
+    }
+
+    //Returns the largest size of the four combinations. Can be different when other ratio's are used
+    public int getLargestSampleSize()         {
+         int x1 = newParticipant.getMeasures(AATImage.PULL, AATImage.NEUTRAL).length;
+        int x2 = newParticipant.getMeasures(AATImage.PULL, AATImage.AFFECTIVE).length;
+       int x3 = newParticipant.getMeasures(AATImage.PUSH, AATImage.NEUTRAL).length;
+        int x4= newParticipant.getMeasures(AATImage.PUSH, AATImage.AFFECTIVE).length;
+        int[] array;
+        array = new int[] {x1,x2,x3,x4};
+        Arrays.sort(array);
+        return array[0];
     }
 
 

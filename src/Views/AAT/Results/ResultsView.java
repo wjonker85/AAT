@@ -20,10 +20,11 @@ public class ResultsView extends JPanel {
     public void switchView(String type) {
         this.removeAll();
        if(type.equalsIgnoreCase("BoxPlot")) {
-           BoxPlot bp = new BoxPlot(model);
-           bp.init();
+         //  BoxPlot bp = new BoxPlot(model);
+         //  bp.init();
+           BoxPlot2 bp = new BoxPlot2(model);
            this.add(bp);
-           bp.display(true);
+           bp.displayPlot(true);
        }
         else if(type.equalsIgnoreCase("Barchart")) {
            BarChart b = new BarChart(model);
