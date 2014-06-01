@@ -10,6 +10,7 @@ import de.erichseifert.gral.ui.InteractivePanel;
 import de.erichseifert.gral.util.GraphicsUtils;
 import de.erichseifert.gral.util.Insets2D;
 import de.erichseifert.gral.util.Location;
+import de.erichseifert.vectorgraphics2d.util.DataUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -19,26 +20,19 @@ import java.util.HashMap;
  * Created by marcel on 2/16/14.
  * Should be the panel that displays a plot a the end of the test.
  */
-public class BarChart extends JPanel {
+public class BarChartResults extends JPanel {
 
     private AATModel model;
-    JPanel mainPanel;
     private final Color COLORA = Color.red;
     private final Color COLORN = Color.blue;
 
 
-    public BarChart(AATModel model) {
-        super(new GridBagLayout());
+    public BarChartResults(AATModel model) {
+        super(new BorderLayout());
+        setForeground(Color.black);
         this.model = model;
-        Dimension screen = getToolkit().getScreenSize();
-        setPreferredSize(new Dimension(screen.width, screen.height));
-        setBackground(Color.black);
-        setForeground(Color.white);
-        this.model = model;
-        mainPanel = new JPanel(new BorderLayout());
-        mainPanel.setBackground(Color.white);
-        mainPanel.setPreferredSize(new Dimension((int) (0.7 * screen.width), (int) (0.6 * screen.height)));
-        this.add(mainPanel);
+        setBackground(Color.white);
+        createBarChart();
     }
 
     private void addToData(DataTable data, HashMap<String, float[]> results, double pos) {
@@ -80,9 +74,9 @@ public class BarChart extends JPanel {
                 )
         );
         pointRendererA.setValueVisible(true);
-        pointRendererA.setValueColumn(2);
+        pointRendererA.setValueColumn(1);
         pointRendererA.setValueLocation(Location.CENTER);
-        pointRendererA.setValueColor(GraphicsUtils.deriveDarker(COLORA));
+        pointRendererA.setValueColor(Color.white);
         pointRendererA.setValueFont(Font.decode(null).deriveFont(Font.BOLD));
 
         // Format bars
@@ -101,26 +95,27 @@ public class BarChart extends JPanel {
                 )
         );
         pointRendererN.setValueVisible(true);
-        pointRendererN.setValueColumn(2);
+        pointRendererN.setValueColumn(1);
         pointRendererN.setValueLocation(Location.CENTER);
-        pointRendererN.setValueColor(GraphicsUtils.deriveDarker(COLORN));
+        pointRendererN.setValueColor(Color.white);
         pointRendererN.setValueFont(Font.decode(null).deriveFont(Font.BOLD));
-
+        plot.getTitle().setText("Average reaction times(ms) for the four conditions");
         plot.getAxisRenderer(BarPlot.AXIS_X).setLabel("Condition");
         plot.getAxisRenderer(BarPlot.AXIS_Y).setLabel("Mean RTime(ms)");
-        plot.getAxisRenderer(BarPlot.AXIS_X).setTicksVisible(false);
+   //     plot.getAxisRenderer(BarPlot.AXIS_X).setTicksVisible(false);
+        // Format axes
+        plot.getAxisRenderer(de.erichseifert.gral.plots.BoxPlot.AXIS_X).setCustomTicks(
+                DataUtils.map(
+                        new Double[]{0.0,0.1,0.2,0.3,0.4,0.5},
+                        new String[]{"",model.getLabelPerCondition(AATImage.AFFECTIVE, AATImage.PULL)
+                                , model.getLabelPerCondition(AATImage.NEUTRAL, AATImage.PULL)
+                                ," "
+                                , model.getLabelPerCondition(AATImage.AFFECTIVE, AATImage.PUSH)
+                                , model.getLabelPerCondition(AATImage.NEUTRAL, AATImage.PUSH)
+                        }
+                )
+        );
         // Add plot to Swing component
-        mainPanel.add(new InteractivePanel(plot), BorderLayout.CENTER);
-    }
-
-
-    public void displayPlot(boolean show) {
-        if (show) {
-            createBarChart();
-            repaint();
-        } else {
-
-            repaint();
-        }
+        this.add(new InteractivePanel(plot), BorderLayout.CENTER);
     }
 }

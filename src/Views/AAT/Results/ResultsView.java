@@ -13,23 +13,37 @@ public class ResultsView extends JPanel {
     private AATModel model;
 
     public ResultsView(AATModel model) {
+        super(new GridBagLayout());
+        this.setBackground(Color.black);
+        this.setForeground(Color.white);
+        Dimension screen = getToolkit().getScreenSize();
+        setPreferredSize(new Dimension(screen.width, screen.height));
         this.model = model;
     }
 
     //Simple dispatch of panels containing different type of result graphs
     public void switchView(String type) {
         this.removeAll();
+        Dimension screen = getToolkit().getScreenSize();
        if(type.equalsIgnoreCase("BoxPlot")) {
-         //  BoxPlot bp = new BoxPlot(model);
-         //  bp.init();
-           BoxPlot2 bp = new BoxPlot2(model);
+           BoxPlotResults bp = new BoxPlotResults(model);
+           bp.setPreferredSize(new Dimension((int) (0.7 * screen.width), (int) (0.6 * screen.height)));
            this.add(bp);
-           bp.displayPlot(true);
        }
         else if(type.equalsIgnoreCase("Barchart")) {
-           BarChart b = new BarChart(model);
+           BarChartResults b = new BarChartResults(model);
+           b.setPreferredSize(new Dimension((int) (0.7 * screen.width), (int) (0.6 * screen.height)));
            this.add(b);
-           b.displayPlot(true);
+       }
+
+        else if(type.equalsIgnoreCase("Both")) {
+           BarChartResults b = new BarChartResults(model);
+           BoxPlotResults bp = new BoxPlotResults(model);
+           b.setPreferredSize(new Dimension((int) (0.45 * screen.width), (int) (0.6 * screen.height)));
+           bp.setPreferredSize(new Dimension((int) (0.45 * screen.width), (int) (0.6 * screen.height)));
+           this.add(b);
+           this.add(bp);
+
        }
         revalidate();
     }

@@ -348,18 +348,31 @@ public class AATModel extends Observable {
         return results;
     }
 
-    //Returns the largest size of the four combinations. Can be different when other ratio's are used
-    public int getLargestSampleSize()         {
-         int x1 = newParticipant.getMeasures(AATImage.PULL, AATImage.NEUTRAL).length;
-        int x2 = newParticipant.getMeasures(AATImage.PULL, AATImage.AFFECTIVE).length;
-       int x3 = newParticipant.getMeasures(AATImage.PUSH, AATImage.NEUTRAL).length;
-        int x4= newParticipant.getMeasures(AATImage.PUSH, AATImage.AFFECTIVE).length;
-        int[] array;
-        array = new int[] {x1,x2,x3,x4};
-        Arrays.sort(array);
-        return array[0];
+    public String getLabelPerCondition(int type, int direction) {
+        if(type == AATImage.AFFECTIVE) {
+            String aDir = newAAT.getTestConfiguration().getAffectiveDir().getName();
+            if(direction == AATImage.PULL) {
+                String pull = newAAT.getTestConfiguration().getPullTag();
+                return pull + " & " + aDir;
+            }
+            else if(direction == AATImage.PUSH) {
+                String push = newAAT.getTestConfiguration().getPushTag();
+                return push + " & " + aDir;
+            }
+        }
+        else if(type == AATImage.NEUTRAL) {
+            String nDir = newAAT.getTestConfiguration().getNeutralDir().getName();
+            if (direction == AATImage.PULL) {
+                String pull = newAAT.getTestConfiguration().getPullTag();
+                return pull + " & " + nDir;
+            }
+            else if (direction == AATImage.PUSH) {
+                String push = newAAT.getTestConfiguration().getPushTag();
+                return push + " & " + nDir;
+            }
+        }
+        return "";
     }
-
 
     public HashMap<String,float[]> getResultsPerCondition(int type, int direction) {
         HashMap<String, float[]> results = new HashMap<String, float[]>();

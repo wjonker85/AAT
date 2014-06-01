@@ -18,8 +18,6 @@
 package Views.AAT;
 
 import Model.AATModel;
-import Views.AAT.Results.BarChart;
-import Views.AAT.Results.BoxPlot;
 import Views.AAT.Results.ResultsView;
 import Views.Questionnaire.DisplayQuestionnairePanel;
 

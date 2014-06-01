@@ -716,7 +716,7 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
         inputQuestionFile.setEnabled(false);
         JLabel graphL = new JLabel("<html>Do you want display a graph showing the participants result?<br>" +
                 "Choose the desired graph type or leave empty if you don't want to display the results.");
-        Object[] plotOptions = {"","Barchart","Boxplot"};
+        Object[] plotOptions = {"","Barchart","Boxplot", "Both"};
         inputPlotType = new JComboBox<Object>(plotOptions);
         inputPlotType.setPreferredSize(new Dimension(100, 25));
         panel.add(graphL);
