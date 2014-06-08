@@ -178,6 +178,7 @@ public class AAT_Main extends JFrame implements Observer {
                     joystick.enableTrigger(); //set flag to trigger
                     model.startTest(true);
                 } catch (Exception e) {
+                    e.printStackTrace();
                     runButton.setEnabled(false);
                 }
             }
