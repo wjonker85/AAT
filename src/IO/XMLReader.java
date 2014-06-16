@@ -65,7 +65,6 @@ public class XMLReader {
 
     public static Questionnaire getQuestionnaire(File questionFile) {
         Document doc = null;
-        System.out.println("Q file " + questionFile.getAbsolutePath());
         try {
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             DocumentBuilder db = dbf.newDocumentBuilder();
@@ -108,8 +107,7 @@ public class XMLReader {
                 if (fstNode.getNodeType() == Node.ELEMENT_NODE) {
                     Element element = (Element) fstNode;
                     type = element.getAttribute("type");
-                    required = element.getAttribute("required").equalsIgnoreCase("false");
-                    System.out.println("Question found " + type);
+                    required = element.getAttribute("required").equalsIgnoreCase("true");
 
                     if (type.equalsIgnoreCase("closed_combo")) {
                         newQuestion = new ClosedComboQuestion();
@@ -183,34 +181,34 @@ public class XMLReader {
 
 
     public static ArrayList<String> getIncludedFiles(File dir) {
-        ArrayList<String> files = new ArrayList<String>();
+        if (dir != null) {
+            ArrayList<String> files = new ArrayList<String>();
 
-        try {
-            File xmlFile = new File(dir.getAbsoluteFile() + File.separator + "included.xml");
-            System.out.println("XMLFILE " + xmlFile.getAbsolutePath());
-            if (!xmlFile.exists()) {        //Create the included.xml files when they are not present. Done for backwards compatibility with older versions of the test.
-                System.out.println("Included.xml doesn't exist, creating one.");
-                XMLWriter.writeXMLImagesList(dir);
-            }
-            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-            Document doc = dBuilder.parse(xmlFile);
-            doc.getDocumentElement().normalize();
-            NodeList nList = doc.getElementsByTagName("image");
-            for (int x = 0; x < nList.getLength(); x++) {
-                Node fstNode = nList.item(x);
-
-                if (fstNode.getNodeType() == Node.ELEMENT_NODE) {
-                    Element element = (Element) fstNode;
-                    String file = element.getAttribute("file");
-                    System.out.println("Included " + file);
-                    files.add(file);
+            try {
+                File xmlFile = new File(dir.getAbsoluteFile() + File.separator + "included.xml");
+                if (!xmlFile.exists()) {        //Create the included.xml files when they are not present. Done for backwards compatibility with older versions of the test.
+                    System.out.println("Included.xml doesn't exist, creating one.");
+                    XMLWriter.writeXMLImagesList(dir);
                 }
+                DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+                DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+                Document doc = dBuilder.parse(xmlFile);
+                doc.getDocumentElement().normalize();
+                NodeList nList = doc.getElementsByTagName("image");
+                for (int x = 0; x < nList.getLength(); x++) {
+                    Node fstNode = nList.item(x);
+
+                    if (fstNode.getNodeType() == Node.ELEMENT_NODE) {
+                        Element element = (Element) fstNode;
+                        String file = element.getAttribute("file");
+                        files.add(file);
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return files;
+            return files;
+        } else return new ArrayList<String>();
     }
 
     //Same result as the above, but this time returns as an arraylist of Files
@@ -219,7 +217,6 @@ public class XMLReader {
         ArrayList<File> result = new ArrayList<File>();
         for (String s : getIncludedFiles(dir)) {
             String image = dir.getAbsolutePath() + File.separator + s;
-            System.out.println("Added image " + image);
             result.add(new File(image));
         }
         return result;

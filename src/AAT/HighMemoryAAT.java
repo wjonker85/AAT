@@ -116,23 +116,19 @@ public class HighMemoryAAT extends AbstractAAT {
         if (trialSize <= 0) {  //not set in the config
             trialSize = (getNeutralImages().size() + getAffectiveImages().size()) * 2;
         }
-        System.out.println("Trial Size = " + trialSize);
         float aSize = (getAffectPerc() * trialSize) / 100f;
         int affectSize = Math.round(aSize);
-        System.out.println("Affect size " + affectSize);
         int neutralSize = trialSize - affectSize;
         randomList.addAll(createList(neutralSize, getN_pushPerc(), getNeutralImages(), AATImage.NEUTRAL));
         randomList.addAll(createList(affectSize, getA_pushPerc(), getAffectiveImages(), AATImage.AFFECTIVE));
         Collections.shuffle(randomList);    //Randomise the list
-        Runtime runtime = Runtime.getRuntime();
-        System.out.println("Free memory : " + runtime.freeMemory());
         return randomList;
     }
 
     /**
      * Create a list with different push/pull percentages
      *
-     * @param n  Number of images
+     * @param n        Number of images
      * @param pushPerc Percentage push in the images list
      * @param fileList List of files to select from
      * @return new image list with the correct pull/push ratio
@@ -157,7 +153,6 @@ public class HighMemoryAAT extends AbstractAAT {
     public ArrayList<AATImage> createRandomListNoBorders() {
         ArrayList<AATImage> randomList = new ArrayList<AATImage>();
         for (File image : getNeutralImages()) {
-            // System.out.println(image.getName());
             if (image.getName().contains(getTestConfiguration().getPullTag())) {
                 AATImage pull = new AATImage(image, AATImage.PULL, AATImage.NEUTRAL, this); //Two instances for every image
                 randomList.add(pull);

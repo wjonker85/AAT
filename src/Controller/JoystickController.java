@@ -165,7 +165,7 @@ public class JoystickController extends Thread implements Observer {
         int returnValue = 0;
         int middlePos = (NoSteps + 1) / 2;
         float steps = NoSteps - middlePos;
-        float increment =  (1 / steps);
+        float increment = (1 / steps);
         if (value > 0) {                                           //Correct for small joystick error, otherwise it will not reach the end
             //with large stepsizes
             float delta = 0.001f;

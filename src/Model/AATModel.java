@@ -28,7 +28,9 @@ import org.w3c.dom.Document;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Observable;
 
 
 /**
@@ -162,6 +164,11 @@ public class AATModel extends Observable {
         } else {
             notifyObservers("Export_foreign");
         }
+    }
+
+    public void EscapeAction() {
+        this.setChanged();
+        notifyObservers("Escape");
     }
 
     public void setExportAATDataRecorder(AATDataRecorder AATDataRecorder) {
@@ -349,24 +356,21 @@ public class AATModel extends Observable {
     }
 
     public String getLabelPerCondition(int type, int direction) {
-        if(type == AATImage.AFFECTIVE) {
+        if (type == AATImage.AFFECTIVE) {
             String aDir = newAAT.getTestConfiguration().getAffectiveDir().getName();
-            if(direction == AATImage.PULL) {
+            if (direction == AATImage.PULL) {
                 String pull = newAAT.getTestConfiguration().getPullTag();
                 return pull + " & " + aDir;
-            }
-            else if(direction == AATImage.PUSH) {
+            } else if (direction == AATImage.PUSH) {
                 String push = newAAT.getTestConfiguration().getPushTag();
                 return push + " & " + aDir;
             }
-        }
-        else if(type == AATImage.NEUTRAL) {
+        } else if (type == AATImage.NEUTRAL) {
             String nDir = newAAT.getTestConfiguration().getNeutralDir().getName();
             if (direction == AATImage.PULL) {
                 String pull = newAAT.getTestConfiguration().getPullTag();
                 return pull + " & " + nDir;
-            }
-            else if (direction == AATImage.PUSH) {
+            } else if (direction == AATImage.PUSH) {
                 String push = newAAT.getTestConfiguration().getPushTag();
                 return push + " & " + nDir;
             }
@@ -374,28 +378,25 @@ public class AATModel extends Observable {
         return "";
     }
 
-    public HashMap<String,float[]> getResultsPerCondition(int type, int direction) {
+    public HashMap<String, float[]> getResultsPerCondition(int type, int direction) {
         HashMap<String, float[]> results = new HashMap<String, float[]>();
         String pull = newAAT.getTestConfiguration().getPullTag();
         String push = newAAT.getTestConfiguration().getPushTag();
         String nDir = newAAT.getTestConfiguration().getNeutralDir().getName();
         String aDir = newAAT.getTestConfiguration().getAffectiveDir().getName();
-        if(type == AATImage.AFFECTIVE) {
-            if(direction == AATImage.PULL) {
+        if (type == AATImage.AFFECTIVE) {
+            if (direction == AATImage.PULL) {
                 results.put(pull + " & " + aDir, newParticipant.getMeasures(AATImage.PULL, AATImage.AFFECTIVE));
-            }
-            else if(direction == AATImage.PUSH) {
+            } else if (direction == AATImage.PUSH) {
                 results.put(push + " & " + aDir, newParticipant.getMeasures(AATImage.PUSH, AATImage.AFFECTIVE));
             }
-        }
-        else if(type == AATImage.NEUTRAL) {
+        } else if (type == AATImage.NEUTRAL) {
             if (direction == AATImage.PULL) {
                 results.put(pull + " & " + nDir, newParticipant.getMeasures(AATImage.PULL, AATImage.NEUTRAL));
+            } else if (direction == AATImage.PUSH) {
+                results.put(push + " & " + nDir, newParticipant.getMeasures(AATImage.PUSH, AATImage.NEUTRAL));
             }
-            else if (direction == AATImage.PUSH) {
-                    results.put(push + " & " + nDir, newParticipant.getMeasures(AATImage.PUSH, AATImage.NEUTRAL));
-                }
-            }
+        }
         return results;
     }
 
@@ -476,7 +477,7 @@ public class AATModel extends Observable {
 
 
             case AATModel.TEST_SHOW_FINISHED:
-                if (newAAT.getTestConfiguration().getPlotType().length()>0) {
+                if (newAAT.getTestConfiguration().getPlotType().length() > 0) {
                     testStatus = AATModel.TEST_SHOW_RESULTS;
                     this.setChanged();
                     this.notifyObservers("Display results");

@@ -1,3 +1,20 @@
+/** This file is part of Approach Avoidance Task.
+ *
+ * Approach Avoidance Task is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Approach Avoidance Task is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Approach Avoidance Task.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+
 package AAT.Configuration.Validation;
 
 import AAT.IConfigOption;
@@ -10,7 +27,7 @@ import java.util.HashMap;
  * This is a map structure that can contain all the different variables that can be set for the configuration of the test
  * These variables can be either String, Integer, Boolean or File datatypes. Each config option can also have it's own validator
  * attached to it.
- *
+ * <p/>
  * The structure makes it ease to easy add different options to the the test and have them validated. The AAT can only be started when all the
  * validators that are assigned to the variables have returned true. Otherwise an exception is thrown with a messing telling the user about the problem.
  */
@@ -109,7 +126,6 @@ public class TestConfigurationMap<TKey> {
 
     public File getFileValue(TKey key) throws FalseConfigException {
         if (FileOptions.containsKey(key)) {
-            System.out.println(key + " " + FileOptions.get(key).getValue());
             return FileOptions.get(key).getValue();
         } else {
             throw new FalseConfigException(String.valueOf(key) + " not found.");

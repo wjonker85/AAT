@@ -1,3 +1,20 @@
+/** This file is part of Approach Avoidance Task.
+ *
+ * Approach Avoidance Task is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Approach Avoidance Task is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Approach Avoidance Task.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+
 package Views.Components;
 
 import AAT.Configuration.LanguageFileTemplate;
@@ -138,19 +155,15 @@ public class HTMLEditPanel extends JPanel {
                 NodeList finishL = lang.getElementsByTagName("finished");
                 Node introN = introL.item(0).getChildNodes().item(0);
                 intro = introN.getNodeValue();
-                intro = intro.replaceAll("(\r\n|\n)", "<br />");
                 this.setEditorIntroText(intro);
                 Node startN = startL.item(0).getChildNodes().item(0);
                 start = startN.getNodeValue();
-                start = start.replaceAll("(\r\n|\n)", "<br />");
                 this.setEditorStartText(start);
                 Node breakN = breakL.item(0).getChildNodes().item(0);
                 breakT = breakN.getNodeValue();
-                breakT = breakT.replaceAll("(\r\n|\n)", "<br />");
                 this.setEditorBreakText(breakT);
                 Node finishN = finishL.item(0).getChildNodes().item(0);
                 finish = finishN.getNodeValue();
-                finish = finish.replaceAll("(\r\n|\n)", "<br />");
                 this.setEditorFinishText(finish);
             }
             return true;

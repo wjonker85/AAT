@@ -20,9 +20,9 @@ import Controller.JoystickController;
 import DataStructures.AATDataRecorder;
 import IO.DataExporter;
 import Model.AATModel;
-import Views.TestUpgrade.ExportDataDialog;
-import Views.Export.SelectTestRevision;
 import Views.AAT.TestFrame;
+import Views.Export.SelectTestRevision;
+import Views.TestUpgrade.ExportDataDialog;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -175,6 +175,7 @@ public class AAT_Main extends JFrame implements Observer {
                     testFrame = new TestFrame(model);
                     model.addObserver(testFrame);
                     model.addObserver(joystick);
+                    model.addObserver(getInstance());
                     joystick.enableTrigger(); //set flag to trigger
                     model.startTest(true);
                 } catch (Exception e) {
@@ -302,9 +303,8 @@ public class AAT_Main extends JFrame implements Observer {
             exportData.setEnabled(true);
             runButton.setEnabled(true);
             System.gc();
-        }
-
-        if (o.toString().equalsIgnoreCase("Data_loaded_export")) {
+            model.addObserver(this.getInstance());
+        } else if (o.toString().equalsIgnoreCase("Data_loaded_export")) {
             HashMap<String, String> testData = DataExporter.getTestRevisions(model.getExportDocument());
             if (testData.size() > 1) {
                 SelectTestRevision testRevision = new SelectTestRevision(testData, -99, model, false);
@@ -315,19 +315,18 @@ public class AAT_Main extends JFrame implements Observer {
                 System.out.println("Single set of data found for id " + model.getExport_id());
                 model.setExport_id(model.getExport_id(), false);        //Set export ID and notify observers
             }
-        }
-
-        if (o.toString().equalsIgnoreCase("Export")) {
+        } else if (o.toString().equalsIgnoreCase("Export")) {
             System.out.println("Showing data exporter, using id " + model.getExport_id());
             ExportDataDialog export = new ExportDataDialog(model.getAATDataRecorder().getTestMetaData(model.getExport_id()));
             export.setVisible(true);
-        }
-
-        if (o.toString().equalsIgnoreCase("Export_foreign")) {
+        } else if (o.toString().equalsIgnoreCase("Export_foreign")) {
             inputAATDataRecorder = model.getExportAATDataRecorder();
             System.out.println("Showing data exporter, using id " + model.getExport_id());
             ExportDataDialog export = new ExportDataDialog(inputAATDataRecorder.getTestMetaData(model.getExport_id()));
             export.setVisible(true);
+        } else if (o.toString().equalsIgnoreCase("Escape")) {
+            model.deleteObservers();
+            model.addObserver(getInstance());
         }
     }
 
@@ -372,7 +371,7 @@ class LicenseDialog extends JDialog {
         });
 
         JScrollPane scrollPane = new JScrollPane(textPane);
-        File f = new File("License" + File.separatorChar + "gpl.html");
+        File f = new File("license" + File.separatorChar + "gpl.html");
         java.net.URL fileURL = null;
         try {
             fileURL = f.toURI().toURL(); // Transform path into URL
@@ -399,7 +398,7 @@ class LicenseDialog extends JDialog {
             }
         });
         doLayout();
-        setSize(400, 300);
+        setSize(600, 450);
     }
 }
 

@@ -89,8 +89,8 @@ public class DataExporter {
      * Each time the configuration for a test is altered, taking a new AAT will create a new revision
      * these revisions need to be exported seperately, because they can have different datastructures e.g. different number of images or trials
      *
-     * @param  doc Data document
-     * @return  Get all test revisions present in the data file
+     * @param doc Data document
+     * @return Get all test revisions present in the data file
      */
     public static HashMap<String, String> getTestRevisions(Document doc) {
         HashMap<String, String> result = new HashMap<String, String>();
@@ -177,9 +177,9 @@ public class DataExporter {
     /**
      * Filter the participant data based on test id.
      *
-     * @param doc  Data document
-     * @param test_id  test id value
-     * @return  Document that only contains the test data specified for a given test id
+     * @param doc     Data document
+     * @param test_id test id value
+     * @return Document that only contains the test data specified for a given test id
      */
     private static Document testIDFilter(Document doc, String test_id) {
         NodeList participantsList = doc.getElementsByTagName("participant");
@@ -218,7 +218,6 @@ public class DataExporter {
                 NodeList rTimeList = image.getElementsByTagName("reactionTime");   //Check reactionTime
                 Node rTimeNode = rTimeList.item(0).getFirstChild();
                 int rTime = Integer.parseInt(rTimeNode.getNodeValue());
-                //   System.out.println("Reaction time " + rTime);
                 if (rTime > maxRtime || rTime < minRTime) {
                     rTimeNode.setNodeValue("");
                 }
@@ -383,7 +382,6 @@ public class DataExporter {
         NodeList participantList = doc.getElementsByTagName("participant");
 
         int rows = participantList.getLength() + 1;
-        System.out.println("Created table with " + rows + " rows and " + columns + " columns");
         String[][] tableData = new String[rows][columns];
         for (int x = 0; x < tableData.length; x++) {        //Fill the array with empty strings;
             for (int y = 0; y < tableData[0].length; y++) {
@@ -394,7 +392,6 @@ public class DataExporter {
         tableData[0][0] = "id";
         for (String key : variableMap.keySet()) {    //create first row
             int pos = variableMap.get(key);
-            System.out.println("key pos " + key + " " + pos + " " + columns);
             pos++; //shift 1 to the right for the id column;
             tableData[0][pos] = key;
 
@@ -404,13 +401,11 @@ public class DataExporter {
             Element participant = (Element) participantList.item(x);
             tableData[x + 1][0] = participant.getAttribute("id");
             NodeList trialList = participant.getElementsByTagName("trial");
-            System.out.println("No. trials " + trialList.getLength());
             int start = 0;
             if (!includePractice) {
                 start = 1;
             }
             for (int n = start; n < trialList.getLength(); n++) {
-                System.out.println("TRIAL " + n);
                 Element trial = (Element) trialList.item(n);
                 NodeList imageList = trial.getElementsByTagName("image");
                 for (int i = 0; i < imageList.getLength(); i++) {
@@ -420,7 +415,6 @@ public class DataExporter {
                     NodeList rTimeList = image.getElementsByTagName("reactionTime");
                     Node rTimeNode = rTimeList.item(0).getFirstChild();
                     String reactionTime = rTimeNode.getNodeValue();
-                    System.out.println("Image " + imageName + " reaction time " + reactionTime);
                     int pos = variableMap.get(imageName);
                     pos++; //Shift 1 to the right
                     tableData[x + 1][pos] = reactionTime;
@@ -479,7 +473,6 @@ public class DataExporter {
                     String variableName = 0 + "_" + createVariableName(image, pullTag, null, null);
 
                     map.put(variableName, count);
-                    System.out.println("Adding variable " + variableName + " at position " + count);
                     count++;
 
                 }
@@ -492,7 +485,6 @@ public class DataExporter {
                     String variableName = 0 + "_" + createVariableName(image, pushTag, null, null);
 
                     map.put(variableName, count);
-                    System.out.println("Adding variable " + variableName + " at position " + count);
                     count++;
                 }
             }
@@ -504,9 +496,7 @@ public class DataExporter {
                 if (Integer.parseInt(typeAttr) == AATImage.PRACTICE) {
                     String variableName = 0 + "_" + createVariableName(image, "", null, null);
                     map.put(variableName, count);
-                    System.out.println("Adding variable 2 " + variableName + " at position " + count);
                     count++;
-
                 }
             }
         }
@@ -515,9 +505,10 @@ public class DataExporter {
 
     /**
      * Append variable name to the variableMap.
-     *  @param testElement Measured image
-     * @param tag push or pull
-     * @param startCount first joystick position
+     *
+     * @param testElement Measured image
+     * @param tag         push or pull
+     * @param startCount  first joystick position
      */
     private static void addToVariableMap(HashMap<String, Integer> map, Element testElement, String tag, String labelA, String labelN, int startCount, int trials, boolean hasPractice) {
 
@@ -569,14 +560,13 @@ public class DataExporter {
      * Construct the variable name, based on the information coming from the data.xml.
      * This should match the variable name that was created based on the metadata.
      *
-     * @param image image name
+     * @param image  image name
      * @param labelA affective label
      * @param labelN neutral label
      * @return The name for the variable that will be placed in the output file
      */
     private static String createVariableName(Element image, String labelA, String labelN) {
         NodeList directionList = image.getElementsByTagName("direction");
-        System.out.println("Directions " + directionList.getLength());
         Node direction = directionList.item(0).getFirstChild();
         NodeList typeList = image.getElementsByTagName("type");
         Node type = typeList.item(0).getFirstChild();
@@ -600,7 +590,6 @@ public class DataExporter {
         String imageName = image.getAttribute("file");
         String typeAttr = image.getAttribute("type");
         String type = "";
-        //    if (direction.length() > 0) {
         if (Integer.parseInt(typeAttr) == AATImage.AFFECTIVE) {
             type = labelA;
         }
@@ -608,21 +597,13 @@ public class DataExporter {
             type = labelN;
         }
 
-        //    if (imageName.toLowerCase().contains(direction.toLowerCase()) && direction.length() >0) {       //Images with pull or push tag in the file name
-        //       return imageName + "_" + type;
-
-        //  } else
         if (direction.length() == 0 && labelA == null) {         //practice image with the push or pull tag in the file name
             return imageName;
         } else if (direction.length() == 0) {
             return imageName + "_" + type;
         } else {
-            //   System.out.println(imageName + "_" + type + "_"+direction);
             return imageName + "_" + type + "_" + direction;
         }
-        //  } else {
-        //    return imageName + "_" + type;
-        // }
     }
 
 

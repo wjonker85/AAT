@@ -60,7 +60,6 @@ public class AATImage {
         }
 
         name = imageFile.getName();
-        System.out.println("Adding image 1 " + imageFile.getAbsoluteFile());
         this.image = loadImage(imageFile, newAAT.getTestConfiguration().getImageSizePerc());
     }
 
@@ -77,10 +76,7 @@ public class AATImage {
             name = imageFile.getName();
         }
 
-        System.out.println("Adding image 2 " + name);
         this.image = loadImage(imageFile, newAAT.getTestConfiguration().getImageSizePerc());
-
-
     }
 
     //Create a generated AAT Image. This creates an image that is just a square with the given color.

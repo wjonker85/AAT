@@ -72,8 +72,8 @@ public class AATView extends JPanel implements Observer {
         this.setBorder(null);
 
         textPane = new JEditorPane();
-        scrollPane = new JScrollPane(textPane,JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        scrollPane.setPreferredSize(new Dimension((int)(0.8 * screen.width),(int)(0.7 *screen.height)));
+        scrollPane = new JScrollPane(textPane, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.setPreferredSize(new Dimension((int) (0.8 * screen.width), (int) (0.7 * screen.height)));
         this.add(scrollPane);
         scrollPane.setOpaque(false);
         textPane.setEditable(false);
@@ -126,9 +126,6 @@ public class AATView extends JPanel implements Observer {
         this.setForeground(Color.white);    //ForeGround to white
         textPane.setBackground(new Color(0));
         if (!infoText.contains("<body>")) {
-            if(!infoText.contains("<") && !infoText.contains(">")) {
-                infoText = infoText.replaceAll("(\r\n|\r|\n|\n\r)", "<br>");            //probably no html content at al, so replace newline with <br>
-            }
             infoText = "<body><h2>" + infoText + "</h2></body>";
         }
         textPane.setText(infoText);

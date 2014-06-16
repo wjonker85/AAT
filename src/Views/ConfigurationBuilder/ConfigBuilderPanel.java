@@ -1,3 +1,20 @@
+/** This file is part of Approach Avoidance Task.
+ *
+ * Approach Avoidance Task is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Approach Avoidance Task is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Approach Avoidance Task.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+
 package Views.ConfigurationBuilder;
 
 import AAT.Configuration.TestConfiguration;
@@ -11,9 +28,9 @@ import DataStructures.QuestionnaireTemplate;
 import IO.ConfigFileReader;
 import IO.ConfigWriter;
 import Model.AATModel;
+import Views.AAT.TestFrame;
 import Views.Components.HTMLEditPanel;
 import Views.Questionnaire.DisplayQuestionnairePanel;
-import Views.AAT.TestFrame;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -364,9 +381,6 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
                 if (file != null) {
                     nDir = file.getAbsoluteFile();
                     inputNeutralDir.setText(FileUtils.getRelativePath(workingDir, nDir));
-                    System.out.println("Working dir: " + workingDir.getAbsoluteFile());
-                    System.out.println("neutral dir: " + nDir.getAbsoluteFile());
-                    System.out.println("Relative path: ");
                 } else {
                     inputNeutralDir.setText("");
                     nDir = null;
@@ -716,7 +730,7 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
         inputQuestionFile.setEnabled(false);
         JLabel graphL = new JLabel("<html>Do you want display a graph showing the participants result?<br>" +
                 "Choose the desired graph type or leave empty if you don't want to display the results.");
-        Object[] plotOptions = {"","Barchart","Boxplot", "Both"};
+        Object[] plotOptions = {"", "Barchart", "Boxplot", "Both"};
         inputPlotType = new JComboBox<Object>(plotOptions);
         inputPlotType.setPreferredSize(new Dimension(100, 25));
         panel.add(graphL);
@@ -1356,7 +1370,7 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
             File qFile = new File(workingDir + File.separator + inputQuestionFile.getText());
             displayQuestionnairePanel.saveQuestionnaire(qFile);
         }
-        if(inputLangFile.getText().length()>0) {
+        if (inputLangFile.getText().length() > 0) {
             File lFile = new File(workingDir + File.separator + inputLangFile.getText());
             htmlEditPanel.save(lFile);
         }
@@ -1374,7 +1388,7 @@ public class ConfigBuilderPanel extends JPanel implements Observer {
         configuration.setBreakAfter(Integer.parseInt(inputBreak.getText()));
         configuration.setPracticeRepeat(Integer.parseInt(inputPractRepeat.getText()));
         String plot = inputPlotType.getSelectedItem().toString();
-        if (plot.length()>0) {
+        if (plot.length() > 0) {
             configuration.setPlotType(plot);
         }
         if (inputQuestionFile.getText().length() > 0) {

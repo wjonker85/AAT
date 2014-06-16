@@ -61,7 +61,7 @@ public class TestFrame extends JFrame implements Observer {
         displayPanel.add(questionsView, "questions");
         displayPanel.add(aatView, "aat");
         displayPanel.add(resultsView, "results");
-        displayPanel.setBackground(new Color(0,0,0,0));
+        displayPanel.setBackground(new Color(0, 0, 0, 0));
         //  resultsView = new BoxPlot()
 
         this.setLayout(new GridBagLayout());
@@ -92,7 +92,6 @@ public class TestFrame extends JFrame implements Observer {
     }
 
     private void closeWindow() {
-        model.deleteObservers();
         aatView = null;
         questionsView = null;
         resultsView = null;

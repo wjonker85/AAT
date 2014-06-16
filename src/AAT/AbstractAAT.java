@@ -65,8 +65,7 @@ public abstract class AbstractAAT {
 
         try {
             this.testConfiguration = testConfiguration;
-            System.out.println("TestConfig " + testConfiguration.getPullTag());
-            //    System.out.println("bla "+testConfiguration.getNeutralDir().getAbsolutePath());
+
             neutralImages = XMLReader.getIncludedFilesF(testConfiguration.getNeutralDir());
             if (neutralImages.size() == 0) {
                 throw new FalseConfigException("Neutral images directory contains no images");

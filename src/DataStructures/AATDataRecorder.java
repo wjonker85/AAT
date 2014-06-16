@@ -21,9 +21,9 @@ import AAT.AbstractAAT;
 import AAT.Configuration.TestMetaData;
 import AAT.Util.FileUtils;
 import Model.AATModel;
+import Views.TestUpgrade.LabelInputFrame;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
-import Views.TestUpgrade.LabelInputFrame;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -85,16 +85,15 @@ public class AATDataRecorder {
         }
         this.dataFile = newAAT.getTestConfiguration().getDataFile();
         if (dataFile.exists()) {
-            System.out.println("No trials is set to " + trials);
             loadFileData();
             checkAndFixOldData(doc);
             if (!hasTestID(newAAT.getTestConfiguration().getTestID())) {
-                System.out.println("Test id not present in the data file, adding required test data to the data file");
+                System.out.println("Test id not present in the data file, adding required meta data to the data file");
                 addTestMetaData(newAAT.getTestConfiguration().getTestID(), trials, newAAT.centerPos(), newAAT.getTestConfiguration().getPullTag(), newAAT.getTestConfiguration().getPushTag(), affLabel, neutLabel, "Created on " + dateString, newAAT.getTestConfiguration().getColoredBorders()); //Add the current test_id and used image files to the data.xml file.
             }
         } else {
             createXMLDOC();
-            System.out.println("New data file created, adding test data");
+            System.out.println("New data file created, adding meta data");
             addTestMetaData(newAAT.getTestConfiguration().getTestID(), trials, newAAT.centerPos(), newAAT.getTestConfiguration().getPullTag(), newAAT.getTestConfiguration().getPushTag(), affLabel, neutLabel, "Created on " + dateString, newAAT.getTestConfiguration().getColoredBorders());
         }
     }
@@ -104,7 +103,7 @@ public class AATDataRecorder {
      * which uses the data belonging to a current loaded AAT.
      *
      * @param dataFile data.xml file
-     * @param model MVC model
+     * @param model    MVC model
      */
     public AATDataRecorder(File dataFile, AATModel model) {
         externalData = true;
@@ -194,13 +193,13 @@ public class AATDataRecorder {
     /**
      * Add meta data to the test data.xml file. This makes the stored test data independent of the test configuration.
      *
-     * @param test_id Current test id
-     * @param trials  Number of trials
-     * @param pullTag  Tag used to identify the pull condition
-     * @param pushTag    Tag used to identify the push condition
-     * @param affLabel   Label for the affective category
-     * @param neutLabel  Label for the neutral category
-     * @param comment    Text describing this particular version of the test
+     * @param test_id   Current test id
+     * @param trials    Number of trials
+     * @param pullTag   Tag used to identify the pull condition
+     * @param pushTag   Tag used to identify the push condition
+     * @param affLabel  Label for the affective category
+     * @param neutLabel Label for the neutral category
+     * @param comment   Text describing this particular version of the test
      */
     private void addTestMetaData(int test_id, int trials, int centerPos, String pullTag, String pushTag, String affLabel, String neutLabel, String comment, boolean borders) {
         Element root = doc.getDocumentElement();
@@ -453,7 +452,6 @@ public class AATDataRecorder {
             }
         }
         tagsMap.remove(largest.tag);
-        System.out.println("Largest is set to " + largest.tag);
         double largestAvg = (double) largest.time / (double) largest.count;
 
         count = 0;
@@ -463,10 +461,8 @@ public class AATDataRecorder {
                 count = largest.count;
             }
         }
-        System.out.println("Second is set to " + second.tag);
         double secondAvg = (double) second.time / (double) second.count;
 
-        System.out.println("Largest " + largestAvg + " Second " + secondAvg);
         String pushTag = largest.tag;
         String pullTag = second.tag;
         if (largestAvg > secondAvg) {
@@ -533,7 +529,7 @@ public class AATDataRecorder {
      * Find the joysticks center position.
      *
      * @param doc XML data document
-     * @return  Center position of the joystick
+     * @return Center position of the joystick
      */
     private int getCenterPos(Document doc) {
         int centerPos;
@@ -552,7 +548,6 @@ public class AATDataRecorder {
                     NodeList posList = image.getElementsByTagName("firstPos");
                     Node posNode = posList.item(0).getFirstChild();
                     String pos = posNode.getNodeValue();
-                    System.out.println("Pos " + pos + " sum " + sum);
                     sum += Integer.parseInt(pos);
                     count++;
                 }
@@ -563,7 +558,6 @@ public class AATDataRecorder {
         if (centerPos % 2 == 0) {      //Round to the nearest odd integer. Center pos is always an odd number.
             centerPos = (int) Math.floor(f);
         }
-        System.out.println("Sum " + sum + " Count " + count + " avg " + f + " center " + centerPos);
         //  centerPos = Math.round(f);
         return centerPos;
     }
@@ -647,18 +641,14 @@ public class AATDataRecorder {
             String test_id = participant.getAttribute("test_id");
             if (test_id.equalsIgnoreCase("-1")) {
                 NodeList imageList = participant.getElementsByTagName("image");
-                System.out.println("No. images " + imageList.getLength());
                 for (int i = 0; i < imageList.getLength(); i++) {
                     Element image = (Element) imageList.item(i);
                     NodeList directions = image.getElementsByTagName("direction");
-                    System.out.println("Directions " + directions.getLength());
                     Node direction = directions.item(0).getFirstChild();
                     String tag = direction.getNodeValue();
-                    System.out.println("tag " + tag);
                     NodeList rTimes = image.getElementsByTagName("reactionTime");
                     Node rtime = rTimes.item(0).getFirstChild();
                     int time = Integer.parseInt(rtime.getNodeValue());
-                    System.out.println("tag " + tag + " " + time);
                     if (!result.containsKey(tag)) {
                         result.put(tag, new imageObject(tag, time, 1));
                     } else {
@@ -701,7 +691,7 @@ public class AATDataRecorder {
      * the category labels. This is necessary to upgrade old data files to the new structure. Mainly to rescue tests that have corrupt data and to save
      * already gathered data.
      *
-     * @param doc  XML document
+     * @param doc     XML document
      * @param test_id Current test id
      * @param pullTag Tag used to identify the pull condition
      * @param pushTag Tag used to identify the push condition
@@ -734,7 +724,6 @@ public class AATDataRecorder {
         if (practiceList.size() > 0) {
             addImageToData(doc, test, practiceList, AATImage.PRACTICE);
         }
-        //    if(AAT.)
         System.out.println("Writing the changes to disk");
         FileUtils.writeDataToFile(dataFile, doc);
 
@@ -761,7 +750,7 @@ public class AATDataRecorder {
      *
      * @param doc  XML document
      * @param type Image type, affective, neutral or practice.
-     * @return  List containing all the loaded image files
+     * @return List containing all the loaded image files
      */
     private ArrayList<File> collectAllImages(Document doc, int type, int test_id) {
         String imgType = "";
