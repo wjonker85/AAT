@@ -35,7 +35,7 @@ import java.util.Observer;
  * Date: 10/15/11
  * Time: 11:26 AM
  * JFrame that contains the test view. An extra frame is needed so that the Processing object can be displayed.
- * This frame lets the test be executed full screen.   TODO cardlayout gebruiker
+ * This frame lets the test be executed full screen.
  */
 public class TestFrame extends JFrame implements Observer {
 
@@ -116,12 +116,11 @@ public class TestFrame extends JFrame implements Observer {
         //Questions Screen
         if (o.toString().equals("Show questions")) {
             setCursor(Cursor.getDefaultCursor());
-            questionsView.displayQuestions(model.getTest().getQuestionnaire());
             cl.show(displayPanel, "questions");
+            questionsView.displayQuestions(model.getTest().getQuestionnaire());
         }
 
         //Results Screen
-        //TODO betere plot structuur
         if (o.toString().equals("Display results")) {
             String type = model.getTest().getTestConfiguration().getPlotType();
             resultsView.switchView(type);

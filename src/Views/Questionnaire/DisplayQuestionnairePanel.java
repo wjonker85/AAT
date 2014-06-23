@@ -57,7 +57,7 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
     public Dimension resolution;
     private JPanel questionsPanel;
     private Map<String, AbstractQuestionPanel> questionsMap = new HashMap<String, AbstractQuestionPanel>();
-    private JScrollPane scrollPane;
+    private JScrollPane scrollPane1;
     private QuestionnaireModel questionnaireModel;
     private IntroductionEditorPanel introductionPanel;
     private Boolean editMode = false;
@@ -70,16 +70,12 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
             editMode = true;
         }
         this.resolution = resolution;
-        JPanel mainPanel = new JPanel();
-        JPanel contentPanel = new JPanel();
         qPanes = new HashMap<String, MouseActionEditorPane>();
 
+        JPanel contentPanel = new JPanel();
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
         contentPanel.setBackground(Color.black);
         contentPanel.setForeground(Color.white);
-        mainPanel.setBackground(Color.black);
-        mainPanel.setForeground(Color.white);
-        mainPanel.setLayout(new FlowLayout(FlowLayout.CENTER));    //TODO even naar kijken
         this.setLayout(new GridBagLayout());
         this.setBackground(Color.black);
         this.setForeground(Color.white);
@@ -90,9 +86,7 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
         submitPanel.setForeground(Color.WHITE);
         questionsPanel.setBackground(Color.black);
         questionsPanel.setForeground(Color.WHITE);
-        JPanel questionnairePanel = new JPanel();
-        //   questionnairePanel.setLayout(new BoxLayout(questionnairePanel, BoxLayout.Y_AXIS));
-        questionnairePanel.setLayout(new GridBagLayout());
+
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = 0;
@@ -100,35 +94,29 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
         gbc.ipady = 10;
         gbc.anchor = GridBagConstraints.WEST;
         gbc.fill = GridBagConstraints.BOTH;
-        questionnairePanel.setBackground(Color.black);
-        questionnairePanel.setForeground(Color.white);
         introductionPanel = new IntroductionEditorPanel();
-        questionnairePanel.add(introductionPanel, gbc);
+        contentPanel.add(introductionPanel);
 
         gbc.gridx = 0;
         gbc.gridy = 1;
         gbc.ipadx = 30;
         gbc.ipady = 10;
         gbc.anchor = GridBagConstraints.CENTER;
-        //     questionnairePanel.add(Box.createVerticalStrut(20)); //small margin
-        questionnairePanel.add(questionsPanel, gbc);
-        //    questionnairePanel.add(Box.createVerticalStrut(40)); //small margin
-        //      questionnairePanel.setPreferredSize(resolution);
-        contentPanel.add(questionnairePanel);
-
+        contentPanel.add(questionsPanel);
         if (!editMode) {
 
 
-            scrollPane = new JScrollPane(contentPanel,
+            scrollPane1 = new JScrollPane(contentPanel,
                     JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
                     JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-            JScrollBar vertical = scrollPane.getVerticalScrollBar();
-            scrollPane.setPreferredSize(resolution);
-            scrollPane.setMinimumSize(resolution);
-            scrollPane.setMaximumSize(resolution);
-            scrollPane.setBorder(BorderFactory.createEmptyBorder());
-            scrollPane.setBackground(Color.black);
-            scrollPane.setForeground(Color.white);
+            JScrollBar vertical = scrollPane1.getVerticalScrollBar();
+            scrollPane1.setPreferredSize(resolution);
+            scrollPane1.setMinimumSize(resolution);
+            scrollPane1.setMaximumSize(resolution);
+            scrollPane1.setBorder(BorderFactory.createEmptyBorder());
+            scrollPane1.setBackground(Color.black);
+            scrollPane1.setForeground(Color.white);
+            scrollPane1.getVerticalScrollBar().setUnitIncrement(16);
 
             InputMap im = vertical.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
             im.put(KeyStroke.getKeyStroke("DOWN"), "positiveUnitIncrement");
@@ -154,11 +142,12 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
             });
             buttonPanel.add(submitButton);
             contentPanel.add(buttonPanel);
-            this.add(scrollPane, new GridBagConstraints());
+            this.add(scrollPane1, new GridBagConstraints());
         } else {
             this.add(contentPanel, new GridBagConstraints());
         }
-        //   revalidate();
+//        introductionPanel.setFocus();
+       //    revalidate();
     }
 
 
@@ -228,38 +217,43 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
         this.questionnaire = questionnaire;
         questionsMap = new HashMap<String, AbstractQuestionPanel>();
         qPanes = new HashMap<String, MouseActionEditorPane>();
-        System.out.println("No questions " + questionnaire.getExtraQuestions().size());
         int maxLabelWidth = getMaxLabelSize();
         introductionPanel.setText(questionnaire.getIntroduction());
 
         for (int x = 0; x < questionnaire.getExtraQuestions().size(); x++) {
             AbstractQuestion questionObject = questionnaire.getExtraQuestions().get(x);
             MouseActionEditorPane question = new MouseActionEditorPane(editMode, questionObject, x, this);
-            if (lastEditedPos == x) {
-                question.setLastEdited(true);
-            } else {
-                question.setLastEdited(false);
+            if(editMode) {
+                if (lastEditedPos == x) {
+                    question.setLastEdited(true);
+                } else {
+                    question.setLastEdited(false);
+                }
+                qPanes.put(questionObject.getKey(), question);
             }
             questionsPanel.add(question);
-            qPanes.put(questionObject.getKey(), question);
             AbstractQuestionPanel newQuestionPanel = questionObject.Accept(new DisplayQuestionnaireVisitor(maxLabelWidth));
             questionsPanel.add(newQuestionPanel);
             questionsMap.put(questionObject.getKey(), newQuestionPanel);
             questionsPanel.setOpaque(false);
             questionsPanel.setBorder(null);
         }
-
+    //    introductionPanel.setFocus();
         SpringUtilities.makeCompactGrid(questionsPanel,
                 questionnaire.getExtraQuestions().size(), 2, //rows, cols
                 6, 6,        //initX, initY
                 6, 6);       //xPad, yPad
 
+
+        revalidate();
         if (!editMode) {
 
-        //    scrollPane.getViewport().setViewPosition(new java.awt.Point(0, 0));
-            ((JComponent)scrollPane.getViewport().getComponentAt( 0, 0 ) ).scrollRectToVisible( new Rectangle() );
+            //    scrollPane1.getViewport().setViewPosition(new java.awt.Point(0, 0));
+            //     ((JComponent)scrollPane1.getViewport().getComponentAt( 0, 0 ) ).scrollRectToVisible( new Rectangle() );
             introductionPanel.setFocus();
-           // revalidate();
+            //     introductionPanel.setText(questionnaire.getIntroduction());
+
+            // revalidate();
         }
     }
 
@@ -454,9 +448,9 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
             }
             editor.setPreferredSize(new Dimension((int) (resolution.getWidth() * 0.8), Integer.MAX_VALUE));
             this.add(scrollPane, gbc);
-            revalidate();
-            JViewport jv = scrollPane.getViewport();
-            jv.setViewPosition(new Point(0, 0));
+        //    revalidate();
+        //    JViewport jv = scrollPane.getViewport();
+        //    jv.setViewPosition(new Point(0, 0));
         }
 
         public void setText(String text) {
@@ -476,16 +470,18 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
             editor.setBackground(new java.awt.Color(0, 0, 0, 0));
             editor.setText(text);
             editor.setEditable(false);
-            revalidate();
-            repaint();
+         //   revalidate();
+        //    repaint();
 
         }
 
         public void setFocus() {
-            editor.requestFocus();
+         //   editor.requestFocus();
             editor.setSelectionStart(0);
             editor.setSelectionEnd(0);
-            ((JComponent)scrollPane.getViewport().getComponentAt( 0, 0 ) ).scrollRectToVisible( new Rectangle() );
+           // scrollPane1.requestFocus();
+        //    editor.setCaretPosition(0);
+         //   ((JComponent)scrollPane1.getViewport().getComponentAt( 0, 0 ) ).scrollRectToVisible( new Rectangle() );
         }
 
         @Override
@@ -670,8 +666,10 @@ public class DisplayQuestionnairePanel extends JPanel implements Observer {
         }
 
         public void setFocus() {
-            questionPane.setSelectionStart(0);
-            questionPane.setSelectionEnd(0);
+            if(editMode) {
+                questionPane.setSelectionStart(0);
+                questionPane.setSelectionEnd(0);
+            }
         }
 
         @Override
